@@ -1,0 +1,190 @@
+name: Capture Webcam Images
+
+on:
+  schedule:
+    # Run every 15 minutes - optimized for GitHub Actions free tier
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  capture-webcam:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Use GitHub token for commits
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci --only=production
+          # Install additional packages needed for webcam capture
+          npm install node-fetch@3
+
+      - name: Create data and image directories
+        run: |
+          mkdir -p data/webcam
+          mkdir -p public/data/webcam
+          mkdir -p public/images/webcam
+          mkdir -p public/images/webcam/thumbs
+
+      - name: Capture webcam images
+        env:
+          # Optional Claude API key for AI image analysis
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+          # Disable browser capture for GitHub Actions (Puppeteer not needed)
+          DISABLE_BROWSER_CAPTURE: 'true'
+        run: |
+          echo "Starting webcam image capture..."
+          echo "Browser capture: DISABLED (optimized for GitHub Actions)"
+          echo "AI analysis: $([ -n "$CLAUDE_API_KEY" ] && echo "ENABLED" || echo "DISABLED")"
+          
+          node scripts/capture-webcam.js
+          echo "Webcam capture completed"
+
+      - name: Verify image capture
+        run: |
+          # Check if latest.json was created/updated
+          if [ -f "data/webcam/latest.json" ]; then
+            echo "✅ Webcam data collected successfully"
+            echo "File size: $(du -h data/webcam/latest.json)"
+            echo "Last modified: $(stat -c %y data/webcam/latest.json)"
+            
+            # Count captured images
+            IMAGE_COUNT=$(find public/images/webcam -name "*.jpg" -type f | wc -l)
+            echo "Total images: $IMAGE_COUNT"
+            
+            # Show recent images
+            echo "Recent images:"
+            find public/images/webcam -name "*.jpg" -type f -mmin -20 | head -5
+            
+            # Show brief data summary
+            echo "Data preview:"
+            head -20 data/webcam/latest.json
+          else
+            echo "❌ Webcam capture failed - no latest.json found"
+            exit 1
+          fi
+
+      - name: Copy data to public directory
+        run: |
+          # Copy collected data to public directory for web access
+          cp -r data/webcam/* public/data/webcam/ 2>/dev/null || echo "No webcam data to copy"
+
+      - name: Optimize images (optional)
+        run: |
+          # Count and report image sizes
+          if [ -d "public/images/webcam" ]; then
+            TOTAL_SIZE=$(du -sh public/images/webcam | cut -f1)
+            IMAGE_COUNT=$(find public/images/webcam -name "*.jpg" -type f | wc -l)
+            echo "Image directory size: $TOTAL_SIZE ($IMAGE_COUNT files)"
+            
+            # Clean up images older than 7 days to save space
+            find public/images/webcam -name "*.jpg" -type f -mtime +7 -delete 2>/dev/null || true
+            
+            AFTER_SIZE=$(du -sh public/images/webcam | cut -f1)
+            AFTER_COUNT=$(find public/images/webcam -name "*.jpg" -type f | wc -l)
+            echo "After cleanup: $AFTER_SIZE ($AFTER_COUNT files)"
+          fi
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Commit and push webcam data
+        run: |
+          # Add collected data files and images
+          git add data/webcam/ public/data/webcam/ public/images/webcam/
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            # Create commit with timestamp and capture info
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            
+            # Get basic stats about the captures
+            TOTAL_CAMERAS="0"
+            SUCCESSFUL_CAPTURES="0"
+            FAILED_CAPTURES="0"
+            if [ -f "data/webcam/latest.json" ]; then
+              TOTAL_CAMERAS=$(node -e "
+                try {
+                  const data = JSON.parse(require('fs').readFileSync('data/webcam/latest.json', 'utf8'));
+                  console.log(data.total_cameras || 0);
+                } catch (e) {
+                  console.log(0);
+                }
+              ")
+              SUCCESSFUL_CAPTURES=$(node -e "
+                try {
+                  const data = JSON.parse(require('fs').readFileSync('data/webcam/latest.json', 'utf8'));
+                  console.log(data.successful_captures || 0);
+                } catch (e) {
+                  console.log(0);
+                }
+              ")
+              FAILED_CAPTURES=$(node -e "
+                try {
+                  const data = JSON.parse(require('fs').readFileSync('data/webcam/latest.json', 'utf8'));
+                  console.log(data.failed_captures || 0);
+                } catch (e) {
+                  console.log(0);
+                }
+              ")
+            fi
+            
+            git commit -m "chore(webcam): Update webcam images - ${TIMESTAMP}
+
+Singapore webcam capture update:
+- Total cameras: ${TOTAL_CAMERAS}
+- Successful captures: ${SUCCESSFUL_CAPTURES}
+- Failed captures: ${FAILED_CAPTURES}
+- Success rate: $(echo "scale=1; $SUCCESSFUL_CAPTURES * 100 / $TOTAL_CAMERAS" | bc -l 2>/dev/null || echo "N/A")%
+- Sources: LTA traffic cameras, public webcams
+- AI analysis: $([ -n "$CLAUDE_API_KEY" ] && echo "enabled" || echo "disabled")
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            
+            # Push changes
+            git push
+            echo "✅ Webcam data committed and pushed successfully"
+          fi
+
+      - name: Handle capture failures
+        if: failure()
+        run: |
+          echo "❌ Webcam capture failed"
+          echo "This could be due to:"
+          echo "1. LTA API temporary unavailability" 
+          echo "2. Network connectivity issues"
+          echo "3. Image download failures"
+          echo "4. Storage space limitations"
+          echo ""
+          echo "The next scheduled run will attempt capture again in 15 minutes."
+          echo "Browser capture is disabled for GitHub Actions optimization."
+          
+          # Don't fail the workflow completely - let it retry on next schedule
+          exit 0
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Clean up any temporary files
+          rm -rf node_modules/.cache 2>/dev/null || true
+          # Clean up any failed image downloads
+          find public/images/webcam -name "*.tmp" -delete 2>/dev/null || true
+          echo "Cleanup completed"

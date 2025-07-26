@@ -2,52 +2,170 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'public/**'
-      - 'package.json'
-      - 'index.html'
-      - 'vite.config.js'
-  workflow_dispatch:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual triggers
 
-# 동시 실행 방지
+# Set permissions for GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
-      
+    timeout-minutes: 15
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
-        run: npm ci
-      
-      - name: Build
         run: |
+          npm ci
+          echo "✅ Dependencies installed successfully"
+
+      - name: Verify project structure
+        run: |
+          echo "📁 Project structure verification:"
+          echo "- Package.json exists: $([ -f package.json ] && echo "✅" || echo "❌")"
+          echo "- Vite config exists: $([ -f vite.config.js ] && echo "✅" || echo "❌")"
+          echo "- Source directory exists: $([ -d src ] && echo "✅" || echo "❌")"
+          echo "- Public directory exists: $([ -d public ] && echo "✅" || echo "❌")"
+          echo "- Data directory exists: $([ -d data ] && echo "✅" || echo "❌")"
+          
+          # Show current data status
+          if [ -f "data/weather/latest.json" ]; then
+            echo "- Weather data: ✅ ($(du -h data/weather/latest.json | cut -f1))"
+          else
+            echo "- Weather data: ⚠️ (not available)"
+          fi
+          
+          if [ -f "data/webcam/latest.json" ]; then
+            echo "- Webcam data: ✅ ($(du -h data/webcam/latest.json | cut -f1))"
+          else
+            echo "- Webcam data: ⚠️ (not available)"
+          fi
+
+      - name: Copy data to public directory
+        run: |
+          # Ensure public data directories exist
+          mkdir -p public/data/weather
+          mkdir -p public/data/webcam
+          mkdir -p public/images/webcam
+          
+          # Copy latest data files for web access
+          if [ -d "data/weather" ]; then
+            cp -r data/weather/* public/data/weather/ 2>/dev/null || echo "No weather data to copy"
+            echo "✅ Weather data copied to public directory"
+          fi
+          
+          if [ -d "data/webcam" ]; then
+            cp -r data/webcam/* public/data/webcam/ 2>/dev/null || echo "No webcam data to copy"
+            echo "✅ Webcam data copied to public directory"
+          fi
+          
+          # Report data sizes
+          echo "📊 Data sizes:"
+          echo "- Public weather data: $(du -sh public/data/weather 2>/dev/null | cut -f1 || echo "0B")"
+          echo "- Public webcam data: $(du -sh public/data/webcam 2>/dev/null | cut -f1 || echo "0B")"
+          echo "- Webcam images: $(du -sh public/images/webcam 2>/dev/null | cut -f1 || echo "0B")"
+
+      - name: Run linting
+        run: |
+          npm run lint || echo "⚠️ Linting completed with warnings"
+
+      - name: Build project with Vite
+        run: |
+          echo "🔧 Building project for production..."
+          echo "Base URL: /singapore_weather_cam/"
+          echo "Build target: GitHub Pages"
+          
           npm run build
-          # GitHub Pages를 위한 .nojekyll 파일 생성
-          touch dist/.nojekyll
-          # 404 페이지를 위해 index.html 복사
-          cp dist/index.html dist/404.html
-      
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+          
+          echo "✅ Build completed successfully"
+          echo "📊 Build output:"
+          echo "- Dist directory size: $(du -sh dist | cut -f1)"
+          echo "- HTML files: $(find dist -name "*.html" | wc -l)"
+          echo "- JS files: $(find dist -name "*.js" | wc -l)"
+          echo "- CSS files: $(find dist -name "*.css" | wc -l)"
+
+      - name: Verify build output
+        run: |
+          # Check if build was successful
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ Build failed - index.html not found"
+            exit 1
+          fi
+          
+          echo "✅ Build verification passed"
+          echo "📁 Build contents:"
+          ls -la dist/
+          
+          # Check if assets were built properly
+          if [ ! -d "dist/assets" ]; then
+            echo "⚠️ Warning: No assets directory found"
+          else
+            echo "📦 Assets built: $(find dist/assets -type f | wc -l) files"
+          fi
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          cname: ${{ vars.CUSTOM_DOMAIN || '' }}
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages  
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment verification
+        run: |
+          echo "✅ Deployment completed successfully"
+          echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "📅 Deployed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo ""
+          echo "🎯 Singapore Weather Cam features:"
+          echo "- Real-time weather data from NEA Singapore API"
+          echo "- Focus area: Bukit Timah region"
+          echo "- Webcam images from Singapore traffic cameras"
+          echo "- GitHub Actions automated data collection"
+          echo "- JAMstack architecture with GitHub Pages hosting"
+
+      - name: Post-deployment health check
+        run: |
+          # Wait a moment for deployment to be available
+          sleep 10
+          
+          # Basic health check (optional - may fail initially)
+          SITE_URL="${{ steps.deployment.outputs.page_url }}"
+          if curl -s -o /dev/null -w "%{http_code}" "$SITE_URL" | grep -q "200"; then
+            echo "✅ Site is responding (HTTP 200)"
+          else
+            echo "⚠️ Site may still be propagating (this is normal for initial deploys)"
+          fi

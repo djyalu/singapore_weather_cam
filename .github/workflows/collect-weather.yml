@@ -2,53 +2,152 @@ name: Collect Weather Data
 
 on:
   schedule:
-    # 5분마다 실행 (GitHub Actions 최소 간격)
+    # Run every 5 minutes - focusing on Bukit Timah area
     - cron: '*/5 * * * *'
-  workflow_dispatch: # 수동 실행 허용
+  workflow_dispatch: # Allow manual triggers
 
 jobs:
   collect-weather:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # Use GitHub token for commits
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+          fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
-      
-      - name: Create package.json if not exists
+
+      - name: Install dependencies
         run: |
-          if [ ! -f "scripts/package.json" ]; then
-            cd scripts
-            npm init -y
-            npm install node-fetch
-            cd ..
-          fi
-      
-      - name: Collect Weather Data
+          npm ci --only=production
+          # Install additional packages needed for data collection
+          npm install node-fetch@3
+
+      - name: Create data directories
         run: |
-          node scripts/collect-weather.js
+          mkdir -p data/weather
+          mkdir -p public/data/weather
+
+      - name: Collect weather data
         env:
-          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY || '' }}
-      
-      - name: Commit and Push Changes
+          # Optional OpenWeatherMap API key for fallback
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          
-          # 변경사항 확인
-          git add data/weather/
-          
-          # 변경사항이 있을 때만 커밋
-          if ! git diff --staged --quiet; then
-            git commit -m "Update weather data - $(date -u '+%Y-%m-%d %H:%M:%S UTC') [skip ci]"
-            git push
+          echo "Starting weather data collection for Bukit Timah area..."
+          node scripts/collect-weather.js
+          echo "Weather data collection completed"
+
+      - name: Verify data collection
+        run: |
+          # Check if latest.json was created/updated
+          if [ -f "data/weather/latest.json" ]; then
+            echo "✅ Weather data collected successfully"
+            echo "File size: $(du -h data/weather/latest.json)"
+            echo "Last modified: $(stat -c %y data/weather/latest.json)"
+            
+            # Show brief data summary
+            echo "Data preview:"
+            head -20 data/weather/latest.json
           else
-            echo "No changes to commit"
+            echo "❌ Weather data collection failed - no latest.json found"
+            exit 1
           fi
+
+      - name: Copy data to public directory
+        run: |
+          # Copy collected data to public directory for web access
+          cp -r data/weather/* public/data/weather/ 2>/dev/null || echo "No weather data to copy"
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Commit and push weather data
+        run: |
+          # Add collected data files
+          git add data/weather/ public/data/weather/
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            # Create commit with timestamp and data info
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            
+            # Get basic stats about the data
+            TEMP_AVG="N/A"
+            HUMIDITY_AVG="N/A"
+            if [ -f "data/weather/latest.json" ]; then
+              TEMP_AVG=$(node -e "
+                try {
+                  const data = JSON.parse(require('fs').readFileSync('data/weather/latest.json', 'utf8'));
+                  if (data.data && data.data.temperature && data.data.temperature.average) {
+                    console.log(data.data.temperature.average.toFixed(1) + '°C');
+                  } else {
+                    console.log('N/A');
+                  }
+                } catch (e) {
+                  console.log('N/A');
+                }
+              ")
+              HUMIDITY_AVG=$(node -e "
+                try {
+                  const data = JSON.parse(require('fs').readFileSync('data/weather/latest.json', 'utf8'));
+                  if (data.data && data.data.humidity && data.data.humidity.average) {
+                    console.log(data.data.humidity.average.toFixed(1) + '%');
+                  } else {
+                    console.log('N/A');
+                  }
+                } catch (e) {
+                  console.log('N/A');
+                }
+              ")
+            fi
+            
+            git commit -m "chore(weather): Update weather data - ${TIMESTAMP}
+
+Bukit Timah area weather update:
+- Temperature: ${TEMP_AVG}
+- Humidity: ${HUMIDITY_AVG}
+- Source: NEA Singapore API
+- Focus: Stations S121, S116, S118 (Bukit Timah area)
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            
+            # Push changes
+            git push
+            echo "✅ Weather data committed and pushed successfully"
+          fi
+
+      - name: Handle collection failures
+        if: failure()
+        run: |
+          echo "❌ Weather data collection failed"
+          echo "This could be due to:"
+          echo "1. NEA API temporary unavailability"
+          echo "2. Network connectivity issues"
+          echo "3. Data parsing errors"
+          echo ""
+          echo "The next scheduled run will attempt collection again in 5 minutes."
+          echo "For Bukit Timah focus area: 1.3520°N, 103.7767°E"
+          
+          # Don't fail the workflow completely - let it retry on next schedule
+          exit 0
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Clean up any temporary files
+          rm -rf node_modules/.cache 2>/dev/null || true
+          echo "Cleanup completed"
