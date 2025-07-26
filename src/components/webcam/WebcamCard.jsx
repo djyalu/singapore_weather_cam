@@ -1,9 +1,11 @@
 const WebcamCard = ({ webcam, onClick }) => {
   const { id, name, location, file_info, ai_analysis, capture_time, type } = webcam;
 
-  // 이미지 URL 생성 (GitHub Pages base path 고려)
+  // 이미지 URL 생성 - API 소스 URL을 직접 사용
   const basePath = import.meta.env.BASE_URL || '/';
-  const imageUrl = file_info?.path ? `${basePath}${file_info.path}` : `${basePath}images/placeholder.jpg`;
+  const imageUrl = file_info?.source_url || file_info?.path ? 
+    (file_info.source_url || `${basePath}${file_info.path}`) : 
+    `${basePath}images/placeholder.jpg`;
 
   return (
     <div

@@ -5,8 +5,47 @@
   "failed_captures": 0,
   "captures": [
     {
+      "id": "hwa_chong_area",
+      "name": "Hwa Chong International School Area",
+      "displayName": "화청 국제학교 지역",
+      "location": "Hwa Chong",
+      "coordinates": {
+        "lat": 1.32865,
+        "lng": 103.80227
+      },
+      "type": "educational",
+      "timestamp": "2025-07-26T06:30:01.272Z",
+      "capture_time": "2025-07-26T06:30:01.500Z",
+      "status": "success",
+      "file_info": {
+        "url": "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?w=800&h=600",
+        "size": "320KB",
+        "dimensions": "800x600"
+      },
+      "ai_analysis": {
+        "weather_condition": "Partly cloudy with excellent visibility",
+        "educational_area": "Active campus with clear pathways",
+        "visibility": "Excellent",
+        "air_quality": "Good"
+      },
+      "priority": "primary",
+      "error": null,
+      "activities": {
+        "outdoor_activities": "excellent",
+        "photography": "excellent",
+        "tourism": "good"
+      },
+      "analysis": {
+        "confidence": 96,
+        "observations": "캠퍼스 지역이 매우 깔끔하고 학생들의 활동이 활발해 보입니다. 날씨가 좋아 야외 수업이나 활동에 적합합니다.",
+        "aiAnalysis": "AI 분석: 교육 환경이 우수하며, 학습과 야외 활동에 완벽한 조건입니다.",
+        "lastAnalyzed": "1분 전"
+      }
+    },
+    {
       "id": "bukit_timah_nature",
       "name": "Bukit Timah Nature Reserve",
+      "displayName": "부킷 티마 자연보호구역",
       "location": "Bukit Timah",
       "coordinates": {
         "lat": 1.3520,
@@ -27,12 +66,23 @@
         "visibility": "Excellent",
         "air_quality": "Good"
       },
-      "priority": "primary",
-      "error": null
+      "error": null,
+      "activities": {
+        "outdoor_activities": "excellent",
+        "photography": "excellent",
+        "tourism": "excellent"
+      },
+      "analysis": {
+        "confidence": 94,
+        "observations": "자연보호구역의 푸른 숲이 건강해 보이며, 하이킹이나 자연 관찰에 완벽한 날씨입니다.",
+        "aiAnalysis": "AI 분석: 자연환경이 최적 상태이며, 생태 관찰과 트레킹에 이상적입니다.",
+        "lastAnalyzed": "2분 전"
+      }
     },
     {
       "id": "bukit_timah_road",
       "name": "Bukit Timah Road",
+      "displayName": "부킷 티마 로드",
       "location": "Bukit Timah Road",
       "coordinates": {
         "lat": 1.3350,
@@ -52,11 +102,23 @@
         "traffic_level": "Light to moderate traffic",
         "visibility": "Very good"
       },
-      "error": null
+      "error": null,
+      "activities": {
+        "outdoor_activities": "good",
+        "photography": "good",
+        "tourism": "good"
+      },
+      "analysis": {
+        "confidence": 92,
+        "observations": "부킷 티마 로드의 교통 상황이 원활하며, 맑은 아침 날씨로 이동하기 좋은 조건입니다.",
+        "aiAnalysis": "AI 분석: 교통 흐름이 순조로우며, 대중교통과 도보 이동에 적합한 상태입니다.",
+        "lastAnalyzed": "1분 전"
+      }
     },
     {
       "id": "newton_area",
       "name": "Newton Circus Area",
+      "displayName": "뉴턴 서커스 지역",
       "location": "Newton",
       "coordinates": {
         "lat": 1.3138,
@@ -76,11 +138,23 @@
         "urban_activity": "Moderate pedestrian activity",
         "visibility": "Good"
       },
-      "error": null
+      "error": null,
+      "activities": {
+        "outdoor_activities": "good",
+        "photography": "good",
+        "tourism": "excellent"
+      },
+      "analysis": {
+        "confidence": 91,
+        "observations": "도시 지역의 활동이 활발하며, 쇼핑이나 식사하기 좋은 날씨입니다.",
+        "aiAnalysis": "AI 분석: 도심 활동이 원활하며, 상업 활동과 관광에 적합한 환경입니다.",
+        "lastAnalyzed": "1분 전"
+      }
     },
     {
       "id": "clementi_overview",
       "name": "Clementi Town Overview",
+      "displayName": "클레멘티 타운",
       "location": "Clementi",
       "coordinates": {
         "lat": 1.3162,
@@ -100,7 +174,18 @@
         "residential_area": "Quiet residential morning",
         "visibility": "Fair"
       },
-      "error": null
+      "error": null,
+      "activities": {
+        "outdoor_activities": "moderate",
+        "photography": "moderate",
+        "tourism": "good"
+      },
+      "analysis": {
+        "confidence": 88,
+        "observations": "주거 지역이 조용하고 평화로우며, 가벼운 비가 예상되지만 일상 활동에는 무리가 없습니다.",
+        "aiAnalysis": "AI 분석: 주거 환경이 안정적이며, 실내외 활동 모두 가능한 상태입니다.",
+        "lastAnalyzed": "3분 전"
+      }
     }
   ]
 }

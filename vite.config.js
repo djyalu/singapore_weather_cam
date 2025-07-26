@@ -1,32 +1,21 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   base: '/singapore_weather_cam/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          charts: ['chart.js', 'react-chartjs-2'],
-          maps: ['leaflet', 'react-leaflet']
-        }
-      }
-    }
+    sourcemap: true
   },
   server: {
     port: 3000,
     open: true,
-    fs: {
-      // Allow serving files from data directory
-      allow: ['..', '.', './data']
-    }
+    host: true
   },
-  publicDir: 'public',
-  preview: {
-    port: 3001
+  fs: {
+    allow: ['..', '.', './data', './public']
   }
-});
+})
