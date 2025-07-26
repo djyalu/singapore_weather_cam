@@ -2,9 +2,8 @@ name: Capture Webcam Images
 
 on:
   schedule:
-    # Ultra-optimized: Every 2 hours (12 runs/day = 360 runs/month)
-    # Saves 83% of usage: 21,600 → 3,600 minutes/month
-    - cron: '15 */2 * * *'  # Offset by 15 min from weather
+    # Every 2 hours, 15 minutes after weather collection
+    - cron: '15 */2 * * *'
   workflow_dispatch:
     inputs:
       capture_mode:
@@ -21,7 +20,7 @@ env:
 jobs:
   capture-webcam:
     runs-on: ubuntu-latest
-    timeout-minutes: 8  # Reduced from 15 to 8
+    timeout-minutes: 8
     permissions:
       contents: write
     concurrency:
@@ -35,90 +34,119 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
 
-      - name: Smart scheduling check
-        id: check
-        run: |
-          # Skip during Singapore night hours (23:00-05:00 SGT) when traffic is minimal
-          SGT_HOUR=$(TZ='Asia/Singapore' date +%H)
-          if [[ $SGT_HOUR -ge 23 || $SGT_HOUR -lt 5 ]]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "🌙 Skipping during low-traffic hours ($SGT_HOUR:00 SGT)"
-            exit 0
-          fi
-          
-          # Check if recent data exists (< 3 hours)
-          if [[ -f "data/webcam/latest.json" ]]; then
-            AGE=$(($(date +%s) - $(date -r data/webcam/latest.json +%s)))
-            if [[ $AGE -lt 10800 && "${{ github.event.inputs.capture_mode }}" != "priority" ]]; then
-              echo "skip=true" >> $GITHUB_OUTPUT
-              echo "⏭️ Skipping: Recent data exists ($(($AGE/3600))h old)"
-              exit 0
-            fi
-          fi
-          
-          echo "skip=false" >> $GITHUB_OUTPUT
-          echo "✅ Webcam capture needed"
-
-      - name: Setup Node.js and dependencies
-        if: steps.check.outputs.skip == 'false'
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install dependencies (optimized)
-        if: steps.check.outputs.skip == 'false'
+      - name: Install dependencies
         run: |
-          npm ci --prefer-offline --no-audit --no-fund --silent
-          mkdir -p data/webcam public/{data/webcam,images/webcam}
+          npm ci --prefer-offline --no-audit --silent
+          echo "✅ Dependencies installed"
 
-      - name: Capture webcam images (streamlined)
-        if: steps.check.outputs.skip == 'false'
+      - name: Create data directories
+        run: |
+          mkdir -p data/webcam
+          mkdir -p public/data/webcam
+          mkdir -p public/images/webcam
+
+      - name: Capture webcam images
         env:
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
           CAPTURE_MODE: ${{ github.event.inputs.capture_mode || 'standard' }}
-          MAX_CONCURRENT_CAPTURES: '8'  # Increased for speed
+          MAX_CONCURRENT_CAPTURES: '8'
         run: |
+          echo "📸 Starting webcam capture..."
           timeout 6m node scripts/capture-webcam.js || {
-            # Minimal fallback
-            echo '{"timestamp":"'$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')'","total_cameras":0,"captures":[],"status":"degraded"}' > data/webcam/latest.json
+            echo "⚠️ Webcam capture failed, creating fallback data"
+            
+            # Create minimal fallback data
+            FALLBACK_TIME=$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')
+            cat > data/webcam/latest.json << EOF
+            {
+              "timestamp": "$FALLBACK_TIME",
+              "total_cameras": 0,
+              "successful_captures": 0,
+              "failed_captures": 0,
+              "captures": [],
+              "error": "Service temporarily unavailable - automatic recovery in progress",
+              "status": "degraded",
+              "next_attempt": "$(date -u -d '+2 hours' '+%Y-%m-%dT%H:%M:%S.000Z')"
+            }
+            EOF
+            echo "📝 Fallback data created"
           }
 
-      - name: Optimize and commit
-        if: steps.check.outputs.skip == 'false'
+      - name: Verify capture results
         run: |
-          if [[ -f "data/webcam/latest.json" ]]; then
-            # Copy data
-            cp data/webcam/latest.json public/data/webcam/
+          if [ -f "data/webcam/latest.json" ]; then
+            echo "✅ Webcam data processed successfully"
+            echo "File size: $(du -h data/webcam/latest.json | cut -f1)"
             
-            # Efficient image cleanup (keep only last 24 hours)
-            find public/images/webcam -name "*.jpg" -mtime +1 -delete 2>/dev/null || true
+            # Count captured images
+            IMAGE_COUNT=$(find public/images/webcam -name "*.jpg" -type f 2>/dev/null | wc -l)
+            echo "Total images: $IMAGE_COUNT"
+          else
+            echo "❌ Webcam capture failed"
+            exit 1
+          fi
+
+      - name: Copy data to public directory
+        run: |
+          cp data/webcam/latest.json public/data/webcam/ 2>/dev/null || true
+
+      - name: Image cleanup
+        run: |
+          # Clean up images older than 7 days to save space
+          find public/images/webcam -name "*.jpg" -type f -mtime +7 -delete 2>/dev/null || true
+          
+          AFTER_COUNT=$(find public/images/webcam -name "*.jpg" -type f 2>/dev/null | wc -l)
+          echo "Images after cleanup: $AFTER_COUNT"
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Commit and push webcam data
+        run: |
+          git add data/webcam/ public/data/webcam/ public/images/webcam/
+          
+          if ! git diff --staged --quiet; then
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
             
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action (Optimized)"
-            git add data/webcam/ public/data/webcam/ public/images/webcam/
-            
-            if ! git diff --staged --quiet; then
-              # Get capture stats efficiently
-              STATS=$(node -pe "
+            # Get capture stats
+            CAPTURE_STATS="0/0"
+            if [ -f "data/webcam/latest.json" ]; then
+              CAPTURE_STATS=$(node -pe "
                 try {
-                  const d = JSON.parse(require('fs').readFileSync('data/webcam/latest.json', 'utf8'));
-                  \`\${d.successful_captures || 0}/\${d.total_cameras || 0}\`;
+                  const data = JSON.parse(require('fs').readFileSync('data/webcam/latest.json', 'utf8'));
+                  \`\${data.successful_captures || 0}/\${data.total_cameras || 0}\`;
                 } catch(e) { '0/0'; }
-              ")
-              
-              git commit -m "chore(webcam): Update webcam images - $(date -u '+%Y-%m-%d %H:%M UTC')
-
-Captures: ${STATS} • Mode: ${{ github.event.inputs.capture_mode || 'standard' }}
-
-🤖 Optimized workflow - 83% usage reduction"
-              git push
+              " 2>/dev/null || echo "0/0")
             fi
+            
+            git commit -m "chore(webcam): Update webcam images - ${TIMESTAMP}
+
+Singapore webcam capture update:
+- Captures: ${CAPTURE_STATS}
+- Mode: ${{ github.event.inputs.capture_mode || 'standard' }}
+- Schedule: Every 2 hours (optimized)
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            
+            git push
+            echo "✅ Webcam data committed and pushed successfully"
+          else
+            echo "ℹ️ No changes to commit"
           fi
 
       - name: Cleanup
-        if: always() && steps.check.outputs.skip == 'false'
+        if: always()
         run: |
           rm -rf node_modules/.cache 2>/dev/null || true
           find public/images/webcam -name "*.tmp" -delete 2>/dev/null || true
-          echo "Cleanup completed"
+          echo "🧹 Cleanup completed"

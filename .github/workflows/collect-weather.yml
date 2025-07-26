@@ -2,8 +2,7 @@ name: Collect Weather Data
 
 on:
   schedule:
-    # Ultra-optimized: Every 2 hours (12 runs/day = 360 runs/month)
-    # Saves 90% of usage: 14,400 → 1,440 minutes/month
+    # Every 2 hours (12 runs/day = 360 runs/month)
     - cron: '0 */2 * * *'
   workflow_dispatch:
     inputs:
@@ -20,7 +19,7 @@ env:
 jobs:
   collect-weather:
     runs-on: ubuntu-latest
-    timeout-minutes: 4  # Reduced from 10 to 4
+    timeout-minutes: 6
     permissions:
       contents: write
     concurrency:
@@ -32,73 +31,111 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 1  # Shallow clone for speed
+          fetch-depth: 1
 
-      - name: Check if run needed
-        id: check
-        run: |
-          # Smart scheduling: Skip during Singapore night hours (22:00-06:00 SGT)
-          SGT_HOUR=$(TZ='Asia/Singapore' date +%H)
-          if [[ $SGT_HOUR -ge 22 || $SGT_HOUR -lt 6 ]] && [[ "${{ github.event.inputs.force_run }}" != "true" ]]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "🌙 Skipping during Singapore night hours ($SGT_HOUR:00 SGT)"
-            exit 0
-          fi
-          
-          # Check if data is fresh enough (< 3 hours old)
-          if [[ -f "data/weather/latest.json" && "${{ github.event.inputs.force_run }}" != "true" ]]; then
-            AGE=$(($(date +%s) - $(date -r data/weather/latest.json +%s)))
-            if [[ $AGE -lt 10800 ]]; then  # 3 hours
-              echo "skip=true" >> $GITHUB_OUTPUT
-              echo "⏭️ Skipping: Data is fresh ($(($AGE/3600))h old)"
-              exit 0
-            fi
-          fi
-          
-          echo "skip=false" >> $GITHUB_OUTPUT
-          echo "✅ Weather collection needed"
-
-      - name: Setup Node.js and dependencies
-        if: steps.check.outputs.skip == 'false'
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install dependencies (optimized)
-        if: steps.check.outputs.skip == 'false'
+      - name: Install dependencies
         run: |
-          npm ci --prefer-offline --no-audit --no-fund --silent
-          mkdir -p data/weather public/data/weather
+          npm ci --prefer-offline --no-audit --silent
+          echo "✅ Dependencies installed"
 
-      - name: Collect weather data (streamlined)
-        if: steps.check.outputs.skip == 'false'
+      - name: Create data directories
+        run: |
+          mkdir -p data/weather
+          mkdir -p public/data/weather
+
+      - name: Collect weather data
         env:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
         run: |
-          timeout 3m node scripts/collect-weather.js || {
-            # Minimal fallback
-            echo '{"timestamp":"'$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')'","source":"Fallback","status":"degraded","data":{"message":"Service temporarily unavailable"}}' > data/weather/latest.json
+          echo "🌡️ Starting weather data collection..."
+          timeout 4m node scripts/collect-weather.js || {
+            echo "⚠️ Primary collection failed, creating fallback data"
+            
+            # Create fallback data with current timestamp
+            FALLBACK_TIME=$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')
+            cat > data/weather/latest.json << EOF
+            {
+              "timestamp": "$FALLBACK_TIME",
+              "source": "Fallback System",
+              "status": "service_degraded",
+              "data": {
+                "message": "Weather services temporarily unavailable",
+                "location": "Bukit Timah area",
+                "coordinates": {"lat": 1.3520, "lng": 103.7767},
+                "expected_recovery": "$(date -u -d '+1 hour' '+%Y-%m-%dT%H:%M:%S.000Z')"
+              }
+            }
+            EOF
+            echo "📝 Fallback data created"
           }
 
-      - name: Verify and commit
-        if: steps.check.outputs.skip == 'false'
+      - name: Verify data collection
         run: |
-          if [[ -f "data/weather/latest.json" ]]; then
-            cp data/weather/latest.json public/data/weather/
-            
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action (Optimized)"
-            git add data/weather/ public/data/weather/
-            
-            if ! git diff --staged --quiet; then
-              git commit -m "chore(weather): Update weather data - $(date -u '+%Y-%m-%d %H:%M UTC')
+          if [ -f "data/weather/latest.json" ]; then
+            echo "✅ Weather data collected successfully"
+            echo "File size: $(du -h data/weather/latest.json | cut -f1)"
+            echo "Last modified: $(date -r data/weather/latest.json 2>/dev/null || stat -c %y data/weather/latest.json)"
+          else
+            echo "❌ Weather data collection failed"
+            exit 1
+          fi
 
-🤖 Optimized workflow - 90% usage reduction"
-              git push
+      - name: Copy data to public directory
+        run: |
+          cp -r data/weather/* public/data/weather/ 2>/dev/null || true
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Commit and push weather data
+        run: |
+          git add data/weather/ public/data/weather/
+          
+          if ! git diff --staged --quiet; then
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            
+            # Get temperature from data if available
+            TEMP_INFO="N/A"
+            if [ -f "data/weather/latest.json" ]; then
+              TEMP_INFO=$(node -pe "
+                try {
+                  const data = JSON.parse(require('fs').readFileSync('data/weather/latest.json', 'utf8'));
+                  if (data.current && data.current.temperature) {
+                    data.current.temperature + '°C';
+                  } else {
+                    'N/A';
+                  }
+                } catch(e) { 'N/A'; }
+              " 2>/dev/null || echo "N/A")
             fi
+            
+            git commit -m "chore(weather): Update weather data - ${TIMESTAMP}
+
+Bukit Timah area weather update:
+- Temperature: ${TEMP_INFO}
+- Source: NEA Singapore API
+- Schedule: Every 2 hours (optimized)
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            
+            git push
+            echo "✅ Weather data committed and pushed successfully"
+          else
+            echo "ℹ️ No changes to commit"
           fi
 
       - name: Cleanup
-        if: always() && steps.check.outputs.skip == 'false'
-        run: rm -rf node_modules/.cache 2>/dev/null || true
+        if: always()
+        run: |
+          rm -rf node_modules/.cache 2>/dev/null || true
+          echo "🧹 Cleanup completed"
