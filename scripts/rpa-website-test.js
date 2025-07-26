@@ -3,9 +3,9 @@
  * 실제 웹사이트에 접속하여 사용자 관점에서 기능 테스트를 수행
  */
 
-const { chromium, firefox, webkit } = require('playwright');
-const fs = require('fs').promises;
-const path = require('path');
+import { chromium, firefox, webkit } from 'playwright';
+import fs from 'fs/promises';
+import path from 'path';
 
 // 테스트 설정
 const config = {
@@ -493,12 +493,16 @@ async function main() {
   }
 }
 
+// ES module에서 직접 실행 확인
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+
 // 스크립트가 직접 실행될 때만 main 함수 호출
-if (require.main === module) {
+if (isMainModule) {
   main().catch(error => {
     console.error('❌ Fatal error:', error);
     process.exit(1);
   });
 }
 
-module.exports = { RPAWebsiteTester };
+// ES module export
+export { RPAWebsiteTester };
