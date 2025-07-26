@@ -13,6 +13,7 @@
 
   html {
     @apply scroll-smooth;
+    scroll-padding-top: 120px; /* Account for fixed header */
   }
 
   body {
@@ -25,6 +26,17 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold;
+  }
+  
+  /* Focus management for navigation */
+  section:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 4px;
+  }
+  
+  /* Enhanced focus indicators for navigation */
+  [role="button"]:focus-visible {
+    @apply ring-2 ring-blue-500 ring-offset-2;
   }
 }
 

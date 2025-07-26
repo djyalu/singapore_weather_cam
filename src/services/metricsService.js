@@ -434,7 +434,7 @@ export class MetricsService {
   }
 
   /**
-   * Get real-time dashboard data
+   * Get real-time dashboard data with reliability metrics
    */
   getDashboardData() {
     const now = Date.now();
@@ -449,6 +449,17 @@ export class MetricsService {
 
     const recentErrors = recentAPICalls.filter(call => !call.success);
 
+    // Get reliability report from data reliability service (synchronously)
+    let reliabilityReport = null;
+    try {
+      // Access through global variable if available to avoid circular dependency
+      if (typeof window !== 'undefined' && window.dataReliabilityService) {
+        reliabilityReport = window.dataReliabilityService.getReliabilityReport();
+      }
+    } catch (error) {
+      console.warn('Could not get reliability report:', error);
+    }
+
     return {
       realTime: {
         apiCalls: recentAPICalls.length,
@@ -459,6 +470,7 @@ export class MetricsService {
           : 0,
       },
       health: healthService.getHealthReport(),
+      reliability: reliabilityReport,
       session: {
         id: this.sessionId,
         duration: now - this.startTime,

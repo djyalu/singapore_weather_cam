@@ -21,10 +21,10 @@ const WeatherDashboard = ({ data }) => {
       return {
         current,
         forecast,
-        locationData: null
+        locationData: null,
       };
     }
-    
+
     const selectedLocationData = locations?.find(loc => loc.id === selectedLocation);
     return {
       current: selectedLocationData ? {
@@ -35,10 +35,10 @@ const WeatherDashboard = ({ data }) => {
         windSpeed: current?.windSpeed,
         windDirection: current?.windDirection,
         uvIndex: current?.uvIndex,
-        visibility: current?.visibility
+        visibility: current?.visibility,
       } : current,
       forecast,
-      locationData: selectedLocationData
+      locationData: selectedLocationData,
     };
   };
 

@@ -6,6 +6,7 @@ const Header = React.memo(({ systemStats = {} }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
 
   // Memoized event handlers
   const handleOnline = useCallback(() => {
@@ -30,10 +31,74 @@ const Header = React.memo(({ systemStats = {} }) => {
     e.preventDefault();
     const element = document.querySelector(target);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      // Get header height for offset calculation
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.offsetHeight : 0;
+      const statusBarHeight = 44; // Status bar height
+      const offset = headerHeight + statusBarHeight + 20; // Extra padding
+      
+      // Calculate scroll position with offset
+      const elementPosition = element.offsetTop - offset;
+      
+      // Smooth scroll with offset
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
+      
+      // Update active section
+      setActiveSection(target.replace('#', ''));
+      
+      // Focus management for accessibility
+      setTimeout(() => {
+        element.focus({ preventScroll: true });
+        element.setAttribute('tabindex', '-1');
+      }, 500); // Wait for scroll to complete
+      
       closeMenu();
     }
   }, [closeMenu]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e, target) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleNavClick(e, target);
+    }
+  }, [handleNavClick]);
+
+  // Intersection Observer to track active section
+  useEffect(() => {
+    const sections = ['map', 'weather', 'analysis', 'webcams', 'traffic'];
+    const observers = new Map();
+
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -70% 0px', // Trigger when section is 20% from top
+      threshold: 0.1,
+    };
+
+    sections.forEach((sectionId) => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+        observer.observe(element);
+        observers.set(sectionId, observer);
+      }
+    });
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, []);
 
   useEffect(() => {
     // Use requestAnimationFrame for smooth time updates
@@ -121,43 +186,83 @@ const Header = React.memo(({ systemStats = {} }) => {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8">
+            <nav className="hidden lg:flex items-center space-x-8" role="navigation" aria-label="Main navigation">
               <a
-                href="#main"
-                onClick={(e) => handleNavClick(e, '#main')}
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1"
+                href="#map"
+                onClick={(e) => handleNavClick(e, '#map')}
+                onKeyDown={(e) => handleKeyDown(e, '#map')}
+                className={`transition-colors font-medium flex items-center space-x-1 px-3 py-2 rounded-lg ${
+                  activeSection === 'map'
+                    ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
                 role="button"
                 tabIndex="0"
+                aria-current={activeSection === 'map' ? 'page' : undefined}
               >
                 <span>🗺️</span>
                 <span>Map</span>
               </a>
               <a
-                href="#analysis-heading"
-                onClick={(e) => handleNavClick(e, '#analysis-heading')}
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1"
+                href="#weather"
+                onClick={(e) => handleNavClick(e, '#weather')}
+                onKeyDown={(e) => handleKeyDown(e, '#weather')}
+                className={`transition-colors font-medium flex items-center space-x-1 px-3 py-2 rounded-lg ${
+                  activeSection === 'weather'
+                    ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
                 role="button"
                 tabIndex="0"
+                aria-current={activeSection === 'weather' ? 'page' : undefined}
               >
-                <span>🌍</span>
+                <span>🌤️</span>
                 <span>Weather</span>
               </a>
               <a
-                href="#webcams-heading"
-                onClick={(e) => handleNavClick(e, '#webcams-heading')}
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1"
+                href="#analysis"
+                onClick={(e) => handleNavClick(e, '#analysis')}
+                onKeyDown={(e) => handleKeyDown(e, '#analysis')}
+                className={`transition-colors font-medium flex items-center space-x-1 px-3 py-2 rounded-lg ${
+                  activeSection === 'analysis'
+                    ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
                 role="button"
                 tabIndex="0"
+                aria-current={activeSection === 'analysis' ? 'page' : undefined}
+              >
+                <span>🌍</span>
+                <span>Analysis</span>
+              </a>
+              <a
+                href="#webcams"
+                onClick={(e) => handleNavClick(e, '#webcams')}
+                onKeyDown={(e) => handleKeyDown(e, '#webcams')}
+                className={`transition-colors font-medium flex items-center space-x-1 px-3 py-2 rounded-lg ${
+                  activeSection === 'webcams'
+                    ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
+                role="button"
+                tabIndex="0"
+                aria-current={activeSection === 'webcams' ? 'page' : undefined}
               >
                 <span>📸</span>
                 <span>Webcams</span>
               </a>
               <a
-                href="#traffic-heading"
-                onClick={(e) => handleNavClick(e, '#traffic-heading')}
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1"
+                href="#traffic"
+                onClick={(e) => handleNavClick(e, '#traffic')}
+                onKeyDown={(e) => handleKeyDown(e, '#traffic')}
+                className={`transition-colors font-medium flex items-center space-x-1 px-3 py-2 rounded-lg ${
+                  activeSection === 'traffic'
+                    ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
                 role="button"
                 tabIndex="0"
+                aria-current={activeSection === 'traffic' ? 'page' : undefined}
               >
                 <span>🚗</span>
                 <span>Traffic</span>
@@ -194,44 +299,84 @@ const Header = React.memo(({ systemStats = {} }) => {
 
           {/* Mobile Navigation */}
           {isMenuOpen && (
-            <nav className="lg:hidden mt-6 pt-6 border-t border-gray-200">
-              <div className="space-y-4">
+            <nav className="lg:hidden mt-6 pt-6 border-t border-gray-200" role="navigation" aria-label="Mobile navigation">
+              <div className="space-y-2">
                 <a
-                  href="#main"
-                  onClick={(e) => handleNavClick(e, '#main')}
-                  className="block py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-2"
+                  href="#map"
+                  onClick={(e) => handleNavClick(e, '#map')}
+                  onKeyDown={(e) => handleKeyDown(e, '#map')}
+                  className={`block py-3 px-4 rounded-lg transition-colors font-medium flex items-center space-x-2 ${
+                    activeSection === 'map'
+                      ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
                   role="button"
                   tabIndex="0"
+                  aria-current={activeSection === 'map' ? 'page' : undefined}
                 >
                   <span>🗺️</span>
                   <span>Real-time Map</span>
                 </a>
                 <a
-                  href="#analysis-heading"
-                  onClick={(e) => handleNavClick(e, '#analysis-heading')}
-                  className="block py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-2"
+                  href="#weather"
+                  onClick={(e) => handleNavClick(e, '#weather')}
+                  onKeyDown={(e) => handleKeyDown(e, '#weather')}
+                  className={`block py-3 px-4 rounded-lg transition-colors font-medium flex items-center space-x-2 ${
+                    activeSection === 'weather'
+                      ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
                   role="button"
                   tabIndex="0"
+                  aria-current={activeSection === 'weather' ? 'page' : undefined}
+                >
+                  <span>🌤️</span>
+                  <span>Interactive Weather Dashboard</span>
+                </a>
+                <a
+                  href="#analysis"
+                  onClick={(e) => handleNavClick(e, '#analysis')}
+                  onKeyDown={(e) => handleKeyDown(e, '#analysis')}
+                  className={`block py-3 px-4 rounded-lg transition-colors font-medium flex items-center space-x-2 ${
+                    activeSection === 'analysis'
+                      ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  role="button"
+                  tabIndex="0"
+                  aria-current={activeSection === 'analysis' ? 'page' : undefined}
                 >
                   <span>🌍</span>
                   <span>Weather Analysis</span>
                 </a>
                 <a
-                  href="#webcams-heading"
-                  onClick={(e) => handleNavClick(e, '#webcams-heading')}
-                  className="block py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-2"
+                  href="#webcams"
+                  onClick={(e) => handleNavClick(e, '#webcams')}
+                  onKeyDown={(e) => handleKeyDown(e, '#webcams')}
+                  className={`block py-3 px-4 rounded-lg transition-colors font-medium flex items-center space-x-2 ${
+                    activeSection === 'webcams'
+                      ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
                   role="button"
                   tabIndex="0"
+                  aria-current={activeSection === 'webcams' ? 'page' : undefined}
                 >
                   <span>📸</span>
                   <span>Live Webcams</span>
                 </a>
                 <a
-                  href="#traffic-heading"
-                  onClick={(e) => handleNavClick(e, '#traffic-heading')}
-                  className="block py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-2"
+                  href="#traffic"
+                  onClick={(e) => handleNavClick(e, '#traffic')}
+                  onKeyDown={(e) => handleKeyDown(e, '#traffic')}
+                  className={`block py-3 px-4 rounded-lg transition-colors font-medium flex items-center space-x-2 ${
+                    activeSection === 'traffic'
+                      ? 'text-blue-600 bg-blue-50 border-2 border-blue-200'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
                   role="button"
                   tabIndex="0"
+                  aria-current={activeSection === 'traffic' ? 'page' : undefined}
                 >
                   <span>🚗</span>
                   <span>Traffic Cameras</span>

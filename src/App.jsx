@@ -17,6 +17,7 @@ import { useServiceWorker } from './hooks/useServiceWorker';
 import PWAStatus from './components/common/PWAStatus';
 import HealthMonitor from './components/system/HealthMonitor';
 import MonitoringDashboard from './components/admin/MonitoringDashboard';
+import ScrollProgress from './components/navigation/ScrollProgress';
 import { initializeAccessibility } from './utils/accessibility';
 import { initializeSecurity } from './utils/security';
 import { useMetrics } from './services/metricsService';
@@ -113,6 +114,9 @@ const App = React.memo(() => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        {/* Scroll progress indicator */}
+        <ScrollProgress />
+        
         {/* Skip to main content link for keyboard users */}
         <a
           href="#main"
@@ -126,7 +130,7 @@ const App = React.memo(() => {
 
         <main id="main" className="max-w-7xl mx-auto px-4 pb-8" role="main" tabIndex="-1">
           {/* Map Section */}
-          <section className="mb-8" aria-labelledby="map-heading">
+          <section id="map" className="mb-8" aria-labelledby="map-heading" tabIndex="-1">
             <div className="mb-6">
               <h2 id="map-heading" className="text-2xl font-bold text-gray-900 mb-2">
                 🗺️ Real-time Map
@@ -148,7 +152,7 @@ const App = React.memo(() => {
           </section>
 
           {/* Weather Dashboard Section */}
-          <section className="mb-8" aria-labelledby="weather-dashboard-heading">
+          <section id="weather" className="mb-8" aria-labelledby="weather-dashboard-heading" tabIndex="-1">
             <div className="mb-6">
               <h2 id="weather-dashboard-heading" className="text-2xl font-bold text-gray-900 mb-2">
                 🌤️ Interactive Weather Dashboard
@@ -187,7 +191,7 @@ const App = React.memo(() => {
           </section>
 
           {/* Analysis Results Section */}
-          <section className="mb-8" aria-labelledby="analysis-heading">
+          <section id="analysis" className="mb-8" aria-labelledby="analysis-heading" tabIndex="-1">
             <div className="mb-6">
               <h2 id="analysis-heading" className="text-2xl font-bold text-gray-900 mb-2">
                 🌍 Real-time Regional Weather Analysis
@@ -232,7 +236,7 @@ const App = React.memo(() => {
           </section>
 
           {/* Live Webcams Section */}
-          <section className="mb-8" aria-labelledby="webcams-heading">
+          <section id="webcams" className="mb-8" aria-labelledby="webcams-heading" tabIndex="-1">
             <div className="mb-6">
               <h2 id="webcams-heading" className="text-2xl font-bold text-gray-900 mb-2">
                 📸 Live Webcams
@@ -252,7 +256,7 @@ const App = React.memo(() => {
           </section>
 
           {/* Traffic Cameras Section */}
-          <section className="mb-8" aria-labelledby="traffic-heading">
+          <section id="traffic" className="mb-8" aria-labelledby="traffic-heading" tabIndex="-1">
             <div className="mb-6">
               <h2 id="traffic-heading" className="text-2xl font-bold text-gray-900 mb-2">
                 🚗 Live Traffic Cameras

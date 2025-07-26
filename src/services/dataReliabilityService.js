@@ -34,7 +34,7 @@ export class DataReliabilityService {
 
     this.retryState = new Map();
     this.dataQualityMetrics = new Map();
-    
+
     this.initializeDataMonitoring();
   }
 
@@ -59,7 +59,7 @@ export class DataReliabilityService {
   async loadDataWithReliability(dataType, fetchFunction, options = {}) {
     const startTime = Date.now();
     const cacheKey = `${dataType}_${Date.now()}`;
-    
+
     try {
       // Track the data loading attempt
       metricsService.trackCustomMetric(`data_load_attempt_${dataType}`, 1, 'count', {
@@ -70,19 +70,19 @@ export class DataReliabilityService {
       const data = await this.executeWithRetry(
         `${dataType}_load`,
         fetchFunction,
-        options
+        options,
       );
 
       // Validate data quality
       const qualityResult = await this.validateDataQuality(dataType, data);
-      
+
       if (!qualityResult.isValid) {
         throw new Error(`Data quality validation failed: ${qualityResult.issues.join(', ')}`);
       }
 
       // Cache successful data
       this.cacheSuccessfulData(dataType, data);
-      
+
       // Track successful load
       const duration = Date.now() - startTime;
       metricsService.trackCustomMetric(`data_load_success_${dataType}`, duration, 'ms', {
@@ -103,7 +103,7 @@ export class DataReliabilityService {
 
     } catch (error) {
       console.error(`Data loading failed for ${dataType}:`, error);
-      
+
       // Track failed load
       metricsService.trackCustomMetric(`data_load_failure_${dataType}`, 1, 'count', {
         error: error.message,
@@ -139,17 +139,17 @@ export class DataReliabilityService {
 
         // Track retry attempt
         this.updateRetryState(operationId, attempt);
-        
+
         const result = await fetchFunction();
-        
+
         // Reset retry state on success
         this.resetRetryState(operationId);
-        
+
         return result;
 
       } catch (error) {
         lastError = error;
-        
+
         // Check if error is retryable
         if (!this.isRetryableError(error) || attempt === maxRetries) {
           break;
@@ -167,7 +167,7 @@ export class DataReliabilityService {
     const baseDelay = this.config.retryDelay;
     const exponentialDelay = baseDelay * Math.pow(2, attempt - 1);
     const jitter = Math.random() * 1000; // Add up to 1 second jitter
-    
+
     return Math.min(exponentialDelay + jitter, this.config.maxRetryDelay);
   }
 
@@ -242,11 +242,11 @@ export class DataReliabilityService {
     // Check weather data completeness
     if (data.data) {
       let stationCount = 0;
-      
+
       if (data.data.temperature?.readings) {
         stationCount = Math.max(stationCount, data.data.temperature.readings.length);
       }
-      
+
       if (data.data.humidity?.readings) {
         stationCount = Math.max(stationCount, data.data.humidity.readings.length);
       }
@@ -262,7 +262,7 @@ export class DataReliabilityService {
       const requiredStations = ['S121', 'S116', 'S118']; // Bukit Timah area
       const availableStations = data.data.temperature?.readings?.map(r => r.station_id) || [];
       const missingStations = requiredStations.filter(id => !availableStations.includes(id));
-      
+
       if (missingStations.length > 0) {
         result.score -= missingStations.length * 10;
         result.issues.push(`Missing key stations: ${missingStations.join(', ')}`);
@@ -308,12 +308,12 @@ export class DataReliabilityService {
     }
 
     // Check capture quality
-    const validCaptures = data.captures.filter(capture => 
-      capture.imageUrl && 
-      capture.name && 
+    const validCaptures = data.captures.filter(capture =>
+      capture.imageUrl &&
+      capture.name &&
       capture.coordinates &&
       typeof capture.coordinates.lat === 'number' &&
-      typeof capture.coordinates.lng === 'number'
+      typeof capture.coordinates.lng === 'number',
     );
 
     const qualityRatio = validCaptures.length / data.captures.length;
@@ -349,11 +349,11 @@ export class DataReliabilityService {
     const cachedData = this.getLastSuccessfulData(dataType);
     if (cachedData) {
       const dataAge = Date.now() - cachedData.timestamp;
-      
+
       // Use cached data if it's not too old
       if (dataAge < this.config.dataTimeoutThreshold) {
         console.log(`Using cached ${dataType} data (${Math.round(dataAge / 60000)} minutes old)`);
-        
+
         metricsService.trackCustomMetric(`data_load_cached_fallback_${dataType}`, 1, 'count', {
           cacheAge: dataAge,
           reason: error.message,
@@ -375,7 +375,7 @@ export class DataReliabilityService {
 
     // Generate fallback data as last resort
     const fallbackData = this.generateFallbackData(dataType);
-    
+
     metricsService.trackCustomMetric(`data_load_fallback_generated_${dataType}`, 1, 'count', {
       reason: error.message,
     });
@@ -398,7 +398,7 @@ export class DataReliabilityService {
    */
   generateFallbackData(dataType) {
     const timestamp = new Date().toISOString();
-    
+
     if (dataType === 'weather') {
       return {
         timestamp,
@@ -477,7 +477,7 @@ export class DataReliabilityService {
    * Calculate data age
    */
   calculateDataAge(data) {
-    if (!data.timestamp) return null;
+    if (!data.timestamp) {return null;}
     return Date.now() - new Date(data.timestamp).getTime();
   }
 
@@ -496,7 +496,7 @@ export class DataReliabilityService {
     // Determine overall health
     const healthScores = [qualityReport.weather.score, qualityReport.webcam.score];
     const avgScore = healthScores.reduce((sum, score) => sum + score, 0) / healthScores.length;
-    
+
     if (avgScore < 50) {
       qualityReport.overall = 'unhealthy';
     } else if (avgScore < 75) {
@@ -517,7 +517,7 @@ export class DataReliabilityService {
     // Log quality issues
     if (qualityReport.overall !== 'healthy') {
       console.warn('🔍 Data quality issues detected:', qualityReport);
-      
+
       healthService.recordError(new Error(`Data quality degraded: ${qualityReport.overall}`), {
         type: 'data_quality_issue',
         qualityReport,
@@ -533,7 +533,7 @@ export class DataReliabilityService {
   assessDataTypeHealth(dataType) {
     const lastSuccessful = this.getLastSuccessfulData(dataType);
     const retryInfo = this.retryState.get(`${dataType}_load`);
-    
+
     let score = 100;
     const issues = [];
 
@@ -568,7 +568,7 @@ export class DataReliabilityService {
    */
   cleanupDataCache() {
     const cutoffTime = Date.now() - this.config.dataTimeoutThreshold;
-    
+
     ['weather', 'webcam'].forEach(dataType => {
       for (const [timestamp] of this.dataCache[dataType]) {
         if (timestamp < cutoffTime) {
@@ -614,7 +614,7 @@ export class DataReliabilityService {
    */
   getReliabilityReport() {
     const recent = Array.from(this.dataQualityMetrics.values()).slice(-1)[0];
-    
+
     return {
       timestamp: new Date().toISOString(),
       currentQuality: recent || { overall: 'unknown' },
@@ -636,5 +636,10 @@ export class DataReliabilityService {
 
 // Create singleton instance
 export const dataReliabilityService = new DataReliabilityService();
+
+// Make available globally for cross-service access (avoiding circular dependencies)
+if (typeof window !== 'undefined') {
+  window.dataReliabilityService = dataReliabilityService;
+}
 
 export default dataReliabilityService;

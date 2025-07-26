@@ -4,8 +4,9 @@ import { securityValidator } from '../services/securityService.js';
 import { dataReliabilityService } from '../services/dataReliabilityService.js';
 
 /**
- * Enhanced custom hook for data loading with advanced reliability patterns
- * Features: Circuit breaker, intelligent caching, retry logic, auto-refresh
+ * Enhanced custom hook for data loading with comprehensive reliability service integration
+ * Features: Intelligent retry, data quality validation, graceful degradation, circuit breaker,
+ * advanced caching, security validation, auto-refresh, real-time monitoring
  */
 export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
   const [weatherData, setWeatherData] = useState(null);
@@ -14,7 +15,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const [lastFetch, setLastFetch] = useState(null);
-  
+
   // Enhanced reliability tracking
   const [reliabilityMetrics, setReliabilityMetrics] = useState({
     weatherQuality: null,
@@ -26,7 +27,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
   // Use ref to track if component is mounted
   const isMountedRef = useRef(true);
 
-  // Enhanced data loading with circuit breaker and intelligent caching
+  // Enhanced data loading with comprehensive reliability service
   const loadData = useCallback(async () => {
     if (!isMountedRef.current) {return;}
 
@@ -39,55 +40,94 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
       const basePath = import.meta.env.BASE_URL || '/';
       const timestamp = new Date().getTime(); // Cache busting
 
-      // Use enhanced API service for parallel fetching with reliability patterns
-      const [weatherJson, webcamJson] = await Promise.all([
-        apiService.fetch(`${basePath}data/weather/latest.json?t=${timestamp}`, {
-          cacheTTL: 2 * 60 * 1000, // 2 minute cache for weather data
-          timeout: 10000, // 10 second timeout
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
-          },
-        }),
-        apiService.fetch(`${basePath}data/webcam/latest.json?t=${timestamp}`, {
-          cacheTTL: 60 * 1000, // 1 minute cache for webcam data
-          timeout: 15000, // 15 second timeout for larger data
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
-          },
-        }),
+      // Use data reliability service for enhanced data loading with intelligent retry, validation, and fallback
+      const [weatherResult, webcamResult] = await Promise.all([
+        dataReliabilityService.loadDataWithReliability(
+          'weather',
+          () => apiService.fetch(`${basePath}data/weather/latest.json?t=${timestamp}`, {
+            cacheTTL: 2 * 60 * 1000, // 2 minute cache for weather data
+            timeout: 10000, // 10 second timeout
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache',
+            },
+          }),
+          { maxRetries: 3 },
+        ),
+        dataReliabilityService.loadDataWithReliability(
+          'webcam',
+          () => apiService.fetch(`${basePath}data/webcam/latest.json?t=${timestamp}`, {
+            cacheTTL: 60 * 1000, // 1 minute cache for webcam data
+            timeout: 15000, // 15 second timeout for larger data
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache',
+            },
+          }),
+          { maxRetries: 3 },
+        ),
       ]);
 
       if (!isMountedRef.current) {return;}
 
-      // Enhanced security validation with comprehensive checks
-      const weatherValidation = securityValidator.validateWeatherData(weatherJson);
+      // Additional security validation layer (in addition to reliability service validation)
+      const weatherValidation = securityValidator.validateWeatherData(weatherResult.data);
       if (!weatherValidation.isValid) {
-        throw new Error(`Weather data security validation failed: ${weatherValidation.errors.join(', ')}`);
+        console.warn('Security validation failed for weather data:', weatherValidation.errors);
+        // Continue with sanitized data from reliability service
       }
 
-      const webcamValidation = validateWebcamData(webcamJson);
-      if (!webcamValidation.isValid) {
-        throw new Error(`Webcam data validation failed: ${webcamValidation.error}`);
-      }
-
-      // Add metadata for monitoring
-      const metadata = {
-        loadTime: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
-        weatherStations: weatherJson.data?.temperature?.readings?.length || 0,
-        webcamCameras: webcamJson.captures?.length || 0,
+      // Enhanced metadata including reliability metrics
+      const enhancedWeatherData = {
+        ...weatherResult.data,
+        reliabilityMetadata: {
+          ...weatherResult.metadata,
+          totalLoadTime: Date.now() - startTime,
+          securityValidated: weatherValidation.isValid,
+          timestamp: new Date().toISOString(),
+        },
       };
 
-      // Use sanitized data from security validation
-      setWeatherData({ ...weatherValidation.sanitized, metadata });
-      setWebcamData({ ...webcamJson, metadata });
+      const enhancedWebcamData = {
+        ...webcamResult.data,
+        reliabilityMetadata: {
+          ...webcamResult.metadata,
+          totalLoadTime: Date.now() - startTime,
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      // Update reliability metrics for monitoring
+      setReliabilityMetrics({
+        weatherQuality: weatherResult.metadata.qualityScore,
+        webcamQuality: webcamResult.metadata.qualityScore,
+        fallbackMode: weatherResult.metadata.source?.includes('fallback') || webcamResult.metadata.source?.includes('fallback'),
+        dataAge: Math.max(weatherResult.metadata.dataAge || 0, webcamResult.metadata.dataAge || 0),
+      });
+
+      // Use sanitized data from security validation where available
+      setWeatherData(weatherValidation.isValid ?
+        { ...weatherValidation.sanitized, reliabilityMetadata: enhancedWeatherData.reliabilityMetadata } :
+        enhancedWeatherData,
+      );
+      setWebcamData(enhancedWebcamData);
       setRetryCount(0); // Reset retry count on success
       setLastFetch(new Date());
 
-      // Log successful data load
-      console.log('📊 Data loaded successfully:', metadata);
+      // Log successful data load with reliability info
+      console.log('📊 Enhanced data loaded successfully:', {
+        weather: {
+          qualityScore: weatherResult.metadata.qualityScore,
+          source: weatherResult.metadata.source,
+          loadTime: weatherResult.metadata.loadTime,
+        },
+        webcam: {
+          qualityScore: webcamResult.metadata.qualityScore,
+          source: webcamResult.metadata.source,
+          loadTime: webcamResult.metadata.loadTime,
+        },
+        totalLoadTime: Date.now() - startTime,
+      });
 
     } catch (err) {
       console.error('Enhanced data loading error:', err);
@@ -166,7 +206,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     return retryableCategories.includes(category);
   };
 
-  // Auto-retry with exponential backoff
+  // Simplified retry for extreme cases (data reliability service handles most retry logic)
   const handleRetry = useCallback(() => {
     const delay = Math.min(1000 * Math.pow(2, retryCount), 30000); // Max 30s delay
     const timer = setTimeout(loadData, delay);
@@ -192,9 +232,10 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     };
   }, [loadData, refreshInterval]);
 
-  // Auto-retry failed requests
+  // Auto-retry only for extreme cases (reliability service handles most failures)
   useEffect(() => {
-    if (error && retryCount < 3 && retryCount > 0) {
+    if (error && retryCount < 2 && retryCount > 0 && error.retryable) {
+      console.log(`🔄 Hook-level retry ${retryCount}/2 for extreme case:`, error.category);
       const cleanup = handleRetry();
       return cleanup;
     }
@@ -225,6 +266,11 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     return `${diffHours}h ago`;
   }, [lastFetch]);
 
+  // Get reliability report for monitoring
+  const getReliabilityReport = useCallback(() => {
+    return dataReliabilityService.getReliabilityReport();
+  }, []);
+
   return {
     weatherData,
     webcamData,
@@ -236,6 +282,8 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     lastFetch,
     refresh,
     dataFreshness: getDataFreshness(),
+    reliabilityMetrics,
+    getReliabilityReport,
   };
 };
 
