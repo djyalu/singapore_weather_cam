@@ -1,10 +1,10 @@
 {
-  "api_test_timestamp": "2025-07-26T13:01:09.339Z",
-  "api_response_timestamp": "2025-07-26T21:00:43+08:00",
-  "total_cameras": 90,
+  "api_test_timestamp": "2025-07-26T15:52:11.725Z",
+  "api_response_timestamp": "2025-07-26T23:51:46+08:00",
+  "total_cameras": 56,
   "resolutions": {
-    "320x240": 11,
-    "1920x1080": 79
+    "320x240": 10,
+    "1920x1080": 46
   },
   "hwa_chong_area": {
     "center": {
@@ -12,7 +12,7 @@
       "lng": 103.80227
     },
     "radius_km": 5,
-    "cameras_found": 13,
+    "cameras_found": 7,
     "nearest_cameras": [
       {
         "camera_id": "6705",
@@ -22,7 +22,7 @@
           "longitude": 103.81768
         },
         "resolution": "1920x1080",
-        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/b7c8cd1c-14a7-4cb1-84c2-4fd3232a4734.jpg"
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/758c2fe1-5f38-4ee8-a9f6-4212c6d07ea9.jpg"
       },
       {
         "camera_id": "6706",
@@ -32,17 +32,7 @@
           "longitude": 103.7952799
         },
         "resolution": "1920x1080",
-        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/52d67bfa-fc7d-42fb-a6b0-b865202db181.jpg"
-      },
-      {
-        "camera_id": "6710",
-        "distance_km": "2.52",
-        "location": {
-          "latitude": 1.344205,
-          "longitude": 103.78577
-        },
-        "resolution": "1920x1080",
-        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/61d10156-310e-4239-8dfe-9aefcc808129.jpg"
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/b8218ae8-8bf2-4f0e-b511-2ade997d7067.jpg"
       },
       {
         "camera_id": "2703",
@@ -52,17 +42,27 @@
           "longitude": 103.791033581325
         },
         "resolution": "1920x1080",
-        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/c064a825-71b3-427d-913f-0553e7e7d2e3.jpg"
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/efe683fe-5cee-49a1-a81a-ef7d3d7dd638.jpg"
       },
       {
-        "camera_id": "6704",
-        "distance_km": "2.74",
+        "camera_id": "6712",
+        "distance_km": "3.58",
         "location": {
-          "latitude": 1.32657403632366,
-          "longitude": 103.826857295633
+          "latitude": 1.332691,
+          "longitude": 103.770278
         },
         "resolution": "1920x1080",
-        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/62e329c2-5b05-49d8-bf0c-8fa7ac2c4703.jpg"
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/d5d51bef-58ae-43bd-b85e-1c8adb122ed4.jpg"
+      },
+      {
+        "camera_id": "4706",
+        "distance_km": "4.09",
+        "location": {
+          "latitude": 1.29792,
+          "longitude": 103.78205
+        },
+        "resolution": "1920x1080",
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/38cb0aaa-32bd-49c7-810e-dfe9fda004f7.jpg"
       }
     ]
   }
