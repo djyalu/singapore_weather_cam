@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiService } from '../services/apiService.js';
+import { securityValidator } from '../services/securityService.js';
 
 /**
  * Enhanced custom hook for data loading with advanced reliability patterns
@@ -18,10 +19,10 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
 
   // Enhanced data loading with circuit breaker and intelligent caching
   const loadData = useCallback(async () => {
-    if (!isMountedRef.current) return;
+    if (!isMountedRef.current) {return;}
 
     const startTime = Date.now();
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -36,25 +37,25 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
           timeout: 10000, // 10 second timeout
           headers: {
             'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
+            'Pragma': 'no-cache',
+          },
         }),
         apiService.fetch(`${basePath}data/webcam/latest.json?t=${timestamp}`, {
           cacheTTL: 60 * 1000, // 1 minute cache for webcam data
           timeout: 15000, // 15 second timeout for larger data
           headers: {
             'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        })
+            'Pragma': 'no-cache',
+          },
+        }),
       ]);
 
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {return;}
 
-      // Enhanced data validation with specific error messages
-      const weatherValidation = validateWeatherData(weatherJson);
+      // Enhanced security validation with comprehensive checks
+      const weatherValidation = securityValidator.validateWeatherData(weatherJson);
       if (!weatherValidation.isValid) {
-        throw new Error(`Weather data validation failed: ${weatherValidation.error}`);
+        throw new Error(`Weather data security validation failed: ${weatherValidation.errors.join(', ')}`);
       }
 
       const webcamValidation = validateWebcamData(webcamJson);
@@ -67,10 +68,11 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
         loadTime: Date.now() - startTime,
         timestamp: new Date().toISOString(),
         weatherStations: weatherJson.data?.temperature?.readings?.length || 0,
-        webcamCameras: webcamJson.captures?.length || 0
+        webcamCameras: webcamJson.captures?.length || 0,
       };
 
-      setWeatherData({ ...weatherJson, metadata });
+      // Use sanitized data from security validation
+      setWeatherData({ ...weatherValidation.sanitized, metadata });
       setWebcamData({ ...webcamJson, metadata });
       setRetryCount(0); // Reset retry count on success
       setLastFetch(new Date());
@@ -80,7 +82,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
 
     } catch (err) {
       console.error('Enhanced data loading error:', err);
-      
+
       if (isMountedRef.current) {
         // Categorize error types for better handling
         const errorCategory = categorizeError(err);
@@ -88,7 +90,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
           message: err.message,
           category: errorCategory,
           timestamp: new Date().toISOString(),
-          retryable: isRetryableError(errorCategory)
+          retryable: isRetryableError(errorCategory),
         });
         setRetryCount(prev => prev + 1);
       }
@@ -104,15 +106,15 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     if (!data || typeof data !== 'object') {
       return { isValid: false, error: 'Invalid data structure' };
     }
-    
+
     if (!data.timestamp) {
       return { isValid: false, error: 'Missing timestamp' };
     }
-    
+
     if (!data.data || typeof data.data !== 'object') {
       return { isValid: false, error: 'Missing weather data object' };
     }
-    
+
     return { isValid: true };
   };
 
@@ -120,17 +122,17 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     if (!data || typeof data !== 'object') {
       return { isValid: false, error: 'Invalid data structure' };
     }
-    
+
     if (!data.captures || !Array.isArray(data.captures)) {
       return { isValid: false, error: 'Missing or invalid captures array' };
     }
-    
+
     return { isValid: true };
   };
 
   const categorizeError = (error) => {
     const message = error.message.toLowerCase();
-    
+
     if (message.includes('network') || message.includes('fetch')) {
       return 'network';
     }
@@ -146,7 +148,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     if (message.includes('rate limit')) {
       return 'rate_limit';
     }
-    
+
     return 'unknown';
   };
 

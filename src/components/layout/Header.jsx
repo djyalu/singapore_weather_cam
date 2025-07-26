@@ -1,29 +1,276 @@
-const Header = () => {
+import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import { Camera, Clock, Wifi, CheckCircle, RefreshCw, Menu, X } from 'lucide-react';
+
+const Header = React.memo(({ systemStats = {} }) => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Memoized event handlers
+  const handleOnline = useCallback(() => {
+    setIsOnline(true);
+    console.log('Network connection restored');
+  }, []);
+
+  const handleOffline = useCallback(() => {
+    setIsOnline(false);
+    console.warn('Network connection lost');
+  }, []);
+
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  const handleNavClick = useCallback((e, target) => {
+    e.preventDefault();
+    const element = document.querySelector(target);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      closeMenu();
+    }
+  }, [closeMenu]);
+
+  useEffect(() => {
+    // Use requestAnimationFrame for smooth time updates
+    let animationFrameId;
+    let lastUpdate = 0;
+
+    const updateTime = (timestamp) => {
+      // Update only once per second
+      if (timestamp - lastUpdate >= 1000) {
+        setCurrentTime(new Date());
+        lastUpdate = timestamp;
+      }
+      animationFrameId = requestAnimationFrame(updateTime);
+    };
+
+    animationFrameId = requestAnimationFrame(updateTime);
+
+    // Network status monitoring
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [handleOnline, handleOffline]);
+
+  // Format time with error handling
+  const formatTime = useCallback((date) => {
+    try {
+      return date.toLocaleTimeString('ko-KR');
+    } catch (error) {
+      console.error('Time formatting error:', error);
+      return '--:--:--';
+    }
+  }, []);
+
   return (
-    <header className="bg-singapore-red text-white shadow-lg">
-      <div className="container-custom py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-              <span className="text-singapore-red text-xl">🌤️</span>
-            </div>
-            <h1 className="text-2xl font-bold">Singapore Weather Cam</h1>
+    <>
+      {/* 실시간 상태 표시줄 */}
+      <div className="bg-green-500 text-white text-center py-2 text-sm font-medium">
+        <div className="flex items-center justify-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+            <span>🔴 LIVE • 실시간 분석 중</span>
           </div>
-
-          <nav className="hidden md:flex items-center space-x-6">
-            <a href="#weather" className="hover:text-gray-200 transition-colors">Weather</a>
-            <a href="#webcams" className="hover:text-gray-200 transition-colors">Webcams</a>
-            <a href="#map" className="hover:text-gray-200 transition-colors">Map</a>
-          </nav>
-
-          <div className="flex items-center space-x-2 text-sm">
-            <span className="hidden sm:inline">Last Updated:</span>
-            <span className="font-mono">{new Date().toLocaleTimeString('en-SG')}</span>
+          <span>• 마지막 업데이트: {formatTime(currentTime)}</span>
+          <div className="flex items-center space-x-1" role="status" aria-live="polite">
+            <Wifi className={`w-4 h-4 ${isOnline ? 'text-white' : 'text-red-300'}`} aria-hidden="true" />
+            <span className="text-xs" aria-label={`Network status: ${isOnline ? 'Online' : 'Offline'}`}>
+              {isOnline ? 'ONLINE' : 'OFFLINE'}
+            </span>
           </div>
         </div>
       </div>
-    </header>
+
+      {/* 메인 헤더 */}
+      <header className="bg-white shadow-xl border-b-4 border-blue-500">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-blue-600 p-3 rounded-xl">
+                <Camera className="w-10 h-10 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Singapore Weather Cams
+                </h1>
+                <p className="text-xl text-gray-600 mt-1">🤖 AI-powered Real-time Weather Analysis</p>
+                <div className="flex items-center space-x-4 mt-2">
+                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>시스템 정상 운영</span>
+                  </span>
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>자동 업데이트 활성화</span>
+                  </span>
+                  <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                    🏫 Bukit Timah 중심
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-8">
+              <a
+                href="#main"
+                onClick={(e) => handleNavClick(e, '#main')}
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1"
+                role="button"
+                tabIndex="0"
+              >
+                <span>🗺️</span>
+                <span>Map</span>
+              </a>
+              <a
+                href="#analysis-heading"
+                onClick={(e) => handleNavClick(e, '#analysis-heading')}
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1"
+                role="button"
+                tabIndex="0"
+              >
+                <span>🌍</span>
+                <span>Weather</span>
+              </a>
+              <a
+                href="#webcams-heading"
+                onClick={(e) => handleNavClick(e, '#webcams-heading')}
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1"
+                role="button"
+                tabIndex="0"
+              >
+                <span>📸</span>
+                <span>Webcams</span>
+              </a>
+              <a
+                href="#traffic-heading"
+                onClick={(e) => handleNavClick(e, '#traffic-heading')}
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1"
+                role="button"
+                tabIndex="0"
+              >
+                <span>🚗</span>
+                <span>Traffic</span>
+              </a>
+            </nav>
+
+            {/* System Stats */}
+            <div className="hidden xl:block text-right">
+              <div className="bg-gray-50 p-4 rounded-xl border">
+                <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
+                  <Clock className="w-4 h-4" />
+                  <span>마지막 업데이트: {systemStats.lastUpdate || '정보 없음'}</span>
+                </div>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🤖 Claude AI 분석</div>
+                  <div>⚡ 처리시간: {systemStats.totalProcessingTime || '0초'} • 🔄 5분마다 업데이트</div>
+                  {systemStats.averageConfidence > 0 && (
+                    <div>🎯 평균 신뢰도: {systemStats.averageConfidence}%</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMenu}
+              className="lg:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Toggle navigation menu"
+              aria-expanded={isMenuOpen}
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <nav className="lg:hidden mt-6 pt-6 border-t border-gray-200">
+              <div className="space-y-4">
+                <a
+                  href="#main"
+                  onClick={(e) => handleNavClick(e, '#main')}
+                  className="block py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-2"
+                  role="button"
+                  tabIndex="0"
+                >
+                  <span>🗺️</span>
+                  <span>Real-time Map</span>
+                </a>
+                <a
+                  href="#analysis-heading"
+                  onClick={(e) => handleNavClick(e, '#analysis-heading')}
+                  className="block py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-2"
+                  role="button"
+                  tabIndex="0"
+                >
+                  <span>🌍</span>
+                  <span>Weather Analysis</span>
+                </a>
+                <a
+                  href="#webcams-heading"
+                  onClick={(e) => handleNavClick(e, '#webcams-heading')}
+                  className="block py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-2"
+                  role="button"
+                  tabIndex="0"
+                >
+                  <span>📸</span>
+                  <span>Live Webcams</span>
+                </a>
+                <a
+                  href="#traffic-heading"
+                  onClick={(e) => handleNavClick(e, '#traffic-heading')}
+                  className="block py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-2"
+                  role="button"
+                  tabIndex="0"
+                >
+                  <span>🚗</span>
+                  <span>Traffic Cameras</span>
+                </a>
+
+                {/* Mobile System Stats */}
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <div className="bg-gray-50 p-4 rounded-xl border">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
+                      <Clock className="w-4 h-4" />
+                      <span>마지막 업데이트: {systemStats.lastUpdate || '정보 없음'}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🤖 Claude AI 분석</div>
+                      <div>⚡ 처리시간: {systemStats.totalProcessingTime || '0초'}</div>
+                      {systemStats.averageConfidence > 0 && (
+                        <div>🎯 평균 신뢰도: {systemStats.averageConfidence}%</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </nav>
+          )}
+        </div>
+      </header>
+    </>
   );
+});
+
+Header.propTypes = {
+  systemStats: PropTypes.shape({
+    totalWebcams: PropTypes.number,
+    lastUpdate: PropTypes.string,
+    totalProcessingTime: PropTypes.string,
+    averageConfidence: PropTypes.number,
+  }),
 };
+
+Header.displayName = 'Header';
 
 export default Header;

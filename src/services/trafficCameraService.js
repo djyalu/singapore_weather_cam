@@ -1,5 +1,6 @@
 // Enhanced Singapore Traffic Camera Service with reliability improvements
 import { apiService } from './apiService.js';
+import { securityValidator } from './securityService.js';
 
 const TRAFFIC_API_URL = 'https://api.data.gov.sg/v1/transport/traffic-images';
 
@@ -87,8 +88,8 @@ export const fetchTrafficCameras = async (options = {}) => {
       timeout: options.timeout || 15000, // 15 second timeout
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'Singapore-Weather-Cam/1.0'
-      }
+        'User-Agent': 'Singapore-Weather-Cam/1.0',
+      },
     });
 
     // Validate data structure
@@ -102,7 +103,7 @@ export const fetchTrafficCameras = async (options = {}) => {
 
     // Get the most recent data
     const latestItem = data.items[0];
-    
+
     if (!latestItem.cameras || !Array.isArray(latestItem.cameras)) {
       throw new Error('Invalid camera data structure');
     }
@@ -113,9 +114,9 @@ export const fetchTrafficCameras = async (options = {}) => {
     const processedCameras = cameras
       .filter(camera => {
         // Filter out invalid cameras
-        return camera.camera_id && 
-               camera.location && 
-               camera.image && 
+        return camera.camera_id &&
+               camera.location &&
+               camera.image &&
                typeof camera.location.latitude === 'number' &&
                typeof camera.location.longitude === 'number';
       })
@@ -125,8 +126,8 @@ export const fetchTrafficCameras = async (options = {}) => {
           area: 'Unknown',
         };
 
-        // Enhanced camera data with validation
-        return {
+        // Create initial camera data
+        const cameraData = {
           id: camera.camera_id,
           name: locationInfo.name,
           area: locationInfo.area,
@@ -142,9 +143,19 @@ export const fetchTrafficCameras = async (options = {}) => {
           },
           timestamp: camera.timestamp,
           quality: getImageQuality(camera.image_metadata),
-          status: 'active'
+          status: 'active',
         };
-      });
+
+        // Security validation and sanitization
+        const validation = securityValidator.validateCameraData(cameraData);
+        if (!validation.isValid) {
+          console.warn(`Camera ${camera.camera_id} validation failed:`, validation.errors);
+          return null; // Exclude invalid cameras
+        }
+
+        return validation.sanitized;
+      })
+      .filter(camera => camera !== null); // Remove invalid cameras
 
     // Log performance metrics
     console.log(`📊 Traffic Cameras: ${processedCameras.length} cameras processed`);
@@ -157,18 +168,18 @@ export const fetchTrafficCameras = async (options = {}) => {
         fetchTime: new Date().toISOString(),
         source: 'data.gov.sg',
         cacheHit: false, // Will be updated by API service
-        processingTime: Date.now() - (options.startTime || Date.now())
-      }
+        processingTime: Date.now() - (options.startTime || Date.now()),
+      },
     };
   } catch (error) {
     console.error('Error fetching traffic cameras:', error);
-    
+
     // Enhanced error with context
     const enhancedError = new Error(`Traffic camera fetch failed: ${error.message}`);
     enhancedError.originalError = error;
     enhancedError.service = 'traffic-cameras';
     enhancedError.timestamp = new Date().toISOString();
-    
+
     throw enhancedError;
   }
 };
@@ -177,12 +188,12 @@ export const fetchTrafficCameras = async (options = {}) => {
  * Determine image quality based on metadata
  */
 function getImageQuality(metadata) {
-  if (!metadata) return 'unknown';
-  
+  if (!metadata) {return 'unknown';}
+
   const { width, height } = metadata;
-  if (width >= 1920 && height >= 1080) return 'HD';
-  if (width >= 1280 && height >= 720) return 'HD Ready';
-  if (width >= 640 && height >= 480) return 'Standard';
+  if (width >= 1920 && height >= 1080) {return 'HD';}
+  if (width >= 1280 && height >= 720) {return 'HD Ready';}
+  if (width >= 640 && height >= 480) {return 'Standard';}
   return 'Low';
 }
 

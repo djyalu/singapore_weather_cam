@@ -3,6 +3,8 @@
  * Backend Infrastructure Improvement - Reliability First
  */
 
+import { securityValidator } from './securityService.js';
+
 class CircuitBreaker {
   constructor(options = {}) {
     this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
@@ -12,20 +14,20 @@ class CircuitBreaker {
     this.monitor = options.monitor || (() => {});
     this.lastFailureTime = null;
     this.nextAttempt = null;
-    
+
     // Enhanced monitoring
     this.metrics = {
       totalRequests: 0,
       failedRequests: 0,
       successfulRequests: 0,
       averageResponseTime: 0,
-      stateChanges: []
+      stateChanges: [],
     };
   }
 
   async execute(request) {
     this.metrics.totalRequests++;
-    
+
     if (this.state === 'OPEN') {
       if (this.nextAttempt && Date.now() < this.nextAttempt) {
         throw new CircuitBreakerError('Circuit breaker is OPEN', this.getStatus());
@@ -38,7 +40,7 @@ class CircuitBreaker {
       const startTime = Date.now();
       const result = await request();
       const responseTime = Date.now() - startTime;
-      
+
       this.onSuccess(responseTime);
       return result;
     } catch (error) {
@@ -50,13 +52,13 @@ class CircuitBreaker {
   onSuccess(responseTime) {
     this.metrics.successfulRequests++;
     this.updateAverageResponseTime(responseTime);
-    
+
     if (this.state === 'HALF_OPEN') {
       this.state = 'CLOSED';
       this.failureCount = 0;
       this.logStateChange('CLOSED');
     }
-    
+
     this.monitor('success', this.getStatus());
   }
 
@@ -84,7 +86,7 @@ class CircuitBreaker {
       timestamp: new Date().toISOString(),
       from: this.state,
       to: newState,
-      failureCount: this.failureCount
+      failureCount: this.failureCount,
     });
   }
 
@@ -94,14 +96,14 @@ class CircuitBreaker {
       failureCount: this.failureCount,
       failureThreshold: this.failureThreshold,
       metrics: this.metrics,
-      uptime: this.calculateUptime()
+      uptime: this.calculateUptime(),
     };
   }
 
   calculateUptime() {
     const totalRequests = this.metrics.totalRequests;
-    if (totalRequests === 0) return 100;
-    
+    if (totalRequests === 0) {return 100;}
+
     return ((this.metrics.successfulRequests / totalRequests) * 100).toFixed(2);
   }
 
@@ -130,13 +132,13 @@ class CacheService {
     this.ttl = new Map();
     this.defaultTTL = 5 * 60 * 1000; // 5 minutes
     this.maxSize = 100; // Maximum cache entries
-    
+
     // Cache statistics
     this.stats = {
       hits: 0,
       misses: 0,
       evictions: 0,
-      sets: 0
+      sets: 0,
     };
   }
 
@@ -149,9 +151,9 @@ class CacheService {
     this.cache.set(key, {
       value,
       timestamp: Date.now(),
-      accessCount: 0
+      accessCount: 0,
     });
-    
+
     this.ttl.set(key, Date.now() + ttl);
     this.stats.sets++;
   }
@@ -171,7 +173,7 @@ class CacheService {
     item.accessCount++;
     item.timestamp = Date.now();
     this.stats.hits++;
-    
+
     return item.value;
   }
 
@@ -199,7 +201,7 @@ class CacheService {
   }
 
   getStats() {
-    const hitRate = this.stats.hits + this.stats.misses > 0 
+    const hitRate = this.stats.hits + this.stats.misses > 0
       ? (this.stats.hits / (this.stats.hits + this.stats.misses) * 100).toFixed(2)
       : 0;
 
@@ -207,7 +209,7 @@ class CacheService {
       ...this.stats,
       hitRate: `${hitRate}%`,
       size: this.cache.size,
-      maxSize: this.maxSize
+      maxSize: this.maxSize,
     };
   }
 }
@@ -225,13 +227,13 @@ class RateLimiter {
   isAllowed(identifier) {
     const now = Date.now();
     const windowStart = now - this.windowSize;
-    
+
     if (!this.requests.has(identifier)) {
       this.requests.set(identifier, []);
     }
 
     const requestTimes = this.requests.get(identifier);
-    
+
     // Clean old requests outside the window
     const validRequests = requestTimes.filter(time => time > windowStart);
     this.requests.set(identifier, validRequests);
@@ -253,7 +255,7 @@ class RateLimiter {
     return {
       requestCount: validRequests.length,
       maxRequests: this.maxRequests,
-      resetTime: validRequests.length > 0 ? validRequests[0] + this.windowSize : now
+      resetTime: validRequests.length > 0 ? validRequests[0] + this.windowSize : now,
     };
   }
 }
@@ -266,21 +268,21 @@ export class APIService {
     this.cache = new CacheService();
     this.rateLimiter = new RateLimiter({
       windowSize: 60000, // 1 minute
-      maxRequests: 50 // Per minute per endpoint
+      maxRequests: 50, // Per minute per endpoint
     });
-    
+
     // Circuit breakers for different endpoints
     this.circuitBreakers = {
       weather: new CircuitBreaker({
         failureThreshold: 3,
         timeout: 30000,
-        monitor: this.logCircuitBreakerEvent.bind(this)
+        monitor: this.logCircuitBreakerEvent.bind(this),
       }),
       traffic: new CircuitBreaker({
         failureThreshold: 5,
         timeout: 60000,
-        monitor: this.logCircuitBreakerEvent.bind(this)
-      })
+        monitor: this.logCircuitBreakerEvent.bind(this),
+      }),
     };
 
     // Request queue for handling bursts
@@ -292,23 +294,30 @@ export class APIService {
 
   logCircuitBreakerEvent(type, data) {
     console.log(`[Circuit Breaker] ${type}:`, data);
-    
+
     // Could send to monitoring service
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'circuit_breaker', {
         event_category: 'api',
         event_label: type,
-        custom_map: { data: JSON.stringify(data) }
+        custom_map: { data: JSON.stringify(data) },
       });
     }
   }
 
   async fetch(url, options = {}) {
+    // Security validation: Validate URL before any processing
+    const urlValidation = securityValidator.validateApiUrl(url);
+    if (!urlValidation.isValid) {
+      throw new Error(`Security validation failed: ${urlValidation.error}`);
+    }
+
     const identifier = this.getRequestIdentifier(url);
-    
-    // Rate limiting check
-    if (!this.rateLimiter.isAllowed(identifier)) {
-      throw new Error(`Rate limit exceeded for ${identifier}`);
+
+    // Enhanced rate limiting check with security validator
+    const rateLimitCheck = securityValidator.checkRateLimit(identifier, 50, 60000);
+    if (!rateLimitCheck.allowed) {
+      throw new Error(`Rate limit exceeded for ${identifier}. Reset in ${rateLimitCheck.reset} seconds`);
     }
 
     // Check cache first
@@ -320,7 +329,7 @@ export class APIService {
 
     // Determine which circuit breaker to use
     const circuitBreaker = this.getCircuitBreaker(url);
-    
+
     // Queue request if too many concurrent requests
     if (this.activeRequests >= this.maxConcurrentRequests) {
       return this.queueRequest(url, options, circuitBreaker, cacheKey);
@@ -331,23 +340,23 @@ export class APIService {
 
   async executeRequest(url, options, circuitBreaker, cacheKey) {
     this.activeRequests++;
-    
+
     try {
       const response = await circuitBreaker.execute(async () => {
         const fetchOptions = this.buildFetchOptions(options);
         const response = await fetch(url, fetchOptions);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         return response.json();
       });
 
       // Cache successful responses
       this.cache.set(cacheKey, response, options.cacheTTL);
       return response;
-      
+
     } finally {
       this.activeRequests--;
       this.processQueue();
@@ -362,9 +371,9 @@ export class APIService {
         circuitBreaker,
         cacheKey,
         resolve,
-        reject
+        reject,
       });
-      
+
       this.processQueue();
     });
   }
@@ -378,12 +387,12 @@ export class APIService {
 
     while (this.requestQueue.length > 0 && this.activeRequests < this.maxConcurrentRequests) {
       const request = this.requestQueue.shift();
-      
+
       this.executeRequest(
         request.url,
         request.options,
         request.circuitBreaker,
-        request.cacheKey
+        request.cacheKey,
       ).then(request.resolve).catch(request.reject);
     }
 
@@ -398,10 +407,10 @@ export class APIService {
         'User-Agent': 'Singapore-Weather-Cam/1.0',
         'Cache-Control': 'no-cache',
         'Pragma': 'no-cache',
-        ...options.headers
+        ...options.headers,
       },
       timeout: options.timeout || 10000,
-      ...options
+      ...options,
     };
   }
 
@@ -427,15 +436,15 @@ export class APIService {
   getHealthStatus() {
     return {
       circuitBreakers: Object.fromEntries(
-        Object.entries(this.circuitBreakers).map(([key, cb]) => [key, cb.getStatus()])
+        Object.entries(this.circuitBreakers).map(([key, cb]) => [key, cb.getStatus()]),
       ),
       cache: this.cache.getStats(),
       rateLimiter: {
         activeRequests: this.activeRequests,
         queueLength: this.requestQueue.length,
-        maxConcurrentRequests: this.maxConcurrentRequests
+        maxConcurrentRequests: this.maxConcurrentRequests,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 

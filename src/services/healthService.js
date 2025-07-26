@@ -3,6 +3,9 @@
  * Provides comprehensive system health monitoring and diagnostics
  */
 
+import { useState, useEffect } from 'react';
+import { apiService } from './apiService.js';
+
 class HealthService {
   constructor() {
     this.metrics = {
@@ -11,19 +14,19 @@ class HealthService {
       errorLog: [],
       systemStatus: 'healthy',
       lastCheck: null,
-      uptime: Date.now()
+      uptime: Date.now(),
     };
-    
+
     this.thresholds = {
       responseTime: 5000, // 5 seconds
       errorRate: 0.1, // 10%
       cacheHitRate: 0.7, // 70%
-      memoryUsage: 0.8 // 80%
+      memoryUsage: 0.8, // 80%
     };
-    
+
     this.intervals = new Map();
     this.subscribers = new Set();
-    
+
     this.startMonitoring();
   }
 
@@ -40,6 +43,11 @@ class HealthService {
     this.intervals.set('performance', setInterval(() => {
       this.checkPerformanceMetrics();
     }, 30 * 1000));
+
+    // Record API service metrics every minute
+    this.intervals.set('apiService', setInterval(() => {
+      this.recordAPIServiceMetrics();
+    }, 60 * 1000));
 
     // Clean old metrics every 10 minutes
     this.intervals.set('cleanup', setInterval(() => {
@@ -84,13 +92,13 @@ class HealthService {
       {
         name: 'NEA Weather API',
         url: 'https://api.data.gov.sg/v1/environment/air-temperature',
-        timeout: 10000
+        timeout: 10000,
       },
       {
         name: 'LTA Traffic API',
         url: 'https://api.data.gov.sg/v1/transport/traffic-images',
-        timeout: 15000
-      }
+        timeout: 15000,
+      },
     ];
 
     for (const endpoint of endpoints) {
@@ -101,7 +109,7 @@ class HealthService {
 
         const response = await fetch(endpoint.url, {
           method: 'HEAD', // Use HEAD to minimize data transfer
-          signal: controller.signal
+          signal: controller.signal,
         });
 
         clearTimeout(timeoutId);
@@ -111,14 +119,14 @@ class HealthService {
           status: response.ok ? 'healthy' : 'degraded',
           responseTime,
           statusCode: response.status,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
       } catch (error) {
         this.recordAPIMetric(endpoint.name, {
           status: 'unhealthy',
           error: error.message,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -150,7 +158,7 @@ class HealthService {
         endpoint: endpointName,
         oldStatus: previousMetric.status,
         newStatus: metric.status,
-        metric
+        metric,
       });
     }
   }
@@ -164,11 +172,11 @@ class HealthService {
       memory: this.getMemoryUsage(),
       domNodes: document.querySelectorAll('*').length,
       eventListeners: this.estimateEventListeners(),
-      cacheSize: this.getCacheSize()
+      cacheSize: this.getCacheSize(),
     };
 
     this.metrics.performanceMetrics.set(Date.now(), metrics);
-    
+
     // Check thresholds
     this.checkPerformanceThresholds(metrics);
   }
@@ -183,7 +191,7 @@ class HealthService {
         used: memory.usedJSHeapSize,
         total: memory.totalJSHeapSize,
         limit: memory.jsHeapSizeLimit,
-        percentage: (memory.usedJSHeapSize / memory.jsHeapSizeLimit * 100).toFixed(2)
+        percentage: (memory.usedJSHeapSize / memory.jsHeapSizeLimit * 100).toFixed(2),
       };
     }
     return null;
@@ -193,13 +201,13 @@ class HealthService {
    * Estimate number of event listeners (rough approximation)
    */
   estimateEventListeners() {
-    if (typeof window === 'undefined') return 0;
-    
+    if (typeof window === 'undefined') {return 0;}
+
     // This is a rough estimate based on elements that commonly have listeners
     const interactiveElements = document.querySelectorAll(
-      'button, a, input, select, textarea, [onclick], [onmouseover], [onmouseout]'
+      'button, a, input, select, textarea, [onclick], [onmouseover], [onmouseout]',
     );
-    
+
     return interactiveElements.length;
   }
 
@@ -208,13 +216,15 @@ class HealthService {
    */
   getCacheSize() {
     try {
-      // This would need to be imported from apiService
+      const stats = apiService.cache.getStats();
       return {
-        entries: 0, // apiService.cache.size,
-        hitRate: 0 // apiService.cache.getStats().hitRate
+        entries: stats.size,
+        hitRate: parseFloat(stats.hitRate),
+        maxSize: stats.maxSize,
+        evictions: stats.evictions,
       };
     } catch (error) {
-      return { entries: 0, hitRate: 0 };
+      return { entries: 0, hitRate: 0, maxSize: 0, evictions: 0 };
     }
   }
 
@@ -229,7 +239,7 @@ class HealthService {
         type: 'memory',
         severity: 'warning',
         message: `Memory usage high: ${metrics.memory.percentage}%`,
-        threshold: this.thresholds.memoryUsage * 100
+        threshold: this.thresholds.memoryUsage * 100,
       });
     }
 
@@ -238,7 +248,16 @@ class HealthService {
         type: 'dom',
         severity: 'info',
         message: `High DOM node count: ${metrics.domNodes}`,
-        threshold: 5000
+        threshold: 5000,
+      });
+    }
+
+    if (metrics.cacheSize.hitRate && metrics.cacheSize.hitRate < this.thresholds.cacheHitRate * 100) {
+      alerts.push({
+        type: 'cache',
+        severity: 'warning',
+        message: `Cache hit rate low: ${metrics.cacheSize.hitRate}%`,
+        threshold: this.thresholds.cacheHitRate * 100,
       });
     }
 
@@ -246,8 +265,36 @@ class HealthService {
       this.notifySubscribers({
         type: 'performanceAlert',
         alerts,
-        metrics
+        metrics,
       });
+    }
+  }
+
+  /**
+   * Record API service metrics
+   */
+  recordAPIServiceMetrics() {
+    try {
+      const healthStatus = apiService.getHealthStatus();
+
+      // Record circuit breaker metrics
+      Object.entries(healthStatus.circuitBreakers).forEach(([service, status]) => {
+        this.recordAPIMetric(`Circuit Breaker: ${service}`, {
+          status: status.state === 'CLOSED' ? 'healthy' : status.state === 'HALF_OPEN' ? 'degraded' : 'unhealthy',
+          uptime: status.uptime,
+          failureCount: status.failureCount,
+          timestamp: new Date().toISOString(),
+        });
+      });
+
+      // Log cache performance
+      const cacheStats = healthStatus.cache;
+      if (parseFloat(cacheStats.hitRate) < this.thresholds.cacheHitRate * 100) {
+        console.warn(`⚠️ Cache performance degraded: ${cacheStats.hitRate} hit rate`);
+      }
+
+    } catch (error) {
+      console.error('Failed to record API service metrics:', error);
     }
   }
 
@@ -260,7 +307,7 @@ class HealthService {
       stack: error.stack,
       context,
       timestamp: new Date().toISOString(),
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
     };
 
     this.metrics.errorLog.push(errorRecord);
@@ -275,7 +322,7 @@ class HealthService {
 
     this.notifySubscribers({
       type: 'error',
-      error: errorRecord
+      error: errorRecord,
     });
   }
 
@@ -284,7 +331,7 @@ class HealthService {
    */
   checkErrorRate() {
     const recentErrors = this.metrics.errorLog.filter(
-      error => Date.now() - new Date(error.timestamp).getTime() < 5 * 60 * 1000 // Last 5 minutes
+      error => Date.now() - new Date(error.timestamp).getTime() < 5 * 60 * 1000, // Last 5 minutes
     );
 
     const errorRate = recentErrors.length / 100; // Assuming 100 operations per 5 minutes as baseline
@@ -299,7 +346,7 @@ class HealthService {
    */
   updateSystemStatus(overrideStatus = null) {
     const previousStatus = this.metrics.systemStatus;
-    
+
     if (overrideStatus) {
       this.metrics.systemStatus = overrideStatus;
     } else {
@@ -325,7 +372,7 @@ class HealthService {
         type: 'systemStatusChange',
         oldStatus: previousStatus,
         newStatus: this.metrics.systemStatus,
-        timestamp: this.metrics.lastCheck
+        timestamp: this.metrics.lastCheck,
       });
     }
   }
@@ -345,7 +392,7 @@ class HealthService {
 
     // Clean error log
     this.metrics.errorLog = this.metrics.errorLog.filter(
-      error => new Date(error.timestamp).getTime() > cutoffTime
+      error => new Date(error.timestamp).getTime() > cutoffTime,
     );
   }
 
@@ -354,18 +401,18 @@ class HealthService {
    */
   getHealthReport() {
     const uptime = Date.now() - this.metrics.uptime;
-    
+
     return {
       systemStatus: this.metrics.systemStatus,
       uptime: {
         milliseconds: uptime,
-        formatted: this.formatUptime(uptime)
+        formatted: this.formatUptime(uptime),
       },
       lastCheck: this.metrics.lastCheck,
       apis: this.getAPIHealthSummary(),
       performance: this.getPerformanceSummary(),
       errors: this.getErrorSummary(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -374,7 +421,7 @@ class HealthService {
    */
   getAPIHealthSummary() {
     const summary = {};
-    
+
     for (const [endpoint, metrics] of this.metrics.apiHealth) {
       const recentMetrics = metrics.slice(-10); // Last 10 checks
       const healthyCount = recentMetrics.filter(m => m.status === 'healthy').length;
@@ -386,10 +433,10 @@ class HealthService {
         status: metrics[metrics.length - 1]?.status || 'unknown',
         availability: ((healthyCount / recentMetrics.length) * 100).toFixed(2) + '%',
         averageResponseTime: Math.round(avgResponseTime),
-        lastCheck: metrics[metrics.length - 1]?.timestamp
+        lastCheck: metrics[metrics.length - 1]?.timestamp,
       };
     }
-    
+
     return summary;
   }
 
@@ -398,15 +445,15 @@ class HealthService {
    */
   getPerformanceSummary() {
     const recent = Array.from(this.metrics.performanceMetrics.values()).slice(-1)[0];
-    
-    if (!recent) return null;
+
+    if (!recent) {return null;}
 
     return {
       memory: recent.memory,
       domNodes: recent.domNodes,
       eventListeners: recent.eventListeners,
       cacheSize: recent.cacheSize,
-      timestamp: recent.timestamp
+      timestamp: recent.timestamp,
     };
   }
 
@@ -415,7 +462,7 @@ class HealthService {
    */
   getErrorSummary() {
     const recentErrors = this.metrics.errorLog.filter(
-      error => Date.now() - new Date(error.timestamp).getTime() < 60 * 60 * 1000 // Last hour
+      error => Date.now() - new Date(error.timestamp).getTime() < 60 * 60 * 1000, // Last hour
     );
 
     const errorTypes = {};
@@ -428,7 +475,7 @@ class HealthService {
       total: this.metrics.errorLog.length,
       lastHour: recentErrors.length,
       types: errorTypes,
-      latest: this.metrics.errorLog[this.metrics.errorLog.length - 1]
+      latest: this.metrics.errorLog[this.metrics.errorLog.length - 1],
     };
   }
 
@@ -441,9 +488,9 @@ class HealthService {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (days > 0) return `${days}d ${hours % 24}h ${minutes % 60}m`;
-    if (hours > 0) return `${hours}h ${minutes % 60}m`;
-    if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+    if (days > 0) {return `${days}d ${hours % 24}h ${minutes % 60}m`;}
+    if (hours > 0) {return `${hours}h ${minutes % 60}m`;}
+    if (minutes > 0) {return `${minutes}m ${seconds % 60}s`;}
     return `${seconds}s`;
   }
 
@@ -457,7 +504,7 @@ class HealthService {
       errorLog: [],
       systemStatus: 'healthy',
       lastCheck: null,
-      uptime: Date.now()
+      uptime: Date.now(),
     };
   }
 }
@@ -466,9 +513,6 @@ class HealthService {
 export const healthService = new HealthService();
 
 // React hook for using health service
-import { useState, useEffect } from 'react';
-import { apiService } from './apiService.js';
-
 export const useHealthService = () => {
   const [healthStatus, setHealthStatus] = useState(() => healthService.getHealthReport());
 
@@ -483,7 +527,7 @@ export const useHealthService = () => {
   return {
     healthStatus,
     recordError: healthService.recordError.bind(healthService),
-    getHealthReport: healthService.getHealthReport.bind(healthService)
+    getHealthReport: healthService.getHealthReport.bind(healthService),
   };
 };
 

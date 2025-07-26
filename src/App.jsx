@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import LiveHeader from './components/layout/LiveHeader';
+import Header from './components/layout/Header';
 import SystemStats from './components/dashboard/SystemStats';
 import SystemFooter from './components/layout/SystemFooter';
 import LoadingScreen from './components/common/LoadingScreen';
@@ -14,9 +14,14 @@ import { useDataLoader } from './hooks/useDataLoader';
 import { useSystemStats } from './hooks/useSystemStats';
 import { useServiceWorker } from './hooks/useServiceWorker';
 import PWAStatus from './components/common/PWAStatus';
+import HealthMonitor from './components/system/HealthMonitor';
 import { initializeAccessibility } from './utils/accessibility';
+import { initializeSecurity } from './utils/security';
 
 const App = React.memo(() => {
+  // Health monitor visibility state
+  const [showHealthMonitor, setShowHealthMonitor] = React.useState(false);
+
   // Use custom hooks for cleaner component logic
   const {
     weatherData,
@@ -42,9 +47,10 @@ const App = React.memo(() => {
     requestNotificationPermission,
   } = useServiceWorker();
 
-  // Initialize accessibility features
+  // Initialize accessibility and security features
   React.useEffect(() => {
     initializeAccessibility();
+    initializeSecurity();
   }, []);
 
   // Data loading logic now handled by custom hook
@@ -86,7 +92,7 @@ const App = React.memo(() => {
         >
           Skip to main content
         </a>
-        <LiveHeader systemStats={systemStats} />
+        <Header systemStats={systemStats} />
 
         <SystemStats {...systemStats} />
 
@@ -209,6 +215,12 @@ const App = React.memo(() => {
           onInstall={installPWA}
           onUpdate={updateServiceWorker}
           onRequestNotifications={requestNotificationPermission}
+        />
+
+        {/* Health Monitor */}
+        <HealthMonitor
+          isVisible={showHealthMonitor}
+          onToggle={() => setShowHealthMonitor(!showHealthMonitor)}
         />
       </div>
     </ErrorBoundary>
