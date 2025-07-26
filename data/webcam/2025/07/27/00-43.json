@@ -1,0 +1,195 @@
+{
+  "timestamp": "2025-07-26T15:43:24.750Z",
+  "total_cameras": 9,
+  "successful_captures": 5,
+  "failed_captures": 4,
+  "skipped_captures": 0,
+  "captures": [
+    {
+      "id": "test_image_1",
+      "name": "Test Image 1",
+      "location": "Test Location 1",
+      "coordinates": {
+        "lat": 1.2777,
+        "lng": 103.8515
+      },
+      "type": "test",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:25.656Z",
+      "status": "failed",
+      "file_info": {},
+      "ai_analysis": null,
+      "error": "All capture methods failed"
+    },
+    {
+      "id": "test_image_2",
+      "name": "Test Image 2",
+      "location": "Test Location 2",
+      "coordinates": {
+        "lat": 1.3048,
+        "lng": 103.8318
+      },
+      "type": "test",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:25.656Z",
+      "status": "failed",
+      "file_info": {},
+      "ai_analysis": null,
+      "error": "All capture methods failed"
+    },
+    {
+      "id": "singapore_skyline_1",
+      "name": "Singapore Skyline View 1",
+      "location": "Marina Bay Area",
+      "coordinates": {
+        "lat": 1.2834,
+        "lng": 103.8607
+      },
+      "type": "public",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:28.659Z",
+      "status": "failed",
+      "file_info": {},
+      "ai_analysis": null,
+      "error": "All capture methods failed"
+    },
+    {
+      "id": "singapore_skyline_2",
+      "name": "Singapore Skyline View 2",
+      "location": "Gardens by the Bay Area",
+      "coordinates": {
+        "lat": 1.2816,
+        "lng": 103.8636
+      },
+      "type": "public",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:28.659Z",
+      "status": "failed",
+      "file_info": {},
+      "ai_analysis": null,
+      "error": "All capture methods failed"
+    },
+    {
+      "id": "marina_bay_traffic",
+      "name": "Marina Bay Traffic Camera",
+      "location": "Marina Bay",
+      "coordinates": {
+        "lat": 1.2777,
+        "lng": 103.8515
+      },
+      "type": "traffic",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:31.662Z",
+      "status": "success",
+      "file_info": {
+        "path": "images/webcam/marina_bay_traffic_20250727_0043.jpg",
+        "size": 184601,
+        "created": "1970-01-01T00:00:00.000Z",
+        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/a3c4b10b-aee2-4e34-9f71-75e4577753a2.jpg"
+      },
+      "ai_analysis": {
+        "analysis_available": false,
+        "reason": "API key not configured"
+      }
+    },
+    {
+      "id": "orchard_road_traffic",
+      "name": "Orchard Road Traffic Camera",
+      "location": "Orchard Road",
+      "coordinates": {
+        "lat": 1.3048,
+        "lng": 103.8318
+      },
+      "type": "traffic",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:31.664Z",
+      "status": "success",
+      "file_info": {
+        "path": "images/webcam/orchard_road_traffic_20250727_0043.jpg",
+        "size": 133707,
+        "created": "1970-01-01T00:00:00.000Z",
+        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/81a39dd9-f67e-44e2-a50f-7b708a7a23b2.jpg"
+      },
+      "ai_analysis": {
+        "analysis_available": false,
+        "reason": "API key not configured"
+      }
+    },
+    {
+      "id": "sentosa_traffic",
+      "name": "Sentosa Gateway Traffic Camera",
+      "location": "Sentosa",
+      "coordinates": {
+        "lat": 1.2494,
+        "lng": 103.8303
+      },
+      "type": "traffic",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:35.779Z",
+      "status": "success",
+      "file_info": {
+        "path": "images/webcam/sentosa_traffic_20250727_0043.jpg",
+        "size": 170856,
+        "created": "1970-01-01T00:00:00.000Z",
+        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/80f3a4f7-dd18-4214-8219-28b7bca7dde4.jpg"
+      },
+      "ai_analysis": {
+        "analysis_available": false,
+        "reason": "API key not configured"
+      }
+    },
+    {
+      "id": "changi_airport_traffic",
+      "name": "Changi Airport Traffic Camera",
+      "location": "Changi Airport",
+      "coordinates": {
+        "lat": 1.3644,
+        "lng": 103.9915
+      },
+      "type": "traffic",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:35.780Z",
+      "status": "success",
+      "file_info": {
+        "path": "images/webcam/changi_airport_traffic_20250727_0043.jpg",
+        "size": 134930,
+        "created": "1970-01-01T00:00:00.000Z",
+        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/cb5edb39-8d41-4d92-9ea4-9598270a6750.jpg"
+      },
+      "ai_analysis": {
+        "analysis_available": false,
+        "reason": "API key not configured"
+      }
+    },
+    {
+      "id": "tuas_checkpoint_traffic",
+      "name": "Tuas Checkpoint Traffic Camera",
+      "location": "Tuas",
+      "coordinates": {
+        "lat": 1.3482,
+        "lng": 103.6361
+      },
+      "type": "traffic",
+      "timestamp": "2025-07-26T15:43:24.750Z",
+      "capture_time": "2025-07-26T15:43:39.586Z",
+      "status": "success",
+      "file_info": {
+        "path": "images/webcam/tuas_checkpoint_traffic_20250727_0043.jpg",
+        "size": 120345,
+        "created": "1970-01-01T00:00:00.000Z",
+        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/4cce3d87-86dd-4192-aeda-e50f7a6b5acd.jpg"
+      },
+      "ai_analysis": {
+        "analysis_available": false,
+        "reason": "API key not configured"
+      }
+    }
+  ],
+  "metadata": {
+    "completion_time_ms": 15529,
+    "success_rate": 55.6,
+    "circuit_breaker_state": "CLOSED",
+    "memory_usage_mb": 11,
+    "data_integrity_validated": true
+  }
+}
