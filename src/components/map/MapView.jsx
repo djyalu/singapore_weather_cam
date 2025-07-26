@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -10,7 +11,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-const MapView = ({ weatherData, webcamData }) => {
+const MapView = React.memo(({ weatherData, webcamData }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
 
@@ -114,6 +115,48 @@ const MapView = ({ weatherData, webcamData }) => {
       </div>
     </div>
   );
+});
+
+MapView.propTypes = {
+  weatherData: PropTypes.shape({
+    timestamp: PropTypes.string,
+    locations: PropTypes.arrayOf(PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      coordinates: PropTypes.shape({
+        lat: PropTypes.number,
+        lng: PropTypes.number
+      }),
+      temperature: PropTypes.number,
+      humidity: PropTypes.number,
+      rainfall: PropTypes.number,
+      description: PropTypes.string,
+      priority: PropTypes.string
+    }))
+  }),
+  webcamData: PropTypes.shape({
+    timestamp: PropTypes.string,
+    total_cameras: PropTypes.number,
+    successful_captures: PropTypes.number,
+    failed_captures: PropTypes.number,
+    captures: PropTypes.arrayOf(PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      coordinates: PropTypes.shape({
+        lat: PropTypes.number,
+        lng: PropTypes.number
+      }),
+      type: PropTypes.string,
+      status: PropTypes.string,
+      file_info: PropTypes.shape({
+        url: PropTypes.string
+      }),
+      ai_analysis: PropTypes.object,
+      priority: PropTypes.string
+    }))
+  })
 };
+
+MapView.displayName = 'MapView';
 
 export default MapView;

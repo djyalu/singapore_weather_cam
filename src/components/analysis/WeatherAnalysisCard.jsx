@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { 
   MapPin, 
   Thermometer, 
@@ -12,7 +13,7 @@ import {
   Activity
 } from 'lucide-react';
 
-const WeatherAnalysisCard = ({ 
+const WeatherAnalysisCard = React.memo(({ 
   location,
   animationDelay = 0 
 }) => {
@@ -221,6 +222,61 @@ const WeatherAnalysisCard = ({
       </div>
     </div>
   );
+});
+
+WeatherAnalysisCard.propTypes = {
+  location: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    displayName: PropTypes.string,
+    location: PropTypes.string,
+    coordinates: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired
+    }),
+    type: PropTypes.string,
+    timestamp: PropTypes.string,
+    capture_time: PropTypes.string,
+    status: PropTypes.string,
+    file_info: PropTypes.shape({
+      url: PropTypes.string,
+      size: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      dimensions: PropTypes.string
+    }),
+    ai_analysis: PropTypes.shape({
+      weather_condition: PropTypes.string,
+      nature_condition: PropTypes.string,
+      traffic_level: PropTypes.string,
+      urban_activity: PropTypes.string,
+      residential_area: PropTypes.string,
+      educational_area: PropTypes.string,
+      visibility: PropTypes.string,
+      air_quality: PropTypes.string
+    }),
+    priority: PropTypes.string,
+    error: PropTypes.string,
+    activities: PropTypes.shape({
+      outdoor_activities: PropTypes.string,
+      photography: PropTypes.string,
+      tourism: PropTypes.string
+    }),
+    analysis: PropTypes.shape({
+      confidence: PropTypes.number,
+      observations: PropTypes.string,
+      aiAnalysis: PropTypes.string,
+      lastAnalyzed: PropTypes.string
+    }),
+    weather: PropTypes.shape({
+      condition: PropTypes.string,
+      description: PropTypes.string,
+      temperature: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      humidity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      visibility: PropTypes.string
+    })
+  }).isRequired,
+  animationDelay: PropTypes.number
 };
+
+WeatherAnalysisCard.displayName = 'WeatherAnalysisCard';
 
 export default WeatherAnalysisCard;

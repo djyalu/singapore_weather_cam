@@ -1,7 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Camera, Brain, Zap, Globe, Clock, AlertCircle } from 'lucide-react';
 
-const SystemStats = ({ 
+const SystemStats = React.memo(({ 
   totalWebcams = 0, 
   successfulAnalyses = 0, 
   failedAnalyses = 0, 
@@ -144,6 +145,18 @@ const SystemStats = ({
       )}
     </section>
   );
+});
+
+SystemStats.propTypes = {
+  totalWebcams: PropTypes.number,
+  successfulAnalyses: PropTypes.number,
+  failedAnalyses: PropTypes.number,
+  averageConfidence: PropTypes.number,
+  lastUpdate: PropTypes.string,
+  totalProcessingTime: PropTypes.string,
+  dominantWeather: PropTypes.string
 };
+
+SystemStats.displayName = 'SystemStats';
 
 export default SystemStats;
