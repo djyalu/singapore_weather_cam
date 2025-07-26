@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  fetchTrafficCameras, 
-  filterCamerasByArea, 
+import { useState, useEffect } from 'react';
+import {
+  fetchTrafficCameras,
+  filterCamerasByArea,
   groupCamerasByArea,
-  getFeaturedCameras 
+  getFeaturedCameras,
 } from '../../services/trafficCameraService';
 
 const TrafficCameraGallery = () => {
@@ -19,7 +19,7 @@ const TrafficCameraGallery = () => {
   // Fetch cameras on mount and set up auto-refresh
   useEffect(() => {
     fetchCameras();
-    
+
     if (autoRefresh) {
       const interval = setInterval(fetchCameras, 60000); // Update every minute
       return () => clearInterval(interval);
@@ -69,7 +69,7 @@ const TrafficCameraGallery = () => {
       <div className="card">
         <div className="text-center py-8">
           <p className="text-red-600 mb-4">Error: {error}</p>
-          <button 
+          <button
             onClick={fetchCameras}
             className="btn-primary"
           >
@@ -89,8 +89,8 @@ const TrafficCameraGallery = () => {
             <button
               onClick={() => setViewMode('featured')}
               className={`px-3 py-1 rounded text-sm transition-colors ${
-                viewMode === 'featured' 
-                  ? 'bg-blue-600 text-white' 
+                viewMode === 'featured'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -99,8 +99,8 @@ const TrafficCameraGallery = () => {
             <button
               onClick={() => setViewMode('area')}
               className={`px-3 py-1 rounded text-sm transition-colors ${
-                viewMode === 'area' 
-                  ? 'bg-blue-600 text-white' 
+                viewMode === 'area'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -109,8 +109,8 @@ const TrafficCameraGallery = () => {
             <button
               onClick={() => setViewMode('all')}
               className={`px-3 py-1 rounded text-sm transition-colors ${
-                viewMode === 'all' 
-                  ? 'bg-blue-600 text-white' 
+                viewMode === 'all'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -143,7 +143,7 @@ const TrafficCameraGallery = () => {
               />
               자동 새로고침
             </label>
-            
+
             <button
               onClick={fetchCameras}
               disabled={loading}
@@ -164,8 +164,8 @@ const TrafficCameraGallery = () => {
       {/* Camera Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredCameras.map((camera) => (
-          <div 
-            key={camera.id} 
+          <div
+            key={camera.id}
             className="card hover:shadow-lg transition-shadow"
           >
             <div className="aspect-video bg-gray-100 rounded overflow-hidden mb-3">
@@ -179,10 +179,10 @@ const TrafficCameraGallery = () => {
                 }}
               />
             </div>
-            
+
             <h4 className="font-medium text-sm mb-1">{camera.name}</h4>
             <p className="text-xs text-gray-600 mb-2">{camera.area}</p>
-            
+
             <div className="flex items-center justify-between text-xs text-gray-500">
               <span>📍 {camera.id}</span>
               <span>{camera.image.width}×{camera.image.height}</span>

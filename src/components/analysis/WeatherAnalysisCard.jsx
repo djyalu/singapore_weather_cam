@@ -58,7 +58,9 @@ const WeatherAnalysisCard = React.memo(({
 
   return (
     <div
-      className={`rounded-2xl border-2 shadow-xl p-6 transition-all duration-500 hover:scale-105 hover:shadow-2xl ${getWeatherColor(location.weather?.condition)} animate-fadeInUp`}
+      className={`rounded-2xl border-2 shadow-xl p-6 transition-all duration-500 
+                  hover:scale-105 hover:shadow-2xl ${getWeatherColor(location.weather?.condition)} 
+                  animate-fadeInUp`}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
       {/* 카드 헤더 */}
@@ -97,7 +99,8 @@ const WeatherAnalysisCard = React.memo(({
               {location.weather?.description || '날씨 정보 없음'}
             </span>
             {location.analysis?.confidence && (
-              <span className={`text-xs px-3 py-1 rounded-full font-medium ${getConfidenceColor(location.analysis.confidence)}`}>
+              <span className={`text-xs px-3 py-1 rounded-full font-medium 
+                              ${getConfidenceColor(location.analysis.confidence)}`}>
                 신뢰도 {location.analysis.confidence}%
               </span>
             )}

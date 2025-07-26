@@ -53,7 +53,7 @@ export const useSystemStats = (webcamData) => {
 
     // Format timestamp with proper localization
     const formatTimestamp = (timestamp) => {
-      if (!timestamp) return null;
+      if (!timestamp) {return null;}
       try {
         return new Date(timestamp).toLocaleString('en-SG', {
           timeZone: 'Asia/Singapore',
@@ -61,7 +61,7 @@ export const useSystemStats = (webcamData) => {
           month: 'short',
           day: 'numeric',
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
         });
       } catch (error) {
         console.warn('Invalid timestamp format:', timestamp);
@@ -77,7 +77,7 @@ export const useSystemStats = (webcamData) => {
       lastUpdate: formatTimestamp(webcamData.timestamp),
       totalProcessingTime: '15-30s',
       dominantWeather,
-      successRate: totalWebcams > 0 ? Math.round((successfulAnalyses / totalWebcams) * 100) : 0
+      successRate: totalWebcams > 0 ? Math.round((successfulAnalyses / totalWebcams) * 100) : 0,
     };
   }, [webcamData]);
 };

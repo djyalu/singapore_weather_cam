@@ -99,7 +99,8 @@ const SystemStats = React.memo(({
           return (
             <div
               key={index}
-              className={`${stat.bgColor} rounded-xl shadow-lg p-6 border-l-4 ${stat.borderColor} hover:shadow-xl transition-shadow duration-300`}
+              className={`${stat.bgColor} rounded-xl shadow-lg p-6 border-l-4 
+                          ${stat.borderColor} hover:shadow-xl transition-shadow duration-300`}
             >
               <div className="flex items-center justify-between">
                 <div>

@@ -100,3 +100,217 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* ================================================
+   ACCESSIBILITY & UX ENHANCEMENTS
+   ================================================ */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.sr-only.focus:not(.sr-only),
+.sr-only:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: inherit !important;
+  margin: inherit !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: inherit !important;
+}
+
+/* Focus management for keyboard users */
+body.user-is-tabbing *:focus {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+}
+
+body:not(.user-is-tabbing) *:focus {
+  outline: none !important;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  @apply absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded z-50 transition-all duration-200;
+  transform: translateY(-100%);
+}
+
+.skip-link:focus {
+  transform: translateY(0%);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .text-gray-600 { color: #000000 !important; }
+  .text-gray-700 { color: #000000 !important; }
+  .text-gray-500 { color: #333333 !important; }
+  .border-gray-200 { border-color: #000000 !important; }
+  .bg-gray-50 { background-color: #ffffff !important; }
+  .bg-gray-100 { background-color: #f5f5f5 !important; }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-spin,
+  .animate-pulse,
+  .animate-fadeInUp {
+    animation: none !important;
+  }
+}
+
+/* Enhanced animations for better UX */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Performance optimizations */
+.animate-pulse,
+.animate-spin,
+.animate-fadeInUp {
+  will-change: transform, opacity;
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  body {
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  input, 
+  textarea,
+  [contenteditable] {
+    user-select: text;
+  }
+  
+  /* Hide browser UI elements that don't work in PWA mode */
+  .browser-only {
+    display: none;
+  }
+}
+
+/* Touch target improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .touch-target {
+    @apply p-3;
+  }
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1f2937;
+    --text-primary: #f9fafb;
+    --border-color: #374151;
+  }
+}
+
+/* Loading states with better accessibility */
+[aria-busy="true"] {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Focus trap container */
+.focus-trap {
+  position: relative;
+}
+
+.focus-trap::before,
+.focus-trap::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* Better button styles */
+.btn-enhanced {
+  @apply relative overflow-hidden;
+  transition: all 0.2s ease;
+}
+
+.btn-enhanced:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-enhanced:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-enhanced:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Improved card hover effects */
+.card-interactive {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Status indicators */
+.status-indicator {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-online {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-offline {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-loading {
+  @apply bg-blue-100 text-blue-800;
+}

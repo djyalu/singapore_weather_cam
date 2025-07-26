@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/singapore_weather_cam/',
+  base: process.env.NODE_ENV === 'production' ? '/singapore_weather_cam/' : '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

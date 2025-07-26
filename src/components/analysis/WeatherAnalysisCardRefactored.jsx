@@ -5,13 +5,13 @@ import WeatherCardHeader from './WeatherCardHeader';
 import WeatherCardBadges from './WeatherCardBadges';
 import WeatherInfoSection from './WeatherInfoSection';
 import AIAnalysisSection from './AIAnalysisSection';
-import { 
-  getWeatherIcon, 
-  getWeatherColor, 
-  getConfidenceColor, 
+import {
+  getWeatherIcon,
+  getWeatherColor,
+  getConfidenceColor,
   getActivityColor,
   formatSingaporeTime,
-  getWeatherA11yDescription 
+  getWeatherA11yDescription,
 } from '../../utils/weatherUtils.jsx';
 
 /**
@@ -34,14 +34,16 @@ const WeatherAnalysisCardRefactored = React.memo(({
 
   return (
     <article
-      className={`rounded-2xl border-2 shadow-xl p-6 transition-all duration-500 hover:scale-105 hover:shadow-2xl ${getWeatherColor(weatherCondition)} animate-fadeInUp`}
+      className={`rounded-2xl border-2 shadow-xl p-6 transition-all duration-500 
+                  hover:scale-105 hover:shadow-2xl ${getWeatherColor(weatherCondition)} 
+                  animate-fadeInUp`}
       style={{ animationDelay: `${animationDelay}ms` }}
       role="region"
       aria-label={a11yDescription}
     >
       {/* Card Header */}
-      <WeatherCardHeader 
-        location={location} 
+      <WeatherCardHeader
+        location={location}
         getWeatherIcon={getWeatherIcon}
       />
 
@@ -51,8 +53,8 @@ const WeatherAnalysisCardRefactored = React.memo(({
       {/* Main Content */}
       <div className="space-y-4">
         {/* Weather Information */}
-        <WeatherInfoSection 
-          location={location} 
+        <WeatherInfoSection
+          location={location}
           getConfidenceColor={getConfidenceColor}
         />
 
@@ -82,7 +84,7 @@ const WeatherAnalysisCardRefactored = React.memo(({
             <div className="grid grid-cols-3 gap-2 text-xs">
               {location.activities.outdoor_activities && (
                 <div className="text-center">
-                  <div 
+                  <div
                     className={`px-2 py-1 rounded ${getActivityColor(location.activities.outdoor_activities)}`}
                     role="status"
                     aria-label={`Outdoor activities: ${location.activities.outdoor_activities}`}
@@ -93,7 +95,7 @@ const WeatherAnalysisCardRefactored = React.memo(({
               )}
               {location.activities.photography && (
                 <div className="text-center">
-                  <div 
+                  <div
                     className={`px-2 py-1 rounded ${getActivityColor(location.activities.photography)}`}
                     role="status"
                     aria-label={`Photography conditions: ${location.activities.photography}`}
@@ -104,7 +106,7 @@ const WeatherAnalysisCardRefactored = React.memo(({
               )}
               {location.activities.tourism && (
                 <div className="text-center">
-                  <div 
+                  <div
                     className={`px-2 py-1 rounded ${getActivityColor(location.activities.tourism)}`}
                     role="status"
                     aria-label={`Tourism conditions: ${location.activities.tourism}`}
@@ -146,7 +148,7 @@ const WeatherAnalysisCardRefactored = React.memo(({
               }
             </time>
           </span>
-          <span 
+          <span
             className="bg-blue-500 text-white px-2 py-1 rounded-full animate-pulse"
             role="status"
             aria-label="Real-time data"

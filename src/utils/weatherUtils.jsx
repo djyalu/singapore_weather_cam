@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sun, Cloud, CloudRain } from 'lucide-react';
 
 /**
@@ -80,7 +79,7 @@ export const getActivityColor = (level) => {
  * Format temperature value with unit
  */
 export const formatTemperature = (temp) => {
-  if (temp === null || temp === undefined) return '--';
+  if (temp === null || temp === undefined) {return '--';}
   return `${temp}°C`;
 };
 
@@ -88,7 +87,7 @@ export const formatTemperature = (temp) => {
  * Format humidity value with unit
  */
 export const formatHumidity = (humidity) => {
-  if (humidity === null || humidity === undefined) return '--';
+  if (humidity === null || humidity === undefined) {return '--';}
   return `${humidity}%`;
 };
 
@@ -96,8 +95,8 @@ export const formatHumidity = (humidity) => {
  * Format timestamp to Singapore time
  */
 export const formatSingaporeTime = (timestamp) => {
-  if (!timestamp) return null;
-  
+  if (!timestamp) {return null;}
+
   try {
     return new Date(timestamp).toLocaleString('en-SG', {
       timeZone: 'Asia/Singapore',
@@ -105,7 +104,7 @@ export const formatSingaporeTime = (timestamp) => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   } catch (error) {
     console.warn('Invalid timestamp format:', timestamp);
@@ -117,8 +116,8 @@ export const formatSingaporeTime = (timestamp) => {
  * Determine weather condition from AI analysis text
  */
 export const parseWeatherCondition = (aiAnalysis) => {
-  if (!aiAnalysis) return 'sunny';
-  
+  if (!aiAnalysis) {return 'sunny';}
+
   const condition = aiAnalysis.toLowerCase();
   if (condition.includes('sunny') || condition.includes('clear')) {
     return 'sunny';
@@ -139,8 +138,8 @@ export const parseWeatherCondition = (aiAnalysis) => {
  * Validate weather data structure
  */
 export const isValidWeatherData = (data) => {
-  return data && 
-         typeof data === 'object' && 
+  return data &&
+         typeof data === 'object' &&
          (data.weather || data.ai_analysis || data.analysis);
 };
 
@@ -149,22 +148,22 @@ export const isValidWeatherData = (data) => {
  */
 export const getWeatherA11yDescription = (location) => {
   const parts = [];
-  
+
   if (location.displayName || location.name) {
     parts.push(`Location: ${location.displayName || location.name}`);
   }
-  
+
   if (location.weather?.description) {
     parts.push(`Weather: ${location.weather.description}`);
   }
-  
+
   if (location.weather?.temperature) {
     parts.push(`Temperature: ${formatTemperature(location.weather.temperature)}`);
   }
-  
+
   if (location.analysis?.confidence) {
     parts.push(`Analysis confidence: ${location.analysis.confidence}%`);
   }
-  
+
   return parts.join(', ');
 };

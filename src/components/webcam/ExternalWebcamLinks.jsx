@@ -1,11 +1,10 @@
-import React from 'react';
 import { webcamSources } from '../../config/webcamSources';
 
 const ExternalWebcamLinks = () => {
   return (
     <div className="card">
       <h3 className="text-xl font-semibold mb-4">외부 웹캠 링크</h3>
-      
+
       {/* LTA Traffic Cameras */}
       <div className="mb-6">
         <h4 className="text-lg font-medium mb-3 text-blue-600">🚗 교통 카메라</h4>
@@ -82,7 +81,7 @@ const ExternalWebcamLinks = () => {
       {/* Notice */}
       <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
         <p className="text-sm text-yellow-800">
-          💡 <strong>참고:</strong> 싱가포르에서는 보안상의 이유로 실시간 비디오 스트림 대신 
+          💡 <strong>참고:</strong> 싱가포르에서는 보안상의 이유로 실시간 비디오 스트림 대신
           주기적으로 업데이트되는 정적 이미지를 제공합니다. 대부분의 교통 카메라는 30초~2분마다 업데이트됩니다.
         </p>
       </div>

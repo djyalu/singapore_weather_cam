@@ -31,7 +31,7 @@ const AIAnalysisSection = React.memo(({ location }) => {
         <Brain className="w-4 h-4 mr-2 text-blue-500" aria-hidden="true" />
         🤖 AI Analysis
       </h4>
-      
+
       <div className="space-y-2 text-xs text-gray-700">
         {analysisItems.map((item) => (
           <div key={item.key} className="flex">

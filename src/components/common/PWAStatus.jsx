@@ -1,37 +1,37 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { 
-  Wifi, 
-  WifiOff, 
-  Download, 
-  RefreshCw, 
+import {
+  Wifi,
+  WifiOff,
+  Download,
+  RefreshCw,
   Smartphone,
   Bell,
-  HardDrive
+  HardDrive,
 } from 'lucide-react';
 
 /**
  * PWA Status Component
  * Shows online/offline status, update availability, and install options
  */
-const PWAStatus = React.memo(({ 
-  isOnline, 
-  isUpdateAvailable, 
-  canInstall, 
-  onInstall, 
+const PWAStatus = React.memo(({
+  isOnline,
+  isUpdateAvailable,
+  canInstall,
+  onInstall,
   onUpdate,
   onRequestNotifications,
-  storageInfo 
+  storageInfo,
 }) => {
   return (
     <div className="fixed bottom-4 right-4 z-50 space-y-2">
       {/* Online/Offline Status */}
       <div className={`
         px-3 py-2 rounded-lg shadow-lg text-sm font-medium flex items-center space-x-2
-        ${isOnline 
-          ? 'bg-green-100 text-green-800 border border-green-200' 
-          : 'bg-red-100 text-red-800 border border-red-200'
-        }
+        ${isOnline
+      ? 'bg-green-100 text-green-800 border border-green-200'
+      : 'bg-red-100 text-red-800 border border-red-200'
+    }
       `}>
         {isOnline ? (
           <>

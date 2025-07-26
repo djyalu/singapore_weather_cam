@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import WebcamCard from './WebcamCard';
 import WebcamModal from './WebcamModal';
 import LiveWebcamFeed from './LiveWebcamFeed';
@@ -95,6 +96,26 @@ const WebcamGallery = ({ data }) => {
       )}
     </>
   );
+};
+
+WebcamGallery.propTypes = {
+  data: PropTypes.shape({
+    captures: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        location: PropTypes.string.isRequired,
+        file_info: PropTypes.object,
+        ai_analysis: PropTypes.object,
+        capture_time: PropTypes.string.isRequired,
+        type: PropTypes.string.isRequired,
+      }),
+    ).isRequired,
+    timestamp: PropTypes.string,
+    successful_captures: PropTypes.number,
+    failed_captures: PropTypes.number,
+    total_cameras: PropTypes.number,
+  }).isRequired,
 };
 
 export default WebcamGallery;

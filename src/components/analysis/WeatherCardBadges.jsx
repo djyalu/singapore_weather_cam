@@ -10,7 +10,7 @@ const WeatherCardBadges = React.memo(({ location, showPriority = true, showLive 
     <div className="flex flex-wrap gap-2 mb-3">
       {/* Priority location indicator */}
       {showPriority && location.priority === 'primary' && (
-        <div 
+        <div
           className="bg-blue-500 text-white text-xs px-3 py-1 rounded-full inline-block animate-pulse"
           role="status"
           aria-label="Primary location near Bukit Timah Nature Reserve"
@@ -21,7 +21,7 @@ const WeatherCardBadges = React.memo(({ location, showPriority = true, showLive 
 
       {/* Live status indicator */}
       {showLive && (
-        <div 
+        <div
           className="bg-red-500 text-white text-xs px-2 py-1 rounded-full inline-block animate-pulse"
           role="status"
           aria-label="Live data feed"
@@ -32,7 +32,7 @@ const WeatherCardBadges = React.memo(({ location, showPriority = true, showLive 
 
       {/* Error status if present */}
       {location.error && (
-        <div 
+        <div
           className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full inline-block"
           role="alert"
           aria-label="Data collection error"

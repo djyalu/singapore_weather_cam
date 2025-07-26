@@ -8,7 +8,7 @@ import { Thermometer, Droplets, Eye } from 'lucide-react';
  */
 const WeatherInfoSection = React.memo(({ location, getConfidenceColor }) => {
   const formatValue = (value, unit = '') => {
-    if (value === null || value === undefined) return '--';
+    if (value === null || value === undefined) {return '--';}
     return `${value}${unit}`;
   };
 
@@ -19,7 +19,7 @@ const WeatherInfoSection = React.memo(({ location, getConfidenceColor }) => {
           {location.weather?.description || 'Weather data unavailable'}
         </span>
         {location.analysis?.confidence && (
-          <span 
+          <span
             className={`text-xs px-3 py-1 rounded-full font-medium ${getConfidenceColor(location.analysis.confidence)}`}
             role="status"
             aria-label={`Analysis confidence: ${location.analysis.confidence}%`}
@@ -36,14 +36,14 @@ const WeatherInfoSection = React.memo(({ location, getConfidenceColor }) => {
             {formatValue(location.weather?.temperature, '°C')}
           </span>
         </div>
-        
+
         <div className="flex items-center space-x-2" role="group" aria-label="Humidity">
           <Droplets className="w-4 h-4 text-blue-500" aria-hidden="true" />
           <span className="font-medium">
             {formatValue(location.weather?.humidity, '%')}
           </span>
         </div>
-        
+
         <div className="flex items-center space-x-2" role="group" aria-label="Visibility">
           <Eye className="w-4 h-4 text-purple-500" aria-hidden="true" />
           <span className="font-medium">

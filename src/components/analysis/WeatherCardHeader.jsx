@@ -1,12 +1,12 @@
-import React from 'react';
+import { memo } from 'react';
 import PropTypes from 'prop-types';
-import { MapPin, Sun, Cloud, CloudRain } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 /**
  * Header component for weather analysis cards
  * Displays location name, description, and weather icon
  */
-const WeatherCardHeader = React.memo(({ location, getWeatherIcon }) => {
+const WeatherCardHeader = memo(({ location, getWeatherIcon }) => {
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center space-x-3">

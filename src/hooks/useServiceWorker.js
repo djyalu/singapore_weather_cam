@@ -60,7 +60,7 @@ export const useServiceWorker = () => {
     try {
       const reg = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
-        updateViaCache: 'none'
+        updateViaCache: 'none',
       });
 
       setRegistration(reg);
@@ -68,7 +68,7 @@ export const useServiceWorker = () => {
       // Check for updates
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
-        
+
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
@@ -106,16 +106,16 @@ export const useServiceWorker = () => {
     if (installPrompt) {
       // Show the install prompt
       installPrompt.prompt();
-      
+
       // Wait for the user to respond to the prompt
       const { outcome } = await installPrompt.userChoice;
-      
+
       if (outcome === 'accepted') {
         console.log('PWA install accepted');
       } else {
         console.log('PWA install dismissed');
       }
-      
+
       // Clear the prompt
       setInstallPrompt(null);
     }
@@ -142,7 +142,7 @@ export const useServiceWorker = () => {
         return {
           quota: estimate.quota,
           usage: estimate.usage,
-          usagePercentage: Math.round((estimate.usage / estimate.quota) * 100)
+          usagePercentage: Math.round((estimate.usage / estimate.quota) * 100),
         };
       } catch (error) {
         console.log('Storage estimate failed:', error);
@@ -174,7 +174,7 @@ export const useServiceWorker = () => {
     requestPersistentStorage,
     getStorageEstimate,
     requestNotificationPermission,
-    registration
+    registration,
   };
 };
 

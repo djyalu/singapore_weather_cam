@@ -26,7 +26,7 @@ const App = React.memo(() => {
     error,
     retryCount,
     refresh,
-    dataFreshness
+    dataFreshness,
   } = useDataLoader(5 * 60 * 1000); // 5 minute refresh interval
 
   // Use custom hook for system stats calculation
@@ -39,7 +39,7 @@ const App = React.memo(() => {
     canInstall,
     installPWA,
     updateServiceWorker,
-    requestNotificationPermission
+    requestNotificationPermission,
   } = useServiceWorker();
 
   // Initialize accessibility features
@@ -80,8 +80,8 @@ const App = React.memo(() => {
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         {/* Skip to main content link for keyboard users */}
-        <a 
-          href="#main" 
+        <a
+          href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded z-50 transition-all duration-200"
         >
           Skip to main content
@@ -125,7 +125,7 @@ const App = React.memo(() => {
               </p>
             </div>
 
-            {loading ? (
+            {isInitialLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" aria-live="polite">
                 {Array.from({ length: 6 }, (_, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg p-6 animate-pulse" aria-hidden="true">

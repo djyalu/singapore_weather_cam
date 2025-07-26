@@ -12,9 +12,9 @@ export const announceToScreenReader = (message, priority = 'polite') => {
   announcement.setAttribute('aria-atomic', 'true');
   announcement.className = 'sr-only';
   announcement.textContent = message;
-  
+
   document.body.appendChild(announcement);
-  
+
   // Remove after announcement
   setTimeout(() => {
     document.body.removeChild(announcement);
@@ -59,12 +59,12 @@ export const focusUtils = {
   // Trap focus within an element
   trapFocus: (element) => {
     const focusableElements = element.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
-    
+
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
-    
+
     element.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         if (e.shiftKey) {
@@ -81,20 +81,20 @@ export const focusUtils = {
       }
     });
   },
-  
+
   // Restore focus to previously focused element
   restoreFocus: (previousElement) => {
     if (previousElement && typeof previousElement.focus === 'function') {
       previousElement.focus();
     }
   },
-  
+
   // Get all focusable elements within a container
   getFocusableElements: (container) => {
     return container.querySelectorAll(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
     );
-  }
+  },
 };
 
 /**
@@ -104,7 +104,7 @@ export const keyboardUtils = {
   // Arrow key navigation for lists
   handleArrowNavigation: (event, items, currentIndex, onChange) => {
     let newIndex = currentIndex;
-    
+
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
@@ -125,25 +125,25 @@ export const keyboardUtils = {
       default:
         return;
     }
-    
+
     onChange(newIndex);
     items[newIndex]?.focus();
   },
-  
+
   // Handle escape key
   handleEscape: (callback) => (event) => {
     if (event.key === 'Escape') {
       callback();
     }
   },
-  
+
   // Handle enter/space activation
   handleActivation: (callback) => (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       callback();
     }
-  }
+  },
 };
 
 /**
@@ -156,24 +156,24 @@ export const ariaUtils = {
     descriptionElement.id = descriptionId;
     element.setAttribute('aria-describedby', descriptionId);
   },
-  
+
   // Label an element with another element's content
   labelElement: (element, labelElement) => {
     const labelId = generateId('label');
     labelElement.id = labelId;
     element.setAttribute('aria-labelledby', labelId);
   },
-  
+
   // Toggle aria-expanded attribute
   toggleExpanded: (element, isExpanded) => {
     element.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
   },
-  
+
   // Set live region updates
   setLiveRegion: (element, politeness = 'polite', atomic = true) => {
     element.setAttribute('aria-live', politeness);
     element.setAttribute('aria-atomic', atomic ? 'true' : 'false');
-  }
+  },
 };
 
 /**
@@ -184,19 +184,19 @@ export const screenReaderUtils = {
   hide: (element) => {
     element.setAttribute('aria-hidden', 'true');
   },
-  
+
   // Show element to screen readers
   show: (element) => {
     element.removeAttribute('aria-hidden');
   },
-  
+
   // Create screen reader only text
   createSROnlyText: (text) => {
     const span = document.createElement('span');
     span.className = 'sr-only';
     span.textContent = text;
     return span;
-  }
+  },
 };
 
 /**
@@ -209,15 +209,15 @@ export const contrastUtils = {
     const r = (rgb >> 16) & 0xff;
     const g = (rgb >> 8) & 0xff;
     const b = (rgb >> 0) & 0xff;
-    
+
     const [rs, gs, bs] = [r, g, b].map(c => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
-    
+
     return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
   },
-  
+
   // Calculate contrast ratio
   getContrastRatio: (color1, color2) => {
     const lum1 = contrastUtils.getLuminance(color1);
@@ -226,12 +226,12 @@ export const contrastUtils = {
     const darkest = Math.min(lum1, lum2);
     return (brightest + 0.05) / (darkest + 0.05);
   },
-  
+
   // Check if contrast meets WCAG standards
   meetsWCAG: (color1, color2, level = 'AA') => {
     const ratio = contrastUtils.getContrastRatio(color1, color2);
     return level === 'AAA' ? ratio >= 7 : ratio >= 4.5;
-  }
+  },
 };
 
 /**
@@ -244,7 +244,7 @@ export const motionUtils = {
       element.classList.add(animationClass);
     }
   },
-  
+
   // Remove animations for users who prefer reduced motion
   respectMotionPreferences: () => {
     if (prefersReducedMotion()) {
@@ -259,7 +259,7 @@ export const motionUtils = {
       `;
       document.head.appendChild(style);
     }
-  }
+  },
 };
 
 /**
@@ -268,7 +268,7 @@ export const motionUtils = {
 export const initializeAccessibility = () => {
   // Respect motion preferences
   motionUtils.respectMotionPreferences();
-  
+
   // Add skip links if not present
   if (!document.querySelector('.skip-link')) {
     const skipLink = document.createElement('a');
@@ -277,12 +277,12 @@ export const initializeAccessibility = () => {
     skipLink.textContent = 'Skip to main content';
     document.body.insertBefore(skipLink, document.body.firstChild);
   }
-  
+
   // Monitor for focus indicators
   let hadKeyboardEvent = true;
   const keydownThrottleTimeout = 100;
   let keydownTimeout;
-  
+
   const handleKeydown = () => {
     hadKeyboardEvent = true;
     clearTimeout(keydownTimeout);
@@ -290,14 +290,14 @@ export const initializeAccessibility = () => {
       hadKeyboardEvent = false;
     }, keydownThrottleTimeout);
   };
-  
+
   const handleMousedown = () => {
     hadKeyboardEvent = false;
   };
-  
+
   document.addEventListener('keydown', handleKeydown);
   document.addEventListener('mousedown', handleMousedown);
-  
+
   // Update body class based on input method
   setInterval(() => {
     document.body.classList.toggle('user-is-tabbing', hadKeyboardEvent);

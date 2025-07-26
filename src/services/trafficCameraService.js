@@ -1,4 +1,6 @@
-// Singapore Traffic Camera Service using data.gov.sg API
+// Enhanced Singapore Traffic Camera Service with reliability improvements
+import { apiService } from './apiService.js';
+
 const TRAFFIC_API_URL = 'https://api.data.gov.sg/v1/transport/traffic-images';
 
 // Popular camera locations mapping
@@ -74,63 +76,121 @@ const CAMERA_LOCATIONS = {
   '9703': { name: 'SLE Mandai Lake', area: 'SLE' },
   '9704': { name: 'SLE Seletar', area: 'SLE' },
   '9705': { name: 'TPE Pasir Ris', area: 'TPE' },
-  '9706': { name: 'Loyang Avenue Flyover', area: 'East' }
+  '9706': { name: 'Loyang Avenue Flyover', area: 'East' },
 };
 
-export const fetchTrafficCameras = async () => {
+export const fetchTrafficCameras = async (options = {}) => {
   try {
-    const response = await fetch(TRAFFIC_API_URL);
-    const data = await response.json();
-    
-    if (!data.items || data.items.length === 0) {
+    // Use enhanced API service with circuit breaker and caching
+    const data = await apiService.fetch(TRAFFIC_API_URL, {
+      cacheTTL: options.cacheTTL || 60000, // 1 minute cache
+      timeout: options.timeout || 15000, // 15 second timeout
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Singapore-Weather-Cam/1.0'
+      }
+    });
+
+    // Validate data structure
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid API response format');
+    }
+
+    if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
       throw new Error('No traffic camera data available');
     }
 
     // Get the most recent data
     const latestItem = data.items[0];
+    
+    if (!latestItem.cameras || !Array.isArray(latestItem.cameras)) {
+      throw new Error('Invalid camera data structure');
+    }
+
     const { timestamp, cameras } = latestItem;
 
-    // Process cameras with location info
-    const processedCameras = cameras.map(camera => {
-      const locationInfo = CAMERA_LOCATIONS[camera.camera_id] || {
-        name: `Camera ${camera.camera_id}`,
-        area: 'Unknown'
-      };
+    // Process cameras with enhanced validation and error handling
+    const processedCameras = cameras
+      .filter(camera => {
+        // Filter out invalid cameras
+        return camera.camera_id && 
+               camera.location && 
+               camera.image && 
+               typeof camera.location.latitude === 'number' &&
+               typeof camera.location.longitude === 'number';
+      })
+      .map(camera => {
+        const locationInfo = CAMERA_LOCATIONS[camera.camera_id] || {
+          name: `Camera ${camera.camera_id}`,
+          area: 'Unknown',
+        };
 
-      return {
-        id: camera.camera_id,
-        name: locationInfo.name,
-        area: locationInfo.area,
-        location: {
-          latitude: camera.location.latitude,
-          longitude: camera.location.longitude
-        },
-        image: {
-          url: camera.image,
-          width: camera.image_metadata.width,
-          height: camera.image_metadata.height,
-          md5: camera.image_metadata.md5
-        },
-        timestamp: camera.timestamp
-      };
-    });
+        // Enhanced camera data with validation
+        return {
+          id: camera.camera_id,
+          name: locationInfo.name,
+          area: locationInfo.area,
+          location: {
+            latitude: parseFloat(camera.location.latitude),
+            longitude: parseFloat(camera.location.longitude),
+          },
+          image: {
+            url: camera.image,
+            width: camera.image_metadata?.width || 0,
+            height: camera.image_metadata?.height || 0,
+            md5: camera.image_metadata?.md5 || null,
+          },
+          timestamp: camera.timestamp,
+          quality: getImageQuality(camera.image_metadata),
+          status: 'active'
+        };
+      });
+
+    // Log performance metrics
+    console.log(`📊 Traffic Cameras: ${processedCameras.length} cameras processed`);
 
     return {
       timestamp,
       totalCameras: processedCameras.length,
-      cameras: processedCameras
+      cameras: processedCameras,
+      metadata: {
+        fetchTime: new Date().toISOString(),
+        source: 'data.gov.sg',
+        cacheHit: false, // Will be updated by API service
+        processingTime: Date.now() - (options.startTime || Date.now())
+      }
     };
   } catch (error) {
     console.error('Error fetching traffic cameras:', error);
-    throw error;
+    
+    // Enhanced error with context
+    const enhancedError = new Error(`Traffic camera fetch failed: ${error.message}`);
+    enhancedError.originalError = error;
+    enhancedError.service = 'traffic-cameras';
+    enhancedError.timestamp = new Date().toISOString();
+    
+    throw enhancedError;
   }
 };
 
+/**
+ * Determine image quality based on metadata
+ */
+function getImageQuality(metadata) {
+  if (!metadata) return 'unknown';
+  
+  const { width, height } = metadata;
+  if (width >= 1920 && height >= 1080) return 'HD';
+  if (width >= 1280 && height >= 720) return 'HD Ready';
+  if (width >= 640 && height >= 480) return 'Standard';
+  return 'Low';
+}
+
 // Filter cameras by area or expressway
 export const filterCamerasByArea = (cameras, area) => {
-  if (!area || area === 'all') return cameras;
-  return cameras.filter(camera => 
-    camera.area.toLowerCase().includes(area.toLowerCase())
+  if (!area || area === 'all') {return cameras;}
+  return cameras.filter(camera =>
+    camera.area.toLowerCase().includes(area.toLowerCase()),
   );
 };
 

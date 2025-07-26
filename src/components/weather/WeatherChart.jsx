@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import PropTypes from 'prop-types';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -110,6 +111,16 @@ const WeatherChart = ({ data }) => {
       <Line ref={chartRef} options={options} data={chartData} />
     </div>
   );
+};
+
+WeatherChart.propTypes = {
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      time: PropTypes.string.isRequired,
+      temperature: PropTypes.number.isRequired,
+      rainfall: PropTypes.number.isRequired,
+    }),
+  ).isRequired,
 };
 
 export default WeatherChart;

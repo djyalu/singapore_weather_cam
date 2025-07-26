@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const WeatherCard = ({ title, value, icon, description }) => {
   return (
     <div className="card hover:shadow-xl transition-shadow duration-300">
@@ -13,6 +15,13 @@ const WeatherCard = ({ title, value, icon, description }) => {
       </div>
     </div>
   );
+};
+
+WeatherCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  icon: PropTypes.node.isRequired,
+  description: PropTypes.string,
 };
 
 export default WeatherCard;

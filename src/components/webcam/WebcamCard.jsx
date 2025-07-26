@@ -1,7 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const WebcamCard = ({ webcam, onClick }) => {
-  const { id, name, location, file_info, ai_analysis, capture_time, type } = webcam;
+  const { name, location, file_info, ai_analysis, capture_time, type } = webcam;
   const [imageKey, setImageKey] = React.useState(Date.now());
 
   // 이미지 URL 생성 - API 소스 URL을 직접 사용
@@ -69,6 +70,27 @@ const WebcamCard = ({ webcam, onClick }) => {
       )}
     </div>
   );
+};
+
+WebcamCard.propTypes = {
+  webcam: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    location: PropTypes.string.isRequired,
+    file_info: PropTypes.shape({
+      source_url: PropTypes.string,
+      url: PropTypes.string,
+      path: PropTypes.string,
+      size: PropTypes.number,
+    }),
+    ai_analysis: PropTypes.shape({
+      analysis_available: PropTypes.bool,
+      analysis: PropTypes.string,
+      reason: PropTypes.string,
+    }),
+    capture_time: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+  }).isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default WebcamCard;

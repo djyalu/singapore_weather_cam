@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const LiveWebcamFeed = ({ webcam }) => {
   const { name, location, file_info } = webcam;
@@ -81,6 +82,18 @@ const LiveWebcamFeed = ({ webcam }) => {
       </div>
     </div>
   );
+};
+
+LiveWebcamFeed.propTypes = {
+  webcam: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    location: PropTypes.string.isRequired,
+    file_info: PropTypes.shape({
+      source_url: PropTypes.string,
+      url: PropTypes.string,
+      path: PropTypes.string,
+    }),
+  }).isRequired,
 };
 
 export default LiveWebcamFeed;
