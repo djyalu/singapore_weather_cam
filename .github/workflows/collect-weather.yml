@@ -2,8 +2,8 @@ name: Collect Weather Data
 
 on:
   schedule:
-    # Every 2 hours (12 runs/day = 360 runs/month)
-    - cron: '0 */2 * * *'
+    # Every 4 hours (6 runs/day = 180 runs/month) - Optimized for free tier
+    - cron: '0 */4 * * *'
   workflow_dispatch:
     inputs:
       force_run:
@@ -19,7 +19,7 @@ env:
 jobs:
   collect-weather:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     permissions:
       contents: write
     concurrency:

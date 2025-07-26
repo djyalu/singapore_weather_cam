@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-07-26T15:39:19.030Z",
+  "total_cameras": 9,
+  "successful_captures": 2,
+  "failed_captures": 4,
+  "skipped_captures": 3,
+  "captures": [
+    {
+      "id": "sentosa_traffic",
+      "name": "Sentosa Gateway Traffic Camera",
+      "location": "Sentosa",
+      "coordinates": {
+        "lat": 1.2494,
+        "lng": 103.8303
+      },
+      "type": "traffic",
+      "timestamp": "2025-07-26T15:39:19.030Z",
+      "capture_time": "2025-07-26T15:39:28.458Z",
+      "status": "success",
+      "file_info": {
+        "path": "images/webcam/sentosa_traffic_20250727_0039.jpg",
+        "size": 165783,
+        "created": "1970-01-01T00:00:00.000Z",
+        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/fc58577a-d0e2-4fee-93cf-49f7b04056e5.jpg"
+      },
+      "ai_analysis": {
+        "analysis_available": false,
+        "reason": "API key not configured"
+      }
+    },
+    {
+      "id": "changi_airport_traffic",
+      "name": "Changi Airport Traffic Camera",
+      "location": "Changi Airport",
+      "coordinates": {
+        "lat": 1.3644,
+        "lng": 103.9915
+      },
+      "type": "traffic",
+      "timestamp": "2025-07-26T15:39:19.030Z",
+      "capture_time": "2025-07-26T15:39:28.461Z",
+      "status": "success",
+      "file_info": {
+        "path": "images/webcam/changi_airport_traffic_20250727_0039.jpg",
+        "size": 139822,
+        "created": "1970-01-01T00:00:00.000Z",
+        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/c0f7c514-3d54-461f-9db6-5ce153df6f30.jpg"
+      },
+      "ai_analysis": {
+        "analysis_available": false,
+        "reason": "API key not configured"
+      }
+    }
+  ],
+  "metadata": {
+    "completion_time_ms": 13546,
+    "success_rate": 22.2,
+    "circuit_breaker_state": "CLOSED",
+    "memory_usage_mb": 11,
+    "data_integrity_validated": true
+  }
+}

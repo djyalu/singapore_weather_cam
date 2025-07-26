@@ -2,8 +2,8 @@ name: Capture Webcam Images
 
 on:
   schedule:
-    # Every 2 hours, 15 minutes after weather collection
-    - cron: '15 */2 * * *'
+    # Every 6 hours, 30 minutes after weather collection (4 runs/day = 120 runs/month)
+    - cron: '30 */6 * * *'
   workflow_dispatch:
     inputs:
       capture_mode:
@@ -16,11 +16,12 @@ env:
   REQUEST_TIMEOUT: 12000
   MAX_RETRIES: 2
   DISABLE_BROWSER_CAPTURE: 'true'
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
 
 jobs:
   capture-webcam:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     permissions:
       contents: write
     concurrency:
@@ -44,6 +45,7 @@ jobs:
         run: |
           npm ci --prefer-offline --no-audit --silent
           echo "✅ Dependencies installed"
+          echo "🚫 Puppeteer disabled for GitHub Actions environment"
 
       - name: Create data directories
         run: |

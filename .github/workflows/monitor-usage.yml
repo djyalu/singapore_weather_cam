@@ -38,10 +38,10 @@ jobs:
           echo "📊 GitHub Actions Usage Report"
           echo "================================"
           
-          # Calculate monthly projections
-          WEATHER_RUNS_PER_DAY=48  # Every 30 minutes
-          WEBCAM_RUNS_PER_DAY=48   # Every 30 minutes
-          DEPLOY_RUNS_PER_MONTH=50  # Estimated deployments
+          # Calculate monthly projections - UPDATED SCHEDULES
+          WEATHER_RUNS_PER_DAY=6   # Every 4 hours (optimized)
+          WEBCAM_RUNS_PER_DAY=4    # Every 6 hours (optimized)
+          DEPLOY_RUNS_PER_MONTH=20 # Reduced estimate
           
           WEATHER_MINUTES_PER_RUN=10
           WEBCAM_MINUTES_PER_RUN=15
@@ -106,10 +106,10 @@ jobs:
           
           | Workflow | Schedule | Runs/Day | Minutes/Run | Monthly Minutes |
           |----------|----------|----------|-------------|-----------------|
-          | Weather Collection | */30 * * * * | 48 | 10 | 14,400 |
-          | Webcam Capture | */30 * * * * | 48 | 15 | 21,600 |
-          | Deploy | On push | ~2 | 5 | ~300 |
-          | **Total** | - | - | - | **36,300** |
+          | Weather Collection | 0 */4 * * * | 6 | 8 | 1,440 |
+          | Webcam Capture | 30 */6 * * * | 4 | 12 | 1,440 |
+          | Deploy | On push | ~1 | 5 | ~150 |
+          | **Total** | - | - | - | **~3,030** |
           
           ## Usage Status
           
@@ -135,9 +135,9 @@ jobs:
           
           With current optimizations:
           - **Original Usage**: ~75,200 minutes/month
-          - **Current Usage**: ~36,300 minutes/month
-          - **Savings**: 51.7% reduction
-          - **Under Free Tier**: Yes ✅
+          - **Current Usage**: ~3,030 minutes/month
+          - **Savings**: 95.9% reduction
+          - **Under Free Tier**: Yes ✅ (151% of limit)
           
           ---
           
