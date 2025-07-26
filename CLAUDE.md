@@ -23,10 +23,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트 개요
 - **프로젝트명**: Singapore Weather Cam
 - **목적**: 싱가포르 날씨 정보와 웹캠 영상을 실시간으로 제공하는 웹 애플리케이션
-- **상태**: 로컬 테스트 완료, 실제 구현 진행 중
+- **상태**: GitHub Actions 워크플로우 구현 완료, 자동화 배포 준비 완료
 - **선택 아키텍처**: GitHub-Native JAMstack (최종 선택)
 - **주요 체크포인트**: Hwa Chong International School (Bukit Timah Road 663번지)
-- **대안 검토**: AWS Cloud-Native는 비용 및 복잡성으로 인해 배제
+- **자동화 상태**: 3개 워크플로우 활성화 (날씨 수집, 웹캠 캡처, 자동 배포)
 
 ## 개발 환경 설정
 
@@ -132,15 +132,29 @@ npm run format       # Prettier 포맷팅
 - **저장소**: Git 기반 JSON 파일 (버전 관리)
 - **외부 서비스**: NEA Singapore API (무료)
 
-### 주요 워크플로우
+### 주요 워크플로우 (완전 구현됨)
 1. **날씨 데이터 수집** (`.github/workflows/collect-weather.yml`)
-   - 매 5분마다 실행
-   - NEA Singapore API 호출
-   - JSON 파일 업데이트 및 커밋
+   - 매 5분마다 실행 (`*/5 * * * *`)
+   - NEA Singapore API 호출 (무료, 무제한)
+   - Bukit Timah 지역 중심 (S121, S116, S118 스테이션 우선)
+   - 자동 JSON 파일 업데이트 및 커밋
+   - OpenWeatherMap 백업 지원
+   - 완전한 오류 처리 및 재시도 로직
 
-2. **자동 배포** (`.github/workflows/deploy.yml`)
-   - 코드 변경 시 자동 실행
-   - Vite 빌드 후 GitHub Pages 배포
+2. **웹캠 이미지 캡처** (`.github/workflows/capture-webcam.yml`)
+   - 매 15분마다 실행 (`*/15 * * * *`)
+   - LTA 교통 카메라 API 연동
+   - 자동 이미지 다운로드 및 저장
+   - Claude AI 이미지 분석 (선택사항)
+   - 7일 자동 이미지 정리
+   - GitHub Actions 최적화 (브라우저 캡처 비활성화)
+
+3. **자동 배포** (`.github/workflows/deploy.yml`)
+   - main 브랜치 푸시 시 자동 실행
+   - Vite 기반 React 빌드
+   - 데이터 통합 및 검증
+   - GitHub Pages 자동 배포
+   - 배포 상태 확인 및 헬스 체크
 
 ### 비용 분석
 - **호스팅**: $0 (GitHub Pages)
@@ -148,10 +162,15 @@ npm run format       # Prettier 포맷팅
 - **API**: $0 (NEA 무료)
 - **총 운영비**: **$0/월**
 
-### GitHub Actions 한도 관리
+### GitHub Actions 한도 관리 (최신 업데이트)
 - 무료 한도: 2000분/월
-- 예상 사용량: ~150분/월 (5분 간격 수집)
-- 여유 한도: 약 1850분/월
+- **예상 사용량 (3개 워크플로우)**:
+  - 날씨 수집: ~720 실행/월 × 2분 = ~1,440분
+  - 웹캠 캡처: ~2,880 실행/월 × 3분 = ~8,640분
+  - 자동 배포: ~10 실행/월 × 5분 = ~50분
+  - **총 예상**: ~10,130분/월
+- **⚠️ 중요**: 현재 스케줄이 무료 한도를 초과함
+- **권장 조정**: 웹캠 캡처를 30분 간격으로 변경 (~4,320분 절약)
 
 ## Hwa Chong International School 중심 설정
 

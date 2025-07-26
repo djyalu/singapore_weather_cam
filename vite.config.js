@@ -19,8 +19,13 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: true,
+    fs: {
+      // Allow serving files from data directory
+      allow: ['..', '.', './data']
+    }
   },
+  publicDir: 'public',
   preview: {
     port: 3001
   }

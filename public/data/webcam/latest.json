@@ -1,0 +1,106 @@
+{
+  "timestamp": "2025-07-26T06:30:01.272Z",
+  "total_cameras": 4,
+  "successful_captures": 4,
+  "failed_captures": 0,
+  "captures": [
+    {
+      "id": "bukit_timah_nature",
+      "name": "Bukit Timah Nature Reserve",
+      "location": "Bukit Timah",
+      "coordinates": {
+        "lat": 1.3520,
+        "lng": 103.7767
+      },
+      "type": "nature",
+      "timestamp": "2025-07-26T06:30:01.272Z",
+      "capture_time": "2025-07-26T06:30:01.500Z",
+      "status": "success",
+      "file_info": {
+        "url": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600",
+        "size": "320KB",
+        "dimensions": "800x600"
+      },
+      "ai_analysis": {
+        "weather_condition": "Partly cloudy with good visibility",
+        "nature_condition": "Lush green forest canopy",
+        "visibility": "Excellent",
+        "air_quality": "Good"
+      },
+      "priority": "primary",
+      "error": null
+    },
+    {
+      "id": "bukit_timah_road",
+      "name": "Bukit Timah Road",
+      "location": "Bukit Timah Road",
+      "coordinates": {
+        "lat": 1.3350,
+        "lng": 103.7900
+      },
+      "type": "traffic",
+      "timestamp": "2025-07-26T06:30:01.272Z",
+      "capture_time": "2025-07-26T06:30:01.800Z",
+      "status": "success",
+      "file_info": {
+        "url": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600",
+        "size": "280KB",
+        "dimensions": "800x600"
+      },
+      "ai_analysis": {
+        "weather_condition": "Clear morning conditions",
+        "traffic_level": "Light to moderate traffic",
+        "visibility": "Very good"
+      },
+      "error": null
+    },
+    {
+      "id": "newton_area",
+      "name": "Newton Circus Area",
+      "location": "Newton",
+      "coordinates": {
+        "lat": 1.3138,
+        "lng": 103.8420
+      },
+      "type": "urban",
+      "timestamp": "2025-07-26T06:30:01.272Z",
+      "capture_time": "2025-07-26T06:30:02.100Z",
+      "status": "success",
+      "file_info": {
+        "url": "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1f?w=800&h=600",
+        "size": "290KB",
+        "dimensions": "800x600"
+      },
+      "ai_analysis": {
+        "weather_condition": "Sunny with some clouds",
+        "urban_activity": "Moderate pedestrian activity",
+        "visibility": "Good"
+      },
+      "error": null
+    },
+    {
+      "id": "clementi_overview",
+      "name": "Clementi Town Overview",
+      "location": "Clementi",
+      "coordinates": {
+        "lat": 1.3162,
+        "lng": 103.7649
+      },
+      "type": "residential",
+      "timestamp": "2025-07-26T06:30:01.272Z",
+      "capture_time": "2025-07-26T06:30:02.400Z",
+      "status": "success",
+      "file_info": {
+        "url": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600",
+        "size": "260KB",
+        "dimensions": "800x600"
+      },
+      "ai_analysis": {
+        "weather_condition": "Overcast with light rain expected",
+        "residential_area": "Quiet residential morning",
+        "visibility": "Fair"
+      },
+      "error": null
+    }
+  ]
+}
