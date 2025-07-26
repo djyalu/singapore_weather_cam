@@ -23,8 +23,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트 개요
 - **프로젝트명**: Singapore Weather Cam
 - **목적**: 싱가포르 날씨 정보와 웹캠 영상을 실시간으로 제공하는 웹 애플리케이션
-- **상태**: 설계 완료, 구현 시작
+- **상태**: 로컬 테스트 완료, 실제 구현 진행 중
 - **선택 아키텍처**: GitHub-Native JAMstack (최종 선택)
+- **주요 체크포인트**: Hwa Chong International School (Bukit Timah Road 663번지)
 - **대안 검토**: AWS Cloud-Native는 비용 및 복잡성으로 인해 배제
 
 ## 개발 환경 설정
@@ -151,3 +152,21 @@ npm run format       # Prettier 포맷팅
 - 무료 한도: 2000분/월
 - 예상 사용량: ~150분/월 (5분 간격 수집)
 - 여유 한도: 약 1850분/월
+
+## Hwa Chong International School 중심 설정
+
+### 주요 체크포인트
+- **Hwa Chong International School**: 1.32865°N, 103.80227°E (중심 위치)
+  - 주소: 663 Bukit Timah Road, Singapore 269783
+  - Tel: +65 6464 7077
+- **Newton**: 1.3138°N, 103.8420°E (인근 지역)
+- **Bukit Timah Nature Reserve**: 1.3520°N, 103.7767°E (서쪽 자연보호구역)
+
+### 지도 설정
+- 중심점: Hwa Chong International School (1.32865, 103.80227)
+- 줌 레벨: 12 (지역 상세 보기)
+
+### 데이터 우선순위
+- 날씨 스테이션: S116, S121, S118 (Hwa Chong 인근 우선)
+- 웹캠: Bukit Timah Road 및 교육기관 집중 지역 중심
+- 업데이트: Hwa Chong International School 데이터를 primary로 설정

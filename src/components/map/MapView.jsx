@@ -17,8 +17,8 @@ const MapView = ({ weatherData, webcamData }) => {
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    // Initialize map centered on Singapore
-    const map = L.map(mapRef.current).setView([1.3521, 103.8198], 11);
+    // Initialize map centered on Hwa Chong International School
+    const map = L.map(mapRef.current).setView([1.32865, 103.80227], 12);
     mapInstanceRef.current = map;
 
     // Add tile layer
@@ -55,8 +55,8 @@ const MapView = ({ weatherData, webcamData }) => {
     }
 
     // Add webcam markers
-    if (webcamData?.webcams) {
-      webcamData.webcams.forEach((webcam) => {
+    if (webcamData?.captures) {
+      webcamData.captures.forEach((webcam) => {
         if (webcam.coordinates) {
           const marker = L.marker([webcam.coordinates.lat, webcam.coordinates.lng])
             .addTo(map)
@@ -64,9 +64,16 @@ const MapView = ({ weatherData, webcamData }) => {
               <div class="p-2">
                 <h3 class="font-bold">${webcam.name}</h3>
                 <p>${webcam.location}</p>
-                <img src="${webcam.imageUrl || '/images/placeholder.jpg'}" 
-                     alt="${webcam.name}" 
-                     class="w-32 h-24 object-cover rounded mt-2" />
+                <p class="text-sm text-gray-600">${webcam.type || 'webcam'}</p>
+                ${webcam.file_info?.url ? 
+                  `<img src="${webcam.file_info.url}" 
+                       alt="${webcam.name}" 
+                       class="w-32 h-24 object-cover rounded mt-2" />` : 
+                  `<div class="w-32 h-24 bg-gray-200 rounded mt-2 flex items-center justify-center text-gray-500">📷</div>`
+                }
+                ${webcam.ai_analysis?.weather_condition ? 
+                  `<p class="text-xs mt-2">Weather: ${webcam.ai_analysis.weather_condition}</p>` : ''
+                }
               </div>
             `);
           
