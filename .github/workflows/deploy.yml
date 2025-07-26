@@ -65,23 +65,9 @@ jobs:
     needs: build
     timeout-minutes: 5
     permissions:
-      contents: write
+      pages: write
+      id-token: write
     steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
-          path: ./dist-download
-          
-      - name: Extract build files
-        run: |
-          cd dist-download
-          tar -xf artifact.tar
-          ls -la
-          
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist-download
-          force_orphan: true
+        id: deployment
+        uses: actions/deploy-pages@v4

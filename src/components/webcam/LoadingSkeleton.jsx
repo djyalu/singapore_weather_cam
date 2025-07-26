@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * LoadingSkeleton Component
@@ -158,5 +159,17 @@ CameraCardSkeleton.displayName = 'CameraCardSkeleton';
 ControlsSkeleton.displayName = 'ControlsSkeleton';
 SummarySkeleton.displayName = 'SummarySkeleton';
 LoadingSkeleton.displayName = 'LoadingSkeleton';
+
+// PropTypes definitions
+CameraCardSkeleton.propTypes = {
+  delay: PropTypes.number,
+};
+
+LoadingSkeleton.propTypes = {
+  count: PropTypes.number,
+  showControls: PropTypes.bool,
+  showSummary: PropTypes.bool,
+  variant: PropTypes.oneOf(['default', 'compact', 'minimal']),
+};
 
 export default LoadingSkeleton;
