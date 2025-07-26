@@ -16,20 +16,20 @@ const App = React.memo(() => {
 
   // System stats calculation with memoization
   const systemStats = useMemo(() => {
-    if (!webcamData?.captures) return {};
+    if (!webcamData?.captures) {return {};}
 
     const totalWebcams = webcamData.total_cameras || webcamData.captures.length;
-    const successfulAnalyses = webcamData.successful_captures || 
+    const successfulAnalyses = webcamData.successful_captures ||
       webcamData.captures.filter(c => c.status === 'success').length;
-    const failedAnalyses = webcamData.failed_captures || 
+    const failedAnalyses = webcamData.failed_captures ||
       webcamData.captures.filter(c => c.status === 'failed').length;
-    
+
     // Calculate average confidence from actual analysis data
     const analysisConfidences = webcamData.captures
       .filter(c => c.analysis?.confidence && c.status === 'success')
       .map(c => c.analysis.confidence);
-    
-    const averageConfidence = analysisConfidences.length > 0 
+
+    const averageConfidence = analysisConfidences.length > 0
       ? Math.floor(analysisConfidences.reduce((a, b) => a + b, 0) / analysisConfidences.length)
       : 0;
 
@@ -38,17 +38,17 @@ const App = React.memo(() => {
       .filter(c => c.ai_analysis?.weather_condition)
       .map(c => {
         const condition = c.ai_analysis.weather_condition.toLowerCase();
-        if (condition.includes('sunny') || condition.includes('clear')) return 'sunny';
-        if (condition.includes('cloudy') || condition.includes('overcast')) return 'cloudy';
-        if (condition.includes('partly')) return 'partly_cloudy';
-        if (condition.includes('rain')) return 'light_rain';
+        if (condition.includes('sunny') || condition.includes('clear')) {return 'sunny';}
+        if (condition.includes('cloudy') || condition.includes('overcast')) {return 'cloudy';}
+        if (condition.includes('partly')) {return 'partly_cloudy';}
+        if (condition.includes('rain')) {return 'light_rain';}
         return 'sunny';
       });
-    
-    const dominantWeather = weatherConditions.length > 0 
-      ? weatherConditions.reduce((a, b, i, arr) => 
-          arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b
-        )
+
+    const dominantWeather = weatherConditions.length > 0
+      ? weatherConditions.reduce((a, b, i, arr) =>
+        arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b,
+      )
       : 'sunny';
 
     return {
@@ -58,7 +58,7 @@ const App = React.memo(() => {
       averageConfidence,
       lastUpdate: webcamData.timestamp ? new Date(webcamData.timestamp).toLocaleString('ko-KR') : null,
       totalProcessingTime: '15-30초',
-      dominantWeather
+      dominantWeather,
     };
   }, [webcamData]);
 
@@ -67,17 +67,17 @@ const App = React.memo(() => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const basePath = import.meta.env.BASE_URL || '/';
-      
+
       // Parallel data fetching for better performance
       const [weatherResponse, webcamResponse] = await Promise.all([
         fetch(`${basePath}data/weather/latest.json`, {
-          headers: { 'Cache-Control': 'no-cache' }
+          headers: { 'Cache-Control': 'no-cache' },
         }),
         fetch(`${basePath}data/webcam/latest.json`, {
-          headers: { 'Cache-Control': 'no-cache' }
-        })
+          headers: { 'Cache-Control': 'no-cache' },
+        }),
       ]);
 
       if (!weatherResponse.ok) {
@@ -89,7 +89,7 @@ const App = React.memo(() => {
 
       const [weatherJson, webcamJson] = await Promise.all([
         weatherResponse.json(),
-        webcamResponse.json()
+        webcamResponse.json(),
       ]);
 
       setWeatherData(weatherJson);
@@ -114,10 +114,10 @@ const App = React.memo(() => {
   // Initial load and periodic refresh
   useEffect(() => {
     loadData();
-    
+
     // Refresh every 5 minutes
     const interval = setInterval(loadData, 5 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, [loadData]);
 
@@ -143,7 +143,7 @@ const App = React.memo(() => {
           <p className="text-sm text-gray-600 mb-4">
             {retryCount > 0 && `재시도 ${retryCount}/3`}
           </p>
-          <button 
+          <button
             onClick={loadData}
             className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
             aria-label="데이터 다시 로드"
@@ -159,7 +159,7 @@ const App = React.memo(() => {
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <LiveHeader systemStats={systemStats} />
-        
+
         <SystemStats {...systemStats} />
 
         <main className="max-w-7xl mx-auto px-4 pb-8" role="main">
@@ -173,7 +173,7 @@ const App = React.memo(() => {
                 Hwa Chong International School을 중심으로 한 날씨 및 웹캠 위치
               </p>
             </div>
-            
+
             {loading ? (
               <div className="bg-white rounded-xl shadow-lg p-8 text-center" aria-live="polite">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" aria-hidden="true"></div>

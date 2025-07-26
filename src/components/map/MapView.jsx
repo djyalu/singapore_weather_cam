@@ -16,7 +16,7 @@ const MapView = React.memo(({ weatherData, webcamData }) => {
   const mapInstanceRef = useRef(null);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current || mapInstanceRef.current) {return;}
 
     // Initialize map centered on Bukit Timah Nature Reserve
     const map = L.map(mapRef.current).setView([1.3520, 103.7767], 12);
@@ -42,7 +42,7 @@ const MapView = React.memo(({ weatherData, webcamData }) => {
                 <p>Rainfall: ${location.rainfall || '0'} mm</p>
               </div>
             `);
-          
+
           // Add custom icon for weather stations
           const weatherIcon = L.divIcon({
             html: '<div class="bg-weather-blue text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">🌡️</div>',
@@ -66,18 +66,18 @@ const MapView = React.memo(({ weatherData, webcamData }) => {
                 <h3 class="font-bold">${webcam.name}</h3>
                 <p>${webcam.location}</p>
                 <p class="text-sm text-gray-600">${webcam.type || 'webcam'}</p>
-                ${webcam.file_info?.url ? 
-                  `<img src="${webcam.file_info.url}" 
+                ${webcam.file_info?.url ?
+    `<img src="${webcam.file_info.url}" 
                        alt="${webcam.name}" 
-                       class="w-32 h-24 object-cover rounded mt-2" />` : 
-                  `<div class="w-32 h-24 bg-gray-200 rounded mt-2 flex items-center justify-center text-gray-500">📷</div>`
-                }
-                ${webcam.ai_analysis?.weather_condition ? 
-                  `<p class="text-xs mt-2">Weather: ${webcam.ai_analysis.weather_condition}</p>` : ''
-                }
+                       class="w-32 h-24 object-cover rounded mt-2" />` :
+    '<div class="w-32 h-24 bg-gray-200 rounded mt-2 flex items-center justify-center text-gray-500">📷</div>'
+}
+                ${webcam.ai_analysis?.weather_condition ?
+    `<p class="text-xs mt-2">Weather: ${webcam.ai_analysis.weather_condition}</p>` : ''
+}
               </div>
             `);
-          
+
           // Add custom icon for webcams
           const webcamIcon = L.divIcon({
             html: '<div class="bg-singapore-red text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">📷</div>',
@@ -125,14 +125,14 @@ MapView.propTypes = {
       name: PropTypes.string,
       coordinates: PropTypes.shape({
         lat: PropTypes.number,
-        lng: PropTypes.number
+        lng: PropTypes.number,
       }),
       temperature: PropTypes.number,
       humidity: PropTypes.number,
       rainfall: PropTypes.number,
       description: PropTypes.string,
-      priority: PropTypes.string
-    }))
+      priority: PropTypes.string,
+    })),
   }),
   webcamData: PropTypes.shape({
     timestamp: PropTypes.string,
@@ -144,17 +144,17 @@ MapView.propTypes = {
       name: PropTypes.string,
       coordinates: PropTypes.shape({
         lat: PropTypes.number,
-        lng: PropTypes.number
+        lng: PropTypes.number,
       }),
       type: PropTypes.string,
       status: PropTypes.string,
       file_info: PropTypes.shape({
-        url: PropTypes.string
+        url: PropTypes.string,
       }),
       ai_analysis: PropTypes.object,
-      priority: PropTypes.string
-    }))
-  })
+      priority: PropTypes.string,
+    })),
+  }),
 };
 
 MapView.displayName = 'MapView';

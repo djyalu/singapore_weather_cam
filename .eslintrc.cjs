@@ -7,6 +7,9 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:react-hooks/recommended',
   ],
   parserOptions: {
     ecmaVersion: 'latest',
@@ -15,12 +18,21 @@ module.exports = {
       jsx: true,
     },
   },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
+  plugins: ['react', 'react-hooks'],
   rules: {
+    'react/prop-types': 'warn',
+    'react/display-name': 'off',
     'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': ['warn', { allow: ['warn', 'error', 'log'] }],
     'prefer-const': 'warn',
     'no-var': 'error',
     'eqeqeq': ['error', 'always'],
+    'curly': ['error', 'all'],
     'semi': ['error', 'always'],
     'quotes': ['error', 'single', { avoidEscape: true }],
     'comma-dangle': ['error', 'always-multiline'],

@@ -9,7 +9,7 @@ const Header = () => {
             </div>
             <h1 className="text-2xl font-bold">Singapore Weather Cam</h1>
           </div>
-          
+
           <nav className="hidden md:flex items-center space-x-6">
             <a href="#weather" className="hover:text-gray-200 transition-colors">Weather</a>
             <a href="#webcams" className="hover:text-gray-200 transition-colors">Webcams</a>

@@ -1,26 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { Camera, Clock, Wifi, CheckCircle, RefreshCw } from 'lucide-react';
 
-const LiveHeader = ({ systemStats = {} }) => {
+const LiveHeader = React.memo(({ systemStats = {} }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  // Memoized event handlers
+  const handleOnline = useCallback(() => {
+    setIsOnline(true);
+    console.log('Network connection restored');
+  }, []);
+
+  const handleOffline = useCallback(() => {
+    setIsOnline(false);
+    console.warn('Network connection lost');
+  }, []);
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    // Use requestAnimationFrame for smooth time updates
+    let animationFrameId;
+    let lastUpdate = 0;
 
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const updateTime = (timestamp) => {
+      // Update only once per second
+      if (timestamp - lastUpdate >= 1000) {
+        setCurrentTime(new Date());
+        lastUpdate = timestamp;
+      }
+      animationFrameId = requestAnimationFrame(updateTime);
+    };
 
+    animationFrameId = requestAnimationFrame(updateTime);
+
+    // Network status monitoring
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
     return () => {
-      clearInterval(timer);
+      cancelAnimationFrame(animationFrameId);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
+  }, [handleOnline, handleOffline]);
+
+  // Format time with error handling
+  const formatTime = useCallback((date) => {
+    try {
+      return date.toLocaleTimeString('ko-KR');
+    } catch (error) {
+      console.error('Time formatting error:', error);
+      return '--:--:--';
+    }
   }, []);
 
   return (
@@ -32,10 +63,12 @@ const LiveHeader = ({ systemStats = {} }) => {
             <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
             <span>🔴 LIVE • 실시간 분석 중</span>
           </div>
-          <span>• 마지막 업데이트: {currentTime.toLocaleTimeString('ko-KR')}</span>
-          <div className="flex items-center space-x-1">
-            <Wifi className={`w-4 h-4 ${isOnline ? 'text-white' : 'text-red-300'}`} />
-            <span className="text-xs">{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+          <span>• 마지막 업데이트: {formatTime(currentTime)}</span>
+          <div className="flex items-center space-x-1" role="status" aria-live="polite">
+            <Wifi className={`w-4 h-4 ${isOnline ? 'text-white' : 'text-red-300'}`} aria-hidden="true" />
+            <span className="text-xs" aria-label={`Network status: ${isOnline ? 'Online' : 'Offline'}`}>
+              {isOnline ? 'ONLINE' : 'OFFLINE'}
+            </span>
           </div>
         </div>
       </div>
@@ -77,7 +110,7 @@ const LiveHeader = ({ systemStats = {} }) => {
                 <div className="text-xs text-gray-500 space-y-1">
                   <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🤖 Claude AI 분석</div>
                   <div>⚡ 처리시간: {systemStats.totalProcessingTime || '0초'} • 🔄 5분마다 업데이트</div>
-                  {systemStats.averageConfidence && (
+                  {systemStats.averageConfidence > 0 && (
                     <div>🎯 평균 신뢰도: {systemStats.averageConfidence}%</div>
                   )}
                 </div>
@@ -88,6 +121,17 @@ const LiveHeader = ({ systemStats = {} }) => {
       </div>
     </>
   );
+});
+
+LiveHeader.propTypes = {
+  systemStats: PropTypes.shape({
+    totalWebcams: PropTypes.number,
+    lastUpdate: PropTypes.string,
+    totalProcessingTime: PropTypes.string,
+    averageConfidence: PropTypes.number,
+  }),
 };
+
+LiveHeader.displayName = 'LiveHeader';
 
 export default LiveHeader;

@@ -2,14 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Camera, Brain, Zap, Globe, Clock, AlertCircle } from 'lucide-react';
 
-const SystemStats = React.memo(({ 
-  totalWebcams = 0, 
-  successfulAnalyses = 0, 
-  failedAnalyses = 0, 
+const SystemStats = React.memo(({
+  totalWebcams = 0,
+  successfulAnalyses = 0,
+  failedAnalyses = 0,
   averageConfidence = 0,
   lastUpdate = null,
   totalProcessingTime = '0초',
-  dominantWeather = 'unknown'
+  dominantWeather = 'unknown',
 }) => {
   const getWeatherEmoji = (weather) => {
     switch (weather) {
@@ -23,9 +23,9 @@ const SystemStats = React.memo(({
   };
 
   const getConfidenceColor = (confidence) => {
-    if (confidence >= 95) return 'text-green-600 bg-green-50 border-green-200';
-    if (confidence >= 90) return 'text-blue-600 bg-blue-50 border-blue-200';
-    if (confidence >= 85) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    if (confidence >= 95) {return 'text-green-600 bg-green-50 border-green-200';}
+    if (confidence >= 90) {return 'text-blue-600 bg-blue-50 border-blue-200';}
+    if (confidence >= 85) {return 'text-yellow-600 bg-yellow-50 border-yellow-200';}
     return 'text-red-600 bg-red-50 border-red-200';
   };
 
@@ -37,7 +37,7 @@ const SystemStats = React.memo(({
       color: 'blue',
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-500',
-      textColor: 'text-blue-600'
+      textColor: 'text-blue-600',
     },
     {
       label: '분석 성공',
@@ -46,7 +46,7 @@ const SystemStats = React.memo(({
       color: 'green',
       bgColor: 'bg-green-50',
       borderColor: 'border-green-500',
-      textColor: 'text-green-600'
+      textColor: 'text-green-600',
     },
     {
       label: '평균 신뢰도',
@@ -55,7 +55,7 @@ const SystemStats = React.memo(({
       color: 'purple',
       bgColor: 'bg-purple-50',
       borderColor: 'border-purple-500',
-      textColor: 'text-purple-600'
+      textColor: 'text-purple-600',
     },
     {
       label: '주요 날씨',
@@ -64,7 +64,7 @@ const SystemStats = React.memo(({
       color: 'yellow',
       bgColor: 'bg-yellow-50',
       borderColor: 'border-yellow-500',
-      textColor: 'text-yellow-600'
+      textColor: 'text-yellow-600',
     },
     {
       label: '처리 시간',
@@ -73,7 +73,7 @@ const SystemStats = React.memo(({
       color: 'indigo',
       bgColor: 'bg-indigo-50',
       borderColor: 'border-indigo-500',
-      textColor: 'text-indigo-600'
+      textColor: 'text-indigo-600',
     },
     {
       label: '실패',
@@ -82,8 +82,8 @@ const SystemStats = React.memo(({
       color: 'red',
       bgColor: 'bg-red-50',
       borderColor: 'border-red-500',
-      textColor: 'text-red-600'
-    }
+      textColor: 'text-red-600',
+    },
   ];
 
   return (
@@ -136,7 +136,7 @@ const SystemStats = React.memo(({
             <span className="text-2xl font-bold">{averageConfidence}%</span>
           </div>
           <div className="mt-2 bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-current h-2 rounded-full transition-all duration-500"
               style={{ width: `${averageConfidence}%` }}
             ></div>
@@ -154,7 +154,7 @@ SystemStats.propTypes = {
   averageConfidence: PropTypes.number,
   lastUpdate: PropTypes.string,
   totalProcessingTime: PropTypes.string,
-  dominantWeather: PropTypes.string
+  dominantWeather: PropTypes.string,
 };
 
 SystemStats.displayName = 'SystemStats';

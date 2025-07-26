@@ -18,7 +18,7 @@ const WebcamModal = ({ webcam, onClose }) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
@@ -32,14 +32,14 @@ const WebcamModal = ({ webcam, onClose }) => {
             ×
           </button>
         </div>
-        
+
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
           <img
             src={webcam.imageUrl || '/images/placeholder.jpg'}
             alt={`${webcam.name} webcam view`}
             className="w-full rounded-md mb-4"
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="font-semibold mb-2">Location Details</h3>
@@ -50,14 +50,14 @@ const WebcamModal = ({ webcam, onClose }) => {
                 </p>
               )}
             </div>
-            
+
             {webcam.analysis && (
               <div>
                 <h3 className="font-semibold mb-2">AI Analysis</h3>
                 <p className="text-gray-700 mb-2">{webcam.analysis.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {webcam.analysis.tags?.map((tag, index) => (
-                    <span 
+                    <span
                       key={index}
                       className="text-xs bg-weather-blue text-white px-2 py-1 rounded"
                     >
@@ -73,7 +73,7 @@ const WebcamModal = ({ webcam, onClose }) => {
               </div>
             )}
           </div>
-          
+
           <div className="mt-4 text-sm text-gray-500">
             Last updated: {new Date(webcam.lastUpdated).toLocaleString('en-SG')}
           </div>

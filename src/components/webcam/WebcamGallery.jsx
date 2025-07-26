@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import WebcamCard from './WebcamCard';
 import WebcamModal from './WebcamModal';
+import LiveWebcamFeed from './LiveWebcamFeed';
 
 const WebcamGallery = ({ data }) => {
   const [selectedWebcam, setSelectedWebcam] = useState(null);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'live'
 
   if (!data || !data.captures || data.captures.length === 0) {
     return (
@@ -15,7 +17,7 @@ const WebcamGallery = ({ data }) => {
 
   // 성공한 캡처만 필터링
   const successfulCaptures = data.captures.filter(capture => capture.status === 'success');
-  
+
   if (successfulCaptures.length === 0) {
     return (
       <div className="card">
@@ -39,20 +41,50 @@ const WebcamGallery = ({ data }) => {
               {data.successful_captures}/{data.total_cameras} cameras active
             </p>
           </div>
-          <button className="btn-secondary text-sm">
-            Refresh All
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-1 rounded text-sm transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              📷 그리드 보기
+            </button>
+            <button
+              onClick={() => setViewMode('live')}
+              className={`px-3 py-1 rounded text-sm transition-colors ${
+                viewMode === 'live'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              🔴 라이브 모드
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {successfulCaptures.map((capture) => (
-            <WebcamCard
-              key={capture.id}
-              webcam={capture}
-              onClick={() => setSelectedWebcam(capture)}
-            />
-          ))}
-        </div>
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {successfulCaptures.map((capture) => (
+              <WebcamCard
+                key={capture.id}
+                webcam={capture}
+                onClick={() => setSelectedWebcam(capture)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6">
+            {successfulCaptures.map((capture) => (
+              <LiveWebcamFeed
+                key={capture.id}
+                webcam={capture}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {selectedWebcam && (

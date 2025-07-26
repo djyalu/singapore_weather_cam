@@ -1,21 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { 
-  MapPin, 
-  Thermometer, 
-  Droplets, 
-  Eye, 
-  Brain, 
+import {
+  MapPin,
+  Thermometer,
+  Droplets,
+  Eye,
+  Brain,
   Clock,
   Sun,
   Cloud,
   CloudRain,
-  Activity
+  Activity,
 } from 'lucide-react';
 
-const WeatherAnalysisCard = React.memo(({ 
+const WeatherAnalysisCard = React.memo(({
   location,
-  animationDelay = 0 
+  animationDelay = 0,
 }) => {
   const getWeatherIcon = (condition) => {
     switch (condition) {
@@ -38,9 +38,9 @@ const WeatherAnalysisCard = React.memo(({
   };
 
   const getConfidenceColor = (confidence) => {
-    if (confidence >= 95) return 'bg-green-100 text-green-800';
-    if (confidence >= 90) return 'bg-blue-100 text-blue-800';
-    if (confidence >= 85) return 'bg-yellow-100 text-yellow-800';
+    if (confidence >= 95) {return 'bg-green-100 text-green-800';}
+    if (confidence >= 90) {return 'bg-blue-100 text-blue-800';}
+    if (confidence >= 85) {return 'bg-yellow-100 text-yellow-800';}
     return 'bg-red-100 text-red-800';
   };
 
@@ -54,7 +54,7 @@ const WeatherAnalysisCard = React.memo(({
     }
   };
 
-  if (!location) return null;
+  if (!location) {return null;}
 
   return (
     <div
@@ -102,7 +102,7 @@ const WeatherAnalysisCard = React.memo(({
               </span>
             )}
           </div>
-          
+
           <div className="grid grid-cols-3 gap-3 text-sm">
             <div className="flex items-center space-x-2">
               <Thermometer className="w-4 h-4 text-red-500" />
@@ -197,8 +197,8 @@ const WeatherAnalysisCard = React.memo(({
         {location.file_info?.url && (
           <div className="bg-white bg-opacity-90 rounded-xl p-3 backdrop-blur-sm">
             <h4 className="font-semibold text-sm text-gray-700 mb-2">📷 실시간 영상</h4>
-            <img 
-              src={location.file_info.url} 
+            <img
+              src={location.file_info.url}
               alt={location.name}
               className="w-full h-32 object-cover rounded-lg"
               loading="lazy"
@@ -211,7 +211,7 @@ const WeatherAnalysisCard = React.memo(({
           <span className="flex items-center space-x-1">
             <Clock className="w-3 h-3" />
             <span>
-              {location.capture_time 
+              {location.capture_time
                 ? `분석: ${new Date(location.capture_time).toLocaleTimeString('ko-KR')}`
                 : '분석 시간 없음'
               }
@@ -229,10 +229,11 @@ WeatherAnalysisCard.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     displayName: PropTypes.string,
+    description: PropTypes.string,
     location: PropTypes.string,
     coordinates: PropTypes.shape({
       lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired
+      lng: PropTypes.number.isRequired,
     }),
     type: PropTypes.string,
     timestamp: PropTypes.string,
@@ -241,7 +242,7 @@ WeatherAnalysisCard.propTypes = {
     file_info: PropTypes.shape({
       url: PropTypes.string,
       size: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      dimensions: PropTypes.string
+      dimensions: PropTypes.string,
     }),
     ai_analysis: PropTypes.shape({
       weather_condition: PropTypes.string,
@@ -251,30 +252,30 @@ WeatherAnalysisCard.propTypes = {
       residential_area: PropTypes.string,
       educational_area: PropTypes.string,
       visibility: PropTypes.string,
-      air_quality: PropTypes.string
+      air_quality: PropTypes.string,
     }),
     priority: PropTypes.string,
     error: PropTypes.string,
     activities: PropTypes.shape({
       outdoor_activities: PropTypes.string,
       photography: PropTypes.string,
-      tourism: PropTypes.string
+      tourism: PropTypes.string,
     }),
     analysis: PropTypes.shape({
       confidence: PropTypes.number,
       observations: PropTypes.string,
       aiAnalysis: PropTypes.string,
-      lastAnalyzed: PropTypes.string
+      lastAnalyzed: PropTypes.string,
     }),
     weather: PropTypes.shape({
       condition: PropTypes.string,
       description: PropTypes.string,
       temperature: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       humidity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      visibility: PropTypes.string
-    })
+      visibility: PropTypes.string,
+    }),
   }).isRequired,
-  animationDelay: PropTypes.number
+  animationDelay: PropTypes.number,
 };
 
 WeatherAnalysisCard.displayName = 'WeatherAnalysisCard';
