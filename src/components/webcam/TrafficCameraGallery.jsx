@@ -5,6 +5,8 @@ import {
   groupCamerasByArea,
   getFeaturedCameras,
 } from '../../services/trafficCameraService';
+import LoadingSkeleton from './LoadingSkeleton';
+import ErrorState from './ErrorState';
 
 const TrafficCameraGallery = () => {
   const [cameras, setCameras] = useState([]);
@@ -15,6 +17,8 @@ const TrafficCameraGallery = () => {
   const [viewMode, setViewMode] = useState('featured'); // 'featured', 'all', 'area'
   const [lastUpdate, setLastUpdate] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [retryAttempts, setRetryAttempts] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch cameras on mount and set up auto-refresh
   useEffect(() => {
@@ -37,46 +41,62 @@ const TrafficCameraGallery = () => {
     }
   }, [cameras, viewMode, selectedArea]);
 
-  const fetchCameras = async () => {
+  const fetchCameras = async (isManualRefresh = false) => {
     try {
-      setLoading(true);
+      if (isManualRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      
       const data = await fetchTrafficCameras();
       setCameras(data.cameras);
       setLastUpdate(new Date(data.timestamp));
       setError(null);
+      setRetryAttempts(0); // Reset retry attempts on success
     } catch (err) {
       setError(err.message);
+      setRetryAttempts(prev => prev + 1);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const handleRetry = async () => {
+    await fetchCameras(false);
+  };
+
+  const handleManualRefresh = async () => {
+    await fetchCameras(true);
   };
 
   const groupedCameras = groupCamerasByArea(cameras);
   const areas = Object.keys(groupedCameras).sort();
 
+  // Show skeleton loading state for initial load
   if (loading && cameras.length === 0) {
     return (
-      <div className="card">
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
+      <LoadingSkeleton 
+        count={8}
+        showControls={true}
+        showSummary={true}
+        variant="default"
+      />
     );
   }
 
-  if (error) {
+  // Show enhanced error state
+  if (error && cameras.length === 0) {
     return (
-      <div className="card">
-        <div className="text-center py-8">
-          <p className="text-red-600 mb-4">Error: {error}</p>
-          <button
-            onClick={fetchCameras}
-            className="btn-primary"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        error={error}
+        onRetry={handleRetry}
+        retryAttempts={retryAttempts}
+        maxRetries={3}
+        showDetails={false}
+        variant="default"
+      />
     );
   }
 
@@ -145,11 +165,18 @@ const TrafficCameraGallery = () => {
             </label>
 
             <button
-              onClick={fetchCameras}
-              disabled={loading}
+              onClick={handleManualRefresh}
+              disabled={loading || isRefreshing}
               className="btn-secondary text-sm"
             >
-              {loading ? '업데이트 중...' : '🔄 새로고침'}
+              {isRefreshing ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  업데이트 중...
+                </span>
+              ) : (
+                '🔄 새로고침'
+              )}
             </button>
           </div>
         </div>

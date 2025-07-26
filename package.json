@@ -13,7 +13,11 @@
     "health-monitor": "node scripts/health-check.js --monitor --interval=60",
     "health-json": "node scripts/health-check.js --json",
     "lint": "eslint src/**/*.{js,jsx}",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:rpa": "node scripts/test-github-actions.js --test",
+    "test:rpa-visual": "HEADLESS=false node scripts/test-github-actions.js --test",
+    "test:quick": "node scripts/quick-rpa-test.js",
+    "test:actions": "npm run test:quick"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.9.0",
