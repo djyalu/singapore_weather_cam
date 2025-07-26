@@ -110,10 +110,6 @@ npm run build
 │       ├── accessibility.js         # 접근성 유틸리티
 │       ├── imageUtils.js           # 이미지 처리
 │       └── security.js             # 보안 유틸리티
-├── data/             # 수집된 데이터
-│   ├── weather/      # 날씨 JSON
-│   ├── webcam/       # 웹캠 메타데이터
-│   └── traffic/      # 교통 카메라 데이터
 └── public/           # 정적 파일
     └── images/       # 웹캠 이미지
 ```

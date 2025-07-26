@@ -2,13 +2,49 @@
 
 Singapore Weather Cam 프로젝트의 모든 주요 변경사항을 기록합니다.
 
-## [Unreleased]
+## [3.0.0] - 2025-07-26 🎉
 
 ### 🚀 Added
-- PWA 지원 (Service Worker, Manifest)
+- **RegionalMapView 컴포넌트**: 지역별 인터랙티브 지도 시스템
+  - 5개 지역 선택 (All Singapore, Central, West, East, North, South)
+  - 동적 지역 오버레이 및 경계 표시
+  - 실시간 지역 통계 (날씨 스테이션, 교통 카메라, 평균 온도)
+  - 반응형 디자인 및 애니메이션
+- **SystemStatus 컴포넌트**: 실시간 시스템 상태 모니터링 바
+  - 서비스별 상태 표시 (날씨, 웹캠, 네트워크)
+  - 컬러 코딩된 상태 인디케이터
+  - 마지막 업데이트 시간 및 데이터 품질 메트릭
+- **TemperatureHero 컴포넌트**: 메인 온도 표시 히어로 섹션
+- **지능형 데이터 변환 시스템**:
+  - `weatherDataTransformer.js`: NEA API 데이터 표준화
+  - 다중 API 데이터 통합 엔진
+  - 데이터 품질 검증 및 Fallback 시스템
+
+### 🔧 Enhanced
+- **App.jsx 구조 개선**: SystemStatus 및 TemperatureHero 통합
+- **useDataLoader Hook**: 데이터 변환 로직 통합
+- **Circuit Breaker 패턴**: 장애 격리 및 자동 복구
+- **다층 캐싱 시스템**: 브라우저 + GitHub Actions 레벨
+
+### 🐛 Fixed
+- Real-time map 표시 문제 해결
+- 지역별 날씨 정보 표시 문제 수정
+- 데이터 변환 중복 처리 제거
+- MapView와 WeatherDashboard 데이터 플로우 최적화
+
+### 📚 Documentation
+- README.md 전면 업데이트 (새로운 기능 반영)
+- ARCHITECTURE.md 3.0 버전 업데이트
+- COMPONENTS.md 신규 컴포넌트 문서화
+- CLAUDE.md 프로젝트 상태 업데이트
+
+## [Unreleased]
+
+### 🚀 Planned
+- PWA 지원 강화 (Service Worker, Manifest)
 - 오프라인 모드 지원
 - 푸시 알림 기능
-- Lazy loading 컴포넌트 최적화
+- WebSocket 실시간 업데이트
 
 ## [2.0.0] - 2025-07-26
 

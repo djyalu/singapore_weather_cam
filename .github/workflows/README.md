@@ -1,6 +1,10 @@
 # GitHub Actions Workflows
 
-This directory contains GitHub Actions workflows for the Singapore Weather Cam project. All workflows have been optimized to work within GitHub's free tier limits (2,000 minutes/month).
+This directory contains 5 GitHub Actions workflows for the Singapore Weather Cam project. All workflows have been optimized for production reliability and monitoring.
+
+**최종 업데이트**: 2025-07-26  
+**워크플로우 수**: 5개  
+**상태**: 모두 활성화 ✅
 
 ## 📊 Usage Optimization Summary
 
@@ -22,22 +26,54 @@ To stay within the 2,000 minute free tier, update the cron schedules:
 - **Webcam Capture**: `0 */2 * * *` (every 2 hours) = 360 runs/month = ~5,400 minutes
 - **Total**: ~9,550 minutes/month (**Safe within free tier**)
 
-## 🔧 Workflows
+## 🔧 Active Workflows (5개)
 
 ### 1. Deploy (`deploy.yml`)
 - **Trigger**: Push to main branch or manual
 - **Purpose**: Build and deploy the React app to GitHub Pages
 - **Duration**: ~5 minutes per run
-- **Optimizations**:
-  - ✅ Dependency caching
-  - ✅ Build artifact uploading
-  - ✅ Updated to latest action versions
+- **최근 개선**:
+  - ✅ RegionalMapView 통합 빌드
+  - ✅ SystemStatus 컴포넌트 포함
+  - ✅ 새로운 데이터 변환 엔진 적용
 
 ### 2. Weather Collection (`collect-weather.yml`)
-- **Schedule**: Every 30 minutes (configurable)
-- **Purpose**: Collect weather data from NEA Singapore API
-- **Duration**: ~10 minutes per run
-- **Optimizations**:
+- **Schedule**: Every 5 minutes
+- **Purpose**: NEA Singapore API에서 날씨 데이터 수집
+- **Duration**: ~2 minutes per run
+- **최근 개선**:
+  - ✅ Bukit Timah 지역 중심 데이터 수집
+  - ✅ 지능형 오류 처리 및 재시도
+  - ✅ 데이터 품질 검증 강화
+
+### 3. Webcam Capture (`capture-webcam.yml`)
+- **Schedule**: Every 15 minutes
+- **Purpose**: LTA 교통 카메라 이미지 캡처
+- **Duration**: ~3 minutes per run
+- **최근 개선**:
+  - ✅ 90개 교통 카메라 지원
+  - ✅ HD 화질 (1920x1080) 79개 카메라
+  - ✅ Claude AI 이미지 분석 통합
+
+### 4. Health Check (`health-check.yml`) ⭐ 신규
+- **Schedule**: Every 30 minutes
+- **Purpose**: 시스템 헬스 모니터링 및 알림
+- **Duration**: ~1 minute per run
+- **주요 기능**:
+  - ✅ API 엔드포인트 상태 확인
+  - ✅ 데이터 품질 모니터링
+  - ✅ 성능 메트릭 수집
+  - ✅ 자동 오류 감지 및 알림
+
+### 5. Usage Monitor (`monitor-usage.yml`) ⭐ 신규
+- **Schedule**: Daily at 00:00 UTC
+- **Purpose**: GitHub Actions 리소스 사용량 추적
+- **Duration**: ~1 minute per run
+- **주요 기능**:
+  - ✅ 실행 시간 추적
+  - ✅ 저장소 사용량 모니터링
+  - ✅ API 호출 통계
+  - ✅ 비용 최적화 권장사항
   - ✅ Reduced frequency from 5 to 30 minutes
   - ✅ Dependency caching
   - ✅ Fallback data on API failure

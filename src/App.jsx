@@ -1,13 +1,13 @@
 import React, { Suspense } from 'react';
 import Header from './components/layout/Header';
-import SystemStats from './components/dashboard/SystemStats';
+import SystemStatus from './components/common/SystemStatus';
+import TemperatureHero from './components/weather/TemperatureHero';
 import SystemFooter from './components/layout/SystemFooter';
 import LoadingScreen from './components/common/LoadingScreen';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Lazy load components for better performance
 const WeatherAnalysisCardRefactored = React.lazy(() => import('./components/analysis/WeatherAnalysisCardRefactored'));
-const WeatherDashboard = React.lazy(() => import('./components/weather/WeatherDashboard'));
 const RegionalMapView = React.lazy(() => import('./components/map/RegionalMapView'));
 const WebcamGallery = React.lazy(() => import('./components/webcam/WebcamGallery'));
 const TrafficCameraGallery = React.lazy(() => import('./components/webcam/TrafficCameraGallery'));
@@ -126,79 +126,57 @@ const App = React.memo(() => {
         </a>
         <Header systemStats={systemStats} />
 
-        <SystemStats {...systemStats} />
+        {/* System Status - Compact at top */}
+        <SystemStatus 
+          isOnline={isOnline}
+          lastUpdate={dataFreshness}
+          isLoading={isRefreshing}
+          systemStats={systemStats}
+        />
 
         <main id="main" className="max-w-7xl mx-auto px-4 pb-8" role="main" tabIndex="-1">
-          {/* Map Section */}
-          <section id="map" className="mb-8" aria-labelledby="map-heading" tabIndex="-1">
-            <div className="mb-6">
-              <h2 id="map-heading" className="text-2xl font-bold text-gray-900 mb-2">
+          {/* Temperature Hero - Prominent hero section */}
+          <section className="mb-12">
+            {isInitialLoading ? (
+              <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-3xl shadow-2xl p-12 text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto"></div>
+                <p className="mt-6 text-white text-lg">Loading weather data...</p>
+              </div>
+            ) : (
+              <TemperatureHero weatherData={weatherData} />
+            )}
+          </section>
+          {/* Regional Map - Main interactive section */}
+          <section id="map" className="mb-12" aria-labelledby="map-heading" tabIndex="-1">
+            <div className="mb-8">
+              <h2 id="map-heading" className="text-3xl font-bold text-gray-900 mb-3">
                 🗺️ Regional Weather & Traffic Map
               </h2>
-              <p className="text-gray-600">
+              <p className="text-lg text-gray-600">
                 Interactive map with regional selection and real-time data visualization
-                {isRefreshing && <span className="ml-2 text-blue-600 animate-pulse">• Updating...</span>}
+                {isRefreshing && <span className="ml-3 text-blue-600 animate-pulse font-medium">• Updating...</span>}
               </p>
             </div>
 
             <Suspense fallback={
-              <div className="bg-white rounded-xl shadow-lg p-8 text-center" aria-live="polite">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" aria-hidden="true"></div>
-                <p className="mt-4 text-gray-600">Loading interactive map...</p>
+              <div className="bg-white rounded-2xl shadow-xl p-12 text-center" aria-live="polite">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto" aria-hidden="true"></div>
+                <p className="mt-6 text-gray-600 text-lg">Loading interactive map...</p>
               </div>
             }>
               <RegionalMapView weatherData={weatherData} webcamData={webcamData} />
             </Suspense>
           </section>
 
-          {/* Weather Dashboard Section */}
-          <section id="weather" className="mb-8" aria-labelledby="weather-dashboard-heading" tabIndex="-1">
-            <div className="mb-6">
-              <h2 id="weather-dashboard-heading" className="text-2xl font-bold text-gray-900 mb-2">
-                🌤️ Interactive Weather Dashboard
-              </h2>
-              <p className="text-gray-600">
-                Real-time weather data with interactive location filtering for Bukit Timah region
-                {dataFreshness && <span className="ml-2 text-sm text-gray-500">• {dataFreshness}</span>}
-              </p>
-            </div>
-
-            {isInitialLoading ? (
-              <div className="bg-white rounded-xl shadow-lg p-8 animate-pulse" aria-live="polite">
-                <div className="flex gap-2 mb-6">
-                  {Array.from({ length: 4 }, (_, index) => (
-                    <div key={index} className="h-8 bg-gray-200 rounded w-24"></div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  {Array.from({ length: 4 }, (_, index) => (
-                    <div key={index} className="h-24 bg-gray-200 rounded"></div>
-                  ))}
-                </div>
-                <div className="h-64 bg-gray-200 rounded"></div>
-              </div>
-            ) : (
-              <Suspense fallback={
-                <div className="bg-white rounded-xl shadow-lg p-8 animate-pulse" aria-hidden="true">
-                  <div className="h-8 bg-gray-200 rounded w-full mb-4"></div>
-                  <div className="h-32 bg-gray-200 rounded mb-4"></div>
-                  <div className="h-64 bg-gray-200 rounded"></div>
-                </div>
-              }>
-                <WeatherDashboard data={weatherData} />
-              </Suspense>
-            )}
-          </section>
-
           {/* Analysis Results Section */}
-          <section id="analysis" className="mb-8" aria-labelledby="analysis-heading" tabIndex="-1">
-            <div className="mb-6">
-              <h2 id="analysis-heading" className="text-2xl font-bold text-gray-900 mb-2">
+          <section id="analysis" className="mb-12" aria-labelledby="analysis-heading" tabIndex="-1">
+            <div className="mb-8">
+              <h2 id="analysis-heading" className="text-3xl font-bold text-gray-900 mb-3">
                 🌍 Real-time Regional Weather Analysis
               </h2>
-              <p className="text-gray-600">
+              <p className="text-lg text-gray-600">
                 AI-analyzed current weather conditions for key locations
-                {dataFreshness && <span className="ml-2 text-sm text-gray-500">• {dataFreshness}</span>}
+                {dataFreshness && <span className="ml-3 text-sm text-gray-500 font-medium">• {dataFreshness}</span>}
               </p>
             </div>
 
@@ -236,19 +214,19 @@ const App = React.memo(() => {
           </section>
 
           {/* Live Webcams Section */}
-          <section id="webcams" className="mb-8" aria-labelledby="webcams-heading" tabIndex="-1">
-            <div className="mb-6">
-              <h2 id="webcams-heading" className="text-2xl font-bold text-gray-900 mb-2">
+          <section id="webcams" className="mb-12" aria-labelledby="webcams-heading" tabIndex="-1">
+            <div className="mb-8">
+              <h2 id="webcams-heading" className="text-3xl font-bold text-gray-900 mb-3">
                 📸 Live Webcams
               </h2>
-              <p className="text-gray-600">
+              <p className="text-lg text-gray-600">
                 Real-time video feeds from key Singapore locations
               </p>
             </div>
             <Suspense fallback={
-              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-gray-600">Loading webcams...</p>
+              <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto"></div>
+                <p className="mt-6 text-gray-600 text-lg">Loading webcams...</p>
               </div>
             }>
               <WebcamGallery data={webcamData} />
@@ -256,19 +234,19 @@ const App = React.memo(() => {
           </section>
 
           {/* Traffic Cameras Section */}
-          <section id="traffic" className="mb-8" aria-labelledby="traffic-heading" tabIndex="-1">
-            <div className="mb-6">
-              <h2 id="traffic-heading" className="text-2xl font-bold text-gray-900 mb-2">
+          <section id="traffic" className="mb-12" aria-labelledby="traffic-heading" tabIndex="-1">
+            <div className="mb-8">
+              <h2 id="traffic-heading" className="text-3xl font-bold text-gray-900 mb-3">
                 🚗 Live Traffic Cameras
               </h2>
-              <p className="text-gray-600">
+              <p className="text-lg text-gray-600">
                 Real-time traffic conditions across Singapore (data.gov.sg)
               </p>
             </div>
             <Suspense fallback={
-              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-gray-600">Loading traffic cameras...</p>
+              <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto"></div>
+                <p className="mt-6 text-gray-600 text-lg">Loading traffic cameras...</p>
               </div>
             }>
               <TrafficCameraGallery />

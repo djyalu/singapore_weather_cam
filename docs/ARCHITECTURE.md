@@ -2,6 +2,11 @@
 
 Singapore Weather Cam 프로젝트의 시스템 아키텍처 상세 문서입니다.
 
+**최종 업데이트**: 2025-07-26  
+**아키텍처 버전**: 3.0  
+**상태**: 프로덕션 운영 중 ✅  
+**새로운 기능**: RegionalMapView, SystemStatus, 지능형 데이터 변환
+
 ## 📋 **목차**
 
 - [System Overview](#system-overview)
