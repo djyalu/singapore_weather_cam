@@ -1,0 +1,47 @@
+{
+  "timestamp": "2024-01-20T10:00:00+08:00",
+  "current": {
+    "temperature": 28.5,
+    "feelsLike": 32.1,
+    "humidity": 75,
+    "rainfall": 0,
+    "windSpeed": 12,
+    "windDirection": "NE",
+    "uvIndex": 7,
+    "visibility": 10
+  },
+  "locations": [
+    {
+      "id": "changi",
+      "name": "Changi",
+      "coordinates": { "lat": 1.3644, "lng": 103.9915 },
+      "temperature": 29.2,
+      "humidity": 73,
+      "rainfall": 0
+    },
+    {
+      "id": "jurong",
+      "name": "Jurong",
+      "coordinates": { "lat": 1.3329, "lng": 103.7436 },
+      "temperature": 28.1,
+      "humidity": 78,
+      "rainfall": 0.2
+    },
+    {
+      "id": "central",
+      "name": "City Center",
+      "coordinates": { "lat": 1.2897, "lng": 103.8501 },
+      "temperature": 28.8,
+      "humidity": 74,
+      "rainfall": 0
+    }
+  ],
+  "forecast": [
+    { "time": "2024-01-20T11:00:00+08:00", "temperature": 29.1, "rainfall": 0 },
+    { "time": "2024-01-20T12:00:00+08:00", "temperature": 30.2, "rainfall": 0 },
+    { "time": "2024-01-20T13:00:00+08:00", "temperature": 31.5, "rainfall": 0.5 },
+    { "time": "2024-01-20T14:00:00+08:00", "temperature": 31.8, "rainfall": 2.1 },
+    { "time": "2024-01-20T15:00:00+08:00", "temperature": 30.4, "rainfall": 3.5 },
+    { "time": "2024-01-20T16:00:00+08:00", "temperature": 29.2, "rainfall": 1.2 }
+  ]
+}
