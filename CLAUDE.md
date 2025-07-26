@@ -208,20 +208,31 @@ npm run format       # Prettier 포맷팅
    - Actions 탭에서 워크플로우 실행 상태 확인
    - 실행 로그를 통한 데이터 수집 품질 모니터링
 
-## Hwa Chong International School 중심 설정
+## Bukit Timah Nature Reserve 중심 설정 (2025-07-26 업데이트)
 
 ### 주요 체크포인트
-- **Hwa Chong International School**: 1.32865°N, 103.80227°E (중심 위치)
-  - 주소: 663 Bukit Timah Road, Singapore 269783
-  - Tel: +65 6464 7077
-- **Newton**: 1.3138°N, 103.8420°E (인근 지역)
-- **Bukit Timah Nature Reserve**: 1.3520°N, 103.7767°E (서쪽 자연보호구역)
+- **Bukit Timah Nature Reserve**: 1.3520°N, 103.7767°E (Primary 중심 위치)
+  - 싱가포르 주요 자연보호구역 및 최고점
+  - 열대우림 생태계 모니터링 중심
+- **Newton**: 1.3138°N, 103.8420°E (Secondary 지역)
+- **Clementi**: 1.3162°N, 103.7649°E (Secondary 지역)
 
-### 지도 설정
-- 중심점: Hwa Chong International School (1.32865, 103.80227)
+### 지도 설정 (업데이트됨)
+- 중심점: **Bukit Timah Nature Reserve** (1.3520, 103.7767)
 - 줌 레벨: 12 (지역 상세 보기)
+- 우선 표시: Bukit Timah 지역 자연환경 및 기상 데이터
 
-### 데이터 우선순위
-- 날씨 스테이션: S116, S121, S118 (Hwa Chong 인근 우선)
-- 웹캠: Bukit Timah Road 및 교육기관 집중 지역 중심
-- 업데이트: Hwa Chong International School 데이터를 primary로 설정
+### 데이터 우선순위 (업데이트됨)
+- 날씨 스테이션: **S121, S116, S118** (Bukit Timah 지역 중심)
+  - S121: Bukit Timah Nature Reserve (Primary)
+  - S116: Bukit Timah Road (Primary)
+  - S118: Bukit Timah West (Primary)
+- 웹캠: Bukit Timah Nature Reserve, Bukit Timah Road 중심
+- 업데이트: Bukit Timah 지역 데이터를 primary로 설정
+
+### 최근 변경사항 (2025-07-26)
+1. ✅ MapView 컴포넌트 중심점을 Bukit Timah Nature Reserve로 변경
+2. ✅ 날씨 데이터 수집 스크립트에서 Bukit Timah 지역 우선순위 설정
+3. ✅ 가짜 날씨 데이터에 S121, S116, S118 스테이션 추가
+4. ✅ 웹캠 데이터에 Bukit Timah 지역 위치 추가
+5. ✅ UI에서 primary/secondary 우선순위 구분 표시
