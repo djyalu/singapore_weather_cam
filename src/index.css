@@ -18,6 +18,8 @@
 
   body {
     @apply m-0 min-h-screen bg-gray-50 text-gray-900 font-sans;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
   }
 
   * {
@@ -37,6 +39,20 @@
   /* Enhanced focus indicators for navigation */
   [role="button"]:focus-visible {
     @apply ring-2 ring-blue-500 ring-offset-2;
+  }
+  
+  /* Mobile optimization */
+  @media (max-width: 768px) {
+    html {
+      scroll-padding-top: 100px;
+    }
+  }
+  
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
   }
 }
 
@@ -91,6 +107,28 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  
+  /* Mobile touch optimizations */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Safe area for mobile devices with notches */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Mobile-specific animations */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-slide-up {
+      animation: none;
+    }
   }
 }
 
