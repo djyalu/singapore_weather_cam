@@ -203,7 +203,7 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
   return (
     <div className={`card p-0 overflow-hidden ${className}`}>
       <div ref={mapRef} className="h-96 w-full rounded-lg" />
-      <div className="p-4 border-t">
+      <div className="map-legend p-4 border-t">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">

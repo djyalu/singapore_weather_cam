@@ -22,11 +22,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 프로젝트 개요
 - **프로젝트명**: Singapore Weather Cam
-- **목적**: 싱가포르 날씨 정보와 웹캠 영상을 실시간으로 제공하는 웹 애플리케이션
-- **상태**: 전체 시스템 구현 완료, 프로덕션 배포 준비 완료
+- **목적**: 지역별 실시간 싱가포르 날씨 및 교통 모니터링 시스템
+- **상태**: 전체 시스템 구현 완료, 프로덕션 운영 중
 - **선택 아키텍처**: GitHub-Native JAMstack (최종 선택)
-- **주요 체크포인트**: Hwa Chong International School (Bukit Timah Road 663번지)
+- **주요 체크포인트**: Bukit Timah Nature Reserve (1.3520°N, 103.7767°E)
 - **자동화 상태**: 5개 워크플로우 활성화 (날씨 수집, 웹캠 캡처, 자동 배포, 헬스체크, 사용량 모니터링)
+- **핵심 기능**: RegionalMapView, SystemStatus, 지능형 데이터 변환, Circuit Breaker 패턴
 
 ## 개발 환경 설정
 
@@ -57,20 +58,58 @@ npm run build
 ### 디렉토리 구조
 ```
 /
-├── .github/workflows/   # 자동화 워크플로우 (5개)
-├── scripts/            # 데이터 수집 스크립트
-├── src/               # React 소스 코드
-│   ├── components/    # UI 컴포넌트 (17개)
-│   │   ├── analysis/  # 날씨 분석 카드
-│   │   ├── common/    # 공통 컴포넌트
-│   │   ├── dashboard/ # 시스템 대시보드
-│   │   ├── layout/    # 레이아웃 컴포넌트
-│   │   ├── map/       # 지도 뷰 (Bukit Timah 중심)
-│   │   ├── weather/   # 날씨 컴포넌트
-│   │   └── webcam/    # 웹캠 & 교통 카메라
-│   ├── config/       # 설정 파일
-│   ├── services/     # API 서비스
-│   └── utils/        # 유틸리티 함수
+├── .github/workflows/      # 자동화 워크플로우 (5개)
+│   ├── collect-weather.yml # NEA API 날씨 데이터 수집
+│   ├── capture-webcam.yml  # LTA 교통 카메라 캡처
+│   ├── deploy.yml         # GitHub Pages 자동 배포
+│   ├── health-check.yml   # 시스템 헬스 모니터링
+│   └── monitor-usage.yml  # 리소스 사용량 추적
+├── scripts/               # 데이터 수집 및 최적화 스크립트
+│   ├── collect-weather.js # 날씨 데이터 수집 엔진
+│   ├── capture-webcam.js  # 웹캠 캡처 엔진
+│   └── lta-camera-optimizer.js # LTA 카메라 최적화
+├── data/                  # 수집된 실시간 데이터
+│   ├── weather/          # NEA 날씨 JSON 데이터
+│   ├── webcam/           # 웹캠 메타데이터
+│   └── camera-optimization/ # LTA 카메라 최적화 데이터
+├── src/                  # React 소스 코드
+│   ├── components/       # UI 컴포넌트 (20+ 개)
+│   │   ├── analysis/     # AI 날씨 분석 카드
+│   │   ├── admin/        # 모니터링 대시보드
+│   │   ├── common/       # 공통 컴포넌트 (SystemStatus 등)
+│   │   ├── dashboard/    # 시스템 통계 대시보드
+│   │   ├── layout/       # 헤더, 푸터 레이아웃
+│   │   ├── map/          # 지역별 지도 뷰
+│   │   │   ├── MapView.jsx        # 기본 지도 컴포넌트
+│   │   │   └── RegionalMapView.jsx # 지역별 인터랙티브 지도
+│   │   ├── navigation/   # 스크롤 진행 바
+│   │   ├── system/       # 헬스 모니터링
+│   │   ├── weather/      # 날씨 대시보드 & 카드
+│   │   │   ├── WeatherDashboard.jsx # 인터랙티브 날씨 대시보드
+│   │   │   ├── WeatherCard.jsx     # 날씨 정보 카드
+│   │   │   └── TemperatureHero.jsx # 온도 히어로 섹션
+│   │   └── webcam/       # 웹캠 & 교통 카메라 갤러리
+│   │       ├── TrafficCameraGallery.jsx # LTA 최적화 갤러리
+│   │       └── WebcamGallery.jsx       # 기본 웹캠 갤러리
+│   ├── config/          # 설정 및 매핑
+│   │   ├── weatherStations.js # 날씨 스테이션 설정
+│   │   └── webcamSources.js   # 웹캠 소스 설정
+│   ├── hooks/           # 커스텀 React Hooks
+│   │   ├── useDataLoader.js    # 데이터 로딩 & 신뢰성
+│   │   ├── useSystemStats.js   # 시스템 통계
+│   │   └── useServiceWorker.js # PWA 지원
+│   ├── services/        # API 서비스 및 신뢰성 계층
+│   │   ├── apiService.js            # 기본 API 서비스
+│   │   ├── dataReliabilityService.js # 데이터 신뢰성 관리
+│   │   ├── healthService.js         # 헬스 체크 서비스
+│   │   ├── metricsService.js        # 메트릭 수집
+│   │   ├── securityService.js       # 보안 검증
+│   │   └── trafficCameraService.js  # LTA 교통 카메라 서비스
+│   └── utils/          # 유틸리티 함수
+│       ├── weatherDataTransformer.js # 날씨 데이터 변환 엔진
+│       ├── accessibility.js         # 접근성 유틸리티
+│       ├── imageUtils.js           # 이미지 처리
+│       └── security.js             # 보안 유틸리티
 ├── data/             # 수집된 데이터
 │   ├── weather/      # 날씨 JSON
 │   ├── webcam/       # 웹캠 메타데이터

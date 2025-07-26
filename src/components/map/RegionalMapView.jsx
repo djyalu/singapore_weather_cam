@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import MapView from './MapView.jsx';
 import { STATION_MAPPING } from '../../config/weatherStations.js';
+import './RegionalMapView.css';
 
 // Region definitions with their bounds and styling
 const REGIONS = {
@@ -196,9 +197,9 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
               key={key}
               onClick={() => setSelectedRegion(key)}
               className={`
-                relative p-3 rounded-lg border-2 transition-all duration-200
+                region-button relative p-3 rounded-lg border-2 transition-all duration-200
                 ${selectedRegion === key 
-                  ? `${getRegionColorClass(key, 'border')} ${getRegionColorClass(key, 'bgLight')} shadow-md` 
+                  ? `${getRegionColorClass(key, 'border')} ${getRegionColorClass(key, 'bgLight')} shadow-md active` 
                   : `border-neutral-200 ${getRegionColorClass(key, 'bgHover')}`
                 }
               `}
@@ -221,7 +222,7 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
               {/* Active indicator */}
               {selectedRegion === key && (
                 <div className={`
-                  absolute top-2 right-2 w-3 h-3 rounded-full
+                  active-indicator absolute top-2 right-2 w-3 h-3 rounded-full
                   ${getRegionColorClass(key, 'bg')}
                 `} />
               )}
@@ -230,26 +231,26 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
         </div>
 
         {/* Region Statistics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-neutral-50 rounded-lg">
-          <div className="text-center">
+        <div className="region-stats grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-neutral-50 rounded-lg">
+          <div className="stat-card text-center">
             <div className="text-2xl font-bold text-weather-blue">
               {regionStats.weatherCount}
             </div>
             <div className="text-xs text-neutral-600">Weather Stations</div>
           </div>
-          <div className="text-center">
+          <div className="stat-card text-center">
             <div className="text-2xl font-bold text-singapore-red">
               {regionStats.webcamCount}
             </div>
             <div className="text-xs text-neutral-600">Traffic Cameras</div>
           </div>
-          <div className="text-center">
+          <div className="stat-card text-center">
             <div className="text-2xl font-bold text-accent-600">
               {regionStats.avgTemp || '--'}°C
             </div>
             <div className="text-xs text-neutral-600">Avg Temperature</div>
           </div>
-          <div className="text-center">
+          <div className="stat-card text-center">
             <div className="text-2xl font-bold text-neutral-700">
               {regionStats.totalStations}
             </div>
@@ -269,7 +270,7 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
 
       {/* Region Details Panel */}
       {selectedRegion !== 'all' && (
-        <div className="card">
+        <div className="region-details-panel card">
           <div className="card-header">
             <h3 className={`card-title ${getRegionColorClass(selectedRegion, 'text')}`}>
               {REGIONS[selectedRegion].name} Region Details

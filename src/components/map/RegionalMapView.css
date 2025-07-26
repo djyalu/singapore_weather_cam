@@ -1,0 +1,123 @@
+/* Regional Map View Styles */
+
+.enhanced-regional-map {
+  transition: all 0.3s ease-in-out;
+}
+
+.enhanced-regional-map .leaflet-container {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Region button animations */
+.region-button {
+  transform: translateY(0);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.region-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.region-button.active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Active indicator pulse */
+.region-button.active .active-indicator {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Region statistics cards */
+.region-stats {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  transition: all 0.3s ease;
+}
+
+.region-stats:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.stat-card {
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: scale(1.05);
+}
+
+/* Map legend enhancements */
+.map-legend {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Region detail panels */
+.region-details-panel {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom marker styling for regions */
+.region-label {
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .region-button {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+  }
+  
+  .region-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .region-stats {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .region-stats {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  }
+  
+  .region-stats:hover {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+  }
+  
+  .map-legend {
+    background: rgba(30, 41, 59, 0.95);
+    color: #f1f5f9;
+  }
+}

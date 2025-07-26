@@ -9,6 +9,7 @@ import {
 import LoadingSkeleton from './LoadingSkeleton';
 import ErrorState from './ErrorState';
 import WebcamModal from './WebcamModal';
+import TrafficCameraSelector from './TrafficCameraSelector';
 
 /**
  * Individual Camera Card Component with enhanced mobile touch interactions
@@ -220,7 +221,7 @@ const TrafficCameraGallery = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedArea, setSelectedArea] = useState('all');
-  const [viewMode, setViewMode] = useState('featured'); // 'featured', 'all', 'area'
+  const [viewMode, setViewMode] = useState('selector'); // 'featured', 'all', 'area', 'selector'
   const [lastUpdate, setLastUpdate] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [retryAttempts, setRetryAttempts] = useState(0);
@@ -228,6 +229,7 @@ const TrafficCameraGallery = () => {
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchDevice, setTouchDevice] = useState(false);
+  const [selectedCameraIds, setSelectedCameraIds] = useState([]);
 
   // Detect touch device on mount
   useEffect(() => {
@@ -263,10 +265,13 @@ const TrafficCameraGallery = () => {
       setFilteredCameras(getFeaturedCameras(cameras));
     } else if (viewMode === 'area' && selectedArea !== 'all') {
       setFilteredCameras(filterCamerasByArea(cameras, selectedArea));
+    } else if (viewMode === 'selector' && selectedCameraIds.length > 0) {
+      // Show only selected cameras when in selector mode
+      setFilteredCameras(cameras.filter(camera => selectedCameraIds.includes(camera.id.toString())));
     } else {
       setFilteredCameras(cameras);
     }
-  }, [cameras, viewMode, selectedArea]);
+  }, [cameras, viewMode, selectedArea, selectedCameraIds]);
 
   const fetchCameras = async (isManualRefresh = false) => {
     try {
@@ -298,6 +303,11 @@ const TrafficCameraGallery = () => {
     await fetchCameras(true);
   };
 
+  // Handle camera selection from the selector
+  const handleCameraSelectionChange = useCallback((newSelectedIds) => {
+    setSelectedCameraIds(newSelectedIds);
+  }, []);
+
   // Mobile interaction handlers
   const handleImageTap = useCallback((camera) => {
     const index = filteredCameras.findIndex(c => c.id === camera.id);
@@ -319,7 +329,7 @@ const TrafficCameraGallery = () => {
   const handleSwipeGesture = useCallback((direction) => {
     if (!touchDevice) {return;}
 
-    const modes = ['featured', 'area', 'all'];
+    const modes = ['selector', 'featured', 'area', 'all'];
     const currentIndex = modes.indexOf(viewMode);
 
     if (direction === 'left' && currentIndex < modes.length - 1) {
@@ -374,7 +384,26 @@ const TrafficCameraGallery = () => {
         <div className="flex flex-col gap-4">
           {/* View Mode Buttons - Mobile optimized */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-2">
+            <div className="grid grid-cols-4 gap-2 sm:flex sm:gap-2">
+              <button
+                onClick={() => setViewMode('selector')}
+                className={`
+                  px-4 py-3 sm:px-3 sm:py-2 rounded-lg text-sm sm:text-sm 
+                  font-medium transition-all duration-200 touch-manipulation
+                  min-h-[44px] sm:min-h-[auto] flex items-center justify-center
+                  ${viewMode === 'selector'
+      ? 'bg-green-600 text-white shadow-md transform scale-105'
+      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
+    }
+                `}
+                aria-pressed={viewMode === 'selector'}
+              >
+                <span className="flex items-center gap-1">
+                  <span>🎯</span>
+                  <span className="hidden xs:inline">선택기</span>
+                  <span className="xs:hidden">선택</span>
+                </span>
+              </button>
               <button
                 onClick={() => setViewMode('featured')}
                 className={`
@@ -540,6 +569,16 @@ const TrafficCameraGallery = () => {
         />
       )}
 
+      {/* Camera Selector - Show when in selector mode */}
+      {viewMode === 'selector' && (
+        <TrafficCameraSelector
+          onCameraSelectionChange={handleCameraSelectionChange}
+          selectedCameras={selectedCameraIds}
+          maxSelection={20}
+          className="mb-6"
+        />
+      )}
+
       {/* Camera Grid - Enhanced mobile responsiveness */}
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         {filteredCameras.map((camera, index) => (
@@ -557,7 +596,16 @@ const TrafficCameraGallery = () => {
       <div className="card">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
           <span className="text-gray-700">
-            총 <strong>{cameras.length}</strong>개 카메라 중 <strong>{filteredCameras.length}</strong>개 표시
+            {viewMode === 'selector' ? (
+              <>
+                <strong>{selectedCameraIds.length}</strong>개 카메라 선택됨 
+                {filteredCameras.length > 0 && (
+                  <span> • <strong>{filteredCameras.length}</strong>개 표시중</span>
+                )}
+              </>
+            ) : (
+              <>총 <strong>{cameras.length}</strong>개 카메라 중 <strong>{filteredCameras.length}</strong>개 표시</>
+            )}
           </span>
           <span className="text-green-600 flex items-center gap-2">
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>

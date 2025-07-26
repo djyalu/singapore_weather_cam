@@ -3,10 +3,12 @@
 [![Deploy Status](https://github.com/djyalu/singapore_weather_cam/actions/workflows/deploy.yml/badge.svg)](https://github.com/djyalu/singapore_weather_cam/actions/workflows/deploy.yml)
 [![Weather Collection](https://github.com/djyalu/singapore_weather_cam/actions/workflows/collect-weather.yml/badge.svg)](https://github.com/djyalu/singapore_weather_cam/actions/workflows/collect-weather.yml)
 [![Webcam Capture](https://github.com/djyalu/singapore_weather_cam/actions/workflows/capture-webcam.yml/badge.svg)](https://github.com/djyalu/singapore_weather_cam/actions/workflows/capture-webcam.yml)
+[![Health Check](https://github.com/djyalu/singapore_weather_cam/actions/workflows/health-check.yml/badge.svg)](https://github.com/djyalu/singapore_weather_cam/actions/workflows/health-check.yml)
+[![Usage Monitor](https://github.com/djyalu/singapore_weather_cam/actions/workflows/monitor-usage.yml/badge.svg)](https://github.com/djyalu/singapore_weather_cam/actions/workflows/monitor-usage.yml)
 
-**실시간 싱가포르 날씨 및 웹캠 모니터링 시스템**
+**지능형 실시간 싱가포르 날씨 및 지역별 교통 모니터링 시스템**
 
-Bukit Timah Nature Reserve를 중심으로 한 싱가포르의 실시간 날씨 정보와 교통 카메라 영상을 제공하는 웹 애플리케이션입니다.
+Bukit Timah Nature Reserve를 중심으로 한 싱가포르의 실시간 날씨 정보와 지역별 교통 카메라 영상을 제공하는 AI 강화 웹 애플리케이션입니다.
 
 ## 🌟 **주요 기능**
 
@@ -22,15 +24,20 @@ Bukit Timah Nature Reserve를 중심으로 한 싱가포르의 실시간 날씨 
 - **지역별 필터링**: 주요 지점, 지역별, 전체 보기
 - **AI 이미지 분석**: Claude Vision API를 통한 날씨 및 교통 상황 분석
 
-### 🗺️ **인터랙티브 지도**
+### 🗺️ **지역별 인터랙티브 지도**
+- **5개 지역 선택**: All Singapore, Central, West, East, North, South
+- **동적 지역 오버레이**: 선택된 지역 하이라이트 및 경계 표시
+- **실시간 통계**: 지역별 날씨 스테이션, 교통 카메라, 평균 온도 표시
 - **중심 위치**: Bukit Timah Nature Reserve (1.3520°N, 103.7767°E)
 - **실시간 마커**: 날씨 스테이션 및 웹캠 위치 표시
-- **OpenStreetMap**: 고해상도 지도 데이터
+- **반응형 디자인**: 모바일 및 데스크톱 최적화
 
-### 📊 **시스템 모니터링**
-- **실시간 상태**: 시스템 성능 및 데이터 품질 모니터링
-- **자동 복구**: 장애 상황 자동 감지 및 복구
-- **사용량 추적**: GitHub Actions 리소스 사용량 모니터링
+### 📊 **지능형 시스템 모니터링**
+- **실시간 헬스 체크**: 시스템 성능 및 데이터 품질 모니터링
+- **자동 복구**: 장애 상황 자동 감지 및 복구 (Circuit Breaker 패턴)
+- **사용량 추적**: GitHub Actions 리소스 사용량 모니터링 및 알림
+- **SystemStatus 컴포넌트**: 상단 상태 바를 통한 실시간 서비스 상태 표시
+- **데이터 신뢰성**: 다층 검증 시스템 및 Fallback 데이터 제공
 
 ## 🚀 **라이브 데모**
 
@@ -38,24 +45,46 @@ Bukit Timah Nature Reserve를 중심으로 한 싱가포르의 실시간 날씨 
 
 ## 🏗️ **기술 스택**
 
-### **Frontend**
-- **React 18.3.1**: 현대적인 UI 컴포넌트
-- **Vite 4.5.14**: 초고속 개발 환경
-- **Tailwind CSS 3.4.17**: 유틸리티 기반 스타일링
-- **Chart.js**: 날씨 데이터 시각화
-- **React Leaflet**: 인터랙티브 지도
+### **Frontend Architecture**
+- **React 18.3.1**: 현대적인 함수형 컴포넌트 + Hooks
+- **Vite 4.5.14**: 초고속 개발 환경 + HMR
+- **Tailwind CSS 3.4.17**: 유틸리티 기반 스타일링 + 커스텀 테마
+- **Leaflet**: 고성능 인터랙티브 지도 (RegionalMapView)
+- **Lucide React**: 현대적인 아이콘 시스템
+- **Chart.js**: 반응형 날씨 데이터 시각화
+
+### **Core Components**
+- **RegionalMapView**: 지역별 맵 선택 및 오버레이 시스템
+- **WeatherDashboard**: 인터랙티브 날씨 데이터 대시보드
+- **SystemStatus**: 실시간 시스템 상태 모니터링 바
+- **TrafficCameraGallery**: LTA 최적화 교통 카메라 갤러리
+- **WeatherDataTransformer**: 다중 API 데이터 통합 엔진
 
 ### **Backend & Infrastructure**
-- **GitHub Actions**: 자동화된 데이터 수집 파이프라인
-- **GitHub Pages**: 무료 호스팅
-- **NEA Singapore API**: 공식 날씨 데이터
-- **LTA Traffic API**: 실시간 교통 카메라
-- **Claude AI API**: 이미지 및 날씨 분석
+- **GitHub Actions (5개 워크플로우)**: 완전 자동화 시스템
+  - `collect-weather.yml`: 5분 간격 날씨 데이터 수집
+  - `capture-webcam.yml`: 15분 간격 교통 카메라 캡처
+  - `deploy.yml`: 자동 빌드 및 배포
+  - `health-check.yml`: 시스템 헬스 모니터링
+  - `monitor-usage.yml`: 리소스 사용량 추적
+- **GitHub Pages**: 무료 호스팅 + CDN
+- **NEA Singapore API**: 공식 날씨 데이터 (무료, 무제한)
+- **LTA Traffic API**: 실시간 교통 카메라 (data.gov.sg)
+- **Claude AI API**: 이미지 분석 및 날씨 해석
 
-### **Development**
-- **ESLint + Prettier**: 코드 품질 관리
-- **PropTypes**: 타입 검증
-- **Modern JavaScript**: ES2021+ 기능 활용
+### **Data Reliability & Performance**
+- **Circuit Breaker Pattern**: 장애 격리 및 자동 복구
+- **Multi-layer Caching**: 브라우저 + GitHub Actions 레벨 캐싱
+- **Data Validation**: 보안 검증 + 신뢰성 점수 시스템
+- **Fallback Strategies**: 다중 데이터 소스 백업
+- **Rate Limiting**: API 호출 최적화 및 부하 분산
+
+### **Development & Quality**
+- **ESLint + Prettier**: 자동 코드 포맷팅 및 품질 관리
+- **PropTypes**: 런타임 타입 검증
+- **Modern JavaScript**: ES2021+ 기능 + 모듈 시스템
+- **PWA Support**: 서비스 워커 + 오프라인 지원
+- **Accessibility**: WCAG 2.1 AA 준수 + 키보드 네비게이션
 
 ## 📦 **설치 및 실행**
 

@@ -8,7 +8,7 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 // Lazy load components for better performance
 const WeatherAnalysisCardRefactored = React.lazy(() => import('./components/analysis/WeatherAnalysisCardRefactored'));
 const WeatherDashboard = React.lazy(() => import('./components/weather/WeatherDashboard'));
-const MapView = React.lazy(() => import('./components/map/MapView'));
+const RegionalMapView = React.lazy(() => import('./components/map/RegionalMapView'));
 const WebcamGallery = React.lazy(() => import('./components/webcam/WebcamGallery'));
 const TrafficCameraGallery = React.lazy(() => import('./components/webcam/TrafficCameraGallery'));
 import { useDataLoader } from './hooks/useDataLoader';
@@ -133,10 +133,10 @@ const App = React.memo(() => {
           <section id="map" className="mb-8" aria-labelledby="map-heading" tabIndex="-1">
             <div className="mb-6">
               <h2 id="map-heading" className="text-2xl font-bold text-gray-900 mb-2">
-                🗺️ Real-time Map
+                🗺️ Regional Weather & Traffic Map
               </h2>
               <p className="text-gray-600">
-                Weather and webcam locations centered on Bukit Timah Nature Reserve
+                Interactive map with regional selection and real-time data visualization
                 {isRefreshing && <span className="ml-2 text-blue-600 animate-pulse">• Updating...</span>}
               </p>
             </div>
@@ -144,10 +144,10 @@ const App = React.memo(() => {
             <Suspense fallback={
               <div className="bg-white rounded-xl shadow-lg p-8 text-center" aria-live="polite">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" aria-hidden="true"></div>
-                <p className="mt-4 text-gray-600">Loading map...</p>
+                <p className="mt-4 text-gray-600">Loading interactive map...</p>
               </div>
             }>
-              <MapView weatherData={weatherData} webcamData={webcamData} />
+              <RegionalMapView weatherData={weatherData} webcamData={webcamData} />
             </Suspense>
           </section>
 
