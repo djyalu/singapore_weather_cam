@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useMetrics } from '../../services/metricsService.js';
 import { useHealthService } from '../../services/healthService.js';
 
@@ -492,6 +493,134 @@ const formatDuration = (ms) => {
   if (hours > 0) {return `${hours}h ${minutes % 60}m`;}
   if (minutes > 0) {return `${minutes}m ${seconds % 60}s`;}
   return `${seconds}s`;
+};
+
+MonitoringDashboard.propTypes = {
+  isVisible: PropTypes.bool,
+  onClose: PropTypes.func,
+};
+
+// PropTypes for sub-components
+OverviewTab.propTypes = {
+  data: PropTypes.shape({
+    realTime: PropTypes.shape({
+      apiCalls: PropTypes.number,
+      avgResponseTime: PropTypes.number,
+      errors: PropTypes.number,
+      interactions: PropTypes.number,
+    }),
+    health: PropTypes.object,
+  }).isRequired,
+};
+
+PerformanceTab.propTypes = {
+  data: PropTypes.shape({
+    health: PropTypes.shape({
+      performance: PropTypes.shape({
+        memory: PropTypes.shape({
+          percentage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        }),
+        cacheSize: PropTypes.shape({
+          hitRate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        }),
+        domNodes: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      }),
+    }),
+  }).isRequired,
+};
+
+HealthTab.propTypes = {
+  health: PropTypes.shape({
+    systemStatus: PropTypes.string,
+    uptime: PropTypes.shape({
+      formatted: PropTypes.string,
+    }),
+    lastCheck: PropTypes.string,
+    apis: PropTypes.object,
+    performance: PropTypes.shape({
+      memory: PropTypes.shape({
+        percentage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      }),
+      domNodes: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      eventListeners: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      cacheSize: PropTypes.shape({
+        entries: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      }),
+    }),
+  }).isRequired,
+};
+
+APIsTab.propTypes = {
+  data: PropTypes.shape({
+    realTime: PropTypes.shape({
+      apiCalls: PropTypes.number,
+      avgResponseTime: PropTypes.number,
+      errors: PropTypes.number,
+    }),
+    health: PropTypes.shape({
+      apis: PropTypes.object,
+    }),
+  }).isRequired,
+};
+
+ErrorsTab.propTypes = {
+  health: PropTypes.shape({
+    errors: PropTypes.shape({
+      total: PropTypes.number,
+      lastHour: PropTypes.number,
+      types: PropTypes.object,
+      latest: PropTypes.shape({
+        message: PropTypes.string,
+        timestamp: PropTypes.string,
+        context: PropTypes.object,
+      }),
+    }),
+  }).isRequired,
+};
+
+UsersTab.propTypes = {
+  data: PropTypes.shape({
+    session: PropTypes.shape({
+      duration: PropTypes.number,
+      id: PropTypes.string,
+      userId: PropTypes.string,
+    }),
+    realTime: PropTypes.shape({
+      interactions: PropTypes.number,
+    }),
+  }).isRequired,
+};
+
+MetricCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  subtitle: PropTypes.string,
+  icon: PropTypes.string.isRequired,
+  trend: PropTypes.oneOf(['up', 'down', 'neutral']),
+};
+
+StatusIndicator.propTypes = {
+  status: PropTypes.oneOf(['healthy', 'degraded', 'unhealthy']).isRequired,
+  size: PropTypes.oneOf(['sm', 'md']),
+};
+
+StatusRow.propTypes = {
+  label: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+};
+
+SystemHealthOverview.propTypes = {
+  health: PropTypes.shape({
+    systemStatus: PropTypes.string,
+    uptime: PropTypes.shape({
+      formatted: PropTypes.string,
+    }),
+    apis: PropTypes.object,
+  }).isRequired,
+};
+
+PerformanceChart.propTypes = {
+  data: PropTypes.object.isRequired,
 };
 
 export default MonitoringDashboard;

@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useHealthService } from '../../services/healthService.js';
 
 const HealthMonitor = ({ isVisible = false, onToggle }) => {
@@ -176,6 +177,31 @@ const MetricRow = ({ label, value, threshold, current, reverse = false }) => {
       </span>
     </div>
   );
+};
+
+HealthMonitor.propTypes = {
+  isVisible: PropTypes.bool,
+  onToggle: PropTypes.func,
+};
+
+HealthIcon.propTypes = {
+  status: PropTypes.oneOf(['healthy', 'degraded', 'unhealthy']).isRequired,
+};
+
+StatusBadge.propTypes = {
+  status: PropTypes.oneOf(['healthy', 'degraded', 'unhealthy']).isRequired,
+};
+
+StatusDot.propTypes = {
+  status: PropTypes.oneOf(['healthy', 'degraded', 'unhealthy']).isRequired,
+};
+
+MetricRow.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  threshold: PropTypes.number.isRequired,
+  current: PropTypes.number.isRequired,
+  reverse: PropTypes.bool,
 };
 
 export default HealthMonitor;

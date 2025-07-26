@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import {
   fetchTrafficCameras,
   filterCamerasByArea,
@@ -195,6 +196,22 @@ const CameraCard = ({ camera, index, onImageTap, onCardPress }) => {
       </div>
     </div>
   );
+};
+
+CameraCard.propTypes = {
+  camera: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    name: PropTypes.string.isRequired,
+    area: PropTypes.string.isRequired,
+    image: PropTypes.shape({
+      url: PropTypes.string.isRequired,
+      width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }).isRequired,
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+  onImageTap: PropTypes.func,
+  onCardPress: PropTypes.func,
 };
 
 const TrafficCameraGallery = () => {

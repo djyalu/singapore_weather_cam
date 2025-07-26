@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * ErrorState Component
@@ -260,6 +261,15 @@ const ErrorState = ({
       </div>
     </div>
   );
+};
+
+ErrorState.propTypes = {
+  error: PropTypes.string,
+  onRetry: PropTypes.func,
+  retryAttempts: PropTypes.number,
+  maxRetries: PropTypes.number,
+  showDetails: PropTypes.bool,
+  variant: PropTypes.oneOf(['default', 'compact', 'inline']),
 };
 
 ErrorState.displayName = 'ErrorState';

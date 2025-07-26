@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import WeatherCard from './WeatherCard';
 import WeatherChart from './WeatherChart';
 
@@ -140,6 +141,33 @@ const WeatherDashboard = ({ data }) => {
       </div>
     </div>
   );
+};
+
+WeatherDashboard.propTypes = {
+  data: PropTypes.shape({
+    current: PropTypes.shape({
+      temperature: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      humidity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      rainfall: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      feelsLike: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      windSpeed: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      windDirection: PropTypes.string,
+      uvIndex: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      visibility: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }),
+    forecast: PropTypes.array,
+    locations: PropTypes.arrayOf(PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string,
+      displayName: PropTypes.string,
+      description: PropTypes.string,
+      station_id: PropTypes.string,
+      priority: PropTypes.string,
+      temperature: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      humidity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      rainfall: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })),
+  }),
 };
 
 export default WeatherDashboard;
