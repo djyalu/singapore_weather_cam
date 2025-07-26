@@ -31,22 +31,25 @@ const WEATHER_APIS = {
     : null
 };
 
-// 우선순위 지역 - Hwa Chong International School 중심
+// 우선순위 지역 - Bukit Timah Nature Reserve 중심
 const PRIORITY_LOCATIONS = {
-  hwa_chong_international_school: {
-    name: 'Hwa Chong International School',
-    coordinates: { lat: 1.32865, lng: 103.80227 },
-    station_preferences: ['S116', 'S121', 'S118'] // Hwa Chong 인근 스테이션 우선순위
+  bukit_timah_nature_reserve: {
+    name: 'Bukit Timah Nature Reserve',
+    coordinates: { lat: 1.3520, lng: 103.7767 },
+    station_preferences: ['S121', 'S116', 'S118'], // Bukit Timah 지역 스테이션 우선순위
+    priority: 'primary'
   },
   newton: {
     name: 'Newton',
     coordinates: { lat: 1.3138, lng: 103.8420 },
-    station_preferences: ['S106', 'S107']
+    station_preferences: ['S106', 'S107'],
+    priority: 'secondary'
   },
   clementi: {
     name: 'Clementi',
     coordinates: { lat: 1.3162, lng: 103.7649 },
-    station_preferences: ['S122', 'S113']
+    station_preferences: ['S122', 'S113'],
+    priority: 'secondary'
   }
 };
 
