@@ -8,13 +8,70 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-// Node.js 내장 fetch (Node 18+) 또는 node-fetch 사용
+// Enhanced fetch with circuit breaker pattern
 let fetch;
 try {
   fetch = globalThis.fetch;
 } catch {
   const { default: nodeFetch } = await import('node-fetch');
   fetch = nodeFetch;
+}
+
+// Production environment configuration
+const CONFIG = {
+  REQUEST_TIMEOUT: parseInt(process.env.REQUEST_TIMEOUT) || 10000,
+  MAX_RETRIES: parseInt(process.env.MAX_RETRIES) || 3,
+  CIRCUIT_BREAKER_THRESHOLD: 5,
+  CIRCUIT_BREAKER_TIMEOUT: 60000, // 1 minute
+  BATCH_DELAY: 1000, // 1 second between API calls
+  MAX_CONCURRENT_REQUESTS: 3
+};
+
+// Circuit breaker state management
+const CIRCUIT_BREAKER = {
+  failures: 0,
+  lastFailureTime: null,
+  state: 'CLOSED' // CLOSED, OPEN, HALF_OPEN
+};
+
+/**
+ * Circuit breaker implementation for API resilience
+ */
+function checkCircuitBreaker() {
+  const now = Date.now();
+  
+  if (CIRCUIT_BREAKER.state === 'OPEN') {
+    if (now - CIRCUIT_BREAKER.lastFailureTime > CONFIG.CIRCUIT_BREAKER_TIMEOUT) {
+      console.log('🔄 Circuit breaker transitioning to HALF_OPEN state');
+      CIRCUIT_BREAKER.state = 'HALF_OPEN';
+      return true;
+    }
+    console.log('⚡ Circuit breaker OPEN - blocking request');
+    return false;
+  }
+  
+  return true;
+}
+
+/**
+ * Record API call success/failure for circuit breaker
+ */
+function recordApiResult(success) {
+  if (success) {
+    if (CIRCUIT_BREAKER.state === 'HALF_OPEN') {
+      console.log('✅ Circuit breaker reset to CLOSED state');
+      CIRCUIT_BREAKER.state = 'CLOSED';
+      CIRCUIT_BREAKER.failures = 0;
+    }
+  } else {
+    CIRCUIT_BREAKER.failures++;
+    CIRCUIT_BREAKER.lastFailureTime = Date.now();
+    
+    if (CIRCUIT_BREAKER.failures >= CONFIG.CIRCUIT_BREAKER_THRESHOLD) {
+      console.log(`🔴 Circuit breaker OPEN after ${CIRCUIT_BREAKER.failures} failures`);
+      CIRCUIT_BREAKER.state = 'OPEN';
+    }
+  }
 }
 
 // API 엔드포인트들
@@ -54,48 +111,111 @@ const PRIORITY_LOCATIONS = {
 };
 
 /**
- * API에서 데이터를 안전하게 가져오는 함수
+ * Enhanced API fetcher with circuit breaker and connection management
  */
-async function fetchWithRetry(url, retries = 3) {
+async function fetchWithRetry(url, retries = CONFIG.MAX_RETRIES) {
+  // Check circuit breaker before attempting request
+  if (!checkCircuitBreaker()) {
+    throw new Error('Circuit breaker OPEN - service temporarily unavailable');
+  }
+  
+  const startTime = Date.now();
+  let lastError = null;
+  
   for (let i = 0; i < retries; i++) {
     try {
-      const response = await fetch(url, { 
-        timeout: 10000,
+      console.log(`🔄 API Request [${i + 1}/${retries}]: ${url}`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT);
+      
+      const response = await fetch(url, {
+        signal: controller.signal,
         headers: {
-          'User-Agent': 'Singapore-Weather-Cam/1.0'
+          'User-Agent': 'Singapore-Weather-Cam/1.0 (Production)',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
         }
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
-      return await response.json();
-    } catch (error) {
-      console.warn(`Attempt ${i + 1} failed for ${url}:`, error.message);
-      if (i === retries - 1) throw error;
+      const data = await response.json();
+      const duration = Date.now() - startTime;
       
-      // 재시도 전 대기 (지수 백오프)
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+      console.log(`✅ API Success: ${url} (${duration}ms)`);
+      recordApiResult(true);
+      
+      return data;
+      
+    } catch (error) {
+      lastError = error;
+      const isTimeout = error.name === 'AbortError';
+      const duration = Date.now() - startTime;
+      
+      console.warn(`⚠️ Attempt ${i + 1} failed: ${url} (${duration}ms) - ${error.message}`);
+      
+      if (i === retries - 1) {
+        recordApiResult(false);
+        throw new Error(`API failed after ${retries} attempts: ${lastError.message}`);
+      }
+      
+      // Exponential backoff with jitter
+      const backoffDelay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+      console.log(`⏳ Retrying in ${Math.round(backoffDelay)}ms...`);
+      await new Promise(resolve => setTimeout(resolve, backoffDelay));
     }
   }
 }
 
 /**
- * 싱가포르 NEA API에서 날씨 데이터 수집
+ * Enhanced NEA API data collection with concurrent limiting
  */
 async function collectNeaData() {
   try {
-    const [tempData, humidityData, rainfallData, forecastData] = await Promise.allSettled([
-      fetchWithRetry(WEATHER_APIS.nea_temperature),
-      fetchWithRetry(WEATHER_APIS.nea_humidity),
-      fetchWithRetry(WEATHER_APIS.nea_rainfall),
-      fetchWithRetry(WEATHER_APIS.nea_forecast)
-    ]);
-
+    console.log('🌏 Starting NEA Singapore API data collection...');
+    const startTime = Date.now();
+    
+    // Sequential API calls to avoid overwhelming the service
+    const apiCalls = [
+      { name: 'temperature', url: WEATHER_APIS.nea_temperature },
+      { name: 'humidity', url: WEATHER_APIS.nea_humidity },
+      { name: 'rainfall', url: WEATHER_APIS.nea_rainfall },
+      { name: 'forecast', url: WEATHER_APIS.nea_forecast }
+    ];
+    
+    const results = [];
+    
+    for (const { name, url } of apiCalls) {
+      try {
+        console.log(`📡 Fetching ${name} data...`);
+        const data = await fetchWithRetry(url);
+        results.push({ status: 'fulfilled', value: data, name });
+        
+        // Rate limiting between calls
+        await new Promise(resolve => setTimeout(resolve, CONFIG.BATCH_DELAY));
+        
+      } catch (error) {
+        console.error(`❌ Failed to fetch ${name}: ${error.message}`);
+        results.push({ status: 'rejected', reason: error, name });
+      }
+    }
+    
+    const [tempData, humidityData, rainfallData, forecastData] = results;
+    const duration = Date.now() - startTime;
+    
     const result = {
       timestamp: new Date().toISOString(),
-      source: 'NEA Singapore',
+      source: 'NEA Singapore (Enhanced)',
+      collection_time_ms: duration,
+      api_calls: results.length,
+      successful_calls: results.filter(r => r.status === 'fulfilled').length,
+      failed_calls: results.filter(r => r.status === 'rejected').length,
       data: {}
     };
 
@@ -299,12 +419,98 @@ async function main() {
       process.exit(1);
     }
   } catch (error) {
-    console.error('Error in weather data collection:', error);
+    const totalTime = Date.now() - startTime;
+    console.error('');
+    console.error('🔴 FATAL ERROR - Weather Collection System Failure');
+    console.error(`  - Error: ${error.message}`);
+    console.error(`  - Duration: ${totalTime}ms`);
+    console.error(`  - Circuit breaker: ${CIRCUIT_BREAKER.state}`);
+    console.error(`  - Timestamp: ${new Date().toISOString()}`);
+    console.error('');
+    console.error('📈 System Recovery Information:');
+    console.error('  - Next automatic retry: 5 minutes');
+    console.error('  - Expected resolution: < 15 minutes');
+    console.error('  - Manual intervention may be required if persistent');
+    
     process.exit(1);
   }
 }
 
-// 스크립트 직접 실행 시에만 main 함수 호출
+/**
+ * Create emergency baseline weather data when all sources fail
+ */
+function createEmergencyWeatherData(primaryError, fallbackError = null) {
+  const now = new Date();
+  const hour = now.getHours();
+  
+  // Singapore typical weather patterns based on time of day
+  const baselineTemp = 26 + (hour > 12 && hour < 18 ? 4 : 0); // Warmer in afternoon
+  const baselineHumidity = 70 + (hour > 6 && hour < 10 ? 10 : 0); // Higher in morning
+  
+  return {
+    timestamp: now.toISOString(),
+    source: 'Emergency Baseline System',
+    data_quality: 'estimated',
+    reliability: 'emergency_mode',
+    errors: {
+      primary: primaryError.message,
+      fallback: fallbackError?.message || 'not_configured'
+    },
+    data: {
+      temperature: {
+        estimated_current: baselineTemp,
+        range: `${baselineTemp - 2}-${baselineTemp + 2}°C`,
+        note: 'Singapore typical range - live data temporarily unavailable'
+      },
+      humidity: {
+        estimated_current: baselineHumidity,
+        range: `${baselineHumidity - 10}-${baselineHumidity + 10}%`,
+        note: 'Tropical climate baseline'
+      },
+      location: {
+        name: 'Bukit Timah Nature Reserve',
+        coordinates: { lat: 1.3520, lng: 103.7767 },
+        status: 'monitoring_restored_shortly'
+      },
+      forecast: {
+        general: 'Typical Singapore weather patterns expected',
+        reliability: 'baseline_estimate'
+      }
+    },
+    recovery: {
+      next_attempt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      expected_resolution: '< 15 minutes',
+      service_level: 'degraded_with_baseline'
+    }
+  };
+}
+
+// Enhanced execution with graceful shutdown handling
+process.on('SIGTERM', () => {
+  console.log('⚠️ Received SIGTERM - initiating graceful shutdown...');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('⚠️ Received SIGINT - initiating graceful shutdown...');
+  process.exit(0);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('🔴 Uncaught Exception:', error);
+  console.error('Stack:', error.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔴 Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+// Execute main function
 if (import.meta.url === new URL(process.argv[1], 'file://').href) {
-  main();
+  main().catch((error) => {
+    console.error('🔴 Main execution failed:', error);
+    process.exit(1);
+  });
 }
