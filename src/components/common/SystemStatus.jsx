@@ -350,6 +350,15 @@ const SystemStatus = React.memo(({
     );
   };
 
+  // PropTypes for StatusIndicator component
+  StatusIndicator.propTypes = {
+    status: PropTypes.oneOf(['online', 'offline', 'healthy', 'degraded', 'warning', 'error', 'loading', 'updating', 'stale']).isRequired,
+    icon: PropTypes.elementType.isRequired,
+    label: PropTypes.string.isRequired,
+    tooltip: PropTypes.string,
+    index: PropTypes.number.isRequired,
+  };
+
   return (
     <section
       ref={statusContainerRef}
