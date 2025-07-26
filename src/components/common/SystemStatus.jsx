@@ -4,23 +4,81 @@
  * Shows key metrics: last update time, weather data status, webcam status
  */
 
-import React from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Clock, CloudSun, Camera, Wifi, AlertTriangle, RefreshCw, Zap } from 'lucide-react';
+import { Clock, CloudSun, Camera, Wifi, AlertTriangle, RefreshCw, Zap, X } from 'lucide-react';
+import SkeletonLoader from './SkeletonLoader.jsx';
+import { NetworkError, DataError, ErrorUtils } from './ErrorComponents.jsx';
+import { announceToScreenReader } from '../../utils/accessibility.js';
 
-const SystemStatus = ({
+const SystemStatus = React.memo(({
   lastFetch = null,
   weatherData = null,
   webcamData = null,
   reliabilityMetrics = {},
   error = null,
   isRefreshing = false,
+  isLoading = false,
   onRefresh = null,
   onForceRefresh = null,
+  retryAttempts = 0,
+  maxRetries = 3,
 }) => {
+  const [dismissedErrors, setDismissedErrors] = useState(new Set());
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [lastOnlineTime, setLastOnlineTime] = useState(Date.now());
+  const [statusAnnouncement, setStatusAnnouncement] = useState('');
+  const [focusedStatusIndex, setFocusedStatusIndex] = useState(-1);
 
-  // Calculate time since last update
-  const getTimeSinceUpdate = () => {
+  // Refs for focus management
+  const statusContainerRef = useRef(null);
+  const refreshButtonRef = useRef(null);
+  const statusIndicatorsRef = useRef([]);
+
+  // Monitor network status with accessibility announcements
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setLastOnlineTime(Date.now());
+      announceToScreenReader('Connection restored', 'polite');
+      setStatusAnnouncement('Connection restored');
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      announceToScreenReader('Connection lost', 'assertive');
+      setStatusAnnouncement('Connection lost');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Announce status changes to screen readers
+  useEffect(() => {
+    if (error) {
+      announceToScreenReader(`System error: ${ErrorUtils.getFriendlyMessage(error)}`, 'assertive');
+      setStatusAnnouncement(`Error: ${ErrorUtils.getFriendlyMessage(error)}`);
+    } else if (isRefreshing) {
+      announceToScreenReader('Refreshing data', 'polite');
+      setStatusAnnouncement('Refreshing system data');
+    }
+  }, [error, isRefreshing]);
+
+  // Auto-retry with exponential backoff - memoized
+  const createRetryHandler = useCallback((originalHandler) => {
+    if (!originalHandler) {return null;}
+
+    return ErrorUtils.createRetryFunction(originalHandler, maxRetries);
+  }, [maxRetries]);
+
+  // Calculate time since last update - memoized
+  const getTimeSinceUpdate = useMemo(() => {
     if (!lastFetch) {return 'No data';}
 
     const now = new Date();
@@ -31,7 +89,7 @@ const SystemStatus = ({
 
     const diffHours = Math.floor(diffMinutes / 60);
     return `${diffHours}h ago`;
-  };
+  }, [lastFetch]);
 
   // Determine overall system status
   const getSystemStatus = () => {
@@ -75,84 +133,299 @@ const SystemStatus = ({
     return 'online';
   };
 
-  const systemStatus = getSystemStatus();
+  // Enhanced error handling - memoized
+  const handleDismissError = useCallback((errorId) => {
+    setDismissedErrors(prev => new Set([...prev, errorId]));
+  }, []);
+
+  const shouldShowError = (errorId) => {
+    return !dismissedErrors.has(errorId);
+  };
+
+  const enhancedOnRefresh = createRetryHandler(onRefresh);
+  const enhancedOnForceRefresh = createRetryHandler(onForceRefresh);
+
+  // Determine error state
+  const getErrorState = () => {
+    if (!isOnline) {
+      return {
+        type: 'network',
+        severity: 'error',
+        message: 'Device is offline',
+        showRetry: false,
+      };
+    }
+
+    if (error) {
+      const errorCategory = ErrorUtils.categorizeError(error);
+      return {
+        type: errorCategory,
+        severity: errorCategory === 'network' ? 'warning' : 'error',
+        message: ErrorUtils.getFriendlyMessage(error),
+        showRetry: ErrorUtils.isRecoverable(error),
+      };
+    }
+
+    if (retryAttempts > 0 && retryAttempts < maxRetries) {
+      return {
+        type: 'retry',
+        severity: 'warning',
+        message: `Attempting to reconnect... (${retryAttempts}/${maxRetries})`,
+        showRetry: false,
+      };
+    }
+
+    if (retryAttempts >= maxRetries) {
+      return {
+        type: 'max_retries',
+        severity: 'error',
+        message: 'Maximum retry attempts exceeded',
+        showRetry: true,
+      };
+    }
+
+    return null;
+  };
+
+  // Enhanced keyboard navigation for status indicators - moved before early returns
+  const handleStatusKeydown = useCallback((event, index) => {
+    const indicators = statusIndicatorsRef.current.filter(Boolean);
+
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown': {
+        event.preventDefault();
+        const nextIndex = (index + 1) % indicators.length;
+        indicators[nextIndex]?.focus();
+        setFocusedStatusIndex(nextIndex);
+        break;
+      }
+      case 'ArrowLeft':
+      case 'ArrowUp': {
+        event.preventDefault();
+        const prevIndex = index === 0 ? indicators.length - 1 : index - 1;
+        indicators[prevIndex]?.focus();
+        setFocusedStatusIndex(prevIndex);
+        break;
+      }
+      case 'Home': {
+        event.preventDefault();
+        indicators[0]?.focus();
+        setFocusedStatusIndex(0);
+        break;
+      }
+      case 'End': {
+        event.preventDefault();
+        const lastIndex = indicators.length - 1;
+        indicators[lastIndex]?.focus();
+        setFocusedStatusIndex(lastIndex);
+        break;
+      }
+      default:
+        break;
+    }
+  }, []);
+
+  const errorState = getErrorState();
   const weatherStatus = getWeatherStatus();
   const webcamStatus = getWebcamStatus();
   const timeSinceUpdate = getTimeSinceUpdate();
 
-  // Status indicator component with enhanced mobile support
-  const StatusIndicator = ({ status, icon: Icon, label, tooltip }) => {
+  // Show loading skeleton if initial loading
+  if (isLoading) {
+    return (
+      <div className="bg-neutral-50 border-b border-neutral-200 px-2 sm:px-4 py-3 sm:py-2">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+            {/* Time skeleton */}
+            <div className="flex items-center justify-between sm:justify-start">
+              <div className="flex items-center text-xs text-neutral-600">
+                <Clock className="w-4 h-4 sm:w-3 sm:h-3 mr-2 sm:mr-1 animate-pulse-slow" />
+                <SkeletonLoader.Element height="0.875rem" width="6rem" delay={0} />
+              </div>
+            </div>
+
+            {/* Status indicators skeleton */}
+            <div className="flex items-center justify-between sm:justify-end">
+              <div className="flex items-center space-x-2 sm:space-x-2 animate-stagger-in">
+                <SkeletonLoader.Patterns.StatusIndicator delay={0} />
+                <SkeletonLoader.Patterns.StatusIndicator delay={50} />
+                <div className="hidden xs:block">
+                  <SkeletonLoader.Patterns.StatusIndicator delay={100} />
+                </div>
+              </div>
+
+              {/* Refresh controls skeleton */}
+              <div className="flex items-center space-x-1 ml-2">
+                <SkeletonLoader.Button size="sm" width="3rem" delay={150} />
+                <SkeletonLoader.Button size="sm" width="3rem" delay={200} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Status indicator component with enhanced accessibility
+  const StatusIndicator = ({ status, icon: Icon, label, tooltip, index }) => {
     const getStatusColor = (status) => {
       switch (status) {
         case 'online':
         case 'healthy':
-          return 'text-accent-600 bg-accent-50 hover:bg-accent-100';
+          return 'text-accent-600 bg-accent-50 hover:bg-accent-100 focus:bg-accent-100';
         case 'degraded':
         case 'warning':
-          return 'text-yellow-600 bg-yellow-50 hover:bg-yellow-100';
+          return 'text-yellow-600 bg-yellow-50 hover:bg-yellow-100 focus:bg-yellow-100';
         case 'stale':
-          return 'text-orange-600 bg-orange-50 hover:bg-orange-100';
+          return 'text-orange-600 bg-orange-50 hover:bg-orange-100 focus:bg-orange-100';
         case 'offline':
         case 'error':
-          return 'text-red-600 bg-red-50 hover:bg-red-100';
+          return 'text-red-600 bg-red-50 hover:bg-red-100 focus:bg-red-100';
         case 'loading':
         case 'updating':
-          return 'text-secondary-600 bg-secondary-50 animate-pulse';
+          return 'text-secondary-600 bg-secondary-50 animate-pulse-gentle';
         default:
-          return 'text-neutral-500 bg-neutral-50 hover:bg-neutral-100';
+          return 'text-neutral-500 bg-neutral-50 hover:bg-neutral-100 focus:bg-neutral-100';
+      }
+    };
+
+    const getStatusDescription = (status) => {
+      switch (status) {
+        case 'online':
+        case 'healthy':
+          return 'Operating normally';
+        case 'degraded':
+        case 'warning':
+          return 'Experiencing issues';
+        case 'stale':
+          return 'Data may be outdated';
+        case 'offline':
+        case 'error':
+          return 'Not available';
+        case 'loading':
+        case 'updating':
+          return 'Currently updating';
+        default:
+          return 'Status unknown';
       }
     };
 
     return (
       <div
+        ref={(el) => { statusIndicatorsRef.current[index] = el; }}
         className={`
-          flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+          flex items-center px-3 py-2 rounded-lg text-xs font-medium 
+          status-transition hover-lift
           min-h-[44px] min-w-[44px] justify-center sm:justify-start sm:px-2 sm:py-1 sm:min-h-auto sm:min-w-auto
           active:scale-95 touch-manipulation cursor-pointer
+          animate-fade-in
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
           ${getStatusColor(status)}
         `}
         title={tooltip}
         role="button"
         tabIndex="0"
-        aria-label={`${label}: ${status}`}
+        aria-label={`${label} status: ${status}. ${getStatusDescription(status)}`}
+        aria-describedby={`status-${label.toLowerCase()}-desc`}
+        onKeyDown={(e) => handleStatusKeydown(e, index)}
+        onClick={() => {
+          announceToScreenReader(`${label} status: ${status}`, 'polite');
+        }}
       >
-        <Icon className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+        <Icon
+          className={`
+            w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 transition-transform duration-200
+            ${(status === 'loading' || status === 'updating') ? 'animate-pulse-slow' : ''}
+          `}
+          aria-hidden="true"
+        />
         <span className="hidden sm:inline ml-1">{label}</span>
+
+        {/* Hidden description for screen readers */}
+        <span id={`status-${label.toLowerCase()}-desc`} className="sr-only">
+          {getStatusDescription(status)}
+        </span>
       </div>
     );
   };
 
   return (
-    <div className="bg-neutral-50 border-b border-neutral-200 px-2 sm:px-4 py-3 sm:py-2">
+    <section
+      ref={statusContainerRef}
+      className="bg-neutral-50 border-b border-neutral-200 px-2 sm:px-4 py-3 sm:py-2 loading-to-loaded loaded"
+      aria-label="System status information"
+    >
       <div className="max-w-7xl mx-auto">
+        {/* Live region for status announcements */}
+        {statusAnnouncement && (
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {statusAnnouncement}
+          </div>
+        )}
+
         {/* Mobile-first layout */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
           {/* Top row on mobile - System status */}
-          <div className="flex items-center justify-between sm:justify-start">
+          <div className="flex items-center justify-between sm:justify-start animate-slide-in-left">
             <div className="flex items-center text-xs text-neutral-600">
-              <Clock className="w-4 h-4 sm:w-3 sm:h-3 mr-2 sm:mr-1" />
+              <Clock className={`
+                w-4 h-4 sm:w-3 sm:h-3 mr-2 sm:mr-1 transition-all duration-200
+                ${isRefreshing ? 'animate-spin-smooth' : ''}
+              `} />
               <span className="hidden xs:inline text-sm sm:text-xs">Last update:</span>
-              <span className="font-mono ml-1 text-sm sm:text-xs font-semibold">{timeSinceUpdate}</span>
+              <span className="font-mono ml-1 text-sm sm:text-xs font-semibold animate-fade-in delay-100">
+                {timeSinceUpdate}
+              </span>
             </div>
 
-            {/* Error indicator - mobile optimized */}
-            {error && (
-              <div className="flex items-center px-3 py-2 sm:px-2 sm:py-1 rounded-lg sm:rounded-md bg-red-50 text-red-600 text-xs ml-2 min-h-[44px] sm:min-h-auto">
-                <AlertTriangle className="w-4 h-4 sm:w-3 sm:h-3 mr-1" />
-                <span className="text-sm sm:text-xs font-medium">System Error</span>
+            {/* Enhanced error indicator - mobile optimized */}
+            {errorState && shouldShowError(errorState.type) && (
+              <div className={`
+                flex items-center px-3 py-2 sm:px-2 sm:py-1 rounded-lg sm:rounded-md text-xs ml-2 min-h-[44px] sm:min-h-auto animate-scale-in
+                ${errorState.severity === 'error' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'}
+              `}>
+                <AlertTriangle className={`w-4 h-4 sm:w-3 sm:h-3 mr-1 ${errorState.severity === 'error' ? 'animate-bounce-custom' : 'animate-pulse-slow'}`} />
+                <span className="text-sm sm:text-xs font-medium truncate" title={errorState.message}>
+                  {errorState.type === 'network' ? 'Offline' :
+                    errorState.type === 'retry' ? 'Reconnecting' :
+                      errorState.type === 'max_retries' ? 'Connection Failed' :
+                        'System Error'}
+                </span>
+                <button
+                  onClick={() => {
+                    handleDismissError(errorState.type);
+                    announceToScreenReader('Error dismissed', 'polite');
+                  }}
+                  className="ml-2 p-0.5 hover:bg-black/10 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-1"
+                  aria-label={`Dismiss ${errorState.type} error`}
+                  title="Dismiss this error notification"
+                >
+                  <X className="w-3 h-3" aria-hidden="true" />
+                </button>
               </div>
             )}
           </div>
 
           {/* Bottom row on mobile - Service indicators and controls */}
-          <div className="flex items-center justify-between sm:justify-end">
-            {/* Service status indicators */}
-            <div className="flex items-center space-x-2 sm:space-x-2">
+          <div className="flex items-center justify-between sm:justify-end animate-slide-in-right">
+            {/* Service status indicators with enhanced accessibility */}
+            <div
+              className="flex items-center space-x-2 sm:space-x-2 animate-stagger-in"
+              role="group"
+              aria-label="System service status indicators"
+            >
               <StatusIndicator
                 status={weatherStatus}
                 icon={CloudSun}
                 label="Weather"
                 tooltip={`Weather data: ${weatherStatus} (Quality: ${Math.round((reliabilityMetrics.weatherQuality || 0) * 100)}%)`}
+                index={0}
               />
 
               <StatusIndicator
@@ -160,6 +433,7 @@ const SystemStatus = ({
                 icon={Camera}
                 label="Webcam"
                 tooltip={`Webcam data: ${webcamStatus} (Quality: ${Math.round((reliabilityMetrics.webcamQuality || 0) * 100)}%)`}
+                index={1}
               />
 
               {/* Network indicator - hidden on extra small screens */}
@@ -169,65 +443,133 @@ const SystemStatus = ({
                   icon={Wifi}
                   label="Network"
                   tooltip={reliabilityMetrics.fallbackMode ? 'Using fallback data source' : 'Connected to primary data sources'}
+                  index={2}
                 />
               </div>
             </div>
 
-            {/* Refresh controls - mobile optimized */}
-            <div className="flex items-center space-x-1 ml-2">
-              {onRefresh && (
+            {/* Refresh controls with enhanced accessibility */}
+            <div
+              className="flex items-center space-x-1 ml-2 animate-stagger-in"
+              role="group"
+              aria-label="Data refresh controls"
+            >
+              {enhancedOnRefresh && (
                 <button
-                  onClick={onRefresh}
-                  disabled={isRefreshing}
+                  ref={refreshButtonRef}
+                  onClick={() => {
+                    enhancedOnRefresh();
+                    announceToScreenReader('Refreshing data', 'polite');
+                  }}
+                  disabled={isRefreshing || !isOnline}
                   className="
                     flex items-center justify-center px-3 py-2 sm:px-2 sm:py-1
                     text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100
                     disabled:opacity-50 disabled:cursor-not-allowed rounded-lg sm:rounded-md
-                    transition-all duration-200 active:scale-95 touch-manipulation
+                    status-transition hover-lift active:scale-95 touch-manipulation
                     min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto
+                    animate-fade-in delay-300
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                    disabled:focus:ring-0
                   "
-                  title="Refresh data (respects cache)"
-                  aria-label="Refresh data"
+                  title={!isOnline ? 'Cannot refresh while offline' : 'Refresh data (respects cache)'}
+                  aria-label={isRefreshing ? 'Refreshing data' : 'Refresh system data'}
+                  aria-describedby="refresh-help"
                 >
-                  <RefreshCw className={`w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`
+                      w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 transition-transform duration-200
+                      ${isRefreshing ? 'animate-spin-smooth' : ''}
+                    `}
+                    aria-hidden="true"
+                  />
                   <span className="hidden sm:inline">Refresh</span>
+                  <span id="refresh-help" className="sr-only">
+                    {!isOnline ? 'Cannot refresh while offline' :
+                      isRefreshing ? 'Currently refreshing data' :
+                        'Refresh weather and camera data from cache'}
+                  </span>
                 </button>
               )}
 
-              {onForceRefresh && (
+              {enhancedOnForceRefresh && (
                 <button
-                  onClick={onForceRefresh}
-                  disabled={isRefreshing}
+                  onClick={() => {
+                    enhancedOnForceRefresh();
+                    announceToScreenReader('Force refreshing data', 'polite');
+                  }}
+                  disabled={isRefreshing || !isOnline}
                   className="
                     flex items-center justify-center px-3 py-2 sm:px-2 sm:py-1
                     text-xs font-medium text-orange-600 bg-orange-50 hover:bg-orange-100
                     disabled:opacity-50 disabled:cursor-not-allowed rounded-lg sm:rounded-md
-                    transition-all duration-200 active:scale-95 touch-manipulation
+                    status-transition hover-lift active:scale-95 touch-manipulation
                     min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto
+                    animate-fade-in delay-500
+                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
+                    disabled:focus:ring-0
                   "
-                  title="Force refresh (bypasses cache)"
-                  aria-label="Force refresh data"
+                  title={!isOnline ? 'Cannot force refresh while offline' : 'Force refresh (bypasses cache)'}
+                  aria-label={isRefreshing ? 'Force refreshing data' : 'Force refresh system data'}
+                  aria-describedby="force-refresh-help"
                 >
-                  <Zap className={`w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 ${isRefreshing ? 'animate-pulse' : ''}`} />
+                  <Zap
+                    className={`
+                      w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 transition-transform duration-200
+                      ${isRefreshing ? 'animate-pulse-gentle' : ''}
+                    `}
+                    aria-hidden="true"
+                  />
                   <span className="hidden md:inline">Force</span>
+                  <span id="force-refresh-help" className="sr-only">
+                    {!isOnline ? 'Cannot force refresh while offline' :
+                      isRefreshing ? 'Currently force refreshing data' :
+                        'Force refresh weather and camera data, bypassing cache'}
+                  </span>
                 </button>
               )}
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
 
-StatusIndicator.propTypes = {
-  status: PropTypes.oneOf([
-    'online', 'offline', 'degraded', 'stale', 'loading', 'updating', 'healthy', 'warning', 'error',
-  ]).isRequired,
-  icon: PropTypes.elementType.isRequired,
-  label: PropTypes.string.isRequired,
-  tooltip: PropTypes.string.isRequired,
-};
+        {/* Detailed error information panel */}
+        {errorState && errorState.type !== 'retry' && shouldShowError(`${errorState.type}-detail`) && (
+          <div className="mt-2 animate-slide-down">
+            {errorState.type === 'network' ? (
+              <NetworkError
+                isOnline={isOnline}
+                lastSuccessTime={lastOnlineTime}
+                onRetry={errorState.showRetry ? enhancedOnRefresh : null}
+                className="mx-2 sm:mx-4"
+              />
+            ) : (
+              <DataError
+                message={errorState.message}
+                dataType="system status"
+                onRetry={errorState.showRetry ? enhancedOnRefresh : null}
+                hasCachedData={Boolean(weatherData || webcamData)}
+                className="mx-2 sm:mx-4"
+              />
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison for React.memo to prevent unnecessary re-renders
+  return (
+    prevProps.lastFetch === nextProps.lastFetch &&
+    prevProps.weatherData === nextProps.weatherData &&
+    prevProps.webcamData === nextProps.webcamData &&
+    prevProps.error === nextProps.error &&
+    prevProps.isRefreshing === nextProps.isRefreshing &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.retryAttempts === nextProps.retryAttempts &&
+    prevProps.networkStatus === nextProps.networkStatus &&
+    JSON.stringify(prevProps.reliabilityMetrics) === JSON.stringify(nextProps.reliabilityMetrics)
+  );
+});
 
 SystemStatus.propTypes = {
   lastFetch: PropTypes.instanceOf(Date),
@@ -241,8 +583,12 @@ SystemStatus.propTypes = {
   }),
   error: PropTypes.object,
   isRefreshing: PropTypes.bool,
+  isLoading: PropTypes.bool,
   onRefresh: PropTypes.func,
   onForceRefresh: PropTypes.func,
+  networkStatus: PropTypes.oneOf(['online', 'offline', 'slow']),
+  retryAttempts: PropTypes.number,
+  maxRetries: PropTypes.number,
 };
 
 export default SystemStatus;

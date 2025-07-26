@@ -1,0 +1,423 @@
+/**
+ * Performance-Optimized CSS Animations
+ * 
+ * This file contains GPU-accelerated animations and performance-optimized CSS
+ * for the Singapore Weather Cam application.
+ * 
+ * Performance Guidelines:
+ * - Use transform and opacity for animations (GPU accelerated)
+ * - Avoid animating layout properties (width, height, top, left)
+ * - Use will-change sparingly and remove after animation
+ * - Prefer hardware acceleration with transform3d
+ */
+
+/* ===== GPU-Accelerated Base Classes ===== */
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+.hardware-accelerated {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* ===== Optimized Animation Base ===== */
+
+.animate-optimized {
+  will-change: transform, opacity;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-optimized.animation-complete {
+  will-change: auto;
+}
+
+/* ===== Fade Animations (GPU Accelerated) ===== */
+
+@keyframes fadeInOptimized {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeOutOptimized {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-fade-in-optimized {
+  animation: fadeInOptimized 0.3s ease-out;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-fade-out-optimized {
+  animation: fadeOutOptimized 0.3s ease-out;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ===== Scale Animations (GPU Accelerated) ===== */
+
+@keyframes scaleInOptimized {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale3d(0.95, 0.95, 1);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+}
+
+@keyframes pulseOptimized {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+  50% {
+    transform: translate3d(0, 0, 0) scale3d(1.05, 1.05, 1);
+  }
+}
+
+.animate-scale-in-optimized {
+  animation: scaleInOptimized 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-pulse-optimized {
+  animation: pulseOptimized 2s ease-in-out infinite;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ===== Slide Animations (GPU Accelerated) ===== */
+
+@keyframes slideInLeftOptimized {
+  from {
+    opacity: 0;
+    transform: translate3d(-20px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInRightOptimized {
+  from {
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInUpOptimized {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInDownOptimized {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-slide-in-left-optimized {
+  animation: slideInLeftOptimized 0.5s ease-out;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-slide-in-right-optimized {
+  animation: slideInRightOptimized 0.5s ease-out;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-slide-in-up-optimized {
+  animation: slideInUpOptimized 0.5s ease-out;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-slide-in-down-optimized {
+  animation: slideInDownOptimized 0.5s ease-out;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ===== Spin Animations (GPU Accelerated) ===== */
+
+@keyframes spinOptimized {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(0, 0, 0) rotate(360deg);
+  }
+}
+
+@keyframes spinSmoothOptimized {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(0, 0, 0) rotate(360deg);
+  }
+}
+
+.animate-spin-optimized {
+  animation: spinOptimized 1s linear infinite;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-spin-smooth-optimized {
+  animation: spinSmoothOptimized 2s ease-in-out infinite;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ===== Bounce Animations (GPU Accelerated) ===== */
+
+@keyframes bounceOptimized {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+.animate-bounce-optimized {
+  animation: bounceOptimized 1s ease-in-out infinite;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ===== Stagger Animation Delays ===== */
+
+.animate-stagger-optimized > * {
+  animation-delay: calc(var(--stagger-delay, 100) * 1ms);
+}
+
+.animate-stagger-optimized > *:nth-child(1) { --stagger-delay: 0; }
+.animate-stagger-optimized > *:nth-child(2) { --stagger-delay: 100; }
+.animate-stagger-optimized > *:nth-child(3) { --stagger-delay: 200; }
+.animate-stagger-optimized > *:nth-child(4) { --stagger-delay: 300; }
+.animate-stagger-optimized > *:nth-child(5) { --stagger-delay: 400; }
+.animate-stagger-optimized > *:nth-child(6) { --stagger-delay: 500; }
+.animate-stagger-optimized > *:nth-child(7) { --stagger-delay: 600; }
+.animate-stagger-optimized > *:nth-child(8) { --stagger-delay: 700; }
+
+/* ===== Loading State Animations ===== */
+
+@keyframes skeletonPulseOptimized {
+  0%, 100% {
+    opacity: 0.4;
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes shimmerOptimized {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+.skeleton-pulse-optimized {
+  animation: skeletonPulseOptimized 1.5s ease-in-out infinite;
+  transform: translate3d(0, 0, 0);
+}
+
+.shimmer-optimized {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, 
+    transparent 25%, 
+    rgba(255, 255, 255, 0.4) 50%, 
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmerOptimized 1.5s infinite linear;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ===== Hover Effects (GPU Accelerated) ===== */
+
+.hover-lift-optimized {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translate3d(0, 0, 0);
+}
+
+.hover-lift-optimized:hover {
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+              0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.hover-scale-optimized {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+}
+
+.hover-scale-optimized:hover {
+  transform: translate3d(0, 0, 0) scale3d(1.05, 1.05, 1);
+}
+
+/* ===== Status Transition Animations ===== */
+
+.status-transition-optimized {
+  transition: background-color 0.3s ease,
+              border-color 0.3s ease,
+              color 0.3s ease,
+              opacity 0.3s ease,
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translate3d(0, 0, 0);
+}
+
+/* ===== Performance Optimization Classes ===== */
+
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+.isolation-isolate {
+  isolation: isolate;
+}
+
+/* ===== Reduced Motion Support ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-optimized,
+  .animate-fade-in-optimized,
+  .animate-fade-out-optimized,
+  .animate-scale-in-optimized,
+  .animate-pulse-optimized,
+  .animate-slide-in-left-optimized,
+  .animate-slide-in-right-optimized,
+  .animate-slide-in-up-optimized,
+  .animate-slide-in-down-optimized,
+  .animate-spin-optimized,
+  .animate-spin-smooth-optimized,
+  .animate-bounce-optimized,
+  .skeleton-pulse-optimized,
+  .shimmer-optimized,
+  .hover-lift-optimized,
+  .hover-scale-optimized,
+  .status-transition-optimized {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .hover-lift-optimized:hover,
+  .hover-scale-optimized:hover {
+    transform: translate3d(0, 0, 0) !important;
+  }
+}
+
+/* ===== Layer Promotion for Heavy Animations ===== */
+
+.promote-layer {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Remove will-change after animation completes */
+.promote-layer.animation-ended {
+  will-change: auto;
+}
+
+/* ===== Performance Monitoring Classes ===== */
+
+.perf-monitor {
+  position: relative;
+}
+
+.perf-monitor::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(0, 255, 0, 0.1) 50%, 
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.perf-monitor.performance-good::after {
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(0, 255, 0, 0.1) 50%, 
+    transparent 70%
+  );
+  opacity: 1;
+}
+
+.perf-monitor.performance-warning::after {
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255, 255, 0, 0.1) 50%, 
+    transparent 70%
+  );
+  opacity: 1;
+}
+
+.perf-monitor.performance-poor::after {
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255, 0, 0, 0.1) 50%, 
+    transparent 70%
+  );
+  opacity: 1;
+}

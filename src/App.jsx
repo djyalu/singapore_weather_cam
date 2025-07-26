@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+import ReactDOM from 'react-dom/client';
 import Header from './components/layout/Header';
 import SystemStatus from './components/common/SystemStatus';
 import TemperatureHero from './components/weather/TemperatureHero';
@@ -17,18 +18,35 @@ import { useServiceWorker } from './hooks/useServiceWorker';
 import PWAStatus from './components/common/PWAStatus';
 import HealthMonitor from './components/system/HealthMonitor';
 import MonitoringDashboard from './components/admin/MonitoringDashboard';
+import PerformanceDashboard from './components/admin/PerformanceDashboard';
 import ScrollProgress from './components/navigation/ScrollProgress';
 import { initializeAccessibility } from './utils/accessibility';
 import { initializeSecurity } from './utils/security';
 import { useMetrics } from './services/metricsService';
+import { useComponentPerformance } from './hooks/useComponentPerformance';
+import '../src/styles/performance-animations.css';
+import '../src/styles/accessibility.css';
 
 const App = React.memo(() => {
   // Health monitor and dashboard visibility state
   const [showHealthMonitor, setShowHealthMonitor] = React.useState(false);
   const [showMonitoringDashboard, setShowMonitoringDashboard] = React.useState(false);
+  const [showPerformanceDashboard, setShowPerformanceDashboard] = React.useState(false);
 
   // Metrics tracking
   const { trackPageView, trackUserInteraction } = useMetrics();
+
+  // Performance monitoring for the main App component
+  const appPerformance = useComponentPerformance('App', {
+    weatherDataAvailable: !!weatherData,
+    webcamDataAvailable: !!webcamData,
+    isLoading: isInitialLoading,
+  }, {
+    trackRenders: true,
+    trackProps: true,
+    trackMemory: true,
+    threshold: 20, // Allow slightly longer render time for main app
+  });
 
   // Use custom hooks for cleaner component logic
   const {
@@ -62,6 +80,15 @@ const App = React.memo(() => {
     initializeAccessibility();
     initializeSecurity();
 
+    // Initialize axe-core for development accessibility testing
+    if (process.env.NODE_ENV === 'development') {
+      import('@axe-core/react').then((axe) => {
+        axe.default(React, ReactDOM, 1000);
+      }).catch((error) => {
+        console.warn('Failed to load axe-core for accessibility testing:', error);
+      });
+    }
+
     // Track initial page view
     trackPageView(window.location.pathname, {
       type: 'app_load',
@@ -70,19 +97,25 @@ const App = React.memo(() => {
     });
   }, [trackPageView, weatherData, webcamData]);
 
-  // Add keyboard shortcut for monitoring dashboard (Ctrl+Shift+M)
+  // Add keyboard shortcuts for dashboards
   React.useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.ctrlKey && event.shiftKey && event.key === 'M') {
-        event.preventDefault();
-        setShowMonitoringDashboard(!showMonitoringDashboard);
-        trackUserInteraction('keyboard_shortcut', 'monitoring_dashboard');
+      if (event.ctrlKey && event.shiftKey) {
+        if (event.key === 'M') {
+          event.preventDefault();
+          setShowMonitoringDashboard(!showMonitoringDashboard);
+          trackUserInteraction('keyboard_shortcut', 'monitoring_dashboard');
+        } else if (event.key === 'P') {
+          event.preventDefault();
+          setShowPerformanceDashboard(!showPerformanceDashboard);
+          trackUserInteraction('keyboard_shortcut', 'performance_dashboard');
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showMonitoringDashboard, trackUserInteraction]);
+  }, [showMonitoringDashboard, showPerformanceDashboard, trackUserInteraction]);
 
   // Data loading logic now handled by custom hook
 
@@ -282,6 +315,12 @@ const App = React.memo(() => {
         <MonitoringDashboard
           isVisible={showMonitoringDashboard}
           onClose={() => setShowMonitoringDashboard(false)}
+        />
+
+        {/* Performance Dashboard */}
+        <PerformanceDashboard
+          isVisible={showPerformanceDashboard}
+          onClose={() => setShowPerformanceDashboard(false)}
         />
       </div>
     </ErrorBoundary>

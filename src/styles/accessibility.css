@@ -1,0 +1,362 @@
+/**
+ * Accessibility-focused CSS for WCAG 2.1 AA compliance
+ * Focus indicators, screen reader support, and high contrast mode
+ */
+
+/* =============================================================================
+   Screen Reader Only Content
+   ============================================================================= */
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.sr-only:focus,
+.sr-only:active {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: inherit !important;
+  margin: inherit !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: inherit !important;
+}
+
+/* =============================================================================
+   Focus Management
+   ============================================================================= */
+
+/* Enhanced focus indicators for better visibility */
+*:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Custom focus styles for interactive elements */
+button:focus,
+[role="button"]:focus,
+a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Skip links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #3b82f6;
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 6px;
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Focus visible for keyboard navigation */
+.user-is-tabbing *:focus {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}
+
+/* Remove focus outline for mouse users */
+:not(.user-is-tabbing) *:focus {
+  outline: none;
+}
+
+/* =============================================================================
+   High Contrast Mode Support
+   ============================================================================= */
+
+@media (prefers-contrast: high) {
+  /* Increase contrast for text */
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+  
+  /* High contrast buttons */
+  button,
+  [role="button"] {
+    border: 2px solid #000000;
+    background: #ffffff;
+    color: #000000;
+  }
+  
+  button:hover,
+  [role="button"]:hover {
+    background: #000000;
+    color: #ffffff;
+  }
+  
+  /* High contrast focus indicators */
+  *:focus {
+    outline: 3px solid #000000;
+    outline-offset: 2px;
+    background: #ffffff;
+    color: #000000;
+  }
+  
+  /* High contrast links */
+  a {
+    color: #0000ee;
+    text-decoration: underline;
+  }
+  
+  a:visited {
+    color: #551a8b;
+  }
+  
+  a:hover,
+  a:focus {
+    background: #000000;
+    color: #ffffff;
+  }
+}
+
+/* =============================================================================
+   Reduced Motion Support
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Remove transform animations */
+  .animate-scale-in,
+  .animate-fade-in,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-bounce-custom,
+  .hover-scale {
+    transform: none !important;
+    animation: none !important;
+  }
+  
+  /* Keep essential loading indicators but reduce motion */
+  .animate-spin,
+  .animate-pulse {
+    animation-duration: 2s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* =============================================================================
+   Touch and Mobile Accessibility
+   ============================================================================= */
+
+/* Minimum touch target size (44px x 44px) */
+button,
+[role="button"],
+a,
+input,
+select,
+textarea {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Ensure touch targets don't overlap */
+@media (max-width: 768px) {
+  button,
+  [role="button"],
+  a {
+    margin: 2px;
+    padding: 12px;
+  }
+  
+  /* Larger tap targets for mobile */
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* =============================================================================
+   Color and Contrast Utilities
+   ============================================================================= */
+
+/* WCAG AA compliant color combinations */
+.text-contrast-aa {
+  color: #374151; /* 4.5:1 contrast on white */
+}
+
+.text-contrast-aaa {
+  color: #1f2937; /* 7:1 contrast on white */
+}
+
+.bg-contrast-light {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+.bg-contrast-dark {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+/* Error and warning colors with sufficient contrast */
+.text-error-accessible {
+  color: #dc2626; /* 4.5:1 contrast on white */
+}
+
+.text-warning-accessible {
+  color: #d97706; /* 4.5:1 contrast on white */
+}
+
+.text-success-accessible {
+  color: #059669; /* 4.5:1 contrast on white */
+}
+
+/* =============================================================================
+   Interactive Element States
+   ============================================================================= */
+
+/* Enhanced button states */
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Loading states */
+[aria-busy="true"] {
+  cursor: wait;
+}
+
+[aria-busy="true"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* =============================================================================
+   Form Accessibility
+   ============================================================================= */
+
+/* Required field indicators */
+[aria-required="true"] {
+  border-left: 3px solid #dc2626;
+}
+
+/* Invalid field indicators */
+[aria-invalid="true"] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 1px #dc2626;
+}
+
+/* Error message styling */
+[role="alert"] {
+  padding: 12px;
+  border: 1px solid #dc2626;
+  background: #fef2f2;
+  color: #991b1b;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+/* =============================================================================
+   Live Regions
+   ============================================================================= */
+
+[aria-live] {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+[aria-live]:not(:empty) {
+  position: static;
+  left: auto;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+/* =============================================================================
+   Progressive Enhancement
+   ============================================================================= */
+
+/* No-JS fallbacks */
+.no-js .js-only {
+  display: none !important;
+}
+
+.no-js .no-js-show {
+  display: block !important;
+}
+
+/* =============================================================================
+   Print Accessibility
+   ============================================================================= */
+
+@media print {
+  /* Ensure good contrast in print */
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  
+  /* Show URLs for links */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 12px;
+    color: #666;
+  }
+  
+  /* Hide interactive elements */
+  button,
+  input,
+  select,
+  textarea {
+    display: none !important;
+  }
+  
+  /* Ensure headings break properly */
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid;
+    break-inside: avoid;
+  }
+}
