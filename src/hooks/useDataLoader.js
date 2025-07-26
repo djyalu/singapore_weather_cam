@@ -109,11 +109,14 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
         dataAge: Math.max(weatherResult.metadata.dataAge || 0, webcamResult.metadata.dataAge || 0),
       });
 
-      // Use sanitized data from security validation where available
-      setWeatherData(weatherValidation.isValid ?
-        { ...weatherValidation.sanitized, reliabilityMetadata: enhancedWeatherData.reliabilityMetadata } :
-        enhancedWeatherData,
-      );
+      // Always use the transformed data, but include security validation metadata
+      setWeatherData({
+        ...enhancedWeatherData,
+        securityValidation: {
+          isValid: weatherValidation.isValid,
+          errors: weatherValidation.errors || []
+        }
+      });
       setWebcamData(enhancedWebcamData);
       setRetryCount(0); // Reset retry count on success
       setLastFetch(new Date());
@@ -124,6 +127,8 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
           qualityScore: weatherResult.metadata.qualityScore,
           source: weatherResult.metadata.source,
           loadTime: weatherResult.metadata.loadTime,
+          locationsCount: transformedWeatherData.locations?.length || 0,
+          hasCurrentData: !!transformedWeatherData.current
         },
         webcam: {
           qualityScore: webcamResult.metadata.qualityScore,
