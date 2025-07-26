@@ -58,7 +58,7 @@ export class DataReliabilityService {
    */
   async loadDataWithReliability(dataType, fetchFunction, options = {}) {
     const startTime = Date.now();
-    const cacheKey = `${dataType}_${Date.now()}`;
+    const _cacheKey = `${dataType}_${Date.now()}`; // For future caching implementation
 
     try {
       // Track the data loading attempt
