@@ -17,8 +17,8 @@ const MapView = ({ weatherData, webcamData }) => {
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    // Initialize map centered on Hwa Chong International School
-    const map = L.map(mapRef.current).setView([1.32865, 103.80227], 12);
+    // Initialize map centered on Bukit Timah Nature Reserve
+    const map = L.map(mapRef.current).setView([1.3520, 103.7767], 12);
     mapInstanceRef.current = map;
 
     // Add tile layer
