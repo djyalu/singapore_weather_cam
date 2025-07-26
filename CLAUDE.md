@@ -24,8 +24,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **프로젝트명**: Singapore Weather Cam
 - **목적**: 싱가포르 날씨 정보와 웹캠 영상을 실시간으로 제공하는 웹 애플리케이션
 - **상태**: 설계 완료, 구현 시작
-- **현재 아키텍처**: React + Vite + GitHub Actions (JAMstack)
-- **목표 아키텍처**: Cloud-Native Serverless (AWS Lambda + DynamoDB + CloudFront)
+- **선택 아키텍처**: GitHub-Native JAMstack (최종 선택)
+- **대안 검토**: AWS Cloud-Native는 비용 및 복잡성으로 인해 배제
 
 ## 개발 환경 설정
 
@@ -91,11 +91,11 @@ npm run format       # Prettier 포맷팅
 
 ## 주요 파일 참조
 
-- **시스템 설계**: `DESIGN.md` (현재 JAMstack 아키텍처)
-- **모던 아키텍처**: `ARCHITECTURE_V2.md` (Cloud-Native 목표 설계)
-- **마이그레이션 가이드**: `MIGRATION_ROADMAP.md` (단계별 전환 계획)
+- **현재 아키텍처**: `ARCHITECTURE_GITHUB.md` (GitHub 중심 최종 설계)
+- **구현 가이드**: `IMPLEMENTATION_GUIDE.md` (단계별 구현 방법)
+- **기존 설계**: `DESIGN.md` (초기 JAMstack 아키텍처)
+- **AWS 대안**: `ARCHITECTURE_V2.md` (참고용, 미사용)
 - **API 명세**: `API_SPEC.md`
-- **인프라 코드**: `terraform/` (IaC 템플릿)
 - **README**: `README.md`
 
 ## 개발 가이드라인
@@ -122,39 +122,32 @@ npm run format       # Prettier 포맷팅
 - perf: 성능 개선
 - arch: 아키텍처 변경
 
-## 아키텍처 마이그레이션 전략
+## GitHub-Native 아키텍처
 
-### 현재 단계 (Phase 0)
-- JAMstack 기반 정적 사이트
-- GitHub Actions로 스케줄된 데이터 수집
-- JSON 파일 기반 데이터 저장
+### 핵심 구성
+- **호스팅**: GitHub Pages (무료)
+- **CI/CD**: GitHub Actions (무료 2000분/월)
+- **데이터 수집**: 5분 간격 자동화 워크플로우
+- **저장소**: Git 기반 JSON 파일 (버전 관리)
+- **외부 서비스**: NEA Singapore API (무료)
 
-### 목표 아키텍처
-- AWS Lambda 기반 서버리스 컴퓨팅
-- DynamoDB로 실시간 데이터 저장
-- CloudFront + S3로 글로벌 CDN
-- EventBridge로 이벤트 드리븐 처리
-- AppSync GraphQL로 실시간 업데이트
+### 주요 워크플로우
+1. **날씨 데이터 수집** (`.github/workflows/collect-weather.yml`)
+   - 매 5분마다 실행
+   - NEA Singapore API 호출
+   - JSON 파일 업데이트 및 커밋
 
-### 마이그레이션 원칙
-1. **Blue-Green 배포**: 무중단 전환
-2. **점진적 마이그레이션**: 기능별 단계적 이전
-3. **데이터 이중화**: 마이그레이션 중 데이터 무결성 보장
-4. **롤백 가능성**: 언제든 이전 버전으로 복구 가능
+2. **자동 배포** (`.github/workflows/deploy.yml`)
+   - 코드 변경 시 자동 실행
+   - Vite 빌드 후 GitHub Pages 배포
 
-### Terraform 사용법
-```bash
-# 인프라 초기화
-cd terraform
-terraform init
+### 비용 분석
+- **호스팅**: $0 (GitHub Pages)
+- **CI/CD**: $0 (무료 한도 내)
+- **API**: $0 (NEA 무료)
+- **총 운영비**: **$0/월**
 
-# 개발 환경 배포
-cd environments/dev
-terraform plan
-terraform apply
-
-# 프로덕션 환경 배포
-cd environments/prod
-terraform plan
-terraform apply
-```
+### GitHub Actions 한도 관리
+- 무료 한도: 2000분/월
+- 예상 사용량: ~150분/월 (5분 간격 수집)
+- 여유 한도: 약 1850분/월

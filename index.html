@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Meta Tags -->
+    <title>Singapore Weather Cam - 실시간 날씨 정보</title>
+    <meta name="description" content="싱가포르의 실시간 날씨 정보와 웹캠 영상을 확인하세요. NEA 공식 데이터 기반으로 5분마다 업데이트됩니다." />
+    <meta name="keywords" content="싱가포르, 날씨, 웹캠, 실시간, Singapore, weather, webcam, live" />
+    <meta name="author" content="Singapore Weather Cam" />
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Singapore Weather Cam" />
+    <meta property="og:description" content="싱가포르 실시간 날씨 정보와 웹캠 영상" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://djyalu.github.io/singapore_weather_cam/" />
+    <meta property="og:image" content="https://djyalu.github.io/singapore_weather_cam/og-image.jpg" />
+    
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Singapore Weather Cam" />
+    <meta name="twitter:description" content="싱가포르 실시간 날씨 정보와 웹캠 영상" />
+    <meta name="twitter:image" content="https://djyalu.github.io/singapore_weather_cam/og-image.jpg" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Singapore Weather" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/svg+xml" href="/weather-icon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://api.data.gov.sg" />
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+    
+    <!-- Performance -->
+    <link rel="dns-prefetch" href="//api.data.gov.sg" />
+    <link rel="dns-prefetch" href="//res.cloudinary.com" />
+  </head>
+  <body>
+    <div id="root"></div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
+    
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
