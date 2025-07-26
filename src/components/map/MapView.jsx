@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { transformWeatherData } from '../../utils/weatherDataTransformer';
 
 // Fix for default markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -19,6 +18,13 @@ const MapView = React.memo(({ weatherData, webcamData }) => {
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) {return;}
 
+    console.log('🗺️ MapView: Initializing map with data:', {
+      weatherData: weatherData ? 'present' : 'missing',
+      weatherLocations: weatherData?.locations?.length || 0,
+      webcamData: webcamData ? 'present' : 'missing',
+      webcamCaptures: webcamData?.captures?.length || 0
+    });
+
     // Initialize map centered on Bukit Timah Nature Reserve
     const map = L.map(mapRef.current).setView([1.3520, 103.7767], 12);
     mapInstanceRef.current = map;
@@ -29,10 +35,10 @@ const MapView = React.memo(({ weatherData, webcamData }) => {
       maxZoom: 18,
     }).addTo(map);
 
-    // Transform and add weather station markers
-    const transformedWeatherData = transformWeatherData(weatherData);
-    if (transformedWeatherData?.locations) {
-      transformedWeatherData.locations.forEach((location) => {
+    // Add weather station markers (data already transformed)
+    if (weatherData?.locations) {
+      console.log('🌡️ MapView: Adding weather markers for locations:', weatherData.locations.map(l => l.name));
+      weatherData.locations.forEach((location) => {
         if (location.coordinates) {
           const marker = L.marker([location.coordinates.lat, location.coordinates.lng])
             .addTo(map)

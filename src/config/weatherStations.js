@@ -47,14 +47,6 @@ export const STATION_MAPPING = {
     coordinates: { lat: 1.3429, lng: 103.8847 },
     region: 'east'
   },
-  'S106': {
-    name: 'Tai Seng',
-    displayName: 'Tai Seng',
-    description: 'Central-eastern business district',
-    priority: 'secondary',
-    coordinates: { lat: 1.3369, lng: 103.8847 },
-    region: 'central'
-  },
   'S60': {
     name: 'Sentosa',
     displayName: 'Sentosa Island',
