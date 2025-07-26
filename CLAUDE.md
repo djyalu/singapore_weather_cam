@@ -22,14 +22,95 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 프로젝트 개요
 - **프로젝트명**: Singapore Weather Cam
-- **목적**: 싱가포르 날씨 캠 애플리케이션
-- **상태**: 초기화 필요
+- **목적**: 싱가포르 날씨 정보와 웹캠 영상을 실시간으로 제공하는 웹 애플리케이션
+- **상태**: 설계 완료, 구현 시작
+- **기술 스택**: React + Vite + GitHub Actions (JAMstack 아키텍처)
 
 ## 개발 환경 설정
-(프로젝트 초기화 후 업데이트 예정)
+
+### 필수 설치
+```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
+
+# 프로덕션 빌드
+npm run build
+```
+
+### 환경 변수 (GitHub Secrets)
+- `CLAUDE_API_KEY`: Claude API 키 (웹캠 이미지 분석용)
+- `OPENWEATHER_API_KEY`: OpenWeatherMap API 키 (백업 날씨 데이터)
 
 ## 아키텍처
-(프로젝트 구조 확정 후 업데이트 예정)
+
+### JAMstack + GitHub Actions
+- **Frontend**: React (정적 빌드) → GitHub Pages
+- **Backend**: GitHub Actions (스케줄된 데이터 수집)
+- **Storage**: JSON 파일 (Git 저장소)
+- **CDN**: GitHub 인프라
+
+### 디렉토리 구조
+```
+/
+├── .github/workflows/   # 자동화 워크플로우
+├── scripts/            # 데이터 수집 스크립트
+├── src/               # React 소스 코드
+│   ├── components/    # UI 컴포넌트
+│   └── utils/        # 유틸리티 함수
+├── data/             # 수집된 데이터
+│   ├── weather/      # 날씨 JSON
+│   └── webcam/       # 웹캠 메타데이터
+└── public/           # 정적 파일
+    └── images/       # 웹캠 이미지
+```
 
 ## 주요 명령어
-(개발 환경 설정 후 업데이트 예정)
+
+### 개발
+```bash
+npm run dev          # 개발 서버 실행 (http://localhost:5173)
+npm run build        # 프로덕션 빌드
+npm run preview      # 빌드 미리보기
+```
+
+### 데이터 수집 (GitHub Actions에서 자동 실행)
+```bash
+npm run collect-weather  # 날씨 데이터 수집
+npm run capture-webcam   # 웹캠 이미지 캡처
+```
+
+### 코드 품질
+```bash
+npm run lint         # ESLint 실행
+npm run format       # Prettier 포맷팅
+```
+
+## 주요 파일 참조
+
+- **시스템 설계**: `DESIGN.md`
+- **API 명세**: `API_SPEC.md`
+- **README**: `README.md`
+
+## 개발 가이드라인
+
+### 컴포넌트 개발
+- Functional Components와 Hooks 사용
+- PropTypes 또는 TypeScript 타입 정의
+- Tailwind CSS 클래스 사용
+
+### 데이터 처리
+- 모든 날씨 데이터는 `/data` 디렉토리의 JSON 파일로 관리
+- 이미지는 `/public/images` 디렉토리에 저장
+- GitHub Actions가 30분/1시간 주기로 자동 업데이트
+
+### Git 커밋 규칙
+- feat: 새로운 기능 추가
+- fix: 버그 수정
+- docs: 문서 수정
+- style: 코드 포맷팅
+- refactor: 코드 리팩토링
+- test: 테스트 추가
+- chore: 빌드 업무 수정
