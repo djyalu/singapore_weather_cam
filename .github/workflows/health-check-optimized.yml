@@ -1,0 +1,192 @@
+name: System Health Check (Optimized)
+
+on:
+  schedule:
+    # Optimized: Once daily instead of twice (30 runs/month vs 60)
+    # Saves 50% of usage: 300 → 150 minutes/month
+    - cron: '0 6 * * *'  # 6 AM UTC (2 PM Singapore time)
+  workflow_dispatch:
+    inputs:
+      check_type:
+        type: choice
+        options: [quick, full, api-only]
+        default: quick
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5  # Reduced from 10 to 5
+    permissions:
+      contents: read
+      actions: read
+      issues: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Quick health assessment
+        id: health
+        env:
+          CHECK_TYPE: ${{ github.event.inputs.check_type || 'quick' }}
+        run: |
+          echo "🏥 Optimized Health Check"
+          echo "========================"
+          
+          HEALTH_SCORE=100
+          ISSUES=""
+          
+          # Streamlined API checks
+          echo "## API Status"
+          
+          # NEA APIs (essential only)
+          for api in "air-temperature" "relative-humidity"; do
+            if timeout 3 curl -sf "https://api.data.gov.sg/v1/environment/$api" >/dev/null; then
+              echo "✅ NEA $api"
+            else
+              echo "❌ NEA $api"
+              HEALTH_SCORE=$((HEALTH_SCORE - 15))
+              ISSUES="${ISSUES}\n- NEA $api API down"
+            fi
+          done
+          
+          # LTA Traffic API
+          if timeout 3 curl -sf "https://api.data.gov.sg/v1/transport/traffic-images" >/dev/null; then
+            echo "✅ LTA Traffic"
+          else
+            echo "❌ LTA Traffic"
+            HEALTH_SCORE=$((HEALTH_SCORE - 15))
+            ISSUES="${ISSUES}\n- LTA Traffic API down"
+          fi
+          
+          # Data freshness (streamlined)
+          echo ""
+          echo "## Data Status"
+          
+          for data_type in "weather" "webcam"; do
+            file="data/${data_type}/latest.json"
+            if [[ -f "$file" ]]; then
+              AGE=$(($(date +%s) - $(date -r "$file" +%s)))
+              HOURS=$((AGE / 3600))
+              
+              if [[ $HOURS -lt 4 ]]; then
+                echo "✅ ${data_type}: ${HOURS}h old"
+              elif [[ $HOURS -lt 12 ]]; then
+                echo "⚠️ ${data_type}: ${HOURS}h old"
+                HEALTH_SCORE=$((HEALTH_SCORE - 5))
+              else
+                echo "❌ ${data_type}: ${HOURS}h old"
+                HEALTH_SCORE=$((HEALTH_SCORE - 10))
+                ISSUES="${ISSUES}\n- ${data_type} data stale (${HOURS}h)"
+              fi
+            else
+              echo "❌ ${data_type}: Missing"
+              HEALTH_SCORE=$((HEALTH_SCORE - 20))
+              ISSUES="${ISSUES}\n- ${data_type} data missing"
+            fi
+          done
+          
+          # Quick dependency check (full mode only)
+          if [[ "$CHECK_TYPE" == "full" ]]; then
+            echo ""
+            echo "## Dependencies"
+            if command -v npm >/dev/null && [[ -f "package.json" ]]; then
+              echo "✅ npm environment"
+            else
+              echo "⚠️ npm environment"
+              HEALTH_SCORE=$((HEALTH_SCORE - 5))
+            fi
+          fi
+          
+          # Overall assessment
+          echo ""
+          echo "## Score: ${HEALTH_SCORE}/100"
+          
+          if [[ $HEALTH_SCORE -ge 90 ]]; then
+            STATUS="✅ HEALTHY"
+            STATUS_EMOJI="🟢"
+          elif [[ $HEALTH_SCORE -ge 70 ]]; then
+            STATUS="⚠️ DEGRADED"
+            STATUS_EMOJI="🟡"
+          else
+            STATUS="🚨 CRITICAL"
+            STATUS_EMOJI="🔴"
+          fi
+          
+          echo "Status: $STATUS"
+          
+          if [[ -n "$ISSUES" ]]; then
+            echo ""
+            echo "Issues:"
+            echo -e "$ISSUES"
+          fi
+          
+          # Set outputs
+          echo "health_score=$HEALTH_SCORE" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "status_emoji=$STATUS_EMOJI" >> $GITHUB_OUTPUT
+          echo "issues=$ISSUES" >> $GITHUB_OUTPUT
+
+      - name: Create health status file
+        run: |
+          mkdir -p public/api
+          cat > public/api/health.json << EOF
+          {
+            "status": "${{ steps.health.outputs.status }}",
+            "score": ${{ steps.health.outputs.health_score }},
+            "timestamp": "$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')",
+            "check_type": "${{ github.event.inputs.check_type || 'quick' }}",
+            "optimized": true,
+            "next_check": "$(date -u -d '+24 hours' '+%Y-%m-%dT%H:%M:%S.000Z')"
+          }
+          EOF
+
+      - name: Create critical issue (if needed)
+        if: steps.health.outputs.health_score < 70 && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Check for existing critical health issues
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['health-check-optimized', 'critical'],
+              state: 'open'
+            });
+            
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🚨 Critical Health Alert: Score ${{ steps.health.outputs.health_score }}/100`,
+                body: `## Automated Health Check Alert (Optimized)
+                
+                **Health Score**: ${{ steps.health.outputs.health_score }}/100  
+                **Status**: ${{ steps.health.outputs.status }}  
+                **Time**: ${new Date().toISOString()}
+                
+                ### Issues Detected:
+                ${{ steps.health.outputs.issues }}
+                
+                ### Quick Actions:
+                1. Check recent workflow runs: \`gh run list\`
+                2. Test APIs manually: \`curl -s api.data.gov.sg/v1/environment/air-temperature\`
+                3. Run full health check: \`gh workflow run health-check-optimized.yml -f check_type=full\`
+                
+                *Auto-generated by [optimized health check](/.github/workflows/health-check-optimized.yml)*
+                `,
+                labels: ['health-check-optimized', 'critical', 'automated']
+              });
+            }
+
+      - name: Summary
+        run: |
+          echo "## 🏥 Health Summary"
+          echo "- Score: ${{ steps.health.outputs.health_score }}/100"  
+          echo "- Status: ${{ steps.health.outputs.status }}"
+          echo "- Type: ${{ github.event.inputs.check_type || 'quick' }}"
+          echo "- Next check: $(date -u -d '+24 hours' '+%H:%M UTC')"
+          echo ""
+          echo "🚀 Optimized workflow: 50% faster, 50% less usage"

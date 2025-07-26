@@ -168,16 +168,24 @@ const TrafficCameraGallery = () => {
             key={camera.id}
             className="card hover:shadow-lg transition-shadow"
           >
-            <div className="aspect-video bg-gray-100 rounded overflow-hidden mb-3">
+            <div className="aspect-video bg-gray-100 rounded overflow-hidden mb-3 relative">
               <img
                 src={`${camera.image.url}?t=${Date.now()}`}
                 alt={camera.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-opacity duration-300"
                 loading="lazy"
+                onLoad={(e) => {
+                  e.target.style.opacity = '1';
+                }}
                 onError={(e) => {
                   e.target.src = '/images/placeholder.jpg';
+                  e.target.style.opacity = '0.7';
                 }}
+                style={{ opacity: '0' }}
               />
+              <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                <div className="text-gray-400 text-xs">로딩 중...</div>
+              </div>
             </div>
 
             <h4 className="font-medium text-sm mb-1">{camera.name}</h4>
