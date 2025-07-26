@@ -6,6 +6,7 @@ import LiveWebcamFeed from './LiveWebcamFeed';
 
 const WebcamGallery = ({ data }) => {
   const [selectedWebcam, setSelectedWebcam] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'live'
 
   if (!data || !data.captures || data.captures.length === 0) {
@@ -68,11 +69,14 @@ const WebcamGallery = ({ data }) => {
 
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {successfulCaptures.map((capture) => (
+            {successfulCaptures.map((capture, index) => (
               <WebcamCard
                 key={capture.id}
                 webcam={capture}
-                onClick={() => setSelectedWebcam(capture)}
+                onClick={() => {
+                  setSelectedWebcam(capture);
+                  setCurrentIndex(index);
+                }}
               />
             ))}
           </div>
@@ -90,8 +94,18 @@ const WebcamGallery = ({ data }) => {
 
       {selectedWebcam && (
         <WebcamModal
-          webcam={selectedWebcam}
-          onClose={() => setSelectedWebcam(null)}
+          item={selectedWebcam}
+          items={successfulCaptures}
+          currentIndex={currentIndex}
+          type="webcam"
+          onClose={() => {
+            setSelectedWebcam(null);
+            setCurrentIndex(0);
+          }}
+          onNavigate={(newIndex) => {
+            setCurrentIndex(newIndex);
+            setSelectedWebcam(successfulCaptures[newIndex]);
+          }}
         />
       )}
     </>

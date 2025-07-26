@@ -33,12 +33,12 @@ export const preloadImage = (src) => {
  */
 export const preloadImages = async (urls) => {
   const results = await Promise.allSettled(
-    urls.map(url => preloadImage(url))
+    urls.map(url => preloadImage(url)),
   );
-  
+
   return {
     successful: results.filter(r => r.status === 'fulfilled').map(r => r.value),
-    failed: results.filter(r => r.status === 'rejected').map(r => r.reason)
+    failed: results.filter(r => r.status === 'rejected').map(r => r.reason),
   };
 };
 
@@ -46,8 +46,8 @@ export const preloadImages = async (urls) => {
  * 이미지 URL에 캐시 버스터 추가
  */
 export const addCacheBuster = (url, timestamp = Date.now()) => {
-  if (!url) return url;
-  
+  if (!url) {return url;}
+
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}t=${timestamp}`;
 };
@@ -76,7 +76,7 @@ export const createWebcamFallbackChain = (webcamId, basePath = '/') => {
   return [
     `${basePath}images/webcam/${webcamId}.jpg`,
     `${basePath}images/webcam/${webcamId}_backup.jpg`,
-    `${basePath}images/placeholder.jpg`
+    `${basePath}images/placeholder.jpg`,
   ];
 };
 
@@ -87,5 +87,5 @@ export const imageLoadingStates = {
   LOADING: 'loading',
   LOADED: 'loaded',
   ERROR: 'error',
-  RETRYING: 'retrying'
+  RETRYING: 'retrying',
 };

@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * LoadingSkeleton Component
- * 
+ *
  * Provides modern skeleton UI patterns for the TrafficCameraGallery component
  * Features:
  * - Camera card skeletons matching actual layout
@@ -13,11 +13,11 @@ import React from 'react';
  */
 
 const CameraCardSkeleton = React.memo(({ delay = 0 }) => (
-  <div 
+  <div
     className="card animate-pulse"
-    style={{ 
+    style={{
       animationDelay: `${delay}ms`,
-      animationDuration: '1.5s'
+      animationDuration: '1.5s',
     }}
     role="status"
     aria-label="Loading camera"
@@ -37,7 +37,7 @@ const CameraCardSkeleton = React.memo(({ delay = 0 }) => (
 
     {/* Camera name skeleton */}
     <div className="skeleton h-4 w-3/4 mb-2 rounded"></div>
-    
+
     {/* Area name skeleton */}
     <div className="skeleton h-3 w-1/2 mb-3 rounded"></div>
 
@@ -90,7 +90,7 @@ const SummarySkeleton = React.memo(() => (
 
 /**
  * Main LoadingSkeleton Component
- * 
+ *
  * @param {Object} props
  * @param {number} props.count - Number of camera cards to show (default: 8)
  * @param {boolean} props.showControls - Whether to show controls skeleton (default: true)
@@ -101,12 +101,12 @@ const LoadingSkeleton = ({
   count = 8,
   showControls = true,
   showSummary = true,
-  variant = 'default'
+  variant = 'default',
 }) => {
   // Calculate responsive grid based on viewport
   const getGridCols = () => {
-    if (variant === 'compact') return 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6';
-    if (variant === 'minimal') return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+    if (variant === 'compact') {return 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6';}
+    if (variant === 'minimal') {return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';}
     return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
   };
 
@@ -125,7 +125,7 @@ const LoadingSkeleton = ({
       {/* Camera grid skeleton */}
       <div className={`grid ${getGridCols()} gap-4`}>
         {Array.from({ length: count }, (_, index) => (
-          <CameraCardSkeleton 
+          <CameraCardSkeleton
             key={`skeleton-${index}`}
             delay={getStaggerDelay(index)}
           />
@@ -136,9 +136,9 @@ const LoadingSkeleton = ({
       {showSummary && <SummarySkeleton />}
 
       {/* Loading announcement for screen readers */}
-      <div 
-        className="sr-only" 
-        role="status" 
+      <div
+        className="sr-only"
+        role="status"
         aria-live="polite"
         aria-atomic="true"
       >

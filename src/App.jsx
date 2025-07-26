@@ -116,7 +116,7 @@ const App = React.memo(() => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         {/* Scroll progress indicator */}
         <ScrollProgress />
-        
+
         {/* Skip to main content link for keyboard users */}
         <a
           href="#main"

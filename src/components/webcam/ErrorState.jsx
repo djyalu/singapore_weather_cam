@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 /**
  * ErrorState Component
- * 
+ *
  * Enhanced error handling component with better messaging and retry mechanisms
  * Features:
  * - Multiple error types with appropriate messaging
@@ -18,7 +18,7 @@ const ErrorState = ({
   retryAttempts = 0,
   maxRetries = 3,
   showDetails = false,
-  variant = 'default' // 'default' | 'compact' | 'inline'
+  variant = 'default', // 'default' | 'compact' | 'inline'
 }) => {
   const [isRetrying, setIsRetrying] = useState(false);
   const [showErrorDetails, setShowErrorDetails] = useState(showDetails);
@@ -26,64 +26,64 @@ const ErrorState = ({
   // Determine error type and appropriate messaging
   const getErrorInfo = (errorMessage) => {
     const error = errorMessage?.toLowerCase() || '';
-    
+
     if (error.includes('network') || error.includes('fetch')) {
       return {
         type: 'network',
         title: '네트워크 연결 오류',
         message: '인터넷 연결을 확인하고 다시 시도해주세요.',
         icon: '🌐',
-        severity: 'error'
+        severity: 'error',
       };
     }
-    
+
     if (error.includes('timeout')) {
       return {
         type: 'timeout',
         title: '요청 시간 초과',
         message: '서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.',
         icon: '⏱️',
-        severity: 'warning'
+        severity: 'warning',
       };
     }
-    
+
     if (error.includes('404') || error.includes('not found')) {
       return {
         type: 'not_found',
         title: '데이터를 찾을 수 없음',
         message: '요청한 카메라 데이터를 찾을 수 없습니다.',
         icon: '🔍',
-        severity: 'warning'
+        severity: 'warning',
       };
     }
-    
+
     if (error.includes('403') || error.includes('unauthorized')) {
       return {
         type: 'unauthorized',
         title: '접근 권한 없음',
         message: '데이터에 접근할 권한이 없습니다.',
         icon: '🔒',
-        severity: 'error'
+        severity: 'error',
       };
     }
-    
+
     if (error.includes('500') || error.includes('server')) {
       return {
         type: 'server',
         title: '서버 오류',
         message: '서버에 일시적인 문제가 발생했습니다.',
         icon: '🔧',
-        severity: 'error'
+        severity: 'error',
       };
     }
-    
+
     // Generic error
     return {
       type: 'generic',
       title: '오류가 발생했습니다',
       message: '예상치 못한 오류가 발생했습니다. 다시 시도해주세요.',
       icon: '⚠️',
-      severity: 'error'
+      severity: 'error',
     };
   };
 
@@ -96,19 +96,19 @@ const ErrorState = ({
   };
 
   const handleRetry = async () => {
-    if (!canRetry || isRetrying) return;
-    
+    if (!canRetry || isRetrying) {return;}
+
     setIsRetrying(true);
-    
+
     try {
       const delay = getRetryDelay(retryAttempts);
-      
+
       // Show retry countdown for longer delays
       if (delay > 2000) {
         const seconds = Math.ceil(delay / 1000);
         // You could implement a countdown here if needed
       }
-      
+
       await new Promise(resolve => setTimeout(resolve, delay));
       await onRetry();
     } catch (retryError) {
@@ -120,8 +120,8 @@ const ErrorState = ({
   };
 
   const getContainerClasses = () => {
-    const base = "text-center";
-    
+    const base = 'text-center';
+
     switch (variant) {
       case 'compact':
         return `${base} py-4`;
@@ -196,7 +196,7 @@ const ErrorState = ({
 
         {/* Error details */}
         {showErrorDetails && error && (
-          <div 
+          <div
             id="error-details"
             className="bg-gray-50 border border-gray-200 rounded p-3 mb-4 text-left"
           >
@@ -246,15 +246,15 @@ const ErrorState = ({
         {/* Additional help text */}
         <div className="mt-6 text-xs text-gray-500 max-w-lg mx-auto">
           <p>
-            문제가 지속되면 브라우저를 새로고침하거나 
+            문제가 지속되면 브라우저를 새로고침하거나
             잠시 후 다시 방문해주세요.
           </p>
         </div>
 
         {/* Screen reader additional context */}
         <div className="sr-only">
-          오류 유형: {errorInfo.type}. 
-          심각도: {errorInfo.severity}. 
+          오류 유형: {errorInfo.type}.
+          심각도: {errorInfo.severity}.
           {canRetry ? `재시도 가능. 남은 재시도 횟수: ${maxRetries - retryAttempts}회.` : '재시도 불가능.'}
         </div>
       </div>

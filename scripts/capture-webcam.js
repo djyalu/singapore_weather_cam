@@ -50,7 +50,15 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import puppeteer from 'puppeteer';
+// Optional puppeteer import for browser capture
+let puppeteer = null;
+try {
+  if (process.env.DISABLE_BROWSER_CAPTURE !== 'true') {
+    puppeteer = (await import('puppeteer')).default;
+  }
+} catch (error) {
+  console.warn('Puppeteer not available, browser capture will be disabled');
+}
 import Anthropic from '@anthropic-ai/sdk';
 
 // ES modules __dirname 구현
@@ -372,6 +380,11 @@ async function captureWithBrowser(url, filepath, options = {}) {
   // 환경 변수로 브라우저 캡처 비활성화 가능
   if (process.env.DISABLE_BROWSER_CAPTURE === 'true') {
     throw new Error('Browser capture is disabled');
+  }
+
+  // Puppeteer가 사용 불가능한 경우
+  if (!puppeteer) {
+    throw new Error('Puppeteer is not available');
   }
 
   let browser = null;

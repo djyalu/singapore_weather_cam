@@ -150,8 +150,8 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     }
   }, []);
 
-  // Enhanced data validation functions
-  const validateWeatherData = (data) => {
+  // Enhanced data validation functions (future use)
+  const _validateWeatherData = (data) => {
     if (!data || typeof data !== 'object') {
       return { isValid: false, error: 'Invalid data structure' };
     }
@@ -167,7 +167,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     return { isValid: true };
   };
 
-  const validateWebcamData = (data) => {
+  const _validateWebcamData = (data) => {
     if (!data || typeof data !== 'object') {
       return { isValid: false, error: 'Invalid data structure' };
     }

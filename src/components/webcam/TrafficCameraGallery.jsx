@@ -7,6 +7,7 @@ import {
 } from '../../services/trafficCameraService';
 import LoadingSkeleton from './LoadingSkeleton';
 import ErrorState from './ErrorState';
+import WebcamModal from './WebcamModal';
 
 /**
  * Individual Camera Card Component with enhanced mobile touch interactions
@@ -35,12 +36,12 @@ const CameraCard = ({ camera, index, onImageTap, onCardPress }) => {
     touchStartRef.current = {
       x: e.touches[0].clientX,
       y: e.touches[0].clientY,
-      time: Date.now()
+      time: Date.now(),
     };
-    
+
     // Add visual feedback for touch
     setIsPressed(true);
-    
+
     // Long press detection for camera details
     pressTimeoutRef.current = setTimeout(() => {
       if (onCardPress) {
@@ -55,17 +56,17 @@ const CameraCard = ({ camera, index, onImageTap, onCardPress }) => {
 
   const handleTouchEnd = useCallback((e) => {
     setIsPressed(false);
-    
+
     if (pressTimeoutRef.current) {
       clearTimeout(pressTimeoutRef.current);
     }
 
-    if (!touchStartRef.current) return;
+    if (!touchStartRef.current) {return;}
 
     const touchEnd = {
       x: e.changedTouches[0].clientX,
       y: e.changedTouches[0].clientY,
-      time: Date.now()
+      time: Date.now(),
     };
 
     const deltaX = touchEnd.x - touchStartRef.current.x;
@@ -101,9 +102,9 @@ const CameraCard = ({ camera, index, onImageTap, onCardPress }) => {
         ${isPressed ? 'scale-95 shadow-md' : 'hover:shadow-lg active:scale-98'}
         cursor-pointer select-none
       `}
-      style={{ 
+      style={{
         animationDelay: `${(index % 8) * 50}ms`,
-        WebkitTapHighlightColor: 'transparent'
+        WebkitTapHighlightColor: 'transparent',
       }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -133,9 +134,9 @@ const CameraCard = ({ camera, index, onImageTap, onCardPress }) => {
           loading="lazy"
           onLoad={handleImageLoad}
           onError={handleImageError}
-          style={{ 
+          style={{
             opacity: imageLoading ? '0' : '1',
-            touchAction: 'manipulation'
+            touchAction: 'manipulation',
           }}
           draggable={false}
         />
@@ -182,15 +183,15 @@ const CameraCard = ({ camera, index, onImageTap, onCardPress }) => {
       {/* Mobile interaction indicators */}
       <div className="absolute bottom-2 left-2 opacity-0 group-active:opacity-100 transition-opacity duration-200">
         <div className="text-xs text-gray-400 bg-white bg-opacity-80 px-2 py-1 rounded">
-          탭하여 확대
+          탭하여 모달 열기
         </div>
       </div>
 
       {/* Accessibility */}
       <div className="sr-only">
-        실시간 교통 카메라: {camera.name}, 위치: {camera.area}, 
+        실시간 교통 카메라: {camera.name}, 위치: {camera.area},
         해상도: {camera.image.width}×{camera.image.height}픽셀.
-        탭하여 확대 보기, 길게 눌러 상세 정보 보기
+        탭하여 확대 모달 열기, 화살표 키로 탐색 가능
       </div>
     </div>
   );
@@ -208,23 +209,22 @@ const TrafficCameraGallery = () => {
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState(null);
-  const [showImageModal, setShowImageModal] = useState(false);
-  const [showCameraDetails, setShowCameraDetails] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [touchDevice, setTouchDevice] = useState(false);
 
   // Detect touch device on mount
   useEffect(() => {
     const checkTouchDevice = () => {
       setTouchDevice(
-        'ontouchstart' in window || 
-        navigator.maxTouchPoints > 0 || 
-        navigator.msMaxTouchPoints > 0
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0,
       );
     };
-    
+
     checkTouchDevice();
     window.addEventListener('touchstart', checkTouchDevice, { once: true });
-    
+
     return () => {
       window.removeEventListener('touchstart', checkTouchDevice);
     };
@@ -258,7 +258,7 @@ const TrafficCameraGallery = () => {
       } else {
         setLoading(true);
       }
-      
+
       const data = await fetchTrafficCameras();
       setCameras(data.cameras);
       setLastUpdate(new Date(data.timestamp));
@@ -283,28 +283,28 @@ const TrafficCameraGallery = () => {
 
   // Mobile interaction handlers
   const handleImageTap = useCallback((camera) => {
+    const index = filteredCameras.findIndex(c => c.id === camera.id);
     setSelectedCamera(camera);
-    setShowImageModal(true);
-  }, []);
+    setCurrentIndex(index >= 0 ? index : 0);
+  }, [filteredCameras]);
 
   const handleCardPress = useCallback((camera) => {
-    setSelectedCamera(camera);
-    setShowCameraDetails(true);
-  }, []);
+    // For long press, also open the modal (same as tap for unified experience)
+    handleImageTap(camera);
+  }, [handleImageTap]);
 
   const handleCloseModal = useCallback(() => {
-    setShowImageModal(false);
-    setShowCameraDetails(false);
     setSelectedCamera(null);
+    setCurrentIndex(0);
   }, []);
 
   // Swipe gesture for view mode switching on mobile
   const handleSwipeGesture = useCallback((direction) => {
-    if (!touchDevice) return;
-    
+    if (!touchDevice) {return;}
+
     const modes = ['featured', 'area', 'all'];
     const currentIndex = modes.indexOf(viewMode);
-    
+
     if (direction === 'left' && currentIndex < modes.length - 1) {
       setViewMode(modes[currentIndex + 1]);
     } else if (direction === 'right' && currentIndex > 0) {
@@ -318,7 +318,7 @@ const TrafficCameraGallery = () => {
   // Show skeleton loading state for initial load
   if (loading && cameras.length === 0) {
     return (
-      <LoadingSkeleton 
+      <LoadingSkeleton
         count={8}
         showControls={true}
         showSummary={true}
@@ -349,7 +349,7 @@ const TrafficCameraGallery = () => {
         {touchDevice && (
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="text-sm text-blue-800">
-              💡 <strong>터치 가이드:</strong> 카메라를 탭하여 확대, 길게 눌러 상세 정보 보기
+              💡 <strong>터치 가이드:</strong> 카메라를 탭하여 확대 보기 (화살표 키로 탐색, ESC로 닫기)
             </div>
           </div>
         )}
@@ -365,9 +365,9 @@ const TrafficCameraGallery = () => {
                   font-medium transition-all duration-200 touch-manipulation
                   min-h-[44px] sm:min-h-[auto] flex items-center justify-center
                   ${viewMode === 'featured'
-                    ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
-                  }
+      ? 'bg-blue-600 text-white shadow-md transform scale-105'
+      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
+    }
                 `}
                 aria-pressed={viewMode === 'featured'}
               >
@@ -384,9 +384,9 @@ const TrafficCameraGallery = () => {
                   font-medium transition-all duration-200 touch-manipulation
                   min-h-[44px] sm:min-h-[auto] flex items-center justify-center
                   ${viewMode === 'area'
-                    ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
-                  }
+      ? 'bg-blue-600 text-white shadow-md transform scale-105'
+      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
+    }
                 `}
                 aria-pressed={viewMode === 'area'}
               >
@@ -403,9 +403,9 @@ const TrafficCameraGallery = () => {
                   font-medium transition-all duration-200 touch-manipulation
                   min-h-[44px] sm:min-h-[auto] flex items-center justify-center
                   ${viewMode === 'all'
-                    ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
-                  }
+      ? 'bg-blue-600 text-white shadow-md transform scale-105'
+      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
+    }
                 `}
                 aria-pressed={viewMode === 'all'}
               >
@@ -464,9 +464,9 @@ const TrafficCameraGallery = () => {
               onClick={handleManualRefresh}
               disabled={loading || isRefreshing}
               className="
-                btn-secondary text-sm font-medium px-4 py-3 sm:py-2 
+                btn-secondary text-sm font-medium px-4 py-3 sm:py-2
                 rounded-lg transition-all duration-200 touch-manipulation
-                min-h-[44px] sm:min-h-[auto] disabled:opacity-50 
+                min-h-[44px] sm:min-h-[auto] disabled:opacity-50
                 disabled:cursor-not-allowed active:scale-95
                 flex items-center justify-center gap-2
               "
@@ -526,7 +526,7 @@ const TrafficCameraGallery = () => {
       {/* Camera Grid - Enhanced mobile responsiveness */}
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         {filteredCameras.map((camera, index) => (
-          <CameraCard 
+          <CameraCard
             key={camera.id}
             camera={camera}
             index={index}
@@ -550,127 +550,19 @@ const TrafficCameraGallery = () => {
         </div>
       </div>
 
-      {/* Mobile Image Modal */}
-      {showImageModal && selectedCamera && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4 touch-manipulation">
-          <div className="relative w-full h-full max-w-4xl max-h-full flex flex-col">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 bg-white bg-opacity-10 rounded-t-lg backdrop-blur-sm">
-              <div className="text-white">
-                <h3 className="font-medium text-lg line-clamp-1">{selectedCamera.name}</h3>
-                <p className="text-sm text-gray-300">📍 {selectedCamera.area}</p>
-              </div>
-              <button
-                onClick={handleCloseModal}
-                className="text-white hover:text-gray-300 p-2 min-h-[44px] min-w-[44px] 
-                         rounded-full bg-white bg-opacity-20 active:scale-95 transition-all"
-                aria-label="닫기"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Modal Image */}
-            <div className="flex-1 flex items-center justify-center bg-black bg-opacity-50 rounded-b-lg">
-              <img
-                src={`${selectedCamera.image.url}?t=${Date.now()}`}
-                alt={`${selectedCamera.name} 확대 보기`}
-                className="max-w-full max-h-full object-contain touch-manipulation"
-                style={{ touchAction: 'pinch-zoom' }}
-              />
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 bg-white bg-opacity-10 backdrop-blur-sm rounded-b-lg">
-              <div className="flex items-center justify-between text-white text-sm">
-                <span>해상도: {selectedCamera.image.width}×{selectedCamera.image.height}</span>
-                <span>ID: {selectedCamera.id}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Camera Details Modal */}
-      {showCameraDetails && selectedCamera && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-4 touch-manipulation">
-          <div className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md max-h-[80vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h3 className="font-semibold text-lg text-gray-900">카메라 상세 정보</h3>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-400 hover:text-gray-600 p-2 min-h-[44px] min-w-[44px] 
-                         rounded-full hover:bg-gray-100 active:scale-95 transition-all"
-                aria-label="닫기"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-4 space-y-4 overflow-y-auto">
-              {/* Camera Image */}
-              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                <img
-                  src={`${selectedCamera.image.url}?t=${Date.now()}`}
-                  alt={selectedCamera.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Camera Details */}
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">카메라명</label>
-                  <p className="text-gray-900">{selectedCamera.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">위치</label>
-                  <p className="text-gray-900">📍 {selectedCamera.area}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">카메라 ID</label>
-                    <p className="text-gray-900">{selectedCamera.id}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">해상도</label>
-                    <p className="text-gray-900">{selectedCamera.image.width}×{selectedCamera.image.height}</p>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">상태</label>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-green-600 font-medium">실시간 라이브</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={() => {
-                    setShowCameraDetails(false);
-                    setShowImageModal(true);
-                  }}
-                  className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium 
-                           min-h-[44px] active:scale-95 transition-all duration-200"
-                >
-                  확대 보기
-                </button>
-                <button
-                  onClick={handleCloseModal}
-                  className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium 
-                           min-h-[44px] active:scale-95 transition-all duration-200"
-                >
-                  닫기
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Shared WebcamModal */}
+      {selectedCamera && (
+        <WebcamModal
+          item={selectedCamera}
+          items={filteredCameras}
+          currentIndex={currentIndex}
+          type="traffic"
+          onClose={handleCloseModal}
+          onNavigate={(newIndex) => {
+            setCurrentIndex(newIndex);
+            setSelectedCamera(filteredCameras[newIndex]);
+          }}
+        />
       )}
     </div>
   );

@@ -36,25 +36,25 @@ const Header = React.memo(({ systemStats = {} }) => {
       const headerHeight = header ? header.offsetHeight : 0;
       const statusBarHeight = 44; // Status bar height
       const offset = headerHeight + statusBarHeight + 20; // Extra padding
-      
+
       // Calculate scroll position with offset
       const elementPosition = element.offsetTop - offset;
-      
+
       // Smooth scroll with offset
       window.scrollTo({
         top: elementPosition,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
-      
+
       // Update active section
       setActiveSection(target.replace('#', ''));
-      
+
       // Focus management for accessibility
       setTimeout(() => {
         element.focus({ preventScroll: true });
         element.setAttribute('tabindex', '-1');
       }, 500); // Wait for scroll to complete
-      
+
       closeMenu();
     }
   }, [closeMenu]);
