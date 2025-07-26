@@ -1,137 +1,55 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { Suspense } from 'react';
 import LiveHeader from './components/layout/LiveHeader';
 import SystemStats from './components/dashboard/SystemStats';
-import WeatherAnalysisCard from './components/analysis/WeatherAnalysisCard';
 import SystemFooter from './components/layout/SystemFooter';
-import MapView from './components/map/MapView';
 import LoadingScreen from './components/common/LoadingScreen';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import WebcamGallery from './components/webcam/WebcamGallery';
-import TrafficCameraGallery from './components/webcam/TrafficCameraGallery';
+
+// Lazy load components for better performance
+const WeatherAnalysisCardRefactored = React.lazy(() => import('./components/analysis/WeatherAnalysisCardRefactored'));
+const MapView = React.lazy(() => import('./components/map/MapView'));
+const WebcamGallery = React.lazy(() => import('./components/webcam/WebcamGallery'));
+const TrafficCameraGallery = React.lazy(() => import('./components/webcam/TrafficCameraGallery'));
+import { useDataLoader } from './hooks/useDataLoader';
+import { useSystemStats } from './hooks/useSystemStats';
+import { useServiceWorker } from './hooks/useServiceWorker';
+import PWAStatus from './components/common/PWAStatus';
+import { initializeAccessibility } from './utils/accessibility';
 
 const App = React.memo(() => {
-  const [weatherData, setWeatherData] = useState(null);
-  const [webcamData, setWebcamData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [retryCount, setRetryCount] = useState(0);
+  // Use custom hooks for cleaner component logic
+  const {
+    weatherData,
+    webcamData,
+    isInitialLoading,
+    isRefreshing,
+    error,
+    retryCount,
+    refresh,
+    dataFreshness
+  } = useDataLoader(5 * 60 * 1000); // 5 minute refresh interval
 
-  // System stats calculation with memoization
-  const systemStats = useMemo(() => {
-    if (!webcamData?.captures) {return {};}
+  // Use custom hook for system stats calculation
+  const systemStats = useSystemStats(webcamData);
 
-    const totalWebcams = webcamData.total_cameras || webcamData.captures.length;
-    const successfulAnalyses = webcamData.successful_captures ||
-      webcamData.captures.filter(c => c.status === 'success').length;
-    const failedAnalyses = webcamData.failed_captures ||
-      webcamData.captures.filter(c => c.status === 'failed').length;
+  // PWA functionality
+  const {
+    isOnline,
+    isUpdateAvailable,
+    canInstall,
+    installPWA,
+    updateServiceWorker,
+    requestNotificationPermission
+  } = useServiceWorker();
 
-    // Calculate average confidence from actual analysis data
-    const analysisConfidences = webcamData.captures
-      .filter(c => c.analysis?.confidence && c.status === 'success')
-      .map(c => c.analysis.confidence);
-
-    const averageConfidence = analysisConfidences.length > 0
-      ? Math.floor(analysisConfidences.reduce((a, b) => a + b, 0) / analysisConfidences.length)
-      : 0;
-
-    // Determine dominant weather condition
-    const weatherConditions = webcamData.captures
-      .filter(c => c.ai_analysis?.weather_condition)
-      .map(c => {
-        const condition = c.ai_analysis.weather_condition.toLowerCase();
-        if (condition.includes('sunny') || condition.includes('clear')) {return 'sunny';}
-        if (condition.includes('cloudy') || condition.includes('overcast')) {return 'cloudy';}
-        if (condition.includes('partly')) {return 'partly_cloudy';}
-        if (condition.includes('rain')) {return 'light_rain';}
-        return 'sunny';
-      });
-
-    const dominantWeather = weatherConditions.length > 0
-      ? weatherConditions.reduce((a, b, i, arr) =>
-        arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b,
-      )
-      : 'sunny';
-
-    return {
-      totalWebcams,
-      successfulAnalyses,
-      failedAnalyses,
-      averageConfidence,
-      lastUpdate: webcamData.timestamp ? new Date(webcamData.timestamp).toLocaleString('ko-KR') : null,
-      totalProcessingTime: '15-30초',
-      dominantWeather,
-    };
-  }, [webcamData]);
-
-  // Data loading function with improved error handling
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const basePath = import.meta.env.BASE_URL || '/';
-
-      // Parallel data fetching for better performance
-      const [weatherResponse, webcamResponse] = await Promise.all([
-        fetch(`${basePath}data/weather/latest.json`, {
-          headers: { 'Cache-Control': 'no-cache' },
-        }),
-        fetch(`${basePath}data/webcam/latest.json`, {
-          headers: { 'Cache-Control': 'no-cache' },
-        }),
-      ]);
-
-      if (!weatherResponse.ok) {
-        throw new Error(`Weather data fetch failed: ${weatherResponse.status}`);
-      }
-      if (!webcamResponse.ok) {
-        throw new Error(`Webcam data fetch failed: ${webcamResponse.status}`);
-      }
-
-      const [weatherJson, webcamJson] = await Promise.all([
-        weatherResponse.json(),
-        webcamResponse.json(),
-      ]);
-
-      setWeatherData(weatherJson);
-      setWebcamData(webcamJson);
-      setRetryCount(0); // Reset retry count on success
-
-    } catch (err) {
-      console.error('Data loading error:', err);
-      setError(err.message);
-      setRetryCount(prev => prev + 1);
-    } finally {
-      setLoading(false);
-    }
+  // Initialize accessibility features
+  React.useEffect(() => {
+    initializeAccessibility();
   }, []);
 
-  // Auto-retry with exponential backoff
-  const handleRetry = useCallback(() => {
-    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000); // Max 30s delay
-    setTimeout(loadData, delay);
-  }, [loadData, retryCount]);
+  // Data loading logic now handled by custom hook
 
-  // Initial load and periodic refresh
-  useEffect(() => {
-    loadData();
-
-    // Refresh every 5 minutes
-    const interval = setInterval(loadData, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, [loadData]);
-
-  // Auto-retry failed requests
-  useEffect(() => {
-    if (error && retryCount < 3) {
-      const retryTimer = setTimeout(handleRetry, 2000 * retryCount);
-      return () => clearTimeout(retryTimer);
-    }
-  }, [error, retryCount, handleRetry]);
-
-  if (loading && !weatherData && !webcamData) {
+  if (isInitialLoading) {
     return <LoadingScreen />;
   }
 
@@ -140,17 +58,18 @@ const App = React.memo(() => {
       <div className="min-h-screen bg-red-50 flex items-center justify-center" role="alert">
         <div className="text-center p-8 max-w-md">
           <div className="text-6xl mb-4" role="img" aria-label="Error">⚠️</div>
-          <h1 className="text-2xl font-bold text-red-800 mb-4">데이터 로딩 오류</h1>
+          <h1 className="text-2xl font-bold text-red-800 mb-4">Data Loading Error</h1>
           <p className="text-red-600 mb-4">{error}</p>
           <p className="text-sm text-gray-600 mb-4">
-            {retryCount > 0 && `재시도 ${retryCount}/3`}
+            {retryCount > 0 && `Retry ${retryCount}/3`}
+            {dataFreshness && ` • Last update: ${dataFreshness}`}
           </p>
           <button
-            onClick={loadData}
+            onClick={refresh}
             className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
-            aria-label="데이터 다시 로드"
+            aria-label="Reload data"
           >
-            다시 시도
+            Try Again
           </button>
         </div>
       </div>
@@ -160,40 +79,49 @@ const App = React.memo(() => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        {/* Skip to main content link for keyboard users */}
+        <a 
+          href="#main" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded z-50 transition-all duration-200"
+        >
+          Skip to main content
+        </a>
         <LiveHeader systemStats={systemStats} />
 
         <SystemStats {...systemStats} />
 
-        <main className="max-w-7xl mx-auto px-4 pb-8" role="main">
+        <main id="main" className="max-w-7xl mx-auto px-4 pb-8" role="main" tabIndex="-1">
           {/* Map Section */}
           <section className="mb-8" aria-labelledby="map-heading">
             <div className="mb-6">
               <h2 id="map-heading" className="text-2xl font-bold text-gray-900 mb-2">
-                🗺️ 실시간 지도
+                🗺️ Real-time Map
               </h2>
               <p className="text-gray-600">
-                Hwa Chong International School을 중심으로 한 날씨 및 웹캠 위치
+                Weather and webcam locations centered on Bukit Timah Nature Reserve
+                {isRefreshing && <span className="ml-2 text-blue-600 animate-pulse">• Updating...</span>}
               </p>
             </div>
 
-            {loading ? (
+            <Suspense fallback={
               <div className="bg-white rounded-xl shadow-lg p-8 text-center" aria-live="polite">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" aria-hidden="true"></div>
-                <p className="mt-4 text-gray-600">지도 로딩 중...</p>
+                <p className="mt-4 text-gray-600">Loading map...</p>
               </div>
-            ) : (
+            }>
               <MapView weatherData={weatherData} webcamData={webcamData} />
-            )}
+            </Suspense>
           </section>
 
           {/* Analysis Results Section */}
           <section aria-labelledby="analysis-heading">
             <div className="mb-6">
               <h2 id="analysis-heading" className="text-2xl font-bold text-gray-900 mb-2">
-                🌍 실시간 지역별 날씨 분석
+                🌍 Real-time Regional Weather Analysis
               </h2>
               <p className="text-gray-600">
-                Claude AI가 분석한 주요 지역의 현재 날씨 상황
+                AI-analyzed current weather conditions for key locations
+                {dataFreshness && <span className="ml-2 text-sm text-gray-500">• {dataFreshness}</span>}
               </p>
             </div>
 
@@ -211,13 +139,21 @@ const App = React.memo(() => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {webcamData?.captures?.map((location, index) => (
-                  <WeatherAnalysisCard
-                    key={location.id}
-                    location={location}
-                    animationDelay={index * 100}
-                  />
-                ))}
+                <Suspense fallback={
+                  <div className="bg-white rounded-xl shadow-lg p-6 animate-pulse" aria-hidden="true">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-32 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                  </div>
+                }>
+                  {webcamData?.captures?.map((location, index) => (
+                    <WeatherAnalysisCardRefactored
+                      key={location.id}
+                      location={location}
+                      animationDelay={index * 100}
+                    />
+                  ))}
+                </Suspense>
               </div>
             )}
           </section>
@@ -226,30 +162,54 @@ const App = React.memo(() => {
           <section className="mb-8" aria-labelledby="webcams-heading">
             <div className="mb-6">
               <h2 id="webcams-heading" className="text-2xl font-bold text-gray-900 mb-2">
-                📸 실시간 웹캠
+                📸 Live Webcams
               </h2>
               <p className="text-gray-600">
-                싱가포르 주요 지점의 실시간 영상
+                Real-time video feeds from key Singapore locations
               </p>
             </div>
-            <WebcamGallery data={webcamData} />
+            <Suspense fallback={
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading webcams...</p>
+              </div>
+            }>
+              <WebcamGallery data={webcamData} />
+            </Suspense>
           </section>
 
           {/* Traffic Cameras Section */}
           <section className="mb-8" aria-labelledby="traffic-heading">
             <div className="mb-6">
               <h2 id="traffic-heading" className="text-2xl font-bold text-gray-900 mb-2">
-                🚗 실시간 교통 카메라
+                🚗 Live Traffic Cameras
               </h2>
               <p className="text-gray-600">
-                싱가포르 전역의 실시간 교통 상황 (data.gov.sg 제공)
+                Real-time traffic conditions across Singapore (data.gov.sg)
               </p>
             </div>
-            <TrafficCameraGallery />
+            <Suspense fallback={
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading traffic cameras...</p>
+              </div>
+            }>
+              <TrafficCameraGallery />
+            </Suspense>
           </section>
         </main>
 
         <SystemFooter systemStats={systemStats} />
+
+        {/* PWA Status Components */}
+        <PWAStatus
+          isOnline={isOnline}
+          isUpdateAvailable={isUpdateAvailable}
+          canInstall={canInstall}
+          onInstall={installPWA}
+          onUpdate={updateServiceWorker}
+          onRequestNotifications={requestNotificationPermission}
+        />
       </div>
     </ErrorBoundary>
   );

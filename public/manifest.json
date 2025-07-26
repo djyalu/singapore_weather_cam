@@ -1,12 +1,14 @@
 {
   "name": "Singapore Weather Cam",
   "short_name": "SG Weather",
-  "description": "Real-time weather information and webcam views from Singapore",
-  "theme_color": "#DC143C",
-  "background_color": "#FFFFFF",
+  "description": "Real-time weather and webcam monitoring for Singapore's Bukit Timah region",
+  "theme_color": "#2563eb",
+  "background_color": "#f8fafc",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/favicon-16x16.png",

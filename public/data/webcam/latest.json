@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-07-26T06:30:01.272Z",
+  "timestamp": "2025-07-26T13:00:01.272Z",
   "total_cameras": 4,
   "successful_captures": 4,
   "failed_captures": 0,
@@ -118,7 +118,6 @@
     {
       "id": "newton_area",
       "name": "Newton Circus Area",
-      "displayName": "뉴턴 서커스 지역",
       "location": "Newton",
       "coordinates": {
         "lat": 1.3138,
@@ -138,23 +137,11 @@
         "urban_activity": "Moderate pedestrian activity",
         "visibility": "Good"
       },
-      "error": null,
-      "activities": {
-        "outdoor_activities": "good",
-        "photography": "good",
-        "tourism": "excellent"
-      },
-      "analysis": {
-        "confidence": 91,
-        "observations": "도시 지역의 활동이 활발하며, 쇼핑이나 식사하기 좋은 날씨입니다.",
-        "aiAnalysis": "AI 분석: 도심 활동이 원활하며, 상업 활동과 관광에 적합한 환경입니다.",
-        "lastAnalyzed": "1분 전"
-      }
+      "error": null
     },
     {
       "id": "clementi_overview",
       "name": "Clementi Town Overview",
-      "displayName": "클레멘티 타운",
       "location": "Clementi",
       "coordinates": {
         "lat": 1.3162,
@@ -174,18 +161,7 @@
         "residential_area": "Quiet residential morning",
         "visibility": "Fair"
       },
-      "error": null,
-      "activities": {
-        "outdoor_activities": "moderate",
-        "photography": "moderate",
-        "tourism": "good"
-      },
-      "analysis": {
-        "confidence": 88,
-        "observations": "주거 지역이 조용하고 평화로우며, 가벼운 비가 예상되지만 일상 활동에는 무리가 없습니다.",
-        "aiAnalysis": "AI 분석: 주거 환경이 안정적이며, 실내외 활동 모두 가능한 상태입니다.",
-        "lastAnalyzed": "3분 전"
-      }
+      "error": null
     }
   ]
 }
