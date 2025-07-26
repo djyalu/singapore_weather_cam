@@ -15,6 +15,35 @@ const WeatherDashboard = ({ data }) => {
 
   const { current, forecast, locations } = data;
 
+  // Filter data based on selected location
+  const getFilteredData = () => {
+    if (selectedLocation === 'all') {
+      return {
+        current,
+        forecast,
+        locationData: null
+      };
+    }
+    
+    const selectedLocationData = locations?.find(loc => loc.id === selectedLocation);
+    return {
+      current: selectedLocationData ? {
+        temperature: selectedLocationData.temperature,
+        humidity: selectedLocationData.humidity,
+        rainfall: selectedLocationData.rainfall,
+        feelsLike: current?.feelsLike,
+        windSpeed: current?.windSpeed,
+        windDirection: current?.windDirection,
+        uvIndex: current?.uvIndex,
+        visibility: current?.visibility
+      } : current,
+      forecast,
+      locationData: selectedLocationData
+    };
+  };
+
+  const filteredData = getFilteredData();
+
   return (
     <div className="space-y-6">
       {/* Location Selector */}
@@ -39,36 +68,52 @@ const WeatherDashboard = ({ data }) => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            {location.name}
+            {location.displayName || location.name}
           </button>
         ))}
       </div>
+
+      {/* Selected Location Info */}
+      {filteredData.locationData && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="text-2xl mr-3">📍</div>
+            <div>
+              <h3 className="font-semibold text-blue-900">{filteredData.locationData.displayName}</h3>
+              <p className="text-sm text-blue-700">{filteredData.locationData.description}</p>
+              <p className="text-xs text-blue-600">
+                Station: {filteredData.locationData.station_id} • Priority: {filteredData.locationData.priority}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Current Weather */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <WeatherCard
           title="Temperature"
-          value={`${current?.temperature || '--'}°C`}
+          value={`${filteredData.current?.temperature || '--'}°C`}
           icon="🌡️"
-          description={`Feels like ${current?.feelsLike || '--'}°C`}
+          description={`Feels like ${filteredData.current?.feelsLike || '--'}°C`}
         />
         <WeatherCard
           title="Humidity"
-          value={`${current?.humidity || '--'}%`}
+          value={`${filteredData.current?.humidity || '--'}%`}
           icon="💧"
-          description={current?.humidity > 70 ? 'High humidity' : 'Comfortable'}
+          description={filteredData.current?.humidity > 70 ? 'High humidity' : 'Comfortable'}
         />
         <WeatherCard
           title="Rainfall"
-          value={`${current?.rainfall || '0'} mm`}
+          value={`${filteredData.current?.rainfall || '0'} mm`}
           icon="🌧️"
-          description={current?.rainfall > 0 ? 'Rain detected' : 'No rain'}
+          description={filteredData.current?.rainfall > 0 ? 'Rain detected' : 'No rain'}
         />
         <WeatherCard
           title="Wind"
-          value={`${current?.windSpeed || '--'} km/h`}
+          value={`${filteredData.current?.windSpeed || '--'} km/h`}
           icon="💨"
-          description={`Direction: ${current?.windDirection || '--'}`}
+          description={`Direction: ${filteredData.current?.windDirection || '--'}`}
         />
       </div>
 
@@ -85,11 +130,11 @@ const WeatherDashboard = ({ data }) => {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm opacity-90">UV Index</p>
-            <p className="text-2xl font-bold">{current?.uvIndex || '--'}</p>
+            <p className="text-2xl font-bold">{filteredData.current?.uvIndex || '--'}</p>
           </div>
           <div className="text-right">
             <p className="text-sm opacity-90">Visibility</p>
-            <p className="text-2xl font-bold">{current?.visibility || '--'} km</p>
+            <p className="text-2xl font-bold">{filteredData.current?.visibility || '--'} km</p>
           </div>
         </div>
       </div>

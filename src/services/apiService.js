@@ -4,6 +4,7 @@
  */
 
 import { securityValidator } from './securityService.js';
+import { metricsService } from './metricsService.js';
 
 class CircuitBreaker {
   constructor(options = {}) {
@@ -324,6 +325,18 @@ export class APIService {
     const cacheKey = this.getCacheKey(url, options);
     const cachedResponse = this.cache.get(cacheKey);
     if (cachedResponse) {
+      // Track cache hit
+      metricsService.trackAPICall(
+        this.getEndpointName(url),
+        options.method || 'GET',
+        200,
+        0, // Cache hits are instant
+        {
+          cached: true,
+          cacheHit: true,
+          cacheKey,
+        },
+      );
       return cachedResponse;
     }
 
@@ -339,6 +352,7 @@ export class APIService {
   }
 
   async executeRequest(url, options, circuitBreaker, cacheKey) {
+    const startTime = Date.now();
     this.activeRequests++;
 
     try {
@@ -353,10 +367,42 @@ export class APIService {
         return response.json();
       });
 
+      const duration = Date.now() - startTime;
+
+      // Track successful API call
+      metricsService.trackAPICall(
+        this.getEndpointName(url),
+        options.method || 'GET',
+        200,
+        duration,
+        {
+          cached: false,
+          circuitBreakerState: circuitBreaker.state,
+          cacheKey,
+        },
+      );
+
       // Cache successful responses
       this.cache.set(cacheKey, response, options.cacheTTL);
       return response;
 
+    } catch (error) {
+      const duration = Date.now() - startTime;
+
+      // Track failed API call
+      metricsService.trackAPICall(
+        this.getEndpointName(url),
+        options.method || 'GET',
+        error.message.includes('HTTP') ? parseInt(error.message.match(/\d+/)[0]) : 0,
+        duration,
+        {
+          error: error.message,
+          circuitBreakerState: circuitBreaker.state,
+          cacheKey,
+        },
+      );
+
+      throw error;
     } finally {
       this.activeRequests--;
       this.processQueue();
@@ -416,6 +462,31 @@ export class APIService {
 
   getRequestIdentifier(url) {
     return new URL(url).hostname;
+  }
+
+  getEndpointName(url) {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      // Extract meaningful endpoint names
+      if (pathname.includes('weather') || pathname.includes('temperature')) {
+        return 'weather-api';
+      }
+      if (pathname.includes('traffic') || pathname.includes('transport')) {
+        return 'traffic-api';
+      }
+      if (pathname.includes('humidity')) {
+        return 'humidity-api';
+      }
+      if (pathname.includes('rainfall')) {
+        return 'rainfall-api';
+      }
+
+      return pathname.split('/').filter(Boolean).join('-') || 'unknown-endpoint';
+    } catch (error) {
+      return 'invalid-url';
+    }
   }
 
   getCacheKey(url, options) {

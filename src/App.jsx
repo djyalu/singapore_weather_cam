@@ -7,6 +7,7 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Lazy load components for better performance
 const WeatherAnalysisCardRefactored = React.lazy(() => import('./components/analysis/WeatherAnalysisCardRefactored'));
+const WeatherDashboard = React.lazy(() => import('./components/weather/WeatherDashboard'));
 const MapView = React.lazy(() => import('./components/map/MapView'));
 const WebcamGallery = React.lazy(() => import('./components/webcam/WebcamGallery'));
 const TrafficCameraGallery = React.lazy(() => import('./components/webcam/TrafficCameraGallery'));
@@ -15,12 +16,18 @@ import { useSystemStats } from './hooks/useSystemStats';
 import { useServiceWorker } from './hooks/useServiceWorker';
 import PWAStatus from './components/common/PWAStatus';
 import HealthMonitor from './components/system/HealthMonitor';
+import MonitoringDashboard from './components/admin/MonitoringDashboard';
 import { initializeAccessibility } from './utils/accessibility';
 import { initializeSecurity } from './utils/security';
+import { useMetrics } from './services/metricsService';
 
 const App = React.memo(() => {
-  // Health monitor visibility state
+  // Health monitor and dashboard visibility state
   const [showHealthMonitor, setShowHealthMonitor] = React.useState(false);
+  const [showMonitoringDashboard, setShowMonitoringDashboard] = React.useState(false);
+
+  // Metrics tracking
+  const { trackPageView, trackUserInteraction } = useMetrics();
 
   // Use custom hooks for cleaner component logic
   const {
@@ -51,7 +58,28 @@ const App = React.memo(() => {
   React.useEffect(() => {
     initializeAccessibility();
     initializeSecurity();
-  }, []);
+
+    // Track initial page view
+    trackPageView(window.location.pathname, {
+      type: 'app_load',
+      weatherDataAvailable: !!weatherData,
+      webcamDataAvailable: !!webcamData,
+    });
+  }, [trackPageView, weatherData, webcamData]);
+
+  // Add keyboard shortcut for monitoring dashboard (Ctrl+Shift+M)
+  React.useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey && event.shiftKey && event.key === 'M') {
+        event.preventDefault();
+        setShowMonitoringDashboard(!showMonitoringDashboard);
+        trackUserInteraction('keyboard_shortcut', 'monitoring_dashboard');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showMonitoringDashboard, trackUserInteraction]);
 
   // Data loading logic now handled by custom hook
 
@@ -119,8 +147,47 @@ const App = React.memo(() => {
             </Suspense>
           </section>
 
+          {/* Weather Dashboard Section */}
+          <section className="mb-8" aria-labelledby="weather-dashboard-heading">
+            <div className="mb-6">
+              <h2 id="weather-dashboard-heading" className="text-2xl font-bold text-gray-900 mb-2">
+                🌤️ Interactive Weather Dashboard
+              </h2>
+              <p className="text-gray-600">
+                Real-time weather data with interactive location filtering for Bukit Timah region
+                {dataFreshness && <span className="ml-2 text-sm text-gray-500">• {dataFreshness}</span>}
+              </p>
+            </div>
+
+            {isInitialLoading ? (
+              <div className="bg-white rounded-xl shadow-lg p-8 animate-pulse" aria-live="polite">
+                <div className="flex gap-2 mb-6">
+                  {Array.from({ length: 4 }, (_, index) => (
+                    <div key={index} className="h-8 bg-gray-200 rounded w-24"></div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  {Array.from({ length: 4 }, (_, index) => (
+                    <div key={index} className="h-24 bg-gray-200 rounded"></div>
+                  ))}
+                </div>
+                <div className="h-64 bg-gray-200 rounded"></div>
+              </div>
+            ) : (
+              <Suspense fallback={
+                <div className="bg-white rounded-xl shadow-lg p-8 animate-pulse" aria-hidden="true">
+                  <div className="h-8 bg-gray-200 rounded w-full mb-4"></div>
+                  <div className="h-32 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-64 bg-gray-200 rounded"></div>
+                </div>
+              }>
+                <WeatherDashboard data={weatherData} />
+              </Suspense>
+            )}
+          </section>
+
           {/* Analysis Results Section */}
-          <section aria-labelledby="analysis-heading">
+          <section className="mb-8" aria-labelledby="analysis-heading">
             <div className="mb-6">
               <h2 id="analysis-heading" className="text-2xl font-bold text-gray-900 mb-2">
                 🌍 Real-time Regional Weather Analysis
@@ -221,6 +288,12 @@ const App = React.memo(() => {
         <HealthMonitor
           isVisible={showHealthMonitor}
           onToggle={() => setShowHealthMonitor(!showHealthMonitor)}
+        />
+
+        {/* Monitoring Dashboard */}
+        <MonitoringDashboard
+          isVisible={showMonitoringDashboard}
+          onClose={() => setShowMonitoringDashboard(false)}
         />
       </div>
     </ErrorBoundary>

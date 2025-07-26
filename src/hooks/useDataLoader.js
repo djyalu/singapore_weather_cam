@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiService } from '../services/apiService.js';
 import { securityValidator } from '../services/securityService.js';
+import { dataReliabilityService } from '../services/dataReliabilityService.js';
 
 /**
  * Enhanced custom hook for data loading with advanced reliability patterns
@@ -13,6 +14,14 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const [lastFetch, setLastFetch] = useState(null);
+  
+  // Enhanced reliability tracking
+  const [reliabilityMetrics, setReliabilityMetrics] = useState({
+    weatherQuality: null,
+    webcamQuality: null,
+    fallbackMode: false,
+    dataAge: null,
+  });
 
   // Use ref to track if component is mounted
   const isMountedRef = useRef(true);
