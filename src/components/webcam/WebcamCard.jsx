@@ -1,17 +1,18 @@
 const WebcamCard = ({ webcam, onClick }) => {
   const { id, name, location, file_info, ai_analysis, capture_time, type } = webcam;
-  
-  // 이미지 URL 생성 (상대 경로를 절대 경로로 변환)
-  const imageUrl = file_info?.path ? `/${file_info.path}` : '/images/placeholder.jpg';
+
+  // 이미지 URL 생성 (GitHub Pages base path 고려)
+  const basePath = import.meta.env.BASE_URL || '/';
+  const imageUrl = file_info?.path ? `${basePath}${file_info.path}` : `${basePath}images/placeholder.jpg`;
 
   return (
-    <div 
+    <div
       className="card cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
       onClick={onClick}
     >
       <div className="relative">
         <img
-          src={imageUrl || '/images/placeholder.jpg'}
+          src={imageUrl}
           alt={`${name} webcam view`}
           className="w-full h-48 object-cover rounded-md mb-4"
           loading="lazy"
@@ -23,16 +24,16 @@ const WebcamCard = ({ webcam, onClick }) => {
           {type}
         </div>
       </div>
-      
+
       <h3 className="text-lg font-semibold mb-2">{name}</h3>
       <p className="text-sm text-gray-600 mb-2">{location}</p>
-      
+
       {file_info && (
         <p className="text-xs text-gray-500 mb-3">
           Size: {Math.round(file_info.size / 1024)}KB
         </p>
       )}
-      
+
       {ai_analysis && ai_analysis.analysis_available && (
         <div className="border-t pt-3">
           <p className="text-sm text-gray-700">
@@ -40,7 +41,7 @@ const WebcamCard = ({ webcam, onClick }) => {
           </p>
         </div>
       )}
-      
+
       {ai_analysis && !ai_analysis.analysis_available && (
         <div className="border-t pt-3">
           <p className="text-xs text-gray-500">

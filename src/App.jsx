@@ -16,19 +16,20 @@ function App() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch weather data
-        const weatherResponse = await fetch('/data/weather/latest.json');
+
+        // Fetch weather data (with base path for GitHub Pages)
+        const basePath = import.meta.env.BASE_URL || '/';
+        const weatherResponse = await fetch(`${basePath}data/weather/latest.json`);
         if (!weatherResponse.ok) {
-          throw new Error('Failed to fetch weather data');
+          throw new Error(`Failed to fetch weather data: ${weatherResponse.status}`);
         }
         const weatherJson = await weatherResponse.json();
         setWeatherData(weatherJson);
 
         // Fetch webcam data
-        const webcamResponse = await fetch('/data/webcam/latest.json');
+        const webcamResponse = await fetch(`${basePath}data/webcam/latest.json`);
         if (!webcamResponse.ok) {
-          throw new Error('Failed to fetch webcam data');
+          throw new Error(`Failed to fetch webcam data: ${webcamResponse.status}`);
         }
         const webcamJson = await webcamResponse.json();
         setWebcamData(webcamJson);
@@ -42,7 +43,7 @@ function App() {
     };
 
     fetchData();
-    
+
     // Refresh data every 5 minutes
     const interval = setInterval(fetchData, 5 * 60 * 1000);
     return () => clearInterval(interval);
@@ -58,8 +59,8 @@ function App() {
         <div className="text-center p-8">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Data</h1>
           <p className="text-gray-600">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="btn-primary mt-4"
           >
             Retry
@@ -73,7 +74,7 @@ function App() {
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">
         <Header />
-        
+
         <main className="container-custom py-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Weather Dashboard */}
@@ -99,7 +100,7 @@ function App() {
         <footer className="bg-weather-dark text-white py-8 mt-16">
           <div className="container-custom text-center">
             <p className="text-sm">
-              Singapore Weather Cam © {new Date().getFullYear()} | 
+              Singapore Weather Cam © {new Date().getFullYear()} |
               Data from Weather.gov.sg & Various Sources
             </p>
           </div>
