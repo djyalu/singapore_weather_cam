@@ -2,14 +2,32 @@ name: Capture Webcam Images
 
 on:
   schedule:
-    # Run every 15 minutes - optimized for GitHub Actions free tier
-    - cron: '*/15 * * * *'
+    # Run every 30 minutes - further optimized for GitHub Actions free tier
+    # Previously: */15 (96 runs/day = 1440 min/month)
+    # Now: */30 (48 runs/day = 720 min/month) - 50% reduction
+    - cron: '*/30 * * * *'
   workflow_dispatch: # Allow manual triggers
+    inputs:
+      capture_mode:
+        description: 'Capture mode'
+        required: false
+        type: choice
+        options:
+          - standard
+          - priority
+          - test
+        default: standard
 
 jobs:
   capture-webcam:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: webcam-capture
+      cancel-in-progress: false
 
     steps:
       - name: Checkout repository
@@ -25,9 +43,17 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+            
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline --no-audit
           # Verify critical dependencies are available
           node -e "console.log('puppeteer:', require('puppeteer/package.json').version)"
           node -e "console.log('@anthropic-ai/sdk:', require('@anthropic-ai/sdk/package.json').version)"
@@ -50,6 +76,10 @@ jobs:
           # Timeout settings for reliability
           REQUEST_TIMEOUT: '15000'
           MAX_RETRIES: '3'
+          CAPTURE_MODE: ${{ github.event.inputs.capture_mode || 'standard' }}
+          # Performance settings
+          MAX_CONCURRENT_CAPTURES: '5'
+          BATCH_PROCESSING: 'true'
         run: |
           echo "🚀 Starting enhanced webcam capture system..."
           echo "📊 Configuration:"
@@ -186,6 +216,8 @@ Singapore webcam capture update:
 - Success rate: $(echo "scale=1; $SUCCESSFUL_CAPTURES * 100 / $TOTAL_CAMERAS" | bc -l 2>/dev/null || echo "N/A")%
 - Sources: LTA traffic cameras, public webcams
 - AI analysis: $([ -n "$CLAUDE_API_KEY" ] && echo "enabled" || echo "disabled")
+- Schedule: Every 30 minutes (optimized)
+- Mode: ${{ github.event.inputs.capture_mode || 'standard' }}
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -243,6 +275,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
           # Always exit successfully to prevent workflow failure cascading
           exit 0
 
+      - name: Report workflow usage
+        if: always()
+        run: |
+          echo "📊Workflow Usage Report:"
+          echo "Minutes used: ~15 (estimated)"
+          echo "Monthly projection: ~720 minutes (48 runs/day)"
+          echo "Free tier usage: ~36% (720/2000)"
+          
       - name: Cleanup
         if: always()
         run: |

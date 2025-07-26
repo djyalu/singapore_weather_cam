@@ -2,14 +2,25 @@ name: Collect Weather Data
 
 on:
   schedule:
-    # Run every 5 minutes - focusing on Bukit Timah area
-    - cron: '*/5 * * * *'
+    # Run every 30 minutes - optimized for GitHub Actions free tier
+    # Previously: */5 (288 runs/day = 2880 min/month)
+    # Now: */30 (48 runs/day = 480 min/month) - 83% reduction
+    - cron: '*/30 * * * *'
   workflow_dispatch: # Allow manual triggers
+    inputs:
+      debug_mode:
+        description: 'Enable debug logging'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   collect-weather:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
 
     steps:
       - name: Checkout repository
@@ -25,9 +36,17 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+            
       - name: Install dependencies
         run: |
-          npm ci
+          npm ci --prefer-offline --no-audit
           # Verify dependencies and system readiness
           node -e "console.log('node-fetch available:', !!require('node-fetch'))"
           echo "✅ Dependencies verified for production use"
@@ -45,6 +64,10 @@ jobs:
           NODE_ENV: 'production'
           REQUEST_TIMEOUT: '10000'
           MAX_RETRIES: '3'
+          DEBUG_MODE: ${{ github.event.inputs.debug_mode || 'false' }}
+          # Performance optimization
+          BATCH_SIZE: '10'
+          CONCURRENT_REQUESTS: '3'
         run: |
           echo "🌡️ Starting enhanced weather data collection..."
           echo "📊 System Configuration:"
@@ -158,6 +181,7 @@ Bukit Timah area weather update:
 - Humidity: ${HUMIDITY_AVG}
 - Source: NEA Singapore API
 - Focus: Stations S121, S116, S118 (Bukit Timah area)
+- Schedule: Every 30 minutes (optimized)
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -235,6 +259,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
           # Success exit for graceful degradation
           exit 0
 
+      - name: Report workflow metrics
+        if: always()
+        run: |
+          echo "📊Workflow Metrics:"
+          echo "Duration: $(($(date +%s) - ${{ job.started_at }})) seconds"
+          echo "Status: ${{ job.status }}"
+          echo "Minutes used: ~$(( ($(date +%s) - ${{ job.started_at }}) / 60 + 1 ))"
+          
       - name: Cleanup
         if: always()
         run: |

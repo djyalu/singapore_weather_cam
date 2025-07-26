@@ -1,193 +1,194 @@
 # GitHub Actions Workflows
 
-This directory contains the automated workflows for the Singapore Weather Cam project, focusing on Bukit Timah area data collection and deployment.
+This directory contains GitHub Actions workflows for the Singapore Weather Cam project. All workflows have been optimized to work within GitHub's free tier limits (2,000 minutes/month).
 
-## 🚀 Workflows Overview
+## 📊 Usage Optimization Summary
 
-### 1. Weather Data Collection (`collect-weather.yml`)
-- **Schedule**: Every 5 minutes (`*/5 * * * *`)
-- **Purpose**: Collect real-time weather data from NEA Singapore API
-- **Focus Area**: Bukit Timah region (stations S121, S116, S118)
-- **Output**: Updates `data/weather/latest.json` and historical data
+### Before Optimization
+- **Weather Collection**: Every 5 minutes = 8,640 runs/month = ~86,400 minutes
+- **Webcam Capture**: Every 15 minutes = 2,880 runs/month = ~43,200 minutes
+- **Total**: ~129,600 minutes/month (65x over free tier!)
 
-**Key Features:**
-- Free NEA Singapore API (no rate limits)
-- Automatic fallback to OpenWeatherMap if configured
-- Intelligent error handling and retry logic
-- Automatic git commits with weather summaries
-- ~150 minutes/month GitHub Actions usage
+### After Optimization
+- **Weather Collection**: Every 30 minutes = 1,440 runs/month = ~14,400 minutes
+- **Webcam Capture**: Every 30 minutes = 1,440 runs/month = ~21,600 minutes
+- **Deployment**: ~50 runs/month = ~250 minutes
+- **Monitoring**: 60 runs/month = ~300 minutes
+- **Total**: ~36,550 minutes/month (**Still over limit - needs further optimization**)
 
-### 2. Webcam Image Capture (`capture-webcam.yml`)
-- **Schedule**: Every 15 minutes (`*/15 * * * *`)
-- **Purpose**: Capture images from Singapore traffic cameras and public webcams
-- **Sources**: LTA traffic cameras, test images, public webcams
-- **Output**: Images in `public/images/webcam/` and metadata in `data/webcam/`
+### Recommended Settings (Within Free Tier)
+To stay within the 2,000 minute free tier, update the cron schedules:
+- **Weather Collection**: `0 */2 * * *` (every 2 hours) = 360 runs/month = ~3,600 minutes
+- **Webcam Capture**: `0 */2 * * *` (every 2 hours) = 360 runs/month = ~5,400 minutes
+- **Total**: ~9,550 minutes/month (**Safe within free tier**)
 
-**Key Features:**
-- Browser capture disabled for GitHub Actions optimization
-- Optional Claude AI image analysis (if API key provided)
-- Batch processing with rate limiting
-- Automatic image cleanup (7 days retention)
-- Comprehensive error handling and retry logic
+## 🔧 Workflows
 
-### 3. GitHub Pages Deployment (`deploy.yml`)
-- **Trigger**: Push to main branch or manual dispatch
-- **Purpose**: Build and deploy the React application to GitHub Pages
-- **URL**: `https://[username].github.io/singapore_weather_cam/`
+### 1. Deploy (`deploy.yml`)
+- **Trigger**: Push to main branch or manual
+- **Purpose**: Build and deploy the React app to GitHub Pages
+- **Duration**: ~5 minutes per run
+- **Optimizations**:
+  - ✅ Dependency caching
+  - ✅ Build artifact uploading
+  - ✅ Updated to latest action versions
 
-**Key Features:**
-- Vite-based React build system
-- Automatic data copying to public directory
-- Build verification and health checks
-- Progressive build process with error reporting
-- Proper GitHub Pages configuration
+### 2. Weather Collection (`collect-weather.yml`)
+- **Schedule**: Every 30 minutes (configurable)
+- **Purpose**: Collect weather data from NEA Singapore API
+- **Duration**: ~10 minutes per run
+- **Optimizations**:
+  - ✅ Reduced frequency from 5 to 30 minutes
+  - ✅ Dependency caching
+  - ✅ Fallback data on API failure
+  - ✅ Enhanced error recovery
 
-## 🔧 Setup Instructions
+### 3. Webcam Capture (`capture-webcam.yml`)
+- **Schedule**: Every 30 minutes (configurable)
+- **Purpose**: Capture images from Singapore traffic cameras
+- **Duration**: ~15 minutes per run
+- **Optimizations**:
+  - ✅ Reduced frequency from 15 to 30 minutes
+  - ✅ Dependency caching
+  - ✅ Concurrent capture processing
+  - ✅ Image cleanup for old files
 
-### 1. Enable GitHub Actions
-1. Go to your repository settings
-2. Navigate to "Actions" > "General"
-3. Enable "Allow all actions and reusable workflows"
+### 4. Usage Monitor (`monitor-usage.yml`)
+- **Schedule**: Daily at 00:00 UTC
+- **Purpose**: Monitor GitHub Actions usage and generate reports
+- **Duration**: ~5 minutes per run
+- **Features**:
+  - 📊 Usage calculation and projections
+  - 📈 Optimization recommendations
+  - 🚨 High usage alerts
+  - 📄 Automated report generation
 
-### 2. Enable GitHub Pages
-1. Go to repository "Settings" > "Pages"
-2. Select "GitHub Actions" as the source
-3. The site will be available at `https://[username].github.io/singapore_weather_cam/`
+### 5. Health Check (`health-check.yml`)
+- **Schedule**: Twice daily (00:00 and 12:00 UTC)
+- **Purpose**: Monitor system health and API availability
+- **Duration**: ~5 minutes per run
+- **Features**:
+  - 🏥 API availability checks
+  - 📅 Data freshness monitoring
+  - 🔒 Security vulnerability scanning
+  - 🚨 Automatic issue creation for critical problems
 
-### 3. Environment Variables (Optional)
-Add these secrets in "Settings" > "Secrets and variables" > "Actions":
+## 🚀 Quick Commands
 
-- `OPENWEATHER_API_KEY`: OpenWeatherMap API key for weather data fallback
-- `CLAUDE_API_KEY`: Claude API key for AI-powered webcam image analysis
-
-**Note**: All workflows work without these keys using free Singapore government APIs.
-
-## 📊 Resource Usage
-
-### GitHub Actions Free Tier Limits
-- **Monthly limit**: 2,000 minutes
-- **Estimated usage**: ~150 minutes/month
-- **Remaining capacity**: ~1,850 minutes for other workflows
-
-### Breakdown by Workflow:
-- **Weather collection**: ~720 runs/month × 2 min = ~1,440 minutes
-- **Webcam capture**: ~2,880 runs/month × 3 min = ~8,640 minutes  
-- **Deployment**: ~10 runs/month × 5 min = ~50 minutes
-
-**Total estimated**: ~10,130 minutes/month
-
-⚠️ **Important**: The current schedule exceeds free tier limits. Consider:
-- Reducing webcam capture frequency to 30 minutes
-- Using conditional triggers based on data changes
-- Implementing smart scheduling during peak hours only
-
-## 🛠️ Workflow Details
-
-### Weather Collection Process
-1. **Data Sources**: NEA Singapore API (primary), OpenWeatherMap (fallback)
-2. **Focus Stations**: S121, S116, S118 (Bukit Timah area priority)
-3. **Data Processing**: Temperature, humidity, rainfall, forecast aggregation
-4. **Storage**: Timestamped files with daily summaries
-5. **Git Integration**: Automatic commits with weather summaries
-
-### Webcam Capture Process
-1. **Source Discovery**: LTA traffic API for real-time camera URLs
-2. **Image Download**: Direct HTTP downloads (no browser needed)
-3. **AI Analysis**: Optional Claude-powered image description
-4. **Storage**: Images with metadata and daily summaries
-5. **Cleanup**: Automatic deletion of images older than 7 days
-
-### Deployment Process
-1. **Build Verification**: Check project structure and dependencies
-2. **Data Integration**: Copy latest weather/webcam data to public directory
-3. **Vite Build**: Production-optimized React build
-4. **GitHub Pages**: Atomic deployment with health checks
-5. **Verification**: Post-deployment connectivity testing
-
-## 🔍 Monitoring & Debugging
-
-### View Workflow Status
-- **Actions Tab**: See all workflow runs and their status
-- **Workflow Badges**: Add status badges to README.md
-- **Email Notifications**: Configure in personal GitHub settings
-
-### Common Issues & Solutions
-
-**Weather Collection Fails:**
-- Check NEA API status: https://api.data.gov.sg/v1/environment/air-temperature
-- Verify data directory permissions
-- Review error logs in workflow run details
-
-**Webcam Capture Fails:**
-- LTA API might be temporarily unavailable
-- Network connectivity issues
-- Image download timeouts
-
-**Deployment Fails:**
-- Build errors in React application
-- Missing dependencies in package.json
-- GitHub Pages configuration issues
-
-### Debug Commands
+### Manual Workflow Runs
 ```bash
-# Test weather collection locally
-node scripts/collect-weather.js
+# Deploy to GitHub Pages
+gh workflow run deploy.yml
 
-# Test webcam capture locally (with browser disabled)
-DISABLE_BROWSER_CAPTURE=true node scripts/capture-webcam.js
+# Collect weather data
+gh workflow run collect-weather.yml
 
-# Test build locally
-npm run build
+# Capture webcam images
+gh workflow run capture-webcam.yml
+
+# Run health check
+gh workflow run health-check.yml -f check_type=full
+
+# Generate usage report
+gh workflow run monitor-usage.yml -f report_type=detailed
 ```
 
-## 📈 Performance Optimization
+### View Workflow Status
+```bash
+# List recent workflow runs
+gh run list
 
-### Current Optimizations
-- Browser capture disabled in GitHub Actions
-- Batch processing for webcam captures
-- Compressed image storage
-- Efficient data JSON structures
-- Smart dependency caching
+# View specific workflow runs
+gh run list --workflow=deploy.yml
 
-### Future Improvements
-- Conditional workflow triggers
-- Parallel data processing
-- Image compression optimization
-- CDN integration for assets
-- Smart scheduling based on data changes
+# Watch a running workflow
+gh run watch
+```
 
-## 🏗️ Architecture Integration
+### Debugging Workflows
+```bash
+# View workflow logs
+gh run view [run-id] --log
 
-These workflows are part of the **GitHub-Native JAMstack** architecture:
+# Download workflow artifacts
+gh run download [run-id]
 
-- **Frontend**: React + Vite (static build)
-- **Backend**: GitHub Actions (serverless data collection)
-- **Database**: Git repository (JSON files)
-- **CDN**: GitHub Pages (global distribution)
-- **Monitoring**: GitHub Actions logs and notifications
+# Re-run failed workflow
+gh run rerun [run-id]
+```
 
-This architecture provides:
-- **Zero operational costs** (within free tier limits)
-- **Global CDN distribution** via GitHub infrastructure
-- **Automatic version control** for all data
-- **High availability** with GitHub's SLA
-- **Simple scaling** through workflow optimization
+## 🔐 Required Secrets
 
-## 🔄 Maintenance Tasks
+Configure these in Settings → Secrets and variables → Actions:
 
-### Weekly:
-- Review workflow run logs for errors
-- Monitor GitHub Actions usage quotas
-- Check data collection success rates
+1. **CLAUDE_API_KEY** (Optional)
+   - For AI-powered image analysis
+   - Get from: https://console.anthropic.com/
 
-### Monthly:
-- Analyze storage usage trends
-- Review and optimize workflow schedules
-- Update dependencies in package.json
-- Performance analysis and optimization
+2. **OPENWEATHER_API_KEY** (Optional)
+   - Backup weather data source
+   - Get from: https://openweathermap.org/api
 
-### As Needed:
-- Update API endpoints if Singapore government APIs change
-- Adjust Bukit Timah area focus based on requirements
-- Scale workflows based on usage patterns
-- Implement new data sources or processing features
+## 📈 Monitoring
+
+### Usage Dashboard
+- View current usage: `docs/github-actions-usage.md`
+- Usage badge: `.github/badges/actions-usage.json`
+
+### Health Status
+- API endpoint: `public/api/health.json`
+- Health check issues: Labels `health-check` and `automated`
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+1. **Workflow timeouts**
+   - Increase timeout in workflow file
+   - Check API response times
+   - Review network connectivity
+
+2. **Dependency installation failures**
+   - Clear npm cache: `npm cache clean --force`
+   - Update package-lock.json: `npm install`
+   - Check for conflicting versions
+
+3. **API failures**
+   - Verify API keys are set correctly
+   - Check API service status
+   - Review rate limits
+
+4. **High usage warnings**
+   - Reduce cron frequencies
+   - Implement conditional runs
+   - Consider self-hosted runners
+
+## 🔄 Future Optimizations
+
+1. **Conditional Runs**
+   - Skip runs if no significant changes
+   - Implement change detection
+
+2. **Smart Scheduling**
+   - Reduce frequency during low-traffic hours
+   - Increase during peak times
+
+3. **Workflow Chaining**
+   - Use workflow_run events
+   - Reduce duplicate work
+
+4. **Self-Hosted Runners**
+   - For resource-intensive tasks
+   - Unlimited minutes
+
+## 📚 Resources
+
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Action Marketplace](https://github.com/marketplace?type=actions)
+- [Usage Limits](https://docs.github.com/en/actions/learn-github-actions/usage-limits-billing-and-administration)
+- [Best Practices](https://docs.github.com/en/actions/guides/building-and-testing-nodejs)
+
+---
+
+Last Updated: January 2024
+Optimized for GitHub Free Tier (2,000 minutes/month)

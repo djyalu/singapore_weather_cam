@@ -6,6 +6,8 @@ import SystemFooter from './components/layout/SystemFooter';
 import MapView from './components/map/MapView';
 import LoadingScreen from './components/common/LoadingScreen';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import WebcamGallery from './components/webcam/WebcamGallery';
+import TrafficCameraGallery from './components/webcam/TrafficCameraGallery';
 
 const App = React.memo(() => {
   const [weatherData, setWeatherData] = useState(null);
@@ -218,6 +220,32 @@ const App = React.memo(() => {
                 ))}
               </div>
             )}
+          </section>
+
+          {/* Live Webcams Section */}
+          <section className="mb-8" aria-labelledby="webcams-heading">
+            <div className="mb-6">
+              <h2 id="webcams-heading" className="text-2xl font-bold text-gray-900 mb-2">
+                📸 실시간 웹캠
+              </h2>
+              <p className="text-gray-600">
+                싱가포르 주요 지점의 실시간 영상
+              </p>
+            </div>
+            <WebcamGallery data={webcamData} />
+          </section>
+
+          {/* Traffic Cameras Section */}
+          <section className="mb-8" aria-labelledby="traffic-heading">
+            <div className="mb-6">
+              <h2 id="traffic-heading" className="text-2xl font-bold text-gray-900 mb-2">
+                🚗 실시간 교통 카메라
+              </h2>
+              <p className="text-gray-600">
+                싱가포르 전역의 실시간 교통 상황 (data.gov.sg 제공)
+              </p>
+            </div>
+            <TrafficCameraGallery />
           </section>
         </main>
 

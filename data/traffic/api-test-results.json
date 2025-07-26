@@ -1,0 +1,69 @@
+{
+  "api_test_timestamp": "2025-07-26T12:19:07.889Z",
+  "api_response_timestamp": "2025-07-26T20:18:42+08:00",
+  "total_cameras": 90,
+  "resolutions": {
+    "320x240": 11,
+    "1920x1080": 79
+  },
+  "hwa_chong_area": {
+    "center": {
+      "lat": 1.32865,
+      "lng": 103.80227
+    },
+    "radius_km": 5,
+    "cameras_found": 13,
+    "nearest_cameras": [
+      {
+        "camera_id": "6705",
+        "distance_km": "1.76",
+        "location": {
+          "latitude": 1.332124,
+          "longitude": 103.81768
+        },
+        "resolution": "1920x1080",
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/06d6b470-5a50-4876-ad50-5846003d2dd1.jpg"
+      },
+      {
+        "camera_id": "6706",
+        "distance_km": "2.44",
+        "location": {
+          "latitude": 1.349428893,
+          "longitude": 103.7952799
+        },
+        "resolution": "1920x1080",
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/00d4ad90-2c97-4715-a4ea-4d8d8900f6d0.jpg"
+      },
+      {
+        "camera_id": "6710",
+        "distance_km": "2.52",
+        "location": {
+          "latitude": 1.344205,
+          "longitude": 103.78577
+        },
+        "resolution": "1920x1080",
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/13aeca2c-bc29-4556-b14f-d889f9270f66.jpg"
+      },
+      {
+        "camera_id": "2703",
+        "distance_km": "2.73",
+        "location": {
+          "latitude": 1.35047790791386,
+          "longitude": 103.791033581325
+        },
+        "resolution": "1920x1080",
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/f4704555-97f7-4e2e-a344-16fae0572097.jpg"
+      },
+      {
+        "camera_id": "6704",
+        "distance_km": "2.74",
+        "location": {
+          "latitude": 1.32657403632366,
+          "longitude": 103.826857295633
+        },
+        "resolution": "1920x1080",
+        "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/32deeca3-93dd-4550-8786-80098d45e2b3.jpg"
+      }
+    ]
+  }
+}
