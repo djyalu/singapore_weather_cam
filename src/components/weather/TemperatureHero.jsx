@@ -14,7 +14,7 @@ const TemperatureHero = ({ weatherData, className = '' }) => {
 
     // Try to get Newton station data specifically
     const newtonStation = weatherData.locations?.find(
-      location => location.station_id === 'S117'
+      location => location.station_id === 'S117',
     );
 
     // Fall back to current average data
@@ -31,7 +31,7 @@ const TemperatureHero = ({ weatherData, className = '' }) => {
       humidity: newtonStation?.humidity || current.humidity,
       windSpeed: current.windSpeed,
       windDirection: current.windDirection,
-      timestamp: weatherData.timestamp
+      timestamp: weatherData.timestamp,
     };
   };
 
@@ -54,25 +54,25 @@ const TemperatureHero = ({ weatherData, className = '' }) => {
   }
 
   const formatTemperature = (temp) => {
-    if (temp === null || temp === undefined) return '--';
+    if (temp === null || temp === undefined) {return '--';}
     return Math.round(temp);
   };
 
   const getTemperatureColor = (temp) => {
-    if (temp === null || temp === undefined) return 'text-white';
-    if (temp >= 35) return 'text-red-100';
-    if (temp >= 32) return 'text-orange-100';
-    if (temp >= 28) return 'text-yellow-100';
-    if (temp >= 24) return 'text-green-100';
+    if (temp === null || temp === undefined) {return 'text-white';}
+    if (temp >= 35) {return 'text-red-100';}
+    if (temp >= 32) {return 'text-orange-100';}
+    if (temp >= 28) {return 'text-yellow-100';}
+    if (temp >= 24) {return 'text-green-100';}
     return 'text-blue-100';
   };
 
   const getBackgroundGradient = (temp) => {
-    if (temp === null || temp === undefined) return 'from-neutral-500 to-neutral-600';
-    if (temp >= 35) return 'from-red-500 to-orange-600';
-    if (temp >= 32) return 'from-orange-500 to-red-500';
-    if (temp >= 28) return 'from-primary-500 to-secondary-500';
-    if (temp >= 24) return 'from-secondary-500 to-accent-500';
+    if (temp === null || temp === undefined) {return 'from-neutral-500 to-neutral-600';}
+    if (temp >= 35) {return 'from-red-500 to-orange-600';}
+    if (temp >= 32) {return 'from-orange-500 to-red-500';}
+    if (temp >= 28) {return 'from-primary-500 to-secondary-500';}
+    if (temp >= 24) {return 'from-secondary-500 to-accent-500';}
     return 'from-secondary-600 to-secondary-700';
   };
 
@@ -81,11 +81,11 @@ const TemperatureHero = ({ weatherData, className = '' }) => {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
-      
+
       {/* Content */}
       <div className="relative p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
-          
+
           {/* Main Temperature Display */}
           <div className="text-center lg:text-left flex-1 w-full">
             <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 mb-3 sm:mb-2">
@@ -99,7 +99,7 @@ const TemperatureHero = ({ weatherData, className = '' }) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-baseline justify-center lg:justify-start gap-1 sm:gap-2 mb-3 sm:mb-3">
               <span className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight ${getTemperatureColor(primaryData.temperature)} drop-shadow-lg animate-fade-in`}>
                 {formatTemperature(primaryData.temperature)}
@@ -108,7 +108,7 @@ const TemperatureHero = ({ weatherData, className = '' }) => {
                 °C
               </span>
             </div>
-            
+
             {primaryData.feelsLike && (
               <div className="text-white/80 text-sm sm:text-sm md:text-base mb-4">
                 Feels like{' '}
@@ -122,7 +122,7 @@ const TemperatureHero = ({ weatherData, className = '' }) => {
           {/* Additional Weather Info */}
           <div className="flex-shrink-0 w-full lg:w-auto">
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4 lg:gap-6">
-              
+
               {/* Humidity */}
               {primaryData.humidity && (
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center lg:text-left hover:bg-white/15 transition-all duration-300 group min-h-[80px] sm:min-h-auto flex flex-col justify-center touch-manipulation">
@@ -172,7 +172,7 @@ const TemperatureHero = ({ weatherData, className = '' }) => {
                   Updated {new Date(primaryData.timestamp).toLocaleTimeString('en-SG', {
                     hour: '2-digit',
                     minute: '2-digit',
-                    timeZone: 'Asia/Singapore'
+                    timeZone: 'Asia/Singapore',
                   })}
                 </span>
               )}

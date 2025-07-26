@@ -80,7 +80,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
 
       // Transform weather data to standard format
       const transformedWeatherData = transformWeatherData(weatherResult.data);
-      
+
       // Enhanced metadata including reliability metrics
       const enhancedWeatherData = {
         ...transformedWeatherData,
@@ -114,8 +114,8 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
         ...enhancedWeatherData,
         securityValidation: {
           isValid: weatherValidation.isValid,
-          errors: weatherValidation.errors || []
-        }
+          errors: weatherValidation.errors || [],
+        },
       });
       setWebcamData(enhancedWebcamData);
       setRetryCount(0); // Reset retry count on success
@@ -128,7 +128,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
           source: weatherResult.metadata.source,
           loadTime: weatherResult.metadata.loadTime,
           locationsCount: transformedWeatherData.locations?.length || 0,
-          hasCurrentData: !!transformedWeatherData.current
+          hasCurrentData: !!transformedWeatherData.current,
         },
         webcam: {
           qualityScore: webcamResult.metadata.qualityScore,
@@ -230,11 +230,11 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
 
   // Force refresh function (bypasses cache)
   const forceRefresh = useCallback(async () => {
-    if (!isMountedRef.current) return;
+    if (!isMountedRef.current) {return;}
 
     console.log('🔄 Force refresh initiated - bypassing all caches');
     setRetryCount(0);
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -248,7 +248,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
         try {
           const cacheNames = await caches.keys();
           await Promise.all(
-            cacheNames.map(cacheName => caches.delete(cacheName))
+            cacheNames.map(cacheName => caches.delete(cacheName)),
           );
           console.log('🗑️ Service Worker caches cleared');
         } catch (cacheError) {
@@ -286,12 +286,12 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
         ),
       ]);
 
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {return;}
 
       // Process data same as regular load
       const weatherValidation = securityValidator.validateWeatherData(weatherResult.data);
       const transformedWeatherData = transformWeatherData(weatherResult.data);
-      
+
       const enhancedWeatherData = {
         ...transformedWeatherData,
         reliabilityMetadata: {
@@ -324,8 +324,8 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
         ...enhancedWeatherData,
         securityValidation: {
           isValid: weatherValidation.isValid,
-          errors: weatherValidation.errors || []
-        }
+          errors: weatherValidation.errors || [],
+        },
       });
       setWebcamData(enhancedWebcamData);
       setLastFetch(new Date());

@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
 const getRegionColor = (colorScheme) => {
   const colorMap = {
     'primary': '#DC0032',
-    'secondary': '#0EA5E9', 
+    'secondary': '#0EA5E9',
     'accent': '#65a30d',
     'neutral': '#64748b',
   };
@@ -36,14 +36,14 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
       weatherLocations: weatherData?.locations?.length || 0,
       weatherLocationsData: weatherData?.locations?.slice(0, 2), // 첫 2개 항목만 로그
       webcamData: webcamData ? 'present' : 'missing',
-      webcamCaptures: webcamData?.captures?.length || 0
+      webcamCaptures: webcamData?.captures?.length || 0,
     });
 
     // Initialize map with regional configuration
     console.log('🗺️ MapView: Creating Leaflet map instance...');
     const initialCenter = regionConfig ? [regionConfig.center.lat, regionConfig.center.lng] : [1.3520, 103.7767];
     const initialZoom = regionConfig ? regionConfig.zoom : 12;
-    
+
     const map = L.map(mapRef.current).setView(initialCenter, initialZoom);
     mapInstanceRef.current = map;
     console.log('🗺️ MapView: Map instance created successfully');
@@ -59,13 +59,13 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
     // Add regional overlay if specific region is selected
     if (regionConfig && regionConfig.bounds && selectedRegion !== 'all') {
       console.log('🗺️ MapView: Adding regional overlay for:', selectedRegion);
-      
+
       const { bounds } = regionConfig;
       const overlayBounds = [
         [bounds.south, bounds.west],
-        [bounds.north, bounds.east]
+        [bounds.north, bounds.east],
       ];
-      
+
       // Create a subtle highlight rectangle for the region
       const regionOverlay = L.rectangle(overlayBounds, {
         color: getRegionColor(regionConfig.color),
@@ -74,9 +74,9 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
         fillOpacity: 0.1,
         dashArray: '5, 5',
       }).addTo(map);
-      
+
       regionOverlayRef.current = regionOverlay;
-      
+
       // Add region label
       const center = [(bounds.north + bounds.south) / 2, (bounds.east + bounds.west) / 2];
       L.marker(center, {
@@ -85,7 +85,7 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
           className: 'region-label',
           iconSize: [100, 30],
           iconAnchor: [50, 15],
-        })
+        }),
       }).addTo(map);
     }
 
@@ -162,12 +162,12 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
 
   // Handle region changes
   useEffect(() => {
-    if (!mapInstanceRef.current || !regionConfig) return;
+    if (!mapInstanceRef.current || !regionConfig) {return;}
 
     console.log('🗺️ MapView: Updating map view for region:', selectedRegion);
-    
+
     const map = mapInstanceRef.current;
-    
+
     // Animate to new center and zoom
     map.setView([regionConfig.center.lat, regionConfig.center.lng], regionConfig.zoom, {
       animate: true,
@@ -185,9 +185,9 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
       const { bounds } = regionConfig;
       const overlayBounds = [
         [bounds.south, bounds.west],
-        [bounds.north, bounds.east]
+        [bounds.north, bounds.east],
       ];
-      
+
       const regionOverlay = L.rectangle(overlayBounds, {
         color: getRegionColor(regionConfig.color),
         weight: 2,
@@ -195,7 +195,7 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
         fillOpacity: 0.1,
         dashArray: '5, 5',
       }).addTo(map);
-      
+
       regionOverlayRef.current = regionOverlay;
     }
   }, [selectedRegion, regionConfig]);
@@ -215,10 +215,10 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
               <span>Webcam Locations</span>
             </div>
           </div>
-          
+
           {selectedRegion !== 'all' && regionConfig && (
             <div className="flex items-center gap-2 text-sm">
-              <div 
+              <div
                 className="w-4 h-4 rounded border-2 opacity-50"
                 style={{ borderColor: getRegionColor(regionConfig.color) }}
               ></div>

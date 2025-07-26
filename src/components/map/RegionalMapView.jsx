@@ -86,14 +86,14 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
     const filteredWeatherData = weatherData ? {
       ...weatherData,
       locations: weatherData.locations?.filter(location => {
-        if (!location.coordinates) return false;
-        
+        if (!location.coordinates) {return false;}
+
         const { lat, lng } = location.coordinates;
         const { bounds } = region;
-        
-        return lat >= bounds.south && 
-               lat <= bounds.north && 
-               lng >= bounds.west && 
+
+        return lat >= bounds.south &&
+               lat <= bounds.north &&
+               lng >= bounds.west &&
                lng <= bounds.east;
       }),
     } : null;
@@ -102,14 +102,14 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
     const filteredWebcamData = webcamData ? {
       ...webcamData,
       captures: webcamData.captures?.filter(webcam => {
-        if (!webcam.coordinates) return false;
-        
+        if (!webcam.coordinates) {return false;}
+
         const { lat, lng } = webcam.coordinates;
         const { bounds } = region;
-        
-        return lat >= bounds.south && 
-               lat <= bounds.north && 
-               lng >= bounds.west && 
+
+        return lat >= bounds.south &&
+               lat <= bounds.north &&
+               lng >= bounds.west &&
                lng <= bounds.east;
       }),
     } : null;
@@ -123,14 +123,14 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
   // Calculate region statistics
   const regionStats = useMemo(() => {
     const { weatherData: filteredWeatherData, webcamData: filteredWebcamData } = filteredData;
-    
+
     const weatherCount = filteredWeatherData?.locations?.length || 0;
     const webcamCount = filteredWebcamData?.captures?.length || 0;
-    
+
     // Calculate average temperature for the region
-    const avgTemp = filteredWeatherData?.locations?.length > 0 ? 
+    const avgTemp = filteredWeatherData?.locations?.length > 0 ?
       filteredWeatherData.locations
-        .filter(loc => loc.temperature != null)
+        .filter(loc => loc.temperature !== null)
         .reduce((sum, loc, _, arr) => sum + loc.temperature / arr.length, 0)
         .toFixed(1) : null;
 
@@ -189,7 +189,7 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
             Select a region to view detailed weather and traffic information
           </p>
         </div>
-        
+
         {/* Region Selection Buttons - Mobile Optimized */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 mb-4">
           {Object.entries(REGIONS).map(([key, region]) => (
@@ -200,10 +200,10 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
                 region-button relative p-3 sm:p-4 rounded-lg border-2 transition-all duration-200
                 min-h-[72px] sm:min-h-[80px] touch-manipulation active:scale-95
                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                ${selectedRegion === key 
-                  ? `${getRegionColorClass(key, 'border')} ${getRegionColorClass(key, 'bgLight')} shadow-md active` 
-                  : `border-neutral-200 ${getRegionColorClass(key, 'bgHover')}`
-                }
+                ${selectedRegion === key
+              ? `${getRegionColorClass(key, 'border')} ${getRegionColorClass(key, 'bgLight')} shadow-md active`
+              : `border-neutral-200 ${getRegionColorClass(key, 'bgHover')}`
+            }
               `}
               aria-pressed={selectedRegion === key}
               aria-label={`Select ${region.name} region: ${region.description}`}
@@ -211,10 +211,10 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
               <div className="text-left h-full flex flex-col justify-center">
                 <div className={`
                   font-semibold text-sm sm:text-base mb-1 leading-tight
-                  ${selectedRegion === key 
-                    ? getRegionColorClass(key, 'text') 
-                    : 'text-neutral-700'
-                  }
+                  ${selectedRegion === key
+              ? getRegionColorClass(key, 'text')
+              : 'text-neutral-700'
+            }
                 `}>
                   {region.name}
                 </div>
@@ -222,7 +222,7 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
                   {region.description}
                 </div>
               </div>
-              
+
               {/* Active indicator */}
               {selectedRegion === key && (
                 <div className={`
@@ -272,7 +272,7 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
       </div>
 
       {/* Enhanced Map View */}
-      <MapView 
+      <MapView
         weatherData={filteredData.weatherData}
         webcamData={filteredData.webcamData}
         selectedRegion={selectedRegion}
@@ -288,7 +288,7 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
               {REGIONS[selectedRegion].name} Region Details
             </h3>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-4">
             {/* Weather Stations in Region - Mobile Optimized */}
             {filteredData.weatherData?.locations?.length > 0 && (
@@ -302,8 +302,8 @@ const RegionalMapView = ({ weatherData, webcamData }) => {
                       <div className="flex-1 min-w-0 mr-3">
                         <div className="font-medium text-sm sm:text-sm truncate">{location.name}</div>
                         <div className="text-xs sm:text-xs text-neutral-500 truncate">
-                          {location.coordinates ? 
-                            `${location.coordinates.lat.toFixed(4)}, ${location.coordinates.lng.toFixed(4)}` : 
+                          {location.coordinates ?
+                            `${location.coordinates.lat.toFixed(4)}, ${location.coordinates.lng.toFixed(4)}` :
                             'No coordinates'
                           }
                         </div>

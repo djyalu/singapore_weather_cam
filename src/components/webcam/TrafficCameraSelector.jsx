@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-const TrafficCameraSelector = ({ 
-  onCameraSelectionChange, 
-  selectedCameras = [], 
+const TrafficCameraSelector = ({
+  onCameraSelectionChange,
+  selectedCameras = [],
   maxSelection = 20,
-  className = '' 
+  className = '',
 }) => {
   const [allCameras, setAllCameras] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -22,9 +22,9 @@ const TrafficCameraSelector = ({
     const R = 6371; // Earth's radius in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = 
+    const a =
       Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
       Math.sin(dLng/2) * Math.sin(dLng/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
@@ -32,18 +32,18 @@ const TrafficCameraSelector = ({
 
   // Get image quality from metadata
   const getImageQuality = (metadata) => {
-    if (!metadata) return 'unknown';
+    if (!metadata) {return 'unknown';}
     const { width, height } = metadata;
-    if (width >= 1920 && height >= 1080) return 'HD';
-    if (width >= 1280 && height >= 720) return 'HD Ready';
-    if (width >= 640 && height >= 480) return 'Standard';
+    if (width >= 1920 && height >= 1080) {return 'HD';}
+    if (width >= 1280 && height >= 720) {return 'HD Ready';}
+    if (width >= 640 && height >= 480) {return 'Standard';}
     return 'Low';
   };
 
   // Classify region based on distance
   const classifyRegion = (distance) => {
-    if (distance <= 5) return 'core';
-    if (distance <= 15) return 'major';
+    if (distance <= 5) {return 'core';}
+    if (distance <= 15) {return 'major';}
     return 'extended';
   };
 
@@ -52,11 +52,11 @@ const TrafficCameraSelector = ({
     setLoading(true);
     try {
       console.log('🔍 Fetching live cameras from LTA API...');
-      
+
       const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
         headers: {
-          'User-Agent': 'Singapore-Weather-Cam/1.0'
-        }
+          'User-Agent': 'Singapore-Weather-Cam/1.0',
+        },
       });
 
       if (!response.ok) {
@@ -72,7 +72,7 @@ const TrafficCameraSelector = ({
           BUKIT_TIMAH_CENTER.lat,
           BUKIT_TIMAH_CENTER.lng,
           camera.location.latitude,
-          camera.location.longitude
+          camera.location.longitude,
         );
 
         const quality = getImageQuality(camera.image_metadata);
@@ -83,7 +83,7 @@ const TrafficCameraSelector = ({
           name: `Camera ${camera.camera_id}`,
           coordinates: {
             lat: camera.location.latitude,
-            lng: camera.location.longitude
+            lng: camera.location.longitude,
           },
           distance: Math.round(distance * 10) / 10,
           quality: quality,
@@ -92,7 +92,7 @@ const TrafficCameraSelector = ({
           timestamp: camera.timestamp,
           metadata: camera.image_metadata,
           isOnline: true,
-          lastUpdate: new Date(camera.timestamp).toLocaleString()
+          lastUpdate: new Date(camera.timestamp).toLocaleString(),
         };
       });
 
@@ -122,11 +122,11 @@ const TrafficCameraSelector = ({
     // Apply search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(camera => 
+      filtered = filtered.filter(camera =>
         camera.id.toLowerCase().includes(search) ||
         camera.name.toLowerCase().includes(search) ||
         camera.region.toLowerCase().includes(search) ||
-        camera.quality.toLowerCase().includes(search)
+        camera.quality.toLowerCase().includes(search),
       );
     }
 
@@ -166,7 +166,7 @@ const TrafficCameraSelector = ({
     const newSelection = selectedCameras.includes(cameraId)
       ? selectedCameras.filter(id => id !== cameraId)
       : [...selectedCameras, cameraId].slice(0, maxSelection);
-    
+
     onCameraSelectionChange(newSelection);
   };
 
@@ -176,7 +176,7 @@ const TrafficCameraSelector = ({
       .slice(0, maxSelection - selectedCameras.length)
       .map(camera => camera.id)
       .filter(id => !selectedCameras.includes(id));
-    
+
     const newSelection = [...selectedCameras, ...visibleCameraIds].slice(0, maxSelection);
     onCameraSelectionChange(newSelection);
   };
@@ -191,7 +191,7 @@ const TrafficCameraSelector = ({
     const colors = {
       core: 'bg-red-100 text-red-800',
       major: 'bg-blue-100 text-blue-800',
-      extended: 'bg-gray-100 text-gray-800'
+      extended: 'bg-gray-100 text-gray-800',
     };
     return colors[region] || colors.extended;
   };
@@ -203,7 +203,7 @@ const TrafficCameraSelector = ({
       'HD Ready': 'bg-yellow-100 text-yellow-800',
       'Standard': 'bg-orange-100 text-orange-800',
       'Low': 'bg-red-100 text-red-800',
-      'unknown': 'bg-gray-100 text-gray-800'
+      'unknown': 'bg-gray-100 text-gray-800',
     };
     return colors[quality] || colors.unknown;
   };
@@ -239,7 +239,7 @@ const TrafficCameraSelector = ({
             🔄 Refresh
           </button>
         </div>
-        
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div className="bg-gray-50 rounded p-2 text-center">
@@ -346,18 +346,18 @@ const TrafficCameraSelector = ({
             {filteredAndSortedCameras.map((camera) => {
               const isSelected = selectedCameras.includes(camera.id);
               const canSelect = !isSelected && selectedCameras.length < maxSelection;
-              
+
               return (
                 <div
                   key={camera.id}
                   className={`
                     flex items-center p-3 rounded-lg border transition-all cursor-pointer
-                    ${isSelected 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : canSelect 
-                        ? 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                        : 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
-                    }
+                    ${isSelected
+                  ? 'border-blue-500 bg-blue-50'
+                  : canSelect
+                    ? 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    : 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
+                }
                   `}
                   onClick={() => canSelect || isSelected ? handleCameraToggle(camera.id) : null}
                 >
@@ -368,7 +368,7 @@ const TrafficCameraSelector = ({
                     disabled={!canSelect && !isSelected}
                     className="mr-3"
                   />
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium text-gray-900">
@@ -382,7 +382,7 @@ const TrafficCameraSelector = ({
                       </span>
                     </div>
                     <div className="text-sm text-gray-600">
-                      📍 {camera.distance}km from Bukit Timah • 
+                      📍 {camera.distance}km from Bukit Timah •
                       🕐 {camera.lastUpdate}
                     </div>
                   </div>
@@ -404,7 +404,7 @@ TrafficCameraSelector.propTypes = {
   onCameraSelectionChange: PropTypes.func.isRequired,
   selectedCameras: PropTypes.arrayOf(PropTypes.string),
   maxSelection: PropTypes.number,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default TrafficCameraSelector;

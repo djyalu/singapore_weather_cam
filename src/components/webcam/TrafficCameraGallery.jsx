@@ -598,7 +598,7 @@ const TrafficCameraGallery = () => {
           <span className="text-gray-700">
             {viewMode === 'selector' ? (
               <>
-                <strong>{selectedCameraIds.length}</strong>개 카메라 선택됨 
+                <strong>{selectedCameraIds.length}</strong>개 카메라 선택됨
                 {filteredCameras.length > 0 && (
                   <span> • <strong>{filteredCameras.length}</strong>개 표시중</span>
                 )}

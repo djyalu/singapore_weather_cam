@@ -10,7 +10,7 @@ const WeatherDashboard = ({ data }) => {
     data: data ? 'present' : 'missing',
     current: data?.current ? 'present' : 'missing',
     locations: data?.locations?.length || 0,
-    forecast: data?.forecast?.length || 0
+    forecast: data?.forecast?.length || 0,
   });
 
   if (!data) {

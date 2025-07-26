@@ -16,13 +16,13 @@ export function transformWeatherData(rawData) {
 
   try {
     const { data } = rawData;
-    
+
     // 현재 날씨 정보 추출
     const current = extractCurrentWeather(data);
-    
+
     // 지역별 정보 변환
     const locations = transformLocations(data);
-    
+
     // 예보 정보 (현재는 기본값)
     const forecast = generateBasicForecast(current);
 
@@ -35,14 +35,14 @@ export function transformWeatherData(rawData) {
       meta: {
         stations: data.temperature?.readings?.length || 0,
         lastUpdate: rawData.timestamp,
-        dataQuality: assessDataQuality(data)
-      }
+        dataQuality: assessDataQuality(data),
+      },
     };
 
     console.log('📊 Enhanced data loaded successfully:', {
       stations: transformedData.meta.stations,
       current: transformedData.current.temperature,
-      locations: transformedData.locations.length
+      locations: transformedData.locations.length,
     });
 
     return transformedData;
@@ -72,7 +72,7 @@ function extractCurrentWeather(data) {
     visibility: '--', // NEA에서 제공하지 않음
     location: 'Singapore',
     description: getWeatherDescription(temperature, rainfall),
-    icon: getWeatherIcon(temperature, rainfall)
+    icon: getWeatherIcon(temperature, rainfall),
   };
 }
 
@@ -81,7 +81,7 @@ function extractCurrentWeather(data) {
  */
 function transformLocations(data) {
   const locations = [];
-  
+
   // 전체 평균 정보
   locations.push({
     id: 'all',
@@ -93,7 +93,7 @@ function transformLocations(data) {
     coordinates: { lat: 1.3521, lng: 103.8198 },
     temperature: calculateAverage(data.temperature?.readings),
     humidity: calculateAverage(data.humidity?.readings),
-    rainfall: calculateAverage(data.rainfall?.readings)
+    rainfall: calculateAverage(data.rainfall?.readings),
   });
 
   // Primary 스테이션들 우선 처리 (실제 데이터가 있는 스테이션들)
@@ -108,7 +108,7 @@ function transformLocations(data) {
   // 나머지 secondary 스테이션들
   const tempReadings = data.temperature?.readings || [];
   const processedStations = new Set([...primaryStations, 'avg']);
-  
+
   tempReadings.forEach(reading => {
     if (!processedStations.has(reading.station)) {
       const stationData = extractStationData(data, reading.station);
@@ -145,7 +145,7 @@ function extractStationData(data, stationId) {
     coordinates: stationInfo.coordinates,
     temperature: temperature !== null ? Math.round(temperature * 10) / 10 : null,
     humidity: humidity !== null ? Math.round(humidity) : null,
-    rainfall: rainfall !== null ? Math.round(rainfall * 10) / 10 : null
+    rainfall: rainfall !== null ? Math.round(rainfall * 10) / 10 : null,
   };
 }
 
@@ -153,7 +153,7 @@ function extractStationData(data, stationId) {
  * 특정 스테이션의 값 찾기
  */
 function findStationValue(readings, stationId) {
-  if (!readings || !Array.isArray(readings)) return null;
+  if (!readings || !Array.isArray(readings)) {return null;}
   const reading = readings.find(r => r.station === stationId);
   return reading ? reading.value : null;
 }
@@ -165,13 +165,13 @@ function calculateAverage(readings) {
   if (!readings || !Array.isArray(readings) || readings.length === 0) {
     return null;
   }
-  
+
   const validValues = readings
     .map(r => r.value)
     .filter(v => v !== null && v !== undefined && !isNaN(v));
-    
-  if (validValues.length === 0) return null;
-  
+
+  if (validValues.length === 0) {return null;}
+
   return validValues.reduce((sum, val) => sum + val, 0) / validValues.length;
 }
 
@@ -182,16 +182,16 @@ function getAverageWindDirection(readings) {
   if (!readings || !Array.isArray(readings) || readings.length === 0) {
     return 'Variable';
   }
-  
+
   // 가장 흔한 풍향 반환
   const directions = readings.map(r => r.value).filter(v => v);
-  if (directions.length === 0) return 'Variable';
-  
+  if (directions.length === 0) {return 'Variable';}
+
   const directionCounts = {};
   directions.forEach(dir => {
     directionCounts[dir] = (directionCounts[dir] || 0) + 1;
   });
-  
+
   return Object.entries(directionCounts)
     .sort(([,a], [,b]) => b - a)[0][0];
 }
@@ -200,11 +200,11 @@ function getAverageWindDirection(readings) {
  * 날씨 설명 생성
  */
 function getWeatherDescription(temperature, rainfall) {
-  if (rainfall > 5) return 'Rainy';
-  if (rainfall > 0.5) return 'Light Rain';
-  if (temperature > 32) return 'Hot';
-  if (temperature > 28) return 'Warm';
-  if (temperature > 24) return 'Pleasant';
+  if (rainfall > 5) {return 'Rainy';}
+  if (rainfall > 0.5) {return 'Light Rain';}
+  if (temperature > 32) {return 'Hot';}
+  if (temperature > 28) {return 'Warm';}
+  if (temperature > 24) {return 'Pleasant';}
   return 'Cool';
 }
 
@@ -212,10 +212,10 @@ function getWeatherDescription(temperature, rainfall) {
  * 날씨 아이콘 선택
  */
 function getWeatherIcon(temperature, rainfall) {
-  if (rainfall > 5) return '🌧️';
-  if (rainfall > 0.5) return '🌦️';
-  if (temperature > 32) return '☀️';
-  if (temperature > 28) return '⛅';
+  if (rainfall > 5) {return '🌧️';}
+  if (rainfall > 0.5) {return '🌦️';}
+  if (temperature > 32) {return '☀️';}
+  if (temperature > 28) {return '⛅';}
   return '🌤️';
 }
 
@@ -228,14 +228,14 @@ function generateBasicForecast(current) {
       time: 'Today',
       temperature: current.temperature,
       description: current.description,
-      icon: current.icon
+      icon: current.icon,
     },
     {
       time: 'Tomorrow',
       temperature: current.temperature ? current.temperature + 1 : null,
       description: 'Partly Cloudy',
-      icon: '⛅'
-    }
+      icon: '⛅',
+    },
   ];
 }
 
@@ -246,11 +246,11 @@ function assessDataQuality(data) {
   const hasTemp = data.temperature?.readings?.length > 0;
   const hasHumidity = data.humidity?.readings?.length > 0;
   const hasRainfall = data.rainfall?.readings?.length > 0;
-  
+
   const qualityScore = [hasTemp, hasHumidity, hasRainfall].filter(Boolean).length;
-  
-  if (qualityScore >= 3) return 'high';
-  if (qualityScore >= 2) return 'medium';
+
+  if (qualityScore >= 3) {return 'high';}
+  if (qualityScore >= 2) {return 'medium';}
   return 'low';
 }
 
@@ -272,7 +272,7 @@ function createFallbackData() {
       visibility: '--',
       location: 'Singapore',
       description: 'Data Unavailable',
-      icon: '❓'
+      icon: '❓',
     },
     locations: [
       {
@@ -285,19 +285,19 @@ function createFallbackData() {
         coordinates: { lat: 1.3521, lng: 103.8198 },
         temperature: null,
         humidity: null,
-        rainfall: null
-      }
+        rainfall: null,
+      },
     ],
     forecast: [],
     meta: {
       stations: 0,
       lastUpdate: new Date().toISOString(),
-      dataQuality: 'unavailable'
-    }
+      dataQuality: 'unavailable',
+    },
   };
 }
 
 export default {
   transformWeatherData,
-  createFallbackData
+  createFallbackData,
 };

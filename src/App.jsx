@@ -129,7 +129,7 @@ const App = React.memo(() => {
         <Header systemStats={systemStats} />
 
         {/* System Status - Compact at top with refresh controls */}
-        <SystemStatus 
+        <SystemStatus
           lastFetch={dataFreshness ? new Date(Date.now() - (dataFreshness.includes('m') ? parseInt(dataFreshness) * 60000 : parseInt(dataFreshness) * 3600000)) : null}
           weatherData={weatherData}
           webcamData={webcamData}
