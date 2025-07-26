@@ -14,10 +14,14 @@
     "health-json": "node scripts/health-check.js --json",
     "lint": "eslint src/**/*.{js,jsx}",
     "format": "prettier --write .",
-    "test:rpa": "node scripts/test-github-actions.js --test",
-    "test:rpa-visual": "HEADLESS=false node scripts/test-github-actions.js --test",
-    "test:quick": "node scripts/quick-rpa-test.js",
-    "test:actions": "npm run test:quick"
+    "test:rpa": "node scripts/rpa-website-test.js",
+    "test:rpa-visual": "HEADLESS=false node scripts/rpa-website-test.js",
+    "test:quick": "TARGET_URL=https://djyalu.github.io/singapore_weather_cam/ TEST_TYPE=smoke node scripts/rpa-website-test.js",
+    "test:actions": "npm run test:quick",
+    "task:status": "node scripts/task-manager.js --action=status",
+    "task:analytics": "node scripts/task-manager.js --action=analytics",
+    "task:demo": "node scripts/task-manager.js --demo",
+    "task:init": "node scripts/task-manager.js --initialize"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.9.0",

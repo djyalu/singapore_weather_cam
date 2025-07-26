@@ -1,0 +1,11 @@
+# Task State Directory
+
+This directory stores cross-session task management state and persistence data.
+
+## Files
+- `current-state.json` - Current task hierarchy state
+- `{sessionId}.json` - Session-specific task state backups
+- `analytics.json` - Task performance analytics and metrics
+
+## Purpose
+Enables task continuity across Claude Code sessions with intelligent state management.

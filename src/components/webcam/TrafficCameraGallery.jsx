@@ -8,6 +8,95 @@ import {
 import LoadingSkeleton from './LoadingSkeleton';
 import ErrorState from './ErrorState';
 
+/**
+ * Individual Camera Card Component with enhanced loading states
+ */
+const CameraCard = ({ camera, index }) => {
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageLoad = (e) => {
+    setImageLoading(false);
+    e.target.style.opacity = '1';
+  };
+
+  const handleImageError = (e) => {
+    setImageLoading(false);
+    setImageError(true);
+    e.target.src = '/images/placeholder.jpg';
+    e.target.style.opacity = '0.7';
+  };
+
+  return (
+    <div
+      className="card hover:shadow-lg transition-all duration-300 card-interactive"
+      style={{ 
+        animationDelay: `${(index % 8) * 50}ms`,
+      }}
+    >
+      <div className="aspect-video bg-gray-100 rounded overflow-hidden mb-3 relative group">
+        {/* Image loading skeleton overlay */}
+        {imageLoading && (
+          <div className="absolute inset-0 skeleton flex items-center justify-center z-10">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          </div>
+        )}
+
+        {/* Actual camera image */}
+        <img
+          src={`${camera.image.url}?t=${Date.now()}`}
+          alt={`${camera.name} 실시간 카메라`}
+          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+          loading="lazy"
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          style={{ opacity: imageLoading ? '0' : '1' }}
+        />
+
+        {/* Image error overlay */}
+        {imageError && (
+          <div className="absolute inset-0 bg-gray-100 flex flex-col items-center justify-center text-gray-500">
+            <div className="text-2xl mb-2">📷</div>
+            <div className="text-xs text-center">이미지를 불러올 수<br />없습니다</div>
+          </div>
+        )}
+
+        {/* Live indicator */}
+        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+          LIVE
+        </div>
+      </div>
+
+      {/* Camera info */}
+      <h4 className="font-medium text-sm mb-1 line-clamp-1" title={camera.name}>
+        {camera.name}
+      </h4>
+      <p className="text-xs text-gray-600 mb-2 line-clamp-1" title={camera.area}>
+        📍 {camera.area}
+      </p>
+
+      {/* Metadata */}
+      <div className="flex items-center justify-between text-xs text-gray-500">
+        <span className="bg-gray-100 px-2 py-1 rounded">ID: {camera.id}</span>
+        <span className="bg-blue-50 text-blue-600 px-2 py-1 rounded">
+          {camera.image.width}×{camera.image.height}
+        </span>
+      </div>
+
+      {/* Accessibility */}
+      <div className="sr-only">
+        실시간 교통 카메라: {camera.name}, 위치: {camera.area}, 
+        해상도: {camera.image.width}×{camera.image.height}픽셀
+      </div>
+    </div>
+  );
+};
+
 const TrafficCameraGallery = () => {
   const [cameras, setCameras] = useState([]);
   const [filteredCameras, setFilteredCameras] = useState([]);
@@ -188,41 +277,36 @@ const TrafficCameraGallery = () => {
         )}
       </div>
 
+      {/* Loading state for refresh */}
+      {isRefreshing && cameras.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center gap-2 text-blue-800">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm font-medium">카메라 데이터를 새로고침하는 중...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error state for refresh errors (non-blocking) */}
+      {error && cameras.length > 0 && (
+        <ErrorState
+          error={error}
+          onRetry={handleRetry}
+          retryAttempts={retryAttempts}
+          maxRetries={3}
+          showDetails={false}
+          variant="inline"
+        />
+      )}
+
       {/* Camera Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredCameras.map((camera) => (
-          <div
+        {filteredCameras.map((camera, index) => (
+          <CameraCard 
             key={camera.id}
-            className="card hover:shadow-lg transition-shadow"
-          >
-            <div className="aspect-video bg-gray-100 rounded overflow-hidden mb-3 relative">
-              <img
-                src={`${camera.image.url}?t=${Date.now()}`}
-                alt={camera.name}
-                className="w-full h-full object-cover transition-opacity duration-300"
-                loading="lazy"
-                onLoad={(e) => {
-                  e.target.style.opacity = '1';
-                }}
-                onError={(e) => {
-                  e.target.src = '/images/placeholder.jpg';
-                  e.target.style.opacity = '0.7';
-                }}
-                style={{ opacity: '0' }}
-              />
-              <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-                <div className="text-gray-400 text-xs">로딩 중...</div>
-              </div>
-            </div>
-
-            <h4 className="font-medium text-sm mb-1">{camera.name}</h4>
-            <p className="text-xs text-gray-600 mb-2">{camera.area}</p>
-
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>📍 {camera.id}</span>
-              <span>{camera.image.width}×{camera.image.height}</span>
-            </div>
-          </div>
+            camera={camera}
+            index={index}
+          />
         ))}
       </div>
 
