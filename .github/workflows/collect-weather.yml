@@ -2,8 +2,8 @@ name: Collect Weather Data
 
 on:
   schedule:
-    # Every 4 hours (6 runs/day = 180 runs/month) - Optimized for free tier
-    - cron: '0 */4 * * *'
+    # Every 3 hours (8 runs/day = 240 runs/month) - 60% GitHub Actions budget
+    - cron: '0 */3 * * *'
   workflow_dispatch:
     inputs:
       force_run:
@@ -122,7 +122,7 @@ jobs:
 Bukit Timah area weather update:
 - Temperature: ${TEMP_INFO}
 - Source: NEA Singapore API
-- Schedule: Every 2 hours (optimized)
+- Schedule: Every 3 hours (60% budget optimized)
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 

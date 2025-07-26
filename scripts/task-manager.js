@@ -3,8 +3,10 @@
  * Cross-session persistence, intelligent orchestration, and analytics
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Task state persistence configuration
 const TASK_STATE_DIR = '.github/task-state';
@@ -542,11 +544,12 @@ async function main() {
   await taskManager.getTaskStatus();
 }
 
-if (require.main === module) {
+// Check if this is the main module
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(error => {
     console.error('❌ Task Manager error:', error);
     process.exit(1);
   });
 }
 
-module.exports = { TaskManager };
+export { TaskManager };

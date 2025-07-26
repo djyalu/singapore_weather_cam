@@ -39,7 +39,9 @@ const App = React.memo(() => {
     error,
     retryCount,
     refresh,
+    forceRefresh,
     dataFreshness,
+    reliabilityMetrics,
   } = useDataLoader(5 * 60 * 1000); // 5 minute refresh interval
 
   // Use custom hook for system stats calculation
@@ -126,12 +128,16 @@ const App = React.memo(() => {
         </a>
         <Header systemStats={systemStats} />
 
-        {/* System Status - Compact at top */}
+        {/* System Status - Compact at top with refresh controls */}
         <SystemStatus 
-          isOnline={isOnline}
-          lastUpdate={dataFreshness}
-          isLoading={isRefreshing}
-          systemStats={systemStats}
+          lastFetch={dataFreshness ? new Date(Date.now() - (dataFreshness.includes('m') ? parseInt(dataFreshness) * 60000 : parseInt(dataFreshness) * 3600000)) : null}
+          weatherData={weatherData}
+          webcamData={webcamData}
+          reliabilityMetrics={reliabilityMetrics}
+          error={error}
+          isRefreshing={isRefreshing}
+          onRefresh={refresh}
+          onForceRefresh={forceRefresh}
         />
 
         <main id="main" className="max-w-7xl mx-auto px-4 pb-8" role="main" tabIndex="-1">

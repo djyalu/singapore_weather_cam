@@ -222,11 +222,136 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     return () => clearTimeout(timer);
   }, [loadData, retryCount]);
 
-  // Manual refresh function
+  // Manual refresh function (respects cache)
   const refresh = useCallback(() => {
     setRetryCount(0);
     loadData();
   }, [loadData]);
+
+  // Force refresh function (bypasses cache)
+  const forceRefresh = useCallback(async () => {
+    if (!isMountedRef.current) return;
+
+    console.log('🔄 Force refresh initiated - bypassing all caches');
+    setRetryCount(0);
+    
+    try {
+      setLoading(true);
+      setError(null);
+
+      const startTime = Date.now();
+      const basePath = import.meta.env.BASE_URL || '/';
+      const forceTimestamp = Date.now(); // Strong cache busting
+
+      // Clear any existing caches first
+      if (typeof caches !== 'undefined') {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(
+            cacheNames.map(cacheName => caches.delete(cacheName))
+          );
+          console.log('🗑️ Service Worker caches cleared');
+        } catch (cacheError) {
+          console.warn('Cache clearing failed:', cacheError);
+        }
+      }
+
+      // Force fresh data with strong cache busting
+      const [weatherResult, webcamResult] = await Promise.all([
+        dataReliabilityService.loadDataWithReliability(
+          'weather',
+          () => apiService.fetch(`${basePath}data/weather/latest.json?force=${forceTimestamp}`, {
+            cacheTTL: 0, // No cache
+            timeout: 8000,
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0',
+            },
+          }),
+          { maxRetries: 2, bypassCache: true },
+        ),
+        dataReliabilityService.loadDataWithReliability(
+          'webcam',
+          () => apiService.fetch(`${basePath}data/webcam/latest.json?force=${forceTimestamp}`, {
+            cacheTTL: 0, // No cache
+            timeout: 12000,
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0',
+            },
+          }),
+          { maxRetries: 2, bypassCache: true },
+        ),
+      ]);
+
+      if (!isMountedRef.current) return;
+
+      // Process data same as regular load
+      const weatherValidation = securityValidator.validateWeatherData(weatherResult.data);
+      const transformedWeatherData = transformWeatherData(weatherResult.data);
+      
+      const enhancedWeatherData = {
+        ...transformedWeatherData,
+        reliabilityMetadata: {
+          ...weatherResult.metadata,
+          totalLoadTime: Date.now() - startTime,
+          securityValidated: weatherValidation.isValid,
+          timestamp: new Date().toISOString(),
+          forceRefresh: true,
+        },
+      };
+
+      const enhancedWebcamData = {
+        ...webcamResult.data,
+        reliabilityMetadata: {
+          ...webcamResult.metadata,
+          totalLoadTime: Date.now() - startTime,
+          timestamp: new Date().toISOString(),
+          forceRefresh: true,
+        },
+      };
+
+      setReliabilityMetrics({
+        weatherQuality: weatherResult.metadata.qualityScore,
+        webcamQuality: webcamResult.metadata.qualityScore,
+        fallbackMode: weatherResult.metadata.source?.includes('fallback') || webcamResult.metadata.source?.includes('fallback'),
+        dataAge: Math.max(weatherResult.metadata.dataAge || 0, webcamResult.metadata.dataAge || 0),
+      });
+
+      setWeatherData({
+        ...enhancedWeatherData,
+        securityValidation: {
+          isValid: weatherValidation.isValid,
+          errors: weatherValidation.errors || []
+        }
+      });
+      setWebcamData(enhancedWebcamData);
+      setLastFetch(new Date());
+
+      console.log('⚡ Force refresh completed successfully:', {
+        loadTime: Date.now() - startTime,
+        weatherQuality: weatherResult.metadata.qualityScore,
+        webcamQuality: webcamResult.metadata.qualityScore,
+      });
+
+    } catch (err) {
+      console.error('Force refresh failed:', err);
+      if (isMountedRef.current) {
+        setError({
+          message: `Force refresh failed: ${err.message}`,
+          category: 'force_refresh',
+          timestamp: new Date().toISOString(),
+          retryable: false,
+        });
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   // Initial load and periodic refresh
   useEffect(() => {
@@ -290,6 +415,7 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
     isRefreshing,
     lastFetch,
     refresh,
+    forceRefresh,
     dataFreshness: getDataFreshness(),
     reliabilityMetrics,
     getReliabilityReport,
