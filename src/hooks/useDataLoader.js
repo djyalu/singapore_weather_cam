@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiService } from '../services/apiService.js';
 import { securityValidator } from '../services/securityService.js';
 import { dataReliabilityService } from '../services/dataReliabilityService.js';
+import { transformWeatherData } from '../utils/weatherDataTransformer.js';
 
 /**
  * Enhanced custom hook for data loading with comprehensive reliability service integration
@@ -77,9 +78,12 @@ export const useDataLoader = (refreshInterval = 5 * 60 * 1000) => {
         // Continue with sanitized data from reliability service
       }
 
+      // Transform weather data to standard format
+      const transformedWeatherData = transformWeatherData(weatherResult.data);
+      
       // Enhanced metadata including reliability metrics
       const enhancedWeatherData = {
-        ...weatherResult.data,
+        ...transformedWeatherData,
         reliabilityMetadata: {
           ...weatherResult.metadata,
           totalLoadTime: Date.now() - startTime,

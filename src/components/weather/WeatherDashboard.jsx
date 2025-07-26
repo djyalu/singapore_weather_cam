@@ -2,6 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import WeatherCard from './WeatherCard';
 import WeatherChart from './WeatherChart';
+import { transformWeatherData } from '../../utils/weatherDataTransformer';
 
 const WeatherDashboard = ({ data }) => {
   const [selectedLocation, setSelectedLocation] = useState('all');
@@ -14,7 +15,18 @@ const WeatherDashboard = ({ data }) => {
     );
   }
 
-  const { current, forecast, locations } = data;
+  // Transform NEA data format to component format
+  const transformedData = transformWeatherData(data);
+  
+  if (!transformedData) {
+    return (
+      <div className="card">
+        <p className="text-red-500 text-center">Unable to process weather data</p>
+      </div>
+    );
+  }
+
+  const { current, forecast, locations } = transformedData;
 
   // Filter data based on selected location
   const getFilteredData = () => {

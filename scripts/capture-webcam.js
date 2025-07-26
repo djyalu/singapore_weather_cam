@@ -239,6 +239,7 @@ function formatTimestamp(date = new Date()) {
 
 /**
  * Enhanced image download with comprehensive validation and security
+ * Supports both HEAD and GET methods for maximum compatibility
  */
 async function downloadImage(url, filepath, retries = CONFIG.MAX_RETRIES) {
   // Input validation
@@ -265,10 +266,35 @@ async function downloadImage(url, filepath, retries = CONFIG.MAX_RETRIES) {
       controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT);
       
-      const response = await fetch(url, {
-        signal: controller.signal,
-        headers: CONFIG.SECURITY_HEADERS
-      });
+      // First try HEAD request for efficiency (if supported)
+      let response;
+      let useGetMethod = false;
+      
+      try {
+        response = await fetch(url, {
+          method: 'HEAD',
+          signal: controller.signal,
+          headers: CONFIG.SECURITY_HEADERS
+        });
+        
+        // If HEAD fails with 405 Method Not Allowed, fallback to GET
+        if (response.status === 405) {
+          console.log(`ℹ️ HEAD not supported, using GET method`);
+          useGetMethod = true;
+        }
+      } catch (headError) {
+        console.log(`ℹ️ HEAD request failed, using GET method: ${headError.message}`);
+        useGetMethod = true;
+      }
+      
+      // Use GET method if HEAD failed or not supported
+      if (useGetMethod || !response.ok) {
+        response = await fetch(url, {
+          method: 'GET',
+          signal: controller.signal,
+          headers: CONFIG.SECURITY_HEADERS
+        });
+      }
       
       clearTimeout(timeoutId);
 
@@ -280,22 +306,48 @@ async function downloadImage(url, filepath, retries = CONFIG.MAX_RETRIES) {
       const contentLength = parseInt(response.headers.get('content-length') || '0');
       const contentType = response.headers.get('content-type') || '';
       
-      // Size validation
-      if (contentLength > CONFIG.MAX_FILE_SIZE) {
-        throw new Error(`File too large: ${contentLength} bytes (max: ${CONFIG.MAX_FILE_SIZE})`);
+      // Size validation (skip for HEAD requests where content-length might not be accurate)
+      if (useGetMethod || response.method !== 'HEAD') {
+        if (contentLength > CONFIG.MAX_FILE_SIZE) {
+          throw new Error(`File too large: ${contentLength} bytes (max: ${CONFIG.MAX_FILE_SIZE})`);
+        }
+        
+        if (contentLength > 0 && contentLength < CONFIG.MIN_FILE_SIZE) {
+          throw new Error(`File too small: ${contentLength} bytes (min: ${CONFIG.MIN_FILE_SIZE})`);
+        }
       }
       
-      if (contentLength > 0 && contentLength < CONFIG.MIN_FILE_SIZE) {
-        throw new Error(`File too small: ${contentLength} bytes (min: ${CONFIG.MIN_FILE_SIZE})`);
-      }
-      
-      // Content type validation
-      const isValidType = CONFIG.ALLOWED_MIME_TYPES.some(type => contentType.includes(type));
+      // Content type validation - accept image types or application/octet-stream (common for API images)
+      const isValidType = CONFIG.ALLOWED_MIME_TYPES.some(type => contentType.includes(type)) || 
+                         contentType.includes('application/octet-stream');
       if (!isValidType && contentType) {
-        console.warn(`⚠️ Unexpected content type: ${contentType}`);
+        console.warn(`⚠️ Unexpected content type: ${contentType} - will validate using binary signature`);
+      }
+      
+      // For data.gov.sg images that return application/octet-stream, this is normal
+      if (contentType.includes('application/octet-stream') && url.includes('data.gov.sg')) {
+        console.log(`ℹ️ Singapore government API image detected (application/octet-stream is expected)`);
       }
 
-      const buffer = await response.arrayBuffer();
+      // Only download content for GET requests or when we need the actual file
+      let buffer;
+      if (useGetMethod || response.method !== 'HEAD') {
+        buffer = await response.arrayBuffer();
+      } else {
+        // For HEAD requests, we need to make another GET request to get the actual content
+        const getResponse = await fetch(url, {
+          method: 'GET',
+          signal: controller.signal,
+          headers: CONFIG.SECURITY_HEADERS
+        });
+        
+        if (!getResponse.ok) {
+          throw new Error(`GET request failed: HTTP ${getResponse.status}: ${getResponse.statusText}`);
+        }
+        
+        buffer = await getResponse.arrayBuffer();
+      }
+      
       const uint8Array = new Uint8Array(buffer);
       
       // Binary signature validation

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { transformWeatherData } from '../../utils/weatherDataTransformer';
 
 // Fix for default markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -28,9 +29,10 @@ const MapView = React.memo(({ weatherData, webcamData }) => {
       maxZoom: 18,
     }).addTo(map);
 
-    // Add weather station markers
-    if (weatherData?.locations) {
-      weatherData.locations.forEach((location) => {
+    // Transform and add weather station markers
+    const transformedWeatherData = transformWeatherData(weatherData);
+    if (transformedWeatherData?.locations) {
+      transformedWeatherData.locations.forEach((location) => {
         if (location.coordinates) {
           const marker = L.marker([location.coordinates.lat, location.coordinates.lng])
             .addTo(map)

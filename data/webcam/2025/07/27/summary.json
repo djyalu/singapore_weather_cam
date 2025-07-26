@@ -1,131 +1,15 @@
 {
-  "timestamp": "2025-07-26T15:52:39.412Z",
+  "timestamp": "2025-07-26T15:58:56.262Z",
   "total_cameras": 9,
-  "successful_captures": 5,
-  "failed_captures": 4,
+  "successful_captures": 0,
+  "failed_captures": 9,
   "skipped_captures": 0,
-  "captures": [
-    {
-      "id": "marina_bay_traffic",
-      "name": "Marina Bay Traffic Camera",
-      "location": "Marina Bay",
-      "coordinates": {
-        "lat": 1.2777,
-        "lng": 103.8515
-      },
-      "type": "traffic",
-      "timestamp": "2025-07-26T15:52:39.412Z",
-      "capture_time": "2025-07-26T15:52:45.857Z",
-      "status": "success",
-      "file_info": {
-        "path": "images/webcam/marina_bay_traffic_20250727_0052.jpg",
-        "size": 176551,
-        "created": "1970-01-01T00:00:00.000Z",
-        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/e4c69e6a-2eaa-4645-ac3f-4ec3c6765397.jpg"
-      },
-      "ai_analysis": {
-        "analysis_available": false,
-        "reason": "API key not configured"
-      }
-    },
-    {
-      "id": "orchard_road_traffic",
-      "name": "Orchard Road Traffic Camera",
-      "location": "Orchard Road",
-      "coordinates": {
-        "lat": 1.3048,
-        "lng": 103.8318
-      },
-      "type": "traffic",
-      "timestamp": "2025-07-26T15:52:39.412Z",
-      "capture_time": "2025-07-26T15:52:45.860Z",
-      "status": "success",
-      "file_info": {
-        "path": "images/webcam/orchard_road_traffic_20250727_0052.jpg",
-        "size": 141164,
-        "created": "1970-01-01T00:00:00.000Z",
-        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/060e6ac7-db20-4f54-a4f8-2cbfa2d6bb25.jpg"
-      },
-      "ai_analysis": {
-        "analysis_available": false,
-        "reason": "API key not configured"
-      }
-    },
-    {
-      "id": "sentosa_traffic",
-      "name": "Sentosa Gateway Traffic Camera",
-      "location": "Sentosa",
-      "coordinates": {
-        "lat": 1.2494,
-        "lng": 103.8303
-      },
-      "type": "traffic",
-      "timestamp": "2025-07-26T15:52:39.412Z",
-      "capture_time": "2025-07-26T15:52:50.015Z",
-      "status": "success",
-      "file_info": {
-        "path": "images/webcam/sentosa_traffic_20250727_0052.jpg",
-        "size": 168811,
-        "created": "1970-01-01T00:00:00.000Z",
-        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/34fa43bc-f303-4a0c-bea9-2e629bde7a6e.jpg"
-      },
-      "ai_analysis": {
-        "analysis_available": false,
-        "reason": "API key not configured"
-      }
-    },
-    {
-      "id": "changi_airport_traffic",
-      "name": "Changi Airport Traffic Camera",
-      "location": "Changi Airport",
-      "coordinates": {
-        "lat": 1.3644,
-        "lng": 103.9915
-      },
-      "type": "traffic",
-      "timestamp": "2025-07-26T15:52:39.412Z",
-      "capture_time": "2025-07-26T15:52:50.017Z",
-      "status": "success",
-      "file_info": {
-        "path": "images/webcam/changi_airport_traffic_20250727_0052.jpg",
-        "size": 137587,
-        "created": "1970-01-01T00:00:00.000Z",
-        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/8bac63ec-abbe-4fd3-a439-8ff56183e54e.jpg"
-      },
-      "ai_analysis": {
-        "analysis_available": false,
-        "reason": "API key not configured"
-      }
-    },
-    {
-      "id": "tuas_checkpoint_traffic",
-      "name": "Tuas Checkpoint Traffic Camera",
-      "location": "Tuas",
-      "coordinates": {
-        "lat": 1.3482,
-        "lng": 103.6361
-      },
-      "type": "traffic",
-      "timestamp": "2025-07-26T15:52:39.412Z",
-      "capture_time": "2025-07-26T15:52:53.909Z",
-      "status": "success",
-      "file_info": {
-        "path": "images/webcam/tuas_checkpoint_traffic_20250727_0052.jpg",
-        "size": 117533,
-        "created": "1970-01-01T00:00:00.000Z",
-        "source_url": "https://images.data.gov.sg/api/traffic-images/2025/07/0d5abe94-1d01-4868-b2d3-0477603619ec.jpg"
-      },
-      "ai_analysis": {
-        "analysis_available": false,
-        "reason": "API key not configured"
-      }
-    }
-  ],
+  "captures": [],
   "metadata": {
-    "completion_time_ms": 15255,
-    "success_rate": 55.6,
+    "completion_time_ms": 27122,
+    "success_rate": 0,
     "circuit_breaker_state": "CLOSED",
-    "memory_usage_mb": 11,
+    "memory_usage_mb": 13,
     "data_integrity_validated": true
   }
 }
