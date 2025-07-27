@@ -26,6 +26,21 @@ const SystemStatus = React.memo(({
   retryAttempts = 0,
   maxRetries = 3,
 }) => {
+  // Debug logging in development
+  if (import.meta.env.MODE === 'development') {
+    console.log('🚦 SystemStatus props:', {
+      lastFetch,
+      hasWeatherData: !!weatherData,
+      hasWebcamData: !!webcamData,
+      weatherDataKeys: weatherData ? Object.keys(weatherData) : [],
+      webcamDataKeys: webcamData ? Object.keys(webcamData) : [],
+      reliabilityMetrics,
+      error,
+      isRefreshing,
+      isLoading
+    });
+  }
+
   const [dismissedErrors, setDismissedErrors] = useState(new Set());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [lastOnlineTime, setLastOnlineTime] = useState(Date.now());
@@ -546,7 +561,7 @@ const SystemStatus = React.memo(({
                     `}
                     aria-hidden="true"
                   />
-                  <span className="hidden sm:inline">Refresh</span>
+                  <span className="hidden md:inline">Refresh</span>
                   <span id="refresh-help" className="sr-only">
                     {!isOnline ? 'Cannot refresh while offline' :
                       isRefreshing ? 'Currently refreshing data' :
