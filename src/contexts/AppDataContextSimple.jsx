@@ -118,7 +118,10 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     activeCameras: webcamData?.captures?.filter(c => c.file_info?.url).length || 0,
     weatherStations: weatherData?.locations?.length || 0,
     lastUpdate: lastFetch instanceof Date ? lastFetch.toLocaleString('ko-KR') : lastFetch,
-    status: error ? 'error' : 'healthy'
+    status: error ? 'error' : 'healthy',
+    // Include data for SystemStatus component
+    weatherData,
+    webcamData
   }), [webcamData, weatherData, lastFetch, error]);
 
   const contextValue = useMemo(() => ({

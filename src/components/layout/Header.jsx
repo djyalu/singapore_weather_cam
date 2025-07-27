@@ -139,23 +139,6 @@ const Header = React.memo(({ systemStats = {} }) => {
 
   return (
     <>
-      {/* 실시간 상태 표시줄 */}
-      <div className="bg-green-500 text-white text-center py-2 text-sm font-medium">
-        <div className="flex items-center justify-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
-            <span>🔴 LIVE • 실시간 분석 중</span>
-          </div>
-          <span>• 마지막 업데이트: {formatTime(currentTime)}</span>
-          <div className="flex items-center space-x-1" role="status" aria-live="polite">
-            <Wifi className={`w-4 h-4 ${isOnline ? 'text-white' : 'text-red-300'}`} aria-hidden="true" />
-            <span className="text-xs" aria-label={`Network status: ${isOnline ? 'Online' : 'Offline'}`}>
-              {isOnline ? 'ONLINE' : 'OFFLINE'}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* 메인 헤더 */}
       <header className="bg-white shadow-xl border-b-4 border-blue-500">
         <div className="max-w-7xl mx-auto px-4 py-8">

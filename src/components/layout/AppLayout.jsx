@@ -98,6 +98,8 @@ const AppLayout = React.memo(({ children }) => {
         {/* System Status - Compact at top with refresh controls */}
         <SystemStatus
           lastFetch={lastFetch}
+          weatherData={systemStats?.weatherData}
+          webcamData={systemStats?.webcamData}
           reliabilityMetrics={reliabilityMetrics}
           error={error}
           isRefreshing={isRefreshing || isPullRefreshing}
