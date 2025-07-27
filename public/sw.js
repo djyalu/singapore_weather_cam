@@ -1,9 +1,9 @@
 // Service Worker for Singapore Weather Cam PWA
 // Provides offline functionality and caching strategies
 
-const CACHE_NAME = 'singapore-weather-cam-v1.1.1';
-const STATIC_CACHE = 'static-v1.1.1';
-const DATA_CACHE = 'data-v1.1.1';
+const CACHE_NAME = 'singapore-weather-cam-v1.2.0';
+const STATIC_CACHE = 'static-v1.2.0';
+const DATA_CACHE = 'data-v1.2.0';
 
 // Get base path for GitHub Pages deployment
 const BASE_PATH = '/singapore_weather_cam';
@@ -74,6 +74,12 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Filter out unsupported schemes and browser extension requests
+  if (!isCacheableRequest(request, url)) {
+    // Let browser handle extension requests and other unsupported schemes
+    return;
+  }
+
   // Handle different types of requests with appropriate strategies
   if (isDataRequest(url)) {
     // Data requests: Network first, fallback to cache
@@ -140,6 +146,50 @@ self.addEventListener('notificationclick', (event) => {
 
 // Helper functions
 
+function isCacheableRequest(request, url) {
+  // Filter out browser extension requests and unsupported schemes
+  const unsupportedSchemes = [
+    'chrome-extension:',
+    'moz-extension:',
+    'safari-extension:',
+    'edge-extension:',
+    'extension:',
+    'chrome-search:',
+    'chrome-devtools:',
+    'devtools:',
+    'about:',
+    'moz:',
+    'resource:',
+    'blob:',
+    'data:'
+  ];
+
+  // Check if request uses an unsupported scheme
+  if (unsupportedSchemes.some(scheme => url.protocol.startsWith(scheme))) {
+    return false;
+  }
+
+  // Only cache HTTP/HTTPS requests
+  if (!url.protocol.startsWith('http')) {
+    return false;
+  }
+
+  // Only cache GET requests (safe to cache)
+  if (request.method !== 'GET') {
+    return false;
+  }
+
+  // Filter out requests that look like browser extension injected content
+  if (url.pathname.includes('injected') || 
+      url.pathname.includes('content.js') || 
+      url.pathname.includes('inpage.js') ||
+      url.hostname.includes('extension')) {
+    return false;
+  }
+
+  return true;
+}
+
 function isDataRequest(url) {
   return url.pathname.includes('/data/') && url.pathname.endsWith('.json');
 }
@@ -162,8 +212,13 @@ async function networkFirstStrategy(request) {
     
     if (networkResponse.ok) {
       // Cache successful responses
-      const cache = await caches.open(DATA_CACHE);
-      cache.put(request, networkResponse.clone());
+      try {
+        const cache = await caches.open(DATA_CACHE);
+        await cache.put(request, networkResponse.clone());
+      } catch (cacheError) {
+        console.log('[ServiceWorker] Failed to cache response:', cacheError);
+        // Continue serving the response even if caching fails
+      }
       return networkResponse;
     }
     
@@ -199,8 +254,13 @@ async function cacheFirstStrategy(request, maxAge = null) {
     const networkResponse = await fetch(request);
     
     if (networkResponse.ok) {
-      const cache = await caches.open(STATIC_CACHE);
-      cache.put(request, networkResponse.clone());
+      try {
+        const cache = await caches.open(STATIC_CACHE);
+        await cache.put(request, networkResponse.clone());
+      } catch (cacheError) {
+        console.log('[ServiceWorker] Failed to cache static asset:', cacheError);
+        // Continue serving the response even if caching fails
+      }
     }
     
     return networkResponse;
@@ -236,8 +296,11 @@ async function getCachedResponse(request) {
 function updateCache(request) {
   fetch(request).then((response) => {
     if (response.ok) {
-      const cache = caches.open(STATIC_CACHE);
-      cache.then(c => c.put(request, response));
+      caches.open(STATIC_CACHE).then(cache => {
+        cache.put(request, response).catch(cacheError => {
+          console.log('[ServiceWorker] Background cache update failed:', cacheError);
+        });
+      });
     }
   }).catch(() => {
     // Ignore background update failures
