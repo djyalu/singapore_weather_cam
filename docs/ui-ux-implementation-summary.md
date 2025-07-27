@@ -185,8 +185,8 @@ Special attention to mobile user experience:
 ## 🌍 Cultural Integration
 
 Singapore-specific adaptations:
-- Bukit Timah Nature Reserve as primary weather monitoring location
-- Hwa Chong International School area focus
+- Hwa Chong International School as primary weather monitoring location
+- Bukit Timah Nature Reserve area as secondary focus
 - Local weather patterns and terminology
 - Tropical climate-appropriate color schemes
 - Singapore English language variations
@@ -202,4 +202,4 @@ The documentation includes guidelines for:
 
 ---
 
-This comprehensive UI/UX documentation package provides everything needed to maintain consistent, accessible, and culturally appropriate user interfaces for the Singapore Weather Cam application, with special focus on the Hwa Chong International School area and Bukit Timah region as the primary monitoring locations.
+This comprehensive UI/UX documentation package provides everything needed to maintain consistent, accessible, and culturally appropriate user interfaces for the Singapore Weather Cam application, with Hwa Chong International School as the primary monitoring location and Bukit Timah region as the secondary reference area.
