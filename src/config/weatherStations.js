@@ -1,12 +1,8 @@
-/**
- * Singapore Weather Stations Configuration
- * Now imports from centralized constants
- */
+// Weather Stations
 
 import { WEATHER_STATIONS } from './constants';
 
 export const STATION_MAPPING = {
-  // Primary stations (using centralized coordinates)
   'S117': {
     name: 'Newton',
     displayName: 'Newton (Primary)',
@@ -32,7 +28,6 @@ export const STATION_MAPPING = {
     region: 'central',
   },
 
-  // Secondary stations for broader coverage
   'S107': {
     name: 'East Coast Parkway',
     displayName: 'East Coast',
@@ -67,9 +62,6 @@ export const STATION_MAPPING = {
   },
 };
 
-/**
- * Get station information by ID
- */
 export const getStationInfo = (stationId) => {
   return STATION_MAPPING[stationId] || {
     name: `Station ${stationId}`,
@@ -81,9 +73,6 @@ export const getStationInfo = (stationId) => {
   };
 };
 
-/**
- * Get stations by priority
- */
 export const getStationsByPriority = (priority = 'all') => {
   if (priority === 'all') {
     return Object.entries(STATION_MAPPING);
@@ -94,16 +83,10 @@ export const getStationsByPriority = (priority = 'all') => {
   );
 };
 
-/**
- * Get primary stations (Bukit Timah focus)
- */
 export const getPrimaryStations = () => {
   return getStationsByPriority('primary');
 };
 
-/**
- * Default center coordinates (Bukit Timah Nature Reserve)
- */
 export const DEFAULT_CENTER = {
   lat: 1.3520,
   lng: 103.7767,

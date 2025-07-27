@@ -112,13 +112,29 @@ const SystemStatus = React.memo(({
   // Get weather data status - with safety checks
   const getWeatherStatus = useCallback(() => {
     try {
-      if (!weatherData) {return 'offline';}
+      if (!weatherData) {
+        // Debug logging in development
+        if (import.meta.env.MODE === 'development') {
+          console.log('🌤️ WeatherStatus: No weatherData provided', { weatherData });
+        }
+        return 'offline';
+      }
 
       const quality = reliabilityMetrics?.weatherQuality;
       const dataAge = weatherData?.reliabilityMetadata?.dataAge || 0;
 
       if (dataAge > INTERVALS.SYSTEM_HEALTH_CHECK * 6) {return 'stale';}
       if (quality && quality < LIMITS.MIN_DATA_QUALITY) {return 'degraded';}
+
+      // Debug logging in development
+      if (import.meta.env.MODE === 'development') {
+        console.log('🌤️ WeatherStatus: online', { 
+          hasData: !!weatherData, 
+          dataAge, 
+          quality,
+          locations: weatherData?.locations?.length
+        });
+      }
 
       return 'online';
     } catch (error) {
@@ -133,13 +149,29 @@ const SystemStatus = React.memo(({
   // Get webcam data status - with safety checks
   const getWebcamStatus = useCallback(() => {
     try {
-      if (!webcamData) {return 'offline';}
+      if (!webcamData) {
+        // Debug logging in development
+        if (import.meta.env.MODE === 'development') {
+          console.log('📷 WebcamStatus: No webcamData provided', { webcamData });
+        }
+        return 'offline';
+      }
 
       const quality = reliabilityMetrics?.webcamQuality;
       const dataAge = webcamData?.reliabilityMetadata?.dataAge || 0;
 
       if (dataAge > INTERVALS.SYSTEM_HEALTH_CHECK * 6) {return 'stale';}
       if (quality && quality < LIMITS.MIN_DATA_QUALITY) {return 'degraded';}
+
+      // Debug logging in development
+      if (import.meta.env.MODE === 'development') {
+        console.log('📷 WebcamStatus: online', { 
+          hasData: !!webcamData, 
+          dataAge, 
+          quality,
+          captures: webcamData?.captures?.length
+        });
+      }
 
       return 'online';
     } catch (error) {
@@ -551,7 +583,7 @@ const SystemStatus = React.memo(({
                     `}
                     aria-hidden="true"
                   />
-                  <span className="hidden sm:inline">Force</span>
+                  <span className="hidden md:inline">Force</span>
                   <span id="force-refresh-help" className="sr-only">
                     {!isOnline ? 'Cannot force refresh while offline' :
                       isRefreshing ? 'Currently force refreshing data' :

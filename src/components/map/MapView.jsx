@@ -4,9 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { COORDINATES } from '../../config/constants';
-// import { fetchTrafficCameras } from '../../services/trafficCameraService'; // Using direct API call instead
 
-// Fix default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -14,7 +12,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-// Custom icons
 const weatherIcon = L.divIcon({
   html: '<div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">🌡️</div>',
   className: 'custom-div-icon',
@@ -29,7 +26,6 @@ const webcamIcon = L.divIcon({
   iconAnchor: [16, 32],
 });
 
-// Traffic camera icon (smaller, distinctive)
 const trafficCameraIcon = L.divIcon({
   html: '<div class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md border border-white">🚗</div>',
   className: 'custom-div-icon',
@@ -37,7 +33,6 @@ const trafficCameraIcon = L.divIcon({
   iconAnchor: [12, 24],
 });
 
-// Featured traffic camera icon (larger for important locations)
 const featuredTrafficIcon = L.divIcon({
   html: '<div class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">🚗</div>',
   className: 'custom-div-icon',
@@ -45,7 +40,6 @@ const featuredTrafficIcon = L.divIcon({
   iconAnchor: [16, 32],
 });
 
-// Hwa Chong International School icon
 const schoolIcon = L.divIcon({
   html: '<div class="bg-purple-600 text-white rounded-lg w-10 h-10 flex items-center justify-center text-lg font-bold shadow-lg border-2 border-white">🏫</div>',
   className: 'custom-div-icon',
@@ -58,17 +52,25 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
   const [isLoadingTraffic, setIsLoadingTraffic] = useState(true);
   const [trafficError, setTrafficError] = useState(null);
 
-  // Featured camera IDs (주요 지점)
+  const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
   const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
 
-  // Load traffic cameras on component mount
+  const getAreaFromCameraId = (cameraId) => {
+    const id = cameraId.toString();
+    if (id.startsWith('17')) return 'North';
+    if (id.startsWith('27')) return 'Central';
+    if (id.startsWith('37')) return 'East';
+    if (id.startsWith('47')) return 'West';
+    if (id.startsWith('67')) return 'PIE';
+    return 'Singapore';
+  };
+
   useEffect(() => {
     const loadTrafficCameras = async () => {
       try {
         setIsLoadingTraffic(true);
         setTrafficError(null);
         
-        // Direct API call to Singapore data.gov.sg
         const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
           method: 'GET',
           headers: {
@@ -91,7 +93,46 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
           throw new Error('Invalid camera data structure');
         }
         
-        // Process cameras with basic validation
+        const cameraNames = {
+          '1701': 'Woodlands Causeway',
+          '1702': 'Woodlands Checkpoint', 
+          '1703': 'BKE Woodlands Flyover',
+          '1704': 'BKE Dairy Farm',
+          '1705': 'BKE Sungei Kadut',
+          '1706': 'BKE Mandai',
+          '1707': 'KJE BC Exit',
+          '1709': 'Changi Airport',
+          '2701': 'Sentosa Gateway',
+          '2702': 'West Coast Highway',
+          '2703': 'ECP Marina Bay',
+          '2704': 'Orchard Boulevard',
+          '2705': 'Marina Coastal Drive',
+          '2706': 'ECP Fort Road',
+          '2707': 'Fullerton Road',
+          '2708': 'Marina Boulevard',
+          '3701': 'Central Boulevard',
+          '3702': 'PIE Tuas',
+          '3704': 'PIE Kim Keat',
+          '3705': 'PIE Eunos',
+          '4701': 'AYE After Tuas',
+          '4702': 'AYE Keppel',
+          '4703': 'TPE Punggol',
+          '4704': 'TPE Seletar',
+          '4705': 'TPE Sengkang',
+          '4706': 'TPE Tampines',
+          '4707': 'CTE Braddell',
+          '4708': 'CTE Ang Mo Kio',
+          '4709': 'CTE Yishun',
+          '4710': 'Tuas Second Link',
+          '4712': 'MCE Marina Bay',
+          '4713': 'MCE Maxwell',
+          '4714': 'MCE MBFC',
+          '4716': 'MCE Bayfront',
+          '6710': 'PIE Bukit Timah',
+          '6711': 'PIE Clementi',
+          '6712': 'PIE Jurong',
+        };
+
         const processedCameras = latestItem.cameras
           .filter(camera => 
             camera.camera_id &&
@@ -102,8 +143,8 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
           )
           .map(camera => ({
             id: camera.camera_id,
-            name: `Camera ${camera.camera_id}`,
-            area: 'Singapore',
+            name: cameraNames[camera.camera_id] || `Traffic Camera ${camera.camera_id}`,
+            area: getAreaFromCameraId(camera.camera_id),
             location: {
               latitude: parseFloat(camera.location.latitude),
               longitude: parseFloat(camera.location.longitude),
@@ -118,13 +159,10 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             status: 'active',
           }));
         
-        console.log(`🚗 Loaded ${processedCameras.length} traffic cameras for map display`);
         setTrafficCameras(processedCameras);
       } catch (error) {
-        console.error('Failed to load traffic cameras for map:', error);
         setTrafficError(error.message);
         
-        // Create fallback mock data for testing
         const mockCameras = [
           {
             id: '2703',
@@ -148,7 +186,6 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
           },
         ];
         
-        console.log('🚗 Using fallback mock data:', mockCameras.length, 'cameras');
         setTrafficCameras(mockCameras);
       } finally {
         setIsLoadingTraffic(false);
@@ -157,19 +194,10 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
 
     loadTrafficCameras();
 
-    // Auto-refresh every 3 minutes
     const interval = setInterval(loadTrafficCameras, 3 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
-  console.log('🗺️ MapView: Rendering with data:', {
-    weatherData: weatherData ? 'present' : 'missing',
-    weatherLocations: weatherData?.locations?.length || 0,
-    webcamData: webcamData ? 'present' : 'missing',
-    webcamCaptures: webcamData?.captures?.length || 0,
-    trafficCameras: trafficCameras.length,
-    isLoadingTraffic,
-  });
 
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
@@ -185,7 +213,6 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           
-          {/* Weather station markers */}
           {weatherData?.locations?.map((location) => (
             location.coordinates && (
               <Marker
@@ -206,7 +233,6 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             )
           ))}
 
-          {/* Traffic camera markers (90개 실시간 교통 카메라) */}
           {trafficCameras.map((camera) => {
             const isFeatured = featuredCameraIds.includes(camera.id);
             return (
@@ -243,20 +269,30 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
                       </div>
                     </div>
                     
-                    {/* 실시간 이미지 표시 */}
                     {camera.image?.url && (
                       <div className="mt-3">
-                        <img 
-                          src={camera.image.url} 
-                          alt={`${camera.name} 실시간 교통 상황`}
-                          className="w-full h-32 object-cover rounded border border-gray-200"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'block';
-                          }}
-                        />
-                        <div className="hidden bg-gray-100 w-full h-32 flex items-center justify-center rounded border border-gray-200">
-                          <span className="text-gray-500 text-sm">이미지 로딩 실패</span>
+                        <div className="relative">
+                          <img 
+                            src={camera.image.url} 
+                            alt={`${camera.name} 실시간 교통 상황`}
+                            className="w-full h-32 object-cover rounded border border-gray-200"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextElementSibling.style.display = 'flex';
+                            }}
+                            onLoad={(e) => {
+                              e.target.nextElementSibling.style.display = 'none';
+                            }}
+                          />
+                          <div className="hidden bg-gray-100 w-full h-32 items-center justify-center rounded border border-gray-200">
+                            <div className="text-center">
+                              <span className="text-gray-500 text-sm">📷 이미지 로딩 중...</span>
+                              <div className="mt-1 text-xs text-gray-400">
+                                Camera ID: {camera.id}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
                           🔴 LIVE • 업데이트: {new Date(camera.timestamp).toLocaleTimeString('ko-KR')}
@@ -275,38 +311,7 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             );
           })}
 
-          {/* Webcam markers (기존 웹캠 데이터, 참고용) */}
-          {webcamData?.captures?.map((webcam) => (
-            webcam.coordinates && (
-              <Marker
-                key={webcam.id}
-                position={[webcam.coordinates.lat, webcam.coordinates.lng]}
-                icon={webcamIcon}
-              >
-                <Popup>
-                  <div className="p-2">
-                    <h3 className="font-bold">{webcam.name}</h3>
-                    <p>{webcam.location}</p>
-                    <p className="text-sm text-gray-600">{webcam.type || 'webcam'}</p>
-                    {webcam.file_info?.url && (
-                      <img 
-                        src={webcam.file_info.url} 
-                        alt={webcam.name}
-                        className="w-32 h-24 object-cover rounded mt-2"
-                      />
-                    )}
-                    {webcam.ai_analysis?.weather_condition && (
-                      <p className="text-xs mt-2">
-                        Weather: {webcam.ai_analysis.weather_condition}
-                      </p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            )
-          ))}
 
-          {/* Hwa Chong International School marker */}
           <Marker
             position={[COORDINATES.HWA_CHONG_SCHOOL.lat, COORDINATES.HWA_CHONG_SCHOOL.lng]}
             icon={schoolIcon}
@@ -321,10 +326,8 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
         </MapContainer>
       </div>
 
-      {/* Enhanced Map legend with traffic camera info */}
       <div className="p-4 border-t bg-gray-50">
         <div className="space-y-3">
-          {/* Main legend */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 text-sm flex-wrap">
               <div className="flex items-center gap-2">
@@ -349,7 +352,6 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             </div>
           </div>
 
-          {/* Traffic camera status */}
           <div className="flex items-center justify-between text-sm bg-white rounded px-3 py-2 border border-gray-200">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">

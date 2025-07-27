@@ -1,13 +1,7 @@
-/**
- * Weather Data Transformer
- * NEA Singapore API 데이터를 컴포넌트에서 사용할 수 있는 형식으로 변환
- */
+// Weather Data Transformer
 
 import { STATION_MAPPING } from '../config/weatherStations.js';
 
-/**
- * NEA API 데이터를 표준 형식으로 변환
- */
 export function transformWeatherData(rawData) {
   if (!rawData || !rawData.data) {
     console.warn('⚠️ Invalid weather data structure');
@@ -39,11 +33,6 @@ export function transformWeatherData(rawData) {
       },
     };
 
-    console.log('📊 Enhanced data loaded successfully:', {
-      stations: transformedData.meta.stations,
-      current: transformedData.current.temperature,
-      locations: transformedData.locations.length,
-    });
 
     return transformedData;
   } catch (error) {
@@ -52,9 +41,6 @@ export function transformWeatherData(rawData) {
   }
 }
 
-/**
- * 현재 날씨 정보 추출 및 평균값 계산
- */
 function extractCurrentWeather(data) {
   const temperature = calculateAverage(data.temperature?.readings);
   const humidity = calculateAverage(data.humidity?.readings);
@@ -76,9 +62,6 @@ function extractCurrentWeather(data) {
   };
 }
 
-/**
- * 지역별 날씨 정보 변환
- */
 function transformLocations(data) {
   const locations = [];
 
@@ -122,9 +105,6 @@ function transformLocations(data) {
   return locations;
 }
 
-/**
- * 특정 스테이션 데이터 추출
- */
 function extractStationData(data, stationId) {
   const stationInfo = STATION_MAPPING[stationId];
   if (!stationInfo) {
@@ -149,18 +129,12 @@ function extractStationData(data, stationId) {
   };
 }
 
-/**
- * 특정 스테이션의 값 찾기
- */
 function findStationValue(readings, stationId) {
   if (!readings || !Array.isArray(readings)) {return null;}
   const reading = readings.find(r => r.station === stationId);
   return reading ? reading.value : null;
 }
 
-/**
- * 평균값 계산
- */
 function calculateAverage(readings) {
   if (!readings || !Array.isArray(readings) || readings.length === 0) {
     return null;
@@ -175,9 +149,6 @@ function calculateAverage(readings) {
   return validValues.reduce((sum, val) => sum + val, 0) / validValues.length;
 }
 
-/**
- * 평균 풍향 계산
- */
 function getAverageWindDirection(readings) {
   if (!readings || !Array.isArray(readings) || readings.length === 0) {
     return 'Variable';
@@ -196,9 +167,6 @@ function getAverageWindDirection(readings) {
     .sort(([,a], [,b]) => b - a)[0][0];
 }
 
-/**
- * 날씨 설명 생성
- */
 function getWeatherDescription(temperature, rainfall) {
   if (rainfall > 5) {return 'Rainy';}
   if (rainfall > 0.5) {return 'Light Rain';}
@@ -208,9 +176,6 @@ function getWeatherDescription(temperature, rainfall) {
   return 'Cool';
 }
 
-/**
- * 날씨 아이콘 선택
- */
 function getWeatherIcon(temperature, rainfall) {
   if (rainfall > 5) {return '🌧️';}
   if (rainfall > 0.5) {return '🌦️';}
@@ -219,9 +184,6 @@ function getWeatherIcon(temperature, rainfall) {
   return '🌤️';
 }
 
-/**
- * 기본 예보 생성
- */
 function generateBasicForecast(current) {
   return [
     {
@@ -239,9 +201,6 @@ function generateBasicForecast(current) {
   ];
 }
 
-/**
- * 데이터 품질 평가
- */
 function assessDataQuality(data) {
   const hasTemp = data.temperature?.readings?.length > 0;
   const hasHumidity = data.humidity?.readings?.length > 0;
@@ -254,9 +213,6 @@ function assessDataQuality(data) {
   return 'low';
 }
 
-/**
- * 폴백 데이터 생성
- */
 function createFallbackData() {
   return {
     timestamp: new Date().toISOString(),

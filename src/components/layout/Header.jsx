@@ -8,15 +8,12 @@ const Header = React.memo(({ systemStats = {} }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
 
-  // Memoized event handlers
   const handleOnline = useCallback(() => {
     setIsOnline(true);
-    console.log('Network connection restored');
   }, []);
 
   const handleOffline = useCallback(() => {
     setIsOnline(false);
-    console.warn('Network connection lost');
   }, []);
 
   const toggleMenu = useCallback(() => {
@@ -59,7 +56,6 @@ const Header = React.memo(({ systemStats = {} }) => {
     }
   }, [closeMenu]);
 
-  // Handle keyboard navigation
   const handleKeyDown = useCallback((e, target) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -67,7 +63,6 @@ const Header = React.memo(({ systemStats = {} }) => {
     }
   }, [handleNavClick]);
 
-  // Intersection Observer to track active section
   useEffect(() => {
     const sections = ['map', 'weather', 'analysis', 'webcams', 'traffic'];
     const observers = new Map();
@@ -101,12 +96,10 @@ const Header = React.memo(({ systemStats = {} }) => {
   }, []);
 
   useEffect(() => {
-    // Use requestAnimationFrame for smooth time updates
     let animationFrameId;
     let lastUpdate = 0;
 
     const updateTime = (timestamp) => {
-      // Update only once per second
       if (timestamp - lastUpdate >= 1000) {
         setCurrentTime(new Date());
         lastUpdate = timestamp;
@@ -116,7 +109,6 @@ const Header = React.memo(({ systemStats = {} }) => {
 
     animationFrameId = requestAnimationFrame(updateTime);
 
-    // Network status monitoring
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
@@ -127,19 +119,16 @@ const Header = React.memo(({ systemStats = {} }) => {
     };
   }, [handleOnline, handleOffline]);
 
-  // Format time with error handling
   const formatTime = useCallback((date) => {
     try {
       return date.toLocaleTimeString('ko-KR');
     } catch (error) {
-      console.error('Time formatting error:', error);
       return '--:--:--';
     }
   }, []);
 
   return (
     <>
-      {/* 메인 헤더 */}
       <header className="bg-white shadow-xl border-b-4 border-blue-500">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
@@ -161,7 +150,6 @@ const Header = React.memo(({ systemStats = {} }) => {
               </div>
             </div>
 
-            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-8" role="navigation" aria-label="Main navigation">
               <a
                 href="#map"
@@ -245,7 +233,6 @@ const Header = React.memo(({ systemStats = {} }) => {
               </a>
             </nav>
 
-            {/* System Stats */}
             <div className="hidden xl:block text-right">
               <div className="bg-gray-50 p-4 rounded-xl border">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
@@ -258,7 +245,6 @@ const Header = React.memo(({ systemStats = {} }) => {
               </div>
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
               className="lg:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -269,7 +255,6 @@ const Header = React.memo(({ systemStats = {} }) => {
             </button>
           </div>
 
-          {/* Mobile Navigation */}
           {isMenuOpen && (
             <nav className="lg:hidden mt-6 pt-6 border-t border-gray-200" role="navigation" aria-label="Mobile navigation">
               <div className="space-y-2">
@@ -354,7 +339,6 @@ const Header = React.memo(({ systemStats = {} }) => {
                   <span>Traffic</span>
                 </a>
 
-                {/* Mobile System Stats */}
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <div className="bg-gray-50 p-4 rounded-xl border">
                     <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">

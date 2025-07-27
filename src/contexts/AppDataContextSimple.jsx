@@ -1,13 +1,9 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { transformWeatherData } from '../utils/weatherDataTransformer';
 
-/**
- * SIMPLIFIED VERSION - App Data Context with minimal dependencies
- * Removes all complex imports that cause production build issues
- */
+// App Data Context
 const AppDataContext = createContext(null);
 
-// Simplified data loader hook
 const useSimpleDataLoader = (refreshInterval) => {
   const [weatherData, setWeatherData] = useState(null);
   const [webcamData, setWebcamData] = useState(null);
