@@ -6,7 +6,7 @@ import WebcamGallery from './components/webcam/WebcamGallery';
 import MapView from './components/map/MapView';
 import AdminPanels from './components/admin/AdminPanels';
 import LoadingScreen from './components/common/LoadingScreen';
-import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSafe';
+import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContext';
 
 /**
  * Main Singapore Weather Cam Application

@@ -16,8 +16,29 @@ const AppDataContext = createContext(null);
  * Implements intelligent memoization and selective re-renders
  */
 export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 * 1000 }) => {
-  // Core data loading with reliability metrics
-  const dataLoader = useDataLoader(refreshInterval);
+  // Core data loading with reliability metrics and safety checks
+  let dataLoader;
+  try {
+    dataLoader = useDataLoader(refreshInterval);
+  } catch (error) {
+    console.error('useDataLoader failed:', error);
+    // Provide fallback data structure
+    dataLoader = {
+      weatherData: null,
+      webcamData: null,
+      loading: false,
+      error: null,
+      retryCount: 0,
+      isInitialLoading: false,
+      isRefreshing: false,
+      lastFetch: new Date(),
+      refresh: () => {},
+      forceRefresh: () => {},
+      dataFreshness: { weather: 'unknown', webcam: 'unknown' },
+      reliabilityMetrics: {},
+      getReliabilityReport: () => ({})
+    };
+  }
   const {
     weatherData,
     webcamData,
@@ -48,21 +69,37 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     requestNotificationPermission,
   } = serviceWorker;
 
-  // Metrics and analytics tracking
-  const { trackPageView, trackUserInteraction } = useMetrics();
+  // Metrics and analytics tracking with safe fallback
+  let metricsHook;
+  try {
+    metricsHook = useMetrics();
+  } catch (error) {
+    console.warn('useMetrics failed:', error);
+    metricsHook = {
+      trackPageView: () => {},
+      trackUserInteraction: () => {}
+    };
+  }
+  const { trackPageView, trackUserInteraction } = metricsHook;
 
-  // Performance monitoring for data context
-  const contextPerformance = useComponentPerformance('AppDataContext', {
-    weatherDataAvailable: !!weatherData,
-    webcamDataAvailable: !!webcamData,
-    isLoading: isInitialLoading,
-    systemStatsCount: systemStats?.totalCameras || 0,
-  }, {
-    trackRenders: true,
-    trackProps: true,
-    trackMemory: false, // Reduce overhead for context
-    threshold: 10, // Fast updates expected for context
-  });
+  // Performance monitoring for data context with safe fallback
+  let contextPerformance;
+  try {
+    contextPerformance = useComponentPerformance('AppDataContext', {
+      weatherDataAvailable: !!weatherData,
+      webcamDataAvailable: !!webcamData,
+      isLoading: isInitialLoading,
+      systemStatsCount: systemStats?.totalCameras || 0,
+    }, {
+      trackRenders: true,
+      trackProps: true,
+      trackMemory: false, // Reduce overhead for context
+      threshold: 10, // Fast updates expected for context
+    });
+  } catch (error) {
+    console.warn('useComponentPerformance failed:', error);
+    contextPerformance = { renderCount: 0, averageRenderTime: 0 };
+  }
 
   // Memoized context value to prevent unnecessary re-renders
   // Split into logical groups for selective consumption
