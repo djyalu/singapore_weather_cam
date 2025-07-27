@@ -1,0 +1,227 @@
+/* Performance Optimization CSS */
+/* Reduces rendering costs and improves frame rates */
+
+/* Performance mode styles - activated when FPS is low */
+.performance-mode * {
+  animation-duration: 2s !important;
+  transition-duration: 0.2s !important;
+}
+
+.performance-mode .animate-pulse {
+  animation: pulse-fast 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.performance-mode .animate-spin {
+  animation: spin-fast 1s linear infinite;
+}
+
+/* Optimized animations for performance mode */
+@keyframes pulse-fast {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+@keyframes spin-fast {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Performance-optimized components */
+.performance-optimized {
+  /* Reduce paint and layout thrashing */
+  contain: layout style paint;
+  
+  /* Use GPU acceleration where beneficial */
+  transform: translateZ(0);
+  will-change: transform;
+  
+  /* Optimize text rendering */
+  text-rendering: optimizeSpeed;
+  
+  /* Reduce visual complexity */
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+.performance-optimized img {
+  /* Optimize image rendering */
+  image-rendering: optimizeSpeed;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.performance-optimized video {
+  /* Reduce video quality for performance */
+  filter: contrast(0.9) brightness(0.95);
+}
+
+/* Page hidden optimizations */
+.page-hidden * {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+.page-hidden video,
+.page-hidden canvas {
+  display: none !important;
+}
+
+/* Lazy loading optimizations */
+img[loading="lazy"] {
+  /* Optimize for lazy loading */
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 200px;
+}
+
+/* Intersection observer optimizations */
+.intersection-observer-target {
+  /* Optimize elements being observed */
+  contain: layout;
+}
+
+/* Memory optimization classes */
+.memory-optimized {
+  /* Reduce memory usage */
+  contain: strict;
+  content-visibility: auto;
+}
+
+.memory-optimized img {
+  /* Reduce image memory usage */
+  object-fit: cover;
+  max-width: 100%;
+  height: auto;
+}
+
+/* GPU acceleration for specific elements */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+/* Smooth scrolling optimization */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+.smooth-scroll section {
+  scroll-snap-align: start;
+}
+
+/* Optimize critical rendering path */
+.critical-section {
+  /* Prioritize rendering */
+  contain: layout style;
+  will-change: contents;
+}
+
+/* Reduce layout shifts */
+.layout-stable {
+  /* Prevent layout shifts */
+  contain: layout;
+  min-height: 100px; /* Prevent height changes */
+}
+
+/* Optimize component transitions */
+.optimized-transition {
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  will-change: transform, opacity;
+}
+
+.optimized-transition:hover {
+  transform: translateY(-2px);
+}
+
+/* High performance grid layout */
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  contain: layout;
+}
+
+.performance-grid > * {
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 200px;
+}
+
+/* Optimize fonts for performance */
+.optimized-text {
+  font-display: swap;
+  text-rendering: optimizeSpeed;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    /* Reduce complexity on mobile */
+    filter: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 4px !important;
+  }
+  
+  .mobile-optimized img {
+    /* Optimize images for mobile */
+    image-rendering: optimizeSpeed;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .mobile-optimized .animate-pulse {
+    /* Reduce animation complexity */
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+/* Prefers reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .performance-optimized,
+  .performance-optimized * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode optimizations */
+@media (prefers-contrast: high) {
+  .performance-optimized {
+    /* Simplify styles for high contrast */
+    background: var(--bg-color, white) !important;
+    color: var(--text-color, black) !important;
+    border: 1px solid var(--border-color, #000) !important;
+  }
+}
+
+/* Print optimizations */
+@media print {
+  .performance-optimized {
+    /* Optimize for printing */
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  
+  .performance-optimized img {
+    /* Optimize images for print */
+    image-rendering: auto;
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "timestamp": "2025-07-27T04:13:13.938Z",
+  "url": "https://djyalu.github.io/singapore_weather_cam/",
+  "tests": [
+    {
+      "name": "HTML Loading",
+      "status": "PASS",
+      "statusCode": 200,
+      "details": {
+        "size": 3386,
+        "hasTitle": true,
+        "hasReactRoot": true,
+        "hasServiceWorker": true,
+        "hasCorrectPaths": true
+      }
+    },
+    {
+      "name": "JavaScript Loading",
+      "status": "PASS",
+      "statusCode": 200,
+      "details": {
+        "size": "41985",
+        "contentType": "application/javascript; charset=utf-8"
+      }
+    },
+    {
+      "name": "Service Worker",
+      "status": "PASS",
+      "statusCode": 200,
+      "details": {
+        "hasBasePath": true,
+        "hasCorrectCacheVersion": true,
+        "size": 7504
+      }
+    },
+    {
+      "name": "Weather Data API",
+      "status": "PASS",
+      "statusCode": 200,
+      "details": {
+        "hasTimestamp": true,
+        "hasLocations": false,
+        "locationCount": 0,
+        "hasCurrent": false
+      }
+    },
+    {
+      "name": "Webcam Data API",
+      "status": "PASS",
+      "statusCode": 200,
+      "details": {
+        "hasTimestamp": true,
+        "hasCaptures": true,
+        "captureCount": 9,
+        "hasStats": true
+      }
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "error": 0,
+    "overallStatus": "ALL_PASS"
+  }
+}
