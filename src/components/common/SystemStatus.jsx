@@ -401,7 +401,7 @@ const SystemStatus = React.memo(({
         )}
 
         {/* Mobile-first layout */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
           {/* Top row on mobile - System status */}
           <div className="flex items-center justify-between sm:justify-start animate-slide-in-left">
             <div className="flex items-center text-xs text-neutral-600">
@@ -444,7 +444,7 @@ const SystemStatus = React.memo(({
           </div>
 
           {/* Bottom row on mobile - Service indicators and controls */}
-          <div className="flex items-center justify-between sm:justify-end animate-slide-in-right">
+          <div className="flex items-center justify-between sm:justify-end gap-2 animate-slide-in-right">
             {/* Service status indicators with enhanced accessibility */}
             <div
               className="flex items-center space-x-2 sm:space-x-2 animate-stagger-in"
@@ -481,7 +481,7 @@ const SystemStatus = React.memo(({
 
             {/* Refresh controls with enhanced accessibility */}
             <div
-              className="flex items-center space-x-1 ml-2 animate-stagger-in"
+              className="flex items-center space-x-1 animate-stagger-in"
               role="group"
               aria-label="Data refresh controls"
             >
@@ -551,7 +551,7 @@ const SystemStatus = React.memo(({
                     `}
                     aria-hidden="true"
                   />
-                  <span className="hidden md:inline">Force</span>
+                  <span className="hidden sm:inline">Force</span>
                   <span id="force-refresh-help" className="sr-only">
                     {!isOnline ? 'Cannot force refresh while offline' :
                       isRefreshing ? 'Currently force refreshing data' :
