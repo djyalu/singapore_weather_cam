@@ -1,12 +1,18 @@
-# Force Deploy
+# Force Deploy - Context Provider Fix
 
-This file is created to trigger a manual deployment.
+## Issue
+- React context provider error: "useAppData must be used within AppDataProvider"
+- Fixed in commit c3bf079 but GitHub Pages may not have updated
 
-Timestamp: 2025-07-27 06:50:35 UTC
+## Changes Made
+1. Updated App.jsx to use correct context hooks from AppDataContext
+2. Fixed PWA manifest paths for proper icon loading
+3. Cleared build cache and rebuilt application
 
-Reason: Emergency fix for blank screen - deploying simple React app
+## Deployment
+Force deployment timestamp: 2025-07-27 07:52 UTC
 
-Expected Changes:
-- Simple App.jsx with basic rendering
-- New JavaScript file: index-ab77a86e.js
-- Fallback to working React application
+## Expected Fix
+- App should load without React context errors
+- PWA icons should load correctly
+- New JavaScript bundle: index-8782a3a8.js
