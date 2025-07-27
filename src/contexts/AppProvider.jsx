@@ -16,60 +16,60 @@ const AppContext = createContext(null);
 const appReducer = (state, action) => {
   switch (action.type) {
     case 'SET_LOADING':
-      return { 
-        ...state, 
+      return {
+        ...state,
         isLoading: action.payload,
-        loadingMessage: action.message || state.loadingMessage
+        loadingMessage: action.message || state.loadingMessage,
       };
-    
+
     case 'SET_ERROR':
-      return { 
-        ...state, 
+      return {
+        ...state,
         error: action.payload,
-        isLoading: false
+        isLoading: false,
       };
-    
+
     case 'SET_DATA':
-      return { 
-        ...state, 
+      return {
+        ...state,
         weatherData: action.payload.weather || state.weatherData,
         webcamData: action.payload.webcam || state.webcamData,
         isLoading: false,
         error: null,
-        lastUpdate: new Date().toISOString()
+        lastUpdate: new Date().toISOString(),
       };
-    
+
     case 'SET_LANGUAGE':
-      return { 
-        ...state, 
+      return {
+        ...state,
         language: action.payload,
-        isRTL: ['ar', 'he', 'fa'].includes(action.payload)
+        isRTL: ['ar', 'he', 'fa'].includes(action.payload),
       };
-    
+
     case 'SET_ACCESSIBILITY_MODE':
-      return { 
-        ...state, 
+      return {
+        ...state,
         accessibility: {
           ...state.accessibility,
-          [action.feature]: action.enabled
-        }
+          [action.feature]: action.enabled,
+        },
       };
-    
+
     case 'SET_OFFLINE_MODE':
-      return { 
-        ...state, 
-        isOffline: action.payload
+      return {
+        ...state,
+        isOffline: action.payload,
       };
-    
+
     case 'UPDATE_PREFERENCES':
-      return { 
-        ...state, 
+      return {
+        ...state,
         userPreferences: {
           ...state.userPreferences,
-          ...action.payload
-        }
+          ...action.payload,
+        },
       };
-    
+
     default:
       return state;
   }
@@ -86,20 +86,20 @@ const initialState = {
   loadingMessage: 'Initializing Singapore Weather Cam...',
   error: null,
   lastUpdate: null,
-  
+
   // Internationalization
   language: 'ko',
   isRTL: false,
-  
+
   // Accessibility Features
   accessibility: {
     highContrast: false,
     reducedMotion: false,
     screenReader: false,
     largeText: false,
-    keyboardNavigation: true
+    keyboardNavigation: true,
   },
-  
+
   // User Preferences
   userPreferences: {
     theme: 'light',
@@ -109,26 +109,26 @@ const initialState = {
     autoRefresh: true,
     notifications: false,
     dataQuality: 'balanced', // 'speed' | 'balanced' | 'quality'
-    mapStyle: 'standard'
+    mapStyle: 'standard',
   },
-  
+
   // System State
   isOffline: false,
   networkStatus: 'online',
-  performanceMode: 'auto' // 'low' | 'auto' | 'high'
+  performanceMode: 'auto', // 'low' | 'auto' | 'high'
 };
 
 /**
  * App Provider with Advanced Features
  */
-export const AppProvider = ({ 
-  children, 
+export const AppProvider = ({
+  children,
   refreshInterval = 5 * 60 * 1000,
   enableOfflineMode = true,
-  enableAnalytics = false 
+  enableAnalytics = false,
 }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
-  
+
   // Advanced Hooks Integration
   const { weatherData, webcamData, loading, error, refresh, forceRefresh } = useDataLoader(refreshInterval);
   const { t, changeLanguage, isRTL } = useI18n(state.language);
@@ -140,7 +140,7 @@ export const AppProvider = ({
     if (weatherData || webcamData) {
       dispatch({
         type: 'SET_DATA',
-        payload: { weather: weatherData, webcam: webcamData }
+        payload: { weather: weatherData, webcam: webcamData },
       });
     }
   }, [weatherData, webcamData]);
@@ -150,7 +150,7 @@ export const AppProvider = ({
     dispatch({
       type: 'SET_LOADING',
       payload: loading,
-      message: loading ? t('common.loading') : null
+      message: loading ? t('common.loading') : null,
     });
   }, [loading, t]);
 
@@ -159,13 +159,13 @@ export const AppProvider = ({
     if (error) {
       dispatch({
         type: 'SET_ERROR',
-        payload: error
+        payload: error,
       });
-      
+
       // Announce errors to screen readers
       announceToScreenReader(
-        t('errors.dataLoadFailed', { error: error.message }), 
-        'assertive'
+        t('errors.dataLoadFailed', { error: error.message }),
+        'assertive',
       );
     }
   }, [error, t, announceToScreenReader]);
@@ -174,7 +174,7 @@ export const AppProvider = ({
   useEffect(() => {
     dispatch({
       type: 'SET_OFFLINE_MODE',
-      payload: isOffline
+      payload: isOffline,
     });
   }, [isOffline]);
 
@@ -187,7 +187,7 @@ export const AppProvider = ({
         dispatch({
           type: 'SET_ACCESSIBILITY_MODE',
           feature: 'reducedMotion',
-          enabled: true
+          enabled: true,
         });
       }
 
@@ -197,7 +197,7 @@ export const AppProvider = ({
         dispatch({
           type: 'SET_ACCESSIBILITY_MODE',
           feature: 'highContrast',
-          enabled: true
+          enabled: true,
         });
       }
 
@@ -206,7 +206,7 @@ export const AppProvider = ({
       if (prefersDark) {
         dispatch({
           type: 'UPDATE_PREFERENCES',
-          payload: { theme: 'dark' }
+          payload: { theme: 'dark' },
         });
       }
     };
@@ -239,18 +239,18 @@ export const AppProvider = ({
           announceToScreenReader(t('offline.actionQueued'), 'polite');
           return;
         }
-        
+
         if (force) {
           await forceRefresh();
         } else {
           await refresh();
         }
-        
+
         announceToScreenReader(t('data.refreshed'), 'polite');
       } catch (error) {
         dispatch({
           type: 'SET_ERROR',
-          payload: error
+          payload: error,
         });
       }
     }, [isOffline, queueAction, forceRefresh, refresh, announceToScreenReader, t]),
@@ -260,13 +260,13 @@ export const AppProvider = ({
       changeLanguage(language);
       dispatch({
         type: 'SET_LANGUAGE',
-        payload: language
+        payload: language,
       });
-      
+
       // Update document language
       document.documentElement.lang = language;
       document.documentElement.dir = ['ar', 'he', 'fa'].includes(language) ? 'rtl' : 'ltr';
-      
+
       announceToScreenReader(t('accessibility.languageChanged', { language }), 'polite');
     }, [changeLanguage, announceToScreenReader, t]),
 
@@ -275,9 +275,9 @@ export const AppProvider = ({
       dispatch({
         type: 'SET_ACCESSIBILITY_MODE',
         feature,
-        enabled
+        enabled,
       });
-      
+
       // Apply DOM changes for accessibility features
       const body = document.body;
       switch (feature) {
@@ -294,10 +294,10 @@ export const AppProvider = ({
           setFocusManagement(enabled);
           break;
       }
-      
+
       announceToScreenReader(
-        t(`accessibility.${feature}${enabled ? 'Enabled' : 'Disabled'}`), 
-        'polite'
+        t(`accessibility.${feature}${enabled ? 'Enabled' : 'Disabled'}`),
+        'polite',
       );
     }, [announceToScreenReader, t, setFocusManagement]),
 
@@ -305,14 +305,14 @@ export const AppProvider = ({
     updatePreferences: useCallback((preferences) => {
       dispatch({
         type: 'UPDATE_PREFERENCES',
-        payload: preferences
+        payload: preferences,
       });
-      
+
       // Persist to localStorage
       try {
         localStorage.setItem('swc_preferences', JSON.stringify({
           ...state.userPreferences,
-          ...preferences
+          ...preferences,
         }));
       } catch (error) {
         console.warn('Failed to persist preferences:', error);
@@ -324,7 +324,7 @@ export const AppProvider = ({
       dispatch({ type: 'SET_DATA', payload: { weather: null, webcam: null } });
       dispatch({ type: 'SET_ERROR', payload: null });
       announceToScreenReader(t('app.reset'), 'polite');
-    }, [announceToScreenReader, t])
+    }, [announceToScreenReader, t]),
   };
 
   // Load persisted preferences on mount
@@ -335,7 +335,7 @@ export const AppProvider = ({
         const preferences = JSON.parse(persistedPreferences);
         dispatch({
           type: 'UPDATE_PREFERENCES',
-          payload: preferences
+          payload: preferences,
         });
       }
     } catch (error) {
@@ -347,28 +347,28 @@ export const AppProvider = ({
   const contextValue = {
     // State
     ...state,
-    
+
     // Computed state
     hasData: !!(state.weatherData || state.webcamData),
     isInitialized: !state.isLoading && !state.error,
-    
+
     // Actions
     ...actions,
-    
+
     // Utilities
     t,
     isRTL,
-    
+
     // Data utilities
     getWeatherStations: useCallback(() => {
       return state.weatherData?.locations || [];
     }, [state.weatherData]),
-    
+
     getCamerasByRegion: useCallback((region) => {
-      return state.webcamData?.captures?.filter(camera => 
-        camera.region === region
+      return state.webcamData?.captures?.filter(camera =>
+        camera.region === region,
       ) || [];
-    }, [state.webcamData])
+    }, [state.webcamData]),
   };
 
   return (

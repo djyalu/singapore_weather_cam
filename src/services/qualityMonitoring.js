@@ -47,22 +47,22 @@ class QualityMonitoringService {
     try {
       // Performance monitoring (Performance Persona)
       this.initializePerformanceMonitoring();
-      
+
       // Accessibility monitoring (Frontend Persona)
       this.initializeAccessibilityMonitoring();
-      
+
       // Security monitoring (Security Persona)
       this.initializeSecurityMonitoring();
-      
+
       // Quality monitoring (QA Persona)
       this.initializeQualityMonitoring();
-      
+
       // Architecture monitoring (Architect Persona)
       this.initializeArchitectureMonitoring();
 
       this.isInitialized = true;
       this.reportMetric('system', 'monitoring_initialized', true);
-      
+
     } catch (error) {
       console.error('Quality monitoring initialization failed:', error);
       this.reportAlert('critical', 'Monitoring system failed to initialize', error);
@@ -81,7 +81,7 @@ class QualityMonitoringService {
           if (entry.name === 'first-contentful-paint') {
             const fcp = entry.startTime;
             this.reportMetric('performance', 'fcp', fcp);
-            
+
             if (fcp > this.thresholds.performance.fcp) {
               this.reportAlert('warning', `FCP exceeds threshold: ${fcp.toFixed(0)}ms`);
             }
@@ -94,7 +94,7 @@ class QualityMonitoringService {
         for (const entry of list.getEntries()) {
           const lcp = entry.startTime;
           this.reportMetric('performance', 'lcp', lcp);
-          
+
           if (lcp > this.thresholds.performance.lcp) {
             this.reportAlert('warning', `LCP exceeds threshold: ${lcp.toFixed(0)}ms`);
           }
@@ -106,7 +106,7 @@ class QualityMonitoringService {
         for (const entry of list.getEntries()) {
           const fid = entry.processingStart - entry.startTime;
           this.reportMetric('performance', 'fid', fid);
-          
+
           if (fid > this.thresholds.performance.fid) {
             this.reportAlert('warning', `FID exceeds threshold: ${fid.toFixed(0)}ms`);
           }
@@ -121,9 +121,9 @@ class QualityMonitoringService {
             clsValue += entry.value;
           }
         }
-        
+
         this.reportMetric('performance', 'cls', clsValue);
-        
+
         if (clsValue > this.thresholds.performance.cls) {
           this.reportAlert('warning', `CLS exceeds threshold: ${clsValue.toFixed(3)}`);
         }
@@ -135,9 +135,9 @@ class QualityMonitoringService {
       setInterval(() => {
         const memInfo = performance.memory;
         const usage = memInfo.usedJSHeapSize / memInfo.totalJSHeapSize;
-        
+
         this.reportMetric('performance', 'memory_usage', usage);
-        
+
         if (usage > 0.85) {
           this.reportAlert('critical', `High memory usage: ${(usage * 100).toFixed(1)}%`);
         }
@@ -157,7 +157,7 @@ class QualityMonitoringService {
       if (e.key === 'Tab' || e.key === 'Enter' || e.key === 'Space') {
         keyboardEvents++;
         totalInteractions++;
-        
+
         const keyboardScore = totalInteractions > 0 ? (keyboardEvents / totalInteractions) * 100 : 100;
         this.reportMetric('accessibility', 'keyboard_nav_score', keyboardScore);
       }
@@ -178,16 +178,16 @@ class QualityMonitoringService {
     const checkColorContrast = () => {
       try {
         const elements = document.querySelectorAll('*');
-        let contrastIssues = 0;
-        
+        const contrastIssues = 0;
+
         elements.forEach(el => {
           const styles = window.getComputedStyle(el);
           const color = styles.color;
           const backgroundColor = styles.backgroundColor;
-          
+
           // Simplified contrast check - in production, use a proper contrast ratio calculator
-          if (color && backgroundColor && 
-              color !== 'rgba(0, 0, 0, 0)' && 
+          if (color && backgroundColor &&
+              color !== 'rgba(0, 0, 0, 0)' &&
               backgroundColor !== 'rgba(0, 0, 0, 0)') {
             // Placeholder for actual contrast calculation
             // Real implementation would calculate luminance ratios
@@ -196,7 +196,7 @@ class QualityMonitoringService {
 
         const contrastScore = Math.max(0, 100 - contrastIssues);
         this.reportMetric('accessibility', 'color_contrast_score', contrastScore);
-        
+
       } catch (error) {
         console.warn('Color contrast check failed:', error);
       }
@@ -221,11 +221,11 @@ class QualityMonitoringService {
     });
 
     // HTTPS enforcement check
-    const isSecure = window.location.protocol === 'https:' || 
+    const isSecure = window.location.protocol === 'https:' ||
                     window.location.hostname === 'localhost';
-    
+
     this.reportMetric('security', 'https_enforced', isSecure);
-    
+
     if (!isSecure) {
       this.reportAlert('critical', 'Non-secure context detected');
     }
@@ -280,7 +280,7 @@ class QualityMonitoringService {
     setInterval(() => {
       const qualityScore = this.calculateOverallQualityScore();
       this.reportMetric('quality', 'overall_score', qualityScore);
-      
+
       if (qualityScore < 70) {
         this.reportAlert('warning', `Overall quality score low: ${qualityScore.toFixed(1)}`);
       }
@@ -298,7 +298,7 @@ class QualityMonitoringService {
         if (response.ok) {
           const size = parseInt(response.headers.get('content-length')) || 0;
           this.reportMetric('architecture', 'bundle_size', size);
-          
+
           if (size > this.thresholds.performance.bundle) {
             this.reportAlert('warning', `Bundle size exceeds threshold: ${(size / 1024).toFixed(1)}KB`);
           }
@@ -313,12 +313,12 @@ class QualityMonitoringService {
     // Dependency monitoring
     const checkDependencies = () => {
       const scripts = document.querySelectorAll('script[src]');
-      const externalDeps = Array.from(scripts).filter(script => 
-        script.src.includes('cdn') || script.src.includes('unpkg')
+      const externalDeps = Array.from(scripts).filter(script =>
+        script.src.includes('cdn') || script.src.includes('unpkg'),
       );
 
       this.reportMetric('architecture', 'external_dependencies', externalDeps.length);
-      
+
       if (externalDeps.length > 5) {
         this.reportAlert('info', `High number of external dependencies: ${externalDeps.length}`);
       }
@@ -333,14 +333,14 @@ class QualityMonitoringService {
   reportMetric(category, name, value) {
     const timestamp = Date.now();
     const key = `${category}.${name}`;
-    
+
     if (!this.metrics.has(key)) {
       this.metrics.set(key, []);
     }
-    
+
     const metricData = this.metrics.get(key);
     metricData.push({ value, timestamp });
-    
+
     // Keep only last 100 entries per metric
     if (metricData.length > 100) {
       metricData.shift();
@@ -363,7 +363,7 @@ class QualityMonitoringService {
     };
 
     this.alerts.push(alert);
-    
+
     // Keep only last 50 alerts
     if (this.alerts.length > 50) {
       this.alerts.shift();
@@ -407,12 +407,12 @@ class QualityMonitoringService {
     const fcpScore = this.getLatestMetric('performance', 'fcp');
     const lcpScore = this.getLatestMetric('performance', 'lcp');
     const clsScore = this.getLatestMetric('performance', 'cls');
-    
+
     if (fcpScore !== null && lcpScore !== null && clsScore !== null) {
-      const perfScore = Math.max(0, 100 - 
+      const perfScore = Math.max(0, 100 -
         (fcpScore > this.thresholds.performance.fcp ? 20 : 0) -
         (lcpScore > this.thresholds.performance.lcp ? 20 : 0) -
-        (clsScore > this.thresholds.performance.cls ? 20 : 0)
+        (clsScore > this.thresholds.performance.cls ? 20 : 0),
       );
       totalScore += perfScore * weights.performance;
       totalWeight += weights.performance;
@@ -421,7 +421,7 @@ class QualityMonitoringService {
     // Accessibility score
     const keyboardScore = this.getLatestMetric('accessibility', 'keyboard_nav_score');
     const contrastScore = this.getLatestMetric('accessibility', 'color_contrast_score');
-    
+
     if (keyboardScore !== null || contrastScore !== null) {
       const a11yScore = (keyboardScore || 100 + contrastScore || 100) / 2;
       totalScore += a11yScore * weights.accessibility;
@@ -451,11 +451,11 @@ class QualityMonitoringService {
   getLatestMetric(category, name) {
     const key = `${category}.${name}`;
     const metricData = this.metrics.get(key);
-    
+
     if (!metricData || metricData.length === 0) {
       return null;
     }
-    
+
     return metricData[metricData.length - 1].value;
   }
 
@@ -465,7 +465,7 @@ class QualityMonitoringService {
   getMetricHistory(category, name, limit = 50) {
     const key = `${category}.${name}`;
     const metricData = this.metrics.get(key) || [];
-    
+
     return metricData.slice(-limit);
   }
 
@@ -474,11 +474,11 @@ class QualityMonitoringService {
    */
   getAlerts(severity = null, limit = 50) {
     let filteredAlerts = this.alerts;
-    
+
     if (severity) {
       filteredAlerts = this.alerts.filter(alert => alert.severity === severity);
     }
-    
+
     return filteredAlerts.slice(-limit).reverse(); // Most recent first
   }
 
@@ -487,7 +487,7 @@ class QualityMonitoringService {
    */
   subscribe(callback) {
     this.observers.push(callback);
-    
+
     return () => {
       const index = this.observers.indexOf(callback);
       if (index > -1) {

@@ -9,7 +9,7 @@ import { useWebcamData } from './hooks/useWebcamData';
 const App = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  
+
   // Data hooks
   const { weatherData, isLoading: weatherLoading, error: weatherError, refetch: refetchWeather } = useWeatherData();
   const { webcamData, isLoading: webcamLoading, error: webcamError, refetch: refetchWebcam } = useWebcamData();
@@ -31,13 +31,13 @@ const App = () => {
   const tabs = [
     { id: 'dashboard', name: '대시보드', icon: '🌤️' },
     { id: 'webcam', name: '웹캠', icon: '📹' },
-    { id: 'map', name: '지도', icon: '🗺️' }
+    { id: 'map', name: '지도', icon: '🗺️' },
   ];
 
   // Simple Weather Dashboard Component
   const WeatherDashboard = () => {
     const stations = weatherData?.stations || [];
-    
+
     return (
       <div className="space-y-6">
         {/* Overview Cards */}
@@ -49,7 +49,7 @@ const App = () => {
             </div>
             <div className="text-sm text-gray-600">평균 기온</div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-4 text-center">
             <div className="text-2xl mb-2">💧</div>
             <div className="text-2xl font-bold text-blue-600">
@@ -57,7 +57,7 @@ const App = () => {
             </div>
             <div className="text-sm text-gray-600">습도</div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-4 text-center">
             <div className="text-2xl mb-2">🌧️</div>
             <div className="text-2xl font-bold text-blue-600">
@@ -65,7 +65,7 @@ const App = () => {
             </div>
             <div className="text-sm text-gray-600">강수량</div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-4 text-center">
             <div className="text-2xl mb-2">💨</div>
             <div className="text-2xl font-bold text-blue-600">
@@ -78,8 +78,8 @@ const App = () => {
         {/* Station Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {stations.map((station) => (
-            <div 
-              key={station.id} 
+            <div
+              key={station.id}
               className={`bg-white rounded-lg shadow-md p-6 ${
                 station.isPrimary ? 'ring-2 ring-blue-500' : ''
               }`}
@@ -102,7 +102,7 @@ const App = () => {
                   {station.temperature}°C
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <div className="text-gray-500">습도</div>
@@ -152,7 +152,7 @@ const App = () => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="p-4">
                 <h3 className="font-bold text-lg text-gray-800 mb-1">
                   {camera.name}
@@ -215,12 +215,12 @@ const App = () => {
                 실시간 날씨 정보 시스템 • Real-time Weather Information System
               </p>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-500">
                 마지막 업데이트: {lastUpdate.toLocaleString('ko-KR')}
               </div>
-              <button 
+              <button
                 onClick={() => {
                   refetchWeather();
                   refetchWebcam();
@@ -233,7 +233,7 @@ const App = () => {
               </button>
             </div>
           </div>
-          
+
           {/* Tab Navigation */}
           <div className="flex space-x-1 mt-4">
             {tabs.map((tab) => (
@@ -278,7 +278,7 @@ const App = () => {
       <footer className="bg-white border-t mt-12">
         <div className="container mx-auto px-4 py-6 text-center">
           <p className="text-gray-600 text-sm">
-            © 2024 Singapore Weather Cam • 
+            © 2024 Singapore Weather Cam •
             데이터 출처: NEA Singapore, LTA Singapore
           </p>
         </div>

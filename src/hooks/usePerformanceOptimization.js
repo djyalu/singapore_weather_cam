@@ -10,9 +10,9 @@ export const usePerformanceOptimization = ({
     lcp: 2500,
     fid: 100,
     cls: 0.1,
-    bundleSize: 500 * 1024
+    bundleSize: 500 * 1024,
   },
-  enableAdaptiveLoading = true
+  enableAdaptiveLoading = true,
 } = {}) => {
   const [performanceMetrics, setPerformanceMetrics] = useState({
     lcp: null,
@@ -23,7 +23,7 @@ export const usePerformanceOptimization = ({
     renderTime: null,
     bundleSize: null,
     networkSpeed: 'unknown',
-    deviceType: 'unknown'
+    deviceType: 'unknown',
   });
 
   const [optimizationState, setOptimizationState] = useState({
@@ -32,7 +32,7 @@ export const usePerformanceOptimization = ({
     codesplitting: true,
     prefetching: false,
     serviceWorker: false,
-    compressionLevel: 'auto'
+    compressionLevel: 'auto',
   });
 
   const observerRef = useRef(null);
@@ -42,7 +42,7 @@ export const usePerformanceOptimization = ({
    * Core Web Vitals Measurement
    */
   const measureCoreWebVitals = useCallback(() => {
-    if (!enableRealUserMonitoring) return;
+    if (!enableRealUserMonitoring) {return;}
 
     // Largest Contentful Paint (LCP)
     const measureLCP = () => {
@@ -51,17 +51,17 @@ export const usePerformanceOptimization = ({
           const entries = list.getEntries();
           const lastEntry = entries[entries.length - 1];
           const lcp = lastEntry.renderTime || lastEntry.loadTime;
-          
+
           setPerformanceMetrics(prev => ({ ...prev, lcp }));
           metricsRef.current.lcp = lcp;
-          
+
           // Check against budget
           if (lcp > performanceBudgets.lcp) {
             console.warn(`LCP budget exceeded: ${lcp}ms > ${performanceBudgets.lcp}ms`);
             triggerOptimization('lcp', lcp);
           }
         });
-        
+
         observer.observe({ entryTypes: ['largest-contentful-paint'] });
         observerRef.current = observer;
       }
@@ -76,14 +76,14 @@ export const usePerformanceOptimization = ({
             const fid = entry.processingStart - entry.startTime;
             setPerformanceMetrics(prev => ({ ...prev, fid }));
             metricsRef.current.fid = fid;
-            
+
             if (fid > performanceBudgets.fid) {
               console.warn(`FID budget exceeded: ${fid}ms > ${performanceBudgets.fid}ms`);
               triggerOptimization('fid', fid);
             }
           });
         });
-        
+
         observer.observe({ entryTypes: ['first-input'] });
       }
     };
@@ -92,7 +92,7 @@ export const usePerformanceOptimization = ({
     const measureCLS = () => {
       if ('PerformanceObserver' in window) {
         let clsValue = 0;
-        let clsEntries = [];
+        const clsEntries = [];
 
         const observer = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
@@ -101,16 +101,16 @@ export const usePerformanceOptimization = ({
               clsValue += entry.value;
             }
           }
-          
+
           setPerformanceMetrics(prev => ({ ...prev, cls: clsValue }));
           metricsRef.current.cls = clsValue;
-          
+
           if (clsValue > performanceBudgets.cls) {
             console.warn(`CLS budget exceeded: ${clsValue} > ${performanceBudgets.cls}`);
             triggerOptimization('cls', clsValue);
           }
         });
-        
+
         observer.observe({ entryTypes: ['layout-shift'] });
       }
     };
@@ -127,10 +127,10 @@ export const usePerformanceOptimization = ({
     if ('connection' in navigator) {
       const connection = navigator.connection;
       const effectiveType = connection.effectiveType;
-      
-      setPerformanceMetrics(prev => ({ 
-        ...prev, 
-        networkSpeed: effectiveType 
+
+      setPerformanceMetrics(prev => ({
+        ...prev,
+        networkSpeed: effectiveType,
       }));
 
       // Adaptive loading based on network speed
@@ -140,13 +140,13 @@ export const usePerformanceOptimization = ({
             ...prev,
             imageOptimization: true,
             lazyLoading: true,
-            compressionLevel: 'high'
+            compressionLevel: 'high',
           }));
         } else if (effectiveType === '4g') {
           setOptimizationState(prev => ({
             ...prev,
             prefetching: true,
-            compressionLevel: 'balanced'
+            compressionLevel: 'balanced',
           }));
         }
       }
@@ -173,7 +173,7 @@ export const usePerformanceOptimization = ({
       setOptimizationState(prev => ({
         ...prev,
         imageOptimization: true,
-        lazyLoading: true
+        lazyLoading: true,
       }));
     }
   }, []);
@@ -188,10 +188,10 @@ export const usePerformanceOptimization = ({
       if (navigationEntries.length > 0) {
         const entry = navigationEntries[0];
         const transferSize = entry.transferSize || 0;
-        
-        setPerformanceMetrics(prev => ({ 
-          ...prev, 
-          bundleSize: transferSize 
+
+        setPerformanceMetrics(prev => ({
+          ...prev,
+          bundleSize: transferSize,
         }));
 
         if (transferSize > performanceBudgets.bundleSize) {
@@ -215,30 +215,30 @@ export const usePerformanceOptimization = ({
           ...prev,
           imageOptimization: true,
           lazyLoading: true,
-          prefetching: true
+          prefetching: true,
         }));
         break;
-        
+
       case 'fid':
         // Enable code splitting and reduce main thread work
         setOptimizationState(prev => ({
           ...prev,
           codesplitting: true,
-          compressionLevel: 'high'
+          compressionLevel: 'high',
         }));
         break;
-        
+
       case 'cls':
         // Implement layout optimization
         document.body.classList.add('optimize-layout');
         break;
-        
+
       case 'bundleSize':
         // Enable aggressive compression
         setOptimizationState(prev => ({
           ...prev,
           compressionLevel: 'high',
-          codesplitting: true
+          codesplitting: true,
         }));
         break;
     }
@@ -253,14 +253,14 @@ export const usePerformanceOptimization = ({
       const memoryUsage = {
         used: memory.usedJSHeapSize,
         total: memory.totalJSHeapSize,
-        limit: memory.jsHeapSizeLimit
+        limit: memory.jsHeapSizeLimit,
       };
 
       // Warn if memory usage is high
       const usagePercentage = (memoryUsage.used / memoryUsage.limit) * 100;
       if (usagePercentage > 80) {
         console.warn(`High memory usage: ${usagePercentage.toFixed(1)}%`);
-        
+
         // Trigger garbage collection hint
         if ('gc' in window && typeof window.gc === 'function') {
           window.gc();
@@ -284,9 +284,9 @@ export const usePerformanceOptimization = ({
         lcp: performanceMetrics.lcp <= performanceBudgets.lcp,
         fid: performanceMetrics.fid <= performanceBudgets.fid,
         cls: performanceMetrics.cls <= performanceBudgets.cls,
-        bundleSize: performanceMetrics.bundleSize <= performanceBudgets.bundleSize
+        bundleSize: performanceMetrics.bundleSize <= performanceBudgets.bundleSize,
       },
-      recommendations: []
+      recommendations: [],
     };
 
     // Generate recommendations
@@ -327,24 +327,24 @@ export const usePerformanceOptimization = ({
     // Current metrics
     performanceMetrics,
     optimizationState,
-    
+
     // Actions
     generatePerformanceReport,
     triggerOptimization,
-    
+
     // Utilities
-    isPerformant: performanceMetrics.lcp <= performanceBudgets.lcp && 
-                  performanceMetrics.fid <= performanceBudgets.fid && 
+    isPerformant: performanceMetrics.lcp <= performanceBudgets.lcp &&
+                  performanceMetrics.fid <= performanceBudgets.fid &&
                   performanceMetrics.cls <= performanceBudgets.cls,
-    
+
     // Configuration
     updateOptimizations: setOptimizationState,
-    
+
     // Manual measurements
     measureNow: useCallback(() => {
       measureCoreWebVitals();
       analyzeBundleSize();
-    }, [measureCoreWebVitals, analyzeBundleSize])
+    }, [measureCoreWebVitals, analyzeBundleSize]),
   };
 };
 

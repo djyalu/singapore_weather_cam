@@ -37,7 +37,7 @@ describe('App Component - Comprehensive Test Suite', () => {
   beforeEach(() => {
     // Reset all mocks before each test
     vi.clearAllMocks();
-    
+
     // Mock localStorage
     const localStorageMock = {
       getItem: vi.fn(),
@@ -107,7 +107,7 @@ describe('App Component - Comprehensive Test Suite', () => {
       render(<App />);
       const h1 = screen.getByRole('heading', { level: 1 });
       const h2 = screen.getByRole('heading', { level: 2 });
-      
+
       expect(h1).toHaveTextContent('🌤️ Singapore Weather Cam');
       expect(h2).toHaveTextContent('시스템이 정상적으로 로딩되었습니다!');
     });
@@ -122,7 +122,7 @@ describe('App Component - Comprehensive Test Suite', () => {
       render(<App />);
       const container = screen.getByText('🌤️ Singapore Weather Cam').closest('div');
       expect(container).toBeInTheDocument();
-      
+
       // Test tab navigation
       fireEvent.keyDown(document.body, { key: 'Tab' });
       // Note: More comprehensive keyboard testing would require interactive elements
@@ -130,11 +130,11 @@ describe('App Component - Comprehensive Test Suite', () => {
 
     it('has proper semantic HTML structure', () => {
       render(<App />);
-      
+
       // Check for proper main content area
       const mainContent = screen.getByText('🌤️ Singapore Weather Cam').closest('div');
       expect(mainContent).toBeInTheDocument();
-      
+
       // Check for proper text hierarchy
       expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
       expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
@@ -142,7 +142,7 @@ describe('App Component - Comprehensive Test Suite', () => {
 
     it('provides alternative text for emoji icons', async () => {
       render(<App />);
-      
+
       // The emoji should be part of heading text for screen readers
       const titleWithEmoji = screen.getByText(/🌤️ Singapore Weather Cam/);
       expect(titleWithEmoji).toBeInTheDocument();
@@ -152,7 +152,7 @@ describe('App Component - Comprehensive Test Suite', () => {
       render(<App />);
       const subtitle = screen.getByText('실시간 날씨 정보 시스템');
       expect(subtitle).toHaveClass('text-xl'); // Tailwind xl = 20px
-      
+
       const description = screen.getByText('Real-time Weather Information System');
       expect(description).toHaveClass('text-lg'); // Tailwind lg = 18px
     });
@@ -172,7 +172,7 @@ describe('App Component - Comprehensive Test Suite', () => {
         configurable: true,
         value: 375,
       });
-      
+
       render(<App />);
       const container = screen.getByText('🌤️ Singapore Weather Cam').closest('div');
       expect(container).toHaveClass('p-4');
@@ -188,29 +188,29 @@ describe('App Component - Comprehensive Test Suite', () => {
   describe('Performance Characteristics', () => {
     it('renders efficiently without unnecessary re-renders', async () => {
       const { rerender } = render(<App />);
-      
+
       // Measure initial render
       const startTime = performance.now();
       rerender(<App />);
       const endTime = performance.now();
-      
+
       // Should render quickly (under 16ms for 60fps)
       expect(endTime - startTime).toBeLessThan(16);
     });
 
     it('does not cause memory leaks', () => {
       const { unmount } = render(<App />);
-      
+
       // Capture initial memory if available
       const initialMemory = performance.memory?.usedJSHeapSize || 0;
-      
+
       unmount();
-      
+
       // Force garbage collection if available
       if (global.gc) {
         global.gc();
       }
-      
+
       // Memory should not increase significantly
       const finalMemory = performance.memory?.usedJSHeapSize || 0;
       if (initialMemory > 0) {
@@ -232,14 +232,14 @@ describe('App Component - Comprehensive Test Suite', () => {
     it('does not expose sensitive information', () => {
       render(<App />);
       const htmlContent = document.documentElement.innerHTML;
-      
+
       // Check that no sensitive patterns are exposed
       expect(htmlContent).not.toMatch(/password|secret|token|api[_-]?key/i);
     });
 
     it('properly escapes text content', () => {
       render(<App />);
-      
+
       // All text should be properly escaped (no raw HTML injection)
       const textContent = screen.getByText('React 앱이 성공적으로 실행 중입니다');
       expect(textContent.innerHTML).toBe('React 앱이 성공적으로 실행 중입니다');
@@ -247,7 +247,7 @@ describe('App Component - Comprehensive Test Suite', () => {
 
     it('sets secure default attributes', () => {
       render(<App />);
-      
+
       // Check for any external links (should have rel="noopener noreferrer")
       const externalLinks = screen.queryAllByRole('link');
       externalLinks.forEach(link => {
@@ -265,7 +265,7 @@ describe('App Component - Comprehensive Test Suite', () => {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
       ];
 
       userAgents.forEach(userAgent => {
@@ -273,7 +273,7 @@ describe('App Component - Comprehensive Test Suite', () => {
           value: userAgent,
           writable: true,
         });
-        
+
         expect(() => render(<App />)).not.toThrow();
       });
     });
@@ -282,12 +282,12 @@ describe('App Component - Comprehensive Test Suite', () => {
       // Mock absence of modern features
       const originalIntersectionObserver = global.IntersectionObserver;
       const originalPerformanceObserver = global.PerformanceObserver;
-      
+
       delete global.IntersectionObserver;
       delete global.PerformanceObserver;
-      
+
       expect(() => render(<App />)).not.toThrow();
-      
+
       // Restore
       global.IntersectionObserver = originalIntersectionObserver;
       global.PerformanceObserver = originalPerformanceObserver;
@@ -310,7 +310,7 @@ describe('App Component - Comprehensive Test Suite', () => {
     it('handles timezone correctly for Singapore', () => {
       render(<App />);
       const timeElement = screen.getByText(/2024/);
-      
+
       // Should display Singapore time (UTC+8)
       expect(timeElement.textContent).toContain('2024');
     });
@@ -324,7 +324,7 @@ describe('App Component - Comprehensive Test Suite', () => {
 
       // This test structure is ready for error boundary testing
       expect(() => render(<App />)).not.toThrow();
-      
+
       console.error = originalError;
     });
 
@@ -335,7 +335,7 @@ describe('App Component - Comprehensive Test Suite', () => {
 
     it('maintains state consistency', () => {
       const { rerender } = render(<App />);
-      
+
       // Component should be stateless and consistent
       const initialContent = screen.getByText('🌤️ Singapore Weather Cam');
       rerender(<App />);
@@ -350,10 +350,10 @@ describe('App Component - Comprehensive Test Suite', () => {
 describe('App Integration Tests', () => {
   it('integrates with browser APIs safely', () => {
     render(<App />);
-    
+
     // Should handle Date API correctly
     expect(screen.getByText(/2024/)).toBeInTheDocument();
-    
+
     // Should handle DOM manipulation safely
     expect(document.documentElement.lang).toBeTruthy();
   });
@@ -361,16 +361,16 @@ describe('App Integration Tests', () => {
   it('maintains performance under stress', async () => {
     const iterations = 10;
     const renderTimes = [];
-    
+
     for (let i = 0; i < iterations; i++) {
       const start = performance.now();
       const { unmount } = render(<App />);
       const end = performance.now();
-      
+
       renderTimes.push(end - start);
       unmount();
     }
-    
+
     const averageTime = renderTimes.reduce((a, b) => a + b, 0) / renderTimes.length;
     expect(averageTime).toBeLessThan(10); // Should render in under 10ms on average
   });

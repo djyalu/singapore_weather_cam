@@ -10,7 +10,7 @@ class SecurityManager {
     this.trustedDomains = [
       'api.data.gov.sg',
       'fonts.googleapis.com',
-      'fonts.gstatic.com'
+      'fonts.gstatic.com',
     ];
     this.securityConfig = {
       enableCSP: true,
@@ -18,9 +18,9 @@ class SecurityManager {
       enableClickjacking: true,
       enableMITM: true,
       enableDataValidation: true,
-      logSecurityEvents: true
+      logSecurityEvents: true,
     };
-    
+
     this.initializeSecurity();
   }
 
@@ -40,7 +40,7 @@ class SecurityManager {
    * Enhanced Content Security Policy
    */
   setupContentSecurityPolicy() {
-    if (!this.securityConfig.enableCSP) return;
+    if (!this.securityConfig.enableCSP) {return;}
 
     const cspConfig = {
       'default-src': ["'self'"],
@@ -48,35 +48,35 @@ class SecurityManager {
         "'self'",
         // TODO: Remove 'unsafe-inline' and implement nonce-based CSP
         "'unsafe-inline'", // TEMPORARY - needs nonce implementation
-        'https://api.data.gov.sg'
+        'https://api.data.gov.sg',
       ],
       'style-src': [
         "'self'",
         "'unsafe-inline'", // TODO: Replace with nonce for inline styles
-        'https://fonts.googleapis.com'
+        'https://fonts.googleapis.com',
       ],
       'img-src': [
         "'self'",
         'data:',
         'https://api.data.gov.sg',
         'https://*.data.gov.sg',
-        'blob:'
+        'blob:',
       ],
       'connect-src': [
         "'self'",
         'https://api.data.gov.sg',
-        'wss://api.data.gov.sg'
+        'wss://api.data.gov.sg',
       ],
       'font-src': [
         "'self'",
-        'https://fonts.gstatic.com'
+        'https://fonts.gstatic.com',
       ],
       'frame-src': ["'none'"],
       'object-src': ["'none'"],
       'base-uri': ["'self'"],
       'form-action': ["'self'"],
       'frame-ancestors': ["'none'"],
-      'upgrade-insecure-requests': []
+      'upgrade-insecure-requests': [],
     };
 
     // Generate CSP string
@@ -110,7 +110,7 @@ class SecurityManager {
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
       'Cross-Origin-Embedder-Policy': 'require-corp',
-      'Cross-Origin-Opener-Policy': 'same-origin'
+      'Cross-Origin-Opener-Policy': 'same-origin',
     };
 
     // Log headers for verification (in production, verify server headers)
@@ -126,7 +126,7 @@ class SecurityManager {
       validateCoordinates: (lat, lng) => {
         const latNum = parseFloat(lat);
         const lngNum = parseFloat(lng);
-        
+
         // Singapore bounds: roughly 1.1°N to 1.5°N, 103.6°E to 104.0°E
         return !isNaN(latNum) && !isNaN(lngNum) &&
                latNum >= 1.1 && latNum <= 1.5 &&
@@ -166,7 +166,7 @@ class SecurityManager {
         return encodeURIComponent(String(param))
           .replace(/['"\\]/g, '')
           .substring(0, 100); // Limit length
-      }
+      },
     };
   }
 
@@ -183,7 +183,7 @@ class SecurityManager {
         disposition: event.disposition,
         sourceFile: event.sourceFile,
         lineNumber: event.lineNumber,
-        columnNumber: event.columnNumber
+        columnNumber: event.columnNumber,
       };
 
       this.cspViolations.push(violation);
@@ -213,7 +213,7 @@ class SecurityManager {
                   if (node.nodeName === 'SCRIPT') {
                     this.reportSecurityEvent('script_injection_attempt', {
                       src: node.src,
-                      content: node.textContent?.substring(0, 100)
+                      content: node.textContent?.substring(0, 100),
                     });
                   }
                 });
@@ -223,7 +223,7 @@ class SecurityManager {
 
           observer.observe(document.documentElement, {
             childList: true,
-            subtree: true
+            subtree: true,
           });
         }
       },
@@ -236,7 +236,7 @@ class SecurityManager {
           const logString = args.join(' ');
           if (/password|token|secret|key/i.test(logString)) {
             this.reportSecurityEvent('sensitive_data_console', {
-              content: logString.substring(0, 50)
+              content: logString.substring(0, 50),
             });
           }
           originalLog.apply(console, args);
@@ -246,7 +246,7 @@ class SecurityManager {
       // Monitor for debugging attempts
       observeDebugging: () => {
         // Detect DevTools opening
-        let devtools = { open: false };
+        const devtools = { open: false };
         const threshold = 160;
 
         const detectDevTools = () => {
@@ -255,7 +255,7 @@ class SecurityManager {
             if (!devtools.open) {
               devtools.open = true;
               this.reportSecurityEvent('devtools_opened', {
-                userAgent: navigator.userAgent
+                userAgent: navigator.userAgent,
               });
             }
           } else {
@@ -265,7 +265,7 @@ class SecurityManager {
 
         window.addEventListener('resize', detectDevTools);
         detectDevTools();
-      }
+      },
     };
 
     securityObserver.observeDOM();
@@ -282,9 +282,9 @@ class SecurityManager {
     // Prevent clickjacking
     if (window.self !== window.top) {
       this.reportSecurityEvent('clickjacking_attempt', {
-        parentOrigin: document.referrer
+        parentOrigin: document.referrer,
       });
-      
+
       // Break out of frame
       window.top.location = window.self.location;
     }
@@ -294,13 +294,13 @@ class SecurityManager {
       document.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         this.reportSecurityEvent('context_menu_attempt', {
-          target: e.target.tagName
+          target: e.target.tagName,
         });
       });
 
       // Disable F12 and other dev shortcuts
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'F12' || 
+        if (e.key === 'F12' ||
             (e.ctrlKey && e.shiftKey && e.key === 'I') ||
             (e.ctrlKey && e.shiftKey && e.key === 'C') ||
             (e.ctrlKey && e.key === 'U')) {
@@ -308,7 +308,7 @@ class SecurityManager {
           this.reportSecurityEvent('dev_shortcut_attempt', {
             key: e.key,
             ctrl: e.ctrlKey,
-            shift: e.shiftKey
+            shift: e.shiftKey,
           });
         }
       });
@@ -319,7 +319,7 @@ class SecurityManager {
       const selection = window.getSelection().toString();
       if (selection.length > 100) {
         this.reportSecurityEvent('large_clipboard_copy', {
-          length: selection.length
+          length: selection.length,
         });
       }
     });
@@ -341,10 +341,10 @@ class SecurityManager {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
         'Cache-Control': 'no-cache',
-        ...options.headers
+        ...options.headers,
       },
       credentials: 'same-origin',
-      mode: 'cors'
+      mode: 'cors',
     };
 
     // Add request timeout
@@ -354,7 +354,7 @@ class SecurityManager {
     try {
       const response = await fetch(url, {
         ...secureOptions,
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -368,7 +368,7 @@ class SecurityManager {
       clearTimeout(timeoutId);
       this.reportSecurityEvent('api_request_error', {
         url: url.substring(0, 100),
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -384,11 +384,11 @@ class SecurityManager {
       details,
       userAgent: navigator.userAgent,
       url: window.location.href,
-      sessionId: this.getSessionId()
+      sessionId: this.getSessionId(),
     };
 
     this.securityEvents.push(event);
-    
+
     console.warn(`🚨 Security Event: ${eventType}`, details);
 
     // In production, send to security monitoring service
@@ -407,7 +407,7 @@ class SecurityManager {
       securityEvents: this.securityEvents.length,
       recentEvents: this.securityEvents.slice(-10),
       configuration: this.securityConfig,
-      recommendations: this.getSecurityRecommendations()
+      recommendations: this.getSecurityRecommendations(),
     };
   }
 

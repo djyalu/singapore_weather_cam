@@ -9,7 +9,7 @@ export const useWeatherData = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Try to fetch from data files
       try {
         const response = await fetch('/data/weather/latest.json');
@@ -35,7 +35,7 @@ export const useWeatherData = () => {
             area: 'Central',
             isPrimary: true,
             lat: 1.3520,
-            lng: 103.7767
+            lng: 103.7767,
           },
           {
             id: 'S116',
@@ -47,7 +47,7 @@ export const useWeatherData = () => {
             area: 'Central',
             isPrimary: true,
             lat: 1.3138,
-            lng: 103.8420
+            lng: 103.8420,
           },
           {
             id: 'S118',
@@ -59,12 +59,12 @@ export const useWeatherData = () => {
             area: 'West',
             isPrimary: true,
             lat: 1.3162,
-            lng: 103.7649
-          }
+            lng: 103.7649,
+          },
         ],
-        lastUpdate: new Date().toISOString()
+        lastUpdate: new Date().toISOString(),
       };
-      
+
       setWeatherData(mockData);
     } catch (err) {
       setError(err.message);
@@ -81,6 +81,6 @@ export const useWeatherData = () => {
     weatherData,
     isLoading,
     error,
-    refetch: fetchWeatherData
+    refetch: fetchWeatherData,
   };
 };

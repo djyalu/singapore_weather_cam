@@ -10,15 +10,15 @@ class CodeQualityManager {
       maintainability: 0,
       testCoverage: 0,
       duplication: 0,
-      debt: 0
+      debt: 0,
     };
-    
+
     this.qualityRules = {
       maxFunctionLength: 50,
       maxFileLength: 300,
       maxCyclomaticComplexity: 10,
       minTestCoverage: 80,
-      maxDuplication: 5
+      maxDuplication: 5,
     };
   }
 
@@ -31,7 +31,7 @@ class CodeQualityManager {
       metrics: this.calculateMetrics(),
       violations: this.findViolations(),
       recommendations: this.generateRecommendations(),
-      trends: this.calculateTrends()
+      trends: this.calculateTrends(),
     };
   }
 
@@ -44,7 +44,7 @@ class CodeQualityManager {
       complexity: {
         current: this.qualityMetrics.complexity,
         target: this.qualityRules.maxCyclomaticComplexity,
-        status: this.qualityMetrics.complexity <= this.qualityRules.maxCyclomaticComplexity ? 'good' : 'needs_improvement'
+        status: this.qualityMetrics.complexity <= this.qualityRules.maxCyclomaticComplexity ? 'good' : 'needs_improvement',
       },
 
       // Maintainability Index
@@ -53,16 +53,16 @@ class CodeQualityManager {
         factors: {
           codeLength: 'good',
           complexity: 'good',
-          documentation: 'fair'
-        }
+          documentation: 'fair',
+        },
       },
 
       // Test Coverage
       testCoverage: {
         current: this.qualityMetrics.testCoverage,
         target: this.qualityRules.minTestCoverage,
-        status: this.qualityMetrics.testCoverage >= this.qualityRules.minTestCoverage ? 'good' : 'critical'
-      }
+        status: this.qualityMetrics.testCoverage >= this.qualityRules.minTestCoverage ? 'good' : 'critical',
+      },
     };
   }
 
@@ -75,7 +75,7 @@ class CodeQualityManager {
     const baseScore = 100;
     const complexityPenalty = this.qualityMetrics.complexity * 2;
     const lengthPenalty = Math.max(0, (this.qualityMetrics.fileLength - 200) * 0.1);
-    
+
     return Math.max(0, baseScore - complexityPenalty - lengthPenalty);
   }
 
@@ -124,7 +124,7 @@ class CodeQualityManager {
           );
         };
       `,
-      impact: 'Improves maintainability and reusability'
+      impact: 'Improves maintainability and reusability',
     });
 
     recommendations.push({
@@ -147,7 +147,7 @@ class CodeQualityManager {
           );
         });
       `,
-      impact: 'Reduces unnecessary re-renders'
+      impact: 'Reduces unnecessary re-renders',
     });
 
     recommendations.push({
@@ -171,7 +171,7 @@ class CodeQualityManager {
           </section>
         </main>
       `,
-      impact: 'Improves screen reader navigation and SEO'
+      impact: 'Improves screen reader navigation and SEO',
     });
 
     recommendations.push({
@@ -201,7 +201,7 @@ class CodeQualityManager {
           return { t };
         };
       `,
-      impact: 'Enables future internationalization'
+      impact: 'Enables future internationalization',
     });
 
     recommendations.push({
@@ -216,7 +216,7 @@ class CodeQualityManager {
         // Performance tests with Lighthouse CI
         // Cross-browser testing setup
       `,
-      impact: 'Ensures reliability and prevents regressions'
+      impact: 'Ensures reliability and prevents regressions',
     });
 
     return recommendations;
@@ -234,10 +234,10 @@ class CodeQualityManager {
           'Extract StatusCard component',
           'Extract TimeDisplay component',
           'Extract SystemStatus component',
-          'Add PropTypes or TypeScript'
-        ]
+          'Add PropTypes or TypeScript',
+        ],
       },
-      
+
       phase2: {
         title: 'Performance Optimization',
         duration: '2-3 days',
@@ -245,10 +245,10 @@ class CodeQualityManager {
           'Implement React.memo',
           'Add useMemo for expensive calculations',
           'Optimize re-render patterns',
-          'Add performance monitoring'
-        ]
+          'Add performance monitoring',
+        ],
       },
-      
+
       phase3: {
         title: 'Accessibility Enhancement',
         duration: '1-2 days',
@@ -256,10 +256,10 @@ class CodeQualityManager {
           'Add semantic HTML structure',
           'Implement ARIA labels',
           'Test with screen readers',
-          'Add keyboard navigation'
-        ]
+          'Add keyboard navigation',
+        ],
       },
-      
+
       phase4: {
         title: 'Testing Implementation',
         duration: '3-4 days',
@@ -267,9 +267,9 @@ class CodeQualityManager {
           'Set up testing framework',
           'Write unit tests',
           'Add integration tests',
-          'Implement e2e testing'
-        ]
-      }
+          'Implement e2e testing',
+        ],
+      },
     };
   }
 }

@@ -20,7 +20,7 @@ const App = () => {
           </p>
           <p className="text-sm text-gray-500 mt-2">
             현재 시간: {new Date().toLocaleString('ko-KR', {
-              timeZone: 'Asia/Singapore'
+              timeZone: 'Asia/Singapore',
             })}
           </p>
         </div>

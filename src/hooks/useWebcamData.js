@@ -9,7 +9,7 @@ export const useWebcamData = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Try to fetch from data files
       try {
         const response = await fetch('/data/webcam/latest.json');
@@ -33,22 +33,22 @@ export const useWebcamData = () => {
             lat: 1.3520,
             lng: 103.7767,
             status: 'active',
-            lastUpdate: new Date().toISOString()
+            lastUpdate: new Date().toISOString(),
           },
           {
-            id: '1002', 
+            id: '1002',
             name: 'Newton Circus',
             image: '/images/webcam/placeholder.jpg',
             location: 'Newton',
             lat: 1.3138,
             lng: 103.8420,
             status: 'active',
-            lastUpdate: new Date().toISOString()
-          }
+            lastUpdate: new Date().toISOString(),
+          },
         ],
-        lastUpdate: new Date().toISOString()
+        lastUpdate: new Date().toISOString(),
       };
-      
+
       setWebcamData(mockData);
     } catch (err) {
       setError(err.message);
@@ -65,6 +65,6 @@ export const useWebcamData = () => {
     webcamData,
     isLoading,
     error,
-    refetch: fetchWebcamData
+    refetch: fetchWebcamData,
   };
 };
