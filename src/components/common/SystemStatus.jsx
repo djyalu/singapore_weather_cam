@@ -122,7 +122,10 @@ const SystemStatus = React.memo(({
 
       return 'online';
     } catch (error) {
-      console.warn('getWeatherStatus error:', error);
+      // Use safe logging for production
+      if (import.meta.env.MODE === 'development') {
+        console.warn('getWeatherStatus error:', error);
+      }
       return 'offline';
     }
   }, [weatherData, reliabilityMetrics]);
@@ -140,7 +143,10 @@ const SystemStatus = React.memo(({
 
       return 'online';
     } catch (error) {
-      console.warn('getWebcamStatus error:', error);
+      // Use safe logging for production
+      if (import.meta.env.MODE === 'development') {
+        console.warn('getWebcamStatus error:', error);
+      }
       return 'offline';
     }
   }, [webcamData, reliabilityMetrics]);
@@ -582,17 +588,29 @@ const SystemStatus = React.memo(({
     </section>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison for React.memo to prevent unnecessary re-renders
+  // Optimized comparison for React.memo - avoid expensive operations
+  if (prevProps.lastFetch !== nextProps.lastFetch ||
+      prevProps.isRefreshing !== nextProps.isRefreshing ||
+      prevProps.isLoading !== nextProps.isLoading ||
+      prevProps.retryAttempts !== nextProps.retryAttempts) {
+    return false;
+  }
+
+  // Compare object references first, then key properties if needed
+  if (prevProps.error !== nextProps.error || 
+      prevProps.weatherData !== nextProps.weatherData ||
+      prevProps.webcamData !== nextProps.webcamData) {
+    return false;
+  }
+
+  // Simple reliability metrics comparison - avoid JSON.stringify
+  const prevMetrics = prevProps.reliabilityMetrics || {};
+  const nextMetrics = nextProps.reliabilityMetrics || {};
+  
   return (
-    prevProps.lastFetch === nextProps.lastFetch &&
-    prevProps.weatherData === nextProps.weatherData &&
-    prevProps.webcamData === nextProps.webcamData &&
-    prevProps.error === nextProps.error &&
-    prevProps.isRefreshing === nextProps.isRefreshing &&
-    prevProps.isLoading === nextProps.isLoading &&
-    prevProps.retryAttempts === nextProps.retryAttempts &&
-    prevProps.networkStatus === nextProps.networkStatus &&
-    JSON.stringify(prevProps.reliabilityMetrics) === JSON.stringify(nextProps.reliabilityMetrics)
+    prevMetrics.weatherQuality === nextMetrics.weatherQuality &&
+    prevMetrics.webcamQuality === nextMetrics.webcamQuality &&
+    prevMetrics.fallbackMode === nextMetrics.fallbackMode
   );
 });
 

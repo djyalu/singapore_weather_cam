@@ -30,7 +30,10 @@ const useSimpleDataLoader = (refreshInterval) => {
           setWeatherData(weatherJson);
         }
       } catch (err) {
-        console.warn('Weather data load failed:', err);
+        // Only log in development mode
+        if (import.meta.env.MODE === 'development') {
+          console.warn('Weather data load failed:', err);
+        }
       }
 
       // Load webcam data
@@ -41,13 +44,19 @@ const useSimpleDataLoader = (refreshInterval) => {
           setWebcamData(webcamJson);
         }
       } catch (err) {
-        console.warn('Webcam data load failed:', err);
+        // Only log in development mode
+        if (import.meta.env.MODE === 'development') {
+          console.warn('Webcam data load failed:', err);
+        }
       }
 
       setLastFetch(new Date());
     } catch (err) {
       setError(err.message);
-      console.error('Data loading error:', err);
+      // Only log in development mode
+      if (import.meta.env.MODE === 'development') {
+        console.error('Data loading error:', err);
+      }
     } finally {
       setLoading(false);
     }
