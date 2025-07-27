@@ -112,8 +112,8 @@ const App = () => {
           <MapView 
             weatherData={weatherData}
             webcamData={webcamData}
-            center={COORDINATES.DEFAULT_CENTER}
-            zoom={COORDINATES.DEFAULT_ZOOM}
+            selectedRegion="all"
+            regionConfig={null}
           />
         );
         

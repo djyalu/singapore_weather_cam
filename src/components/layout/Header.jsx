@@ -274,7 +274,7 @@ const Header = React.memo(({ systemStats = {} }) => {
               <div className="bg-gray-50 p-4 rounded-xl border">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
                   <Clock className="w-4 h-4" />
-                  <span>마지막 업데이트: {systemStats.lastUpdate instanceof Date ? systemStats.lastUpdate.toLocaleString('ko-KR') : systemStats.lastUpdate || '정보 없음'}</span>
+                  <span>마지막 업데이트: {systemStats.lastUpdate || '정보 없음'}</span>
                 </div>
                 <div className="text-xs text-gray-500 space-y-1">
                   <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🤖 Claude AI 분석</div>
@@ -387,7 +387,7 @@ const Header = React.memo(({ systemStats = {} }) => {
                   <div className="bg-gray-50 p-4 rounded-xl border">
                     <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
                       <Clock className="w-4 h-4" />
-                      <span>마지막 업데이트: {systemStats.lastUpdate instanceof Date ? systemStats.lastUpdate.toLocaleString('ko-KR') : systemStats.lastUpdate || '정보 없음'}</span>
+                      <span>마지막 업데이트: {systemStats.lastUpdate || '정보 없음'}</span>
                     </div>
                     <div className="text-xs text-gray-500 space-y-1">
                       <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🤖 Claude AI 분석</div>
