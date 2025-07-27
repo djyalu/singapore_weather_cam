@@ -86,9 +86,9 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
 
   // Simple system stats
   const systemStats = useMemo(() => ({
-    totalCameras: webcamData?.cameras?.length || 0,
-    activeCameras: webcamData?.cameras?.filter(c => c.image).length || 0,
-    weatherStations: weatherData?.stations?.length || 0,
+    totalCameras: webcamData?.captures?.length || 0,
+    activeCameras: webcamData?.captures?.filter(c => c.file_info?.url).length || 0,
+    weatherStations: weatherData?.locations?.length || 0,
     lastUpdate: lastFetch,
     status: error ? 'error' : 'healthy'
   }), [webcamData, weatherData, lastFetch, error]);

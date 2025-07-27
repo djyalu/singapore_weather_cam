@@ -43,13 +43,13 @@ const App = () => {
       id: 'dashboard', 
       name: getLocalizedString('DASHBOARD'), 
       icon: UI_STRINGS.ICONS.WEATHER, 
-      badge: weatherData?.stations?.length 
+      badge: weatherData?.locations?.length 
     },
     { 
       id: 'webcam', 
       name: getLocalizedString('WEBCAM'), 
       icon: UI_STRINGS.ICONS.WEBCAM, 
-      badge: webcamData?.cameras?.length 
+      badge: webcamData?.captures?.length 
     },
     { 
       id: 'map', 
@@ -90,8 +90,8 @@ const App = () => {
         return (
           <WeatherDashboard 
             data={{
-              current: weatherData?.stations?.[0],
-              locations: weatherData?.stations,
+              current: weatherData?.locations?.[0],
+              locations: weatherData?.locations,
               forecast: weatherData?.forecast || []
             }}
           />
@@ -128,7 +128,7 @@ const App = () => {
                 <div className="bg-blue-50 rounded-lg p-4">
                   <h3 className="font-semibold text-blue-800">{getLocalizedString('TEMPERATURE_TREND')}</h3>
                   <p className="text-2xl font-bold text-blue-600">
-                    {weatherData?.stations?.[0]?.temperature || '--'}°C
+                    {weatherData?.locations?.[0]?.temperature || '--'}°C
                   </p>
                   <p className="text-sm text-blue-600">{getLocalizedString('WEATHER_REFERENCE')}</p>
                 </div>
@@ -136,20 +136,20 @@ const App = () => {
                 <div className="bg-green-50 rounded-lg p-4">
                   <h3 className="font-semibold text-green-800">{getLocalizedString('HUMIDITY_ANALYSIS')}</h3>
                   <p className="text-2xl font-bold text-green-600">
-                    {weatherData?.stations?.[0]?.humidity || '--'}%
+                    {weatherData?.locations?.[0]?.humidity || '--'}%
                   </p>
                   <p className="text-sm text-green-600">
-                    {(weatherData?.stations?.[0]?.humidity || 0) > 70 ? getLocalizedString('HIGH') : getLocalizedString('NORMAL')}
+                    {(weatherData?.locations?.[0]?.humidity || 0) > 70 ? getLocalizedString('HIGH') : getLocalizedString('NORMAL')}
                   </p>
                 </div>
                 
                 <div className="bg-purple-50 rounded-lg p-4">
                   <h3 className="font-semibold text-purple-800">{getLocalizedString('RAINFALL_PREDICTION')}</h3>
                   <p className="text-2xl font-bold text-purple-600">
-                    {weatherData?.stations?.[0]?.rainfall || 0}{getLocalizedString('RAINFALL_UNIT')}
+                    {weatherData?.locations?.[0]?.rainfall || 0}{getLocalizedString('RAINFALL_UNIT')}
                   </p>
                   <p className="text-sm text-purple-600">
-                    {(weatherData?.stations?.[0]?.rainfall || 0) > 0 ? getLocalizedString('RAIN_DETECTED') : getLocalizedString('CLEAR')}
+                    {(weatherData?.locations?.[0]?.rainfall || 0) > 0 ? getLocalizedString('RAIN_DETECTED') : getLocalizedString('CLEAR')}
                   </p>
                 </div>
               </div>

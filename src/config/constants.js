@@ -9,8 +9,8 @@
 export const COORDINATES = {
   // Primary monitoring location
   HWA_CHONG_SCHOOL: {
-    lat: 1.3437,
-    lng: 103.7640,
+    lat: 1.32865,
+    lng: 103.80227,
     name: 'Hwa Chong International School',
     description: 'Primary monitoring center for Bukit Timah region'
   },
@@ -31,7 +31,7 @@ export const COORDINATES = {
   },
   
   // Default map center (using Hwa Chong as primary)
-  DEFAULT_CENTER: [1.3437, 103.7640],
+  DEFAULT_CENTER: [1.32865, 103.80227],
   DEFAULT_ZOOM: 13,
   MIN_ZOOM: 10,
   MAX_ZOOM: 18,
