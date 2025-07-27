@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
+import { transformWeatherData } from '../utils/weatherDataTransformer';
 
 /**
  * SIMPLIFIED VERSION - App Data Context with minimal dependencies
@@ -27,7 +28,14 @@ const useSimpleDataLoader = (refreshInterval) => {
         const weatherResponse = await fetch(`${basePath}data/weather/latest.json?t=${timestamp}`);
         if (weatherResponse.ok) {
           const weatherJson = await weatherResponse.json();
-          setWeatherData(weatherJson);
+          // Transform NEA API data to UI-friendly format
+          const transformedWeatherData = transformWeatherData(weatherJson);
+          setWeatherData(transformedWeatherData);
+          console.log('🌤️ Weather data loaded and transformed:', {
+            temperature: transformedWeatherData.current?.temperature,
+            locations: transformedWeatherData.locations?.length,
+            timestamp: transformedWeatherData.timestamp
+          });
         }
       } catch (err) {
         // Only log in development mode

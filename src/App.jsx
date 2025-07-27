@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import ErrorBoundary from './components/common/ErrorBoundary';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
-import WeatherDashboard from './components/weather/WeatherDashboard';
-import WebcamGallery from './components/webcam/WebcamGallery';
-import MapView from './components/map/MapView';
-import AdminPanels from './components/admin/AdminPanels';
 import LoadingScreen from './components/common/LoadingScreen';
 import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG, COORDINATES } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
+import { formatDateSafely } from './components/common/SafeDateFormatter';
+
+// Lazy load heavy components for better performance
+const WeatherDashboard = lazy(() => import('./components/weather/WeatherDashboard'));
+const WebcamGallery = lazy(() => import('./components/webcam/WebcamGallery'));
+const MapView = lazy(() => import('./components/map/MapView'));
+const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
 
 /**
  * Main Singapore Weather Cam Application
@@ -77,44 +80,56 @@ const App = () => {
     // Admin panel
     if (showAdmin) {
       return (
-        <AdminPanels 
-          weatherData={weatherData}
-          webcamData={webcamData}
-          onClose={() => setShowAdmin(false)}
-        />
+        <Suspense fallback={<LoadingScreen message="Loading admin panel..." />}>
+          <AdminPanels 
+            weatherData={weatherData}
+            webcamData={webcamData}
+            onClose={() => setShowAdmin(false)}
+          />
+        </Suspense>
       );
     }
+
+    const LoadingFallback = ({ message }) => (
+      <LoadingScreen message={message || 'Loading component...'} />
+    );
 
     switch (activeTab) {
       case 'dashboard':
         return (
-          <WeatherDashboard 
-            data={{
-              current: weatherData?.locations?.[0],
-              locations: weatherData?.locations,
-              forecast: weatherData?.forecast || []
-            }}
-          />
+          <Suspense fallback={<LoadingFallback message="Loading weather dashboard..." />}>
+            <WeatherDashboard 
+              data={{
+                current: weatherData?.locations?.[0],
+                locations: weatherData?.locations,
+                forecast: weatherData?.forecast || []
+              }}
+            />
+          </Suspense>
         );
         
       case 'webcam':
         return (
-          <WebcamGallery 
-            data={webcamData}
-            isLoading={webcamLoading}
-            error={webcamError}
-            lastUpdate={lastUpdate}
-          />
+          <Suspense fallback={<LoadingFallback message="Loading webcam gallery..." />}>
+            <WebcamGallery 
+              data={webcamData}
+              isLoading={webcamLoading}
+              error={webcamError}
+              lastUpdate={lastUpdate}
+            />
+          </Suspense>
         );
         
       case 'map':
         return (
-          <MapView 
-            weatherData={weatherData}
-            webcamData={webcamData}
-            selectedRegion="all"
-            regionConfig={null}
-          />
+          <Suspense fallback={<LoadingFallback message="Loading map..." />}>
+            <MapView 
+              weatherData={weatherData}
+              webcamData={webcamData}
+              selectedRegion="all"
+              regionConfig={null}
+            />
+          </Suspense>
         );
         
       case 'analysis':
@@ -163,14 +178,14 @@ const App = () => {
   };
 
   return (
-    <ErrorBoundary>
+    <EnhancedErrorBoundary maxRetries={3}>
       <AppLayout
         title={`${UI_STRINGS.ICONS.WEATHER} Singapore Weather Cam`}
         subtitle="Enterprise Weather Monitoring System"
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        lastUpdate={lastUpdate}
+        lastUpdate={formatDateSafely(lastUpdate)}
         isLoading={isLoading}
         hasError={hasError}
         errorMessage={weatherError || webcamError}
@@ -180,7 +195,7 @@ const App = () => {
       >
         {renderContent()}
       </AppLayout>
-    </ErrorBoundary>
+    </EnhancedErrorBoundary>
   );
 };
 

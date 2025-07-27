@@ -9,7 +9,26 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: true,
-    minify: 'terser'
+    minify: 'terser',
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          chart: ['chart.js', 'react-chartjs-2', 'chartjs-adapter-date-fns'],
+          leaflet: ['leaflet', 'react-leaflet'],
+          utils: ['date-fns', 'axios'],
+          ui: ['lucide-react', 'framer-motion', 'react-hot-toast']
+        }
+      }
+    },
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
+      }
+    }
   },
   server: {
     port: 3000,

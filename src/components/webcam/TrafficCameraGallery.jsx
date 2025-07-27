@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { INTERVALS, TIMEOUTS, UI_CONFIG, LIMITS } from '../../config/constants';
 import { getLocalizedString, UI_STRINGS } from '../../config/localization';
@@ -12,11 +12,12 @@ import LoadingSkeleton from './LoadingSkeleton';
 import ErrorState from './ErrorState';
 import WebcamModal from './WebcamModal';
 import TrafficCameraSelector from './TrafficCameraSelector';
+import { formatDateSafely } from '../common/SafeDateFormatter';
 
 /**
  * Individual Camera Card Component with enhanced mobile touch interactions
  */
-const CameraCard = ({ camera, index, onImageTap, onCardPress }) => {
+const CameraCard = React.memo(({ camera, index, onImageTap, onCardPress }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
@@ -199,7 +200,13 @@ const CameraCard = ({ camera, index, onImageTap, onCardPress }) => {
       </div>
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.camera.id === nextProps.camera.id &&
+    prevProps.camera.image.url === nextProps.camera.image.url &&
+    prevProps.index === nextProps.index
+  );
+});
 
 CameraCard.propTypes = {
   camera: PropTypes.shape({
@@ -285,11 +292,13 @@ const TrafficCameraGallery = () => {
 
       const data = await fetchTrafficCameras();
       setCameras(data.cameras);
-      setLastUpdate(new Date(data.timestamp));
+      // Safe date handling - ensure valid Date object
+      const timestamp = data.timestamp ? new Date(data.timestamp) : new Date();
+      setLastUpdate(timestamp instanceof Date && !isNaN(timestamp.getTime()) ? timestamp : new Date());
       setError(null);
-      setRetryAttempts(0); // Reset retry attempts on success
+      setRetryAttempts(0);
     } catch (err) {
-      setError(err.message);
+      setError(typeof err.message === 'string' ? err.message : 'Network error occurred');
       setRetryAttempts(prev => prev + 1);
     } finally {
       setLoading(false);
@@ -539,13 +548,9 @@ const TrafficCameraGallery = () => {
             <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
               <div className="flex items-center justify-between">
                 <span>
-                  마지막 업데이트: {
-                    lastUpdate instanceof Date 
-                      ? lastUpdate.toLocaleString('ko-KR')
-                      : typeof lastUpdate === 'string' 
-                        ? lastUpdate
-                        : getLocalizedString('NO_DATA')
-                  }
+                  마지막 업데이트: {formatDateSafely(lastUpdate, { 
+                    fallback: getLocalizedString('NO_DATA') 
+                  })}
                 </span>
                 <span className="text-green-600 flex items-center gap-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
