@@ -6,9 +6,7 @@ import WebcamGallery from './components/webcam/WebcamGallery';
 import MapView from './components/map/MapView';
 import AdminPanels from './components/admin/AdminPanels';
 import LoadingScreen from './components/common/LoadingScreen';
-import { useWeatherData } from './hooks/useWeatherData';
-import { useWebcamData } from './hooks/useWebcamData';
-import { useDataLoader } from './hooks/useDataLoader';
+import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContext';
 
 /**
  * Main Singapore Weather Cam Application
@@ -19,10 +17,10 @@ const App = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   
-  // Data hooks
-  const { weatherData, isLoading: weatherLoading, error: weatherError, refetch: refetchWeather } = useWeatherData();
-  const { webcamData, isLoading: webcamLoading, error: webcamError, refetch: refetchWebcam } = useWebcamData();
-  const { data: transformedData, isLoading: dataLoading } = useDataLoader();
+  // Data hooks from context
+  const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather } = useWeatherData();
+  const { webcamData, isLoading: webcamLoading, error: webcamError, refresh: refetchWebcam } = useWebcamData();
+  const appData = useAppData();
 
   // Auto-refresh data every 5 minutes
   useEffect(() => {
@@ -35,7 +33,7 @@ const App = () => {
     return () => clearInterval(interval);
   }, [refetchWeather, refetchWebcam]);
 
-  const isLoading = weatherLoading || webcamLoading || dataLoading;
+  const isLoading = weatherLoading || webcamLoading;
   const hasError = weatherError || webcamError;
 
   const tabs = [
@@ -71,10 +69,10 @@ const App = () => {
       case 'dashboard':
         return (
           <WeatherDashboard 
-            data={transformedData?.weather || {
+            data={{
               current: weatherData?.stations?.[0],
               locations: weatherData?.stations,
-              forecast: []
+              forecast: weatherData?.forecast || []
             }}
           />
         );
