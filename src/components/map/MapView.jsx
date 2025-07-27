@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { COORDINATES } from '../../config/constants';
+import { fetchTrafficCameras } from '../../services/trafficCameraService';
 
 // Fix default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -28,6 +29,22 @@ const webcamIcon = L.divIcon({
   iconAnchor: [16, 32],
 });
 
+// Traffic camera icon (smaller, distinctive)
+const trafficCameraIcon = L.divIcon({
+  html: '<div class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md border border-white">🚗</div>',
+  className: 'custom-div-icon',
+  iconSize: [24, 24],
+  iconAnchor: [12, 24],
+});
+
+// Featured traffic camera icon (larger for important locations)
+const featuredTrafficIcon = L.divIcon({
+  html: '<div class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">🚗</div>',
+  className: 'custom-div-icon',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+});
+
 // Hwa Chong International School icon
 const schoolIcon = L.divIcon({
   html: '<div class="bg-purple-600 text-white rounded-lg w-10 h-10 flex items-center justify-center text-lg font-bold shadow-lg border-2 border-white">🏫</div>',
@@ -37,11 +54,49 @@ const schoolIcon = L.divIcon({
 });
 
 const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', regionConfig = null, className = '' }) => {
+  const [trafficCameras, setTrafficCameras] = useState([]);
+  const [isLoadingTraffic, setIsLoadingTraffic] = useState(true);
+  const [trafficError, setTrafficError] = useState(null);
+
+  // Featured camera IDs (주요 지점)
+  const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
+
+  // Load traffic cameras on component mount
+  useEffect(() => {
+    const loadTrafficCameras = async () => {
+      try {
+        setIsLoadingTraffic(true);
+        setTrafficError(null);
+        
+        const result = await fetchTrafficCameras({
+          cacheTTL: 60000, // 1 minute cache
+          timeout: 10000, // 10 second timeout
+        });
+        
+        console.log(`🚗 Loaded ${result.cameras.length} traffic cameras for map display`);
+        setTrafficCameras(result.cameras);
+      } catch (error) {
+        console.error('Failed to load traffic cameras for map:', error);
+        setTrafficError(error.message);
+      } finally {
+        setIsLoadingTraffic(false);
+      }
+    };
+
+    loadTrafficCameras();
+
+    // Auto-refresh every 3 minutes
+    const interval = setInterval(loadTrafficCameras, 3 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   console.log('🗺️ MapView: Rendering with data:', {
     weatherData: weatherData ? 'present' : 'missing',
     weatherLocations: weatherData?.locations?.length || 0,
     webcamData: webcamData ? 'present' : 'missing',
     webcamCaptures: webcamData?.captures?.length || 0,
+    trafficCameras: trafficCameras.length,
+    isLoadingTraffic,
   });
 
   return (
@@ -79,7 +134,76 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             )
           ))}
 
-          {/* Webcam markers */}
+          {/* Traffic camera markers (90개 실시간 교통 카메라) */}
+          {trafficCameras.map((camera) => {
+            const isFeatured = featuredCameraIds.includes(camera.id);
+            return (
+              <Marker
+                key={`traffic-${camera.id}`}
+                position={[camera.location.latitude, camera.location.longitude]}
+                icon={isFeatured ? featuredTrafficIcon : trafficCameraIcon}
+              >
+                <Popup>
+                  <div className="p-3 min-w-64">
+                    <h3 className="font-bold text-lg text-gray-800 mb-2">
+                      🚗 {camera.name}
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Camera ID:</span>
+                        <span className="text-blue-600">{camera.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Area:</span>
+                        <span className="text-green-600">{camera.area}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Quality:</span>
+                        <span className={`font-bold ${camera.quality === 'HD' ? 'text-green-600' : 'text-orange-600'}`}>
+                          {camera.quality}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Coordinates:</span>
+                        <span className="text-gray-600 text-xs">
+                          {camera.location.latitude.toFixed(4)}, {camera.location.longitude.toFixed(4)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* 실시간 이미지 표시 */}
+                    {camera.image?.url && (
+                      <div className="mt-3">
+                        <img 
+                          src={camera.image.url} 
+                          alt={`${camera.name} 실시간 교통 상황`}
+                          className="w-full h-32 object-cover rounded border border-gray-200"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                        <div className="hidden bg-gray-100 w-full h-32 flex items-center justify-center rounded border border-gray-200">
+                          <span className="text-gray-500 text-sm">이미지 로딩 실패</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          🔴 LIVE • 업데이트: {new Date(camera.timestamp).toLocaleTimeString('ko-KR')}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {isFeatured && (
+                      <div className="mt-2 bg-red-50 px-2 py-1 rounded text-xs text-red-700 font-medium">
+                        ⭐ 주요 교통 지점
+                      </div>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
+          {/* Webcam markers (기존 웹캠 데이터, 참고용) */}
           {webcamData?.captures?.map((webcam) => (
             webcam.coordinates && (
               <Marker
@@ -125,25 +249,57 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
         </MapContainer>
       </div>
 
-      {/* Map legend */}
+      {/* Enhanced Map legend with traffic camera info */}
       <div className="p-4 border-t bg-gray-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-sm flex-wrap">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-purple-600 rounded-sm border border-white shadow-sm"></div>
-              <span className="font-medium">🏫 Hwa Chong School</span>
+        <div className="space-y-3">
+          {/* Main legend */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 text-sm flex-wrap">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-purple-600 rounded-sm border border-white shadow-sm"></div>
+                <span className="font-medium">🏫 Hwa Chong School</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                <span>Weather Stations ({weatherData?.locations?.length || 0})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+                <span>⭐ 주요 교통 카메라</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span>일반 교통 카메라</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-              <span>Weather Stations</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-              <span>Webcam Locations</span>
+            <div className="text-xs text-gray-500 hidden md:block">
+              📍 중심지: Hwa Chong School
             </div>
           </div>
-          <div className="text-xs text-gray-500 hidden md:block">
-            📍 중심지: Hwa Chong School
+
+          {/* Traffic camera status */}
+          <div className="flex items-center justify-between text-sm bg-white rounded px-3 py-2 border border-gray-200">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-gray-700">🚗 실시간 교통 카메라:</span>
+                <span className="font-bold text-green-600">
+                  {isLoadingTraffic ? '로딩중...' : `${trafficCameras.length}개`}
+                </span>
+              </div>
+              {!isLoadingTraffic && trafficCameras.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-green-600 text-xs">🔴 LIVE</span>
+                  <span className="text-gray-500 text-xs">
+                    마지막 업데이트: {new Date().toLocaleTimeString('ko-KR')}
+                  </span>
+                </div>
+              )}
+            </div>
+            {trafficError && (
+              <div className="text-red-500 text-xs">
+                ⚠️ 교통 카메라 로딩 실패
+              </div>
+            )}
           </div>
         </div>
       </div>

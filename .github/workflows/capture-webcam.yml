@@ -53,31 +53,33 @@ jobs:
           mkdir -p public/data/webcam
           mkdir -p public/images/webcam
 
-      - name: Capture webcam images
+      - name: Monitor traffic cameras
         env:
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
-          CAPTURE_MODE: ${{ github.event.inputs.capture_mode || 'standard' }}
-          MAX_CONCURRENT_CAPTURES: '8'
+          CAPTURE_MODE: ${{ github.event.inputs.capture_mode || 'traffic_only' }}
+          TRAFFIC_ONLY_MODE: 'true'
+          MAX_CONCURRENT_CAPTURES: '12'
         run: |
-          echo "📸 Starting webcam capture..."
-          timeout 6m node scripts/capture-webcam.js || {
-            echo "⚠️ Webcam capture failed, creating fallback data"
+          echo "🚗 Starting traffic camera monitoring..."
+          timeout 8m node scripts/capture-webcam.js || {
+            echo "⚠️ Traffic camera monitoring failed, creating fallback data"
             
-            # Create minimal fallback data
+            # Create minimal fallback data for traffic cameras
             FALLBACK_TIME=$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')
             cat > data/webcam/latest.json << EOF
             {
               "timestamp": "$FALLBACK_TIME",
-              "total_cameras": 0,
+              "total_cameras": 90,
               "successful_captures": 0,
               "failed_captures": 0,
               "captures": [],
-              "error": "Service temporarily unavailable - automatic recovery in progress",
+              "error": "Traffic camera service temporarily unavailable - automatic recovery in progress",
               "status": "degraded",
-              "next_attempt": "$(date -u -d '+2 hours' '+%Y-%m-%dT%H:%M:%S.000Z')"
+              "service_type": "traffic_cameras_only",
+              "next_attempt": "$(date -u -d '+3 hours' '+%Y-%m-%dT%H:%M:%S.000Z')"
             }
             EOF
-            echo "📝 Fallback data created"
+            echo "📝 Traffic camera fallback data created"
           }
 
       - name: Verify capture results
@@ -129,12 +131,12 @@ jobs:
               " 2>/dev/null || echo "0/0")
             fi
             
-            git commit -m "chore(webcam): Update webcam images - ${TIMESTAMP}
+            git commit -m "chore(traffic): Update traffic camera data - ${TIMESTAMP}
 
-Singapore webcam capture update:
-- Captures: ${CAPTURE_STATS}
-- Mode: ${{ github.event.inputs.capture_mode || 'standard' }}
-- Schedule: Every 6 hours (30% budget optimized)
+Singapore traffic camera monitoring:
+- Cameras: ${CAPTURE_STATS}
+- Mode: ${{ github.event.inputs.capture_mode || 'traffic_only' }}
+- Schedule: Every 3 hours (traffic-focused)
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
