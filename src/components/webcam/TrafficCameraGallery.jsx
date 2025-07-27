@@ -538,7 +538,15 @@ const TrafficCameraGallery = () => {
           {lastUpdate && (
             <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
               <div className="flex items-center justify-between">
-                <span>마지막 업데이트: {lastUpdate instanceof Date ? lastUpdate.toLocaleString('ko-KR') : getLocalizedString('NO_DATA')}</span>
+                <span>
+                  마지막 업데이트: {
+                    lastUpdate instanceof Date 
+                      ? lastUpdate.toLocaleString('ko-KR')
+                      : typeof lastUpdate === 'string' 
+                        ? lastUpdate
+                        : getLocalizedString('NO_DATA')
+                  }
+                </span>
                 <span className="text-green-600 flex items-center gap-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   실시간
