@@ -79,8 +79,7 @@ function transformLocations(data) {
     rainfall: calculateAverage(data.rainfall?.readings),
   });
 
-  // Primary 스테이션들 우선 처리 (실제 데이터가 있는 스테이션들)
-  const primaryStations = ['S117', 'S50', 'S106']; // Newton, Clementi, Tai Seng
+  const primaryStations = ['S117', 'S50', 'S106'];
   primaryStations.forEach(stationId => {
     const stationData = extractStationData(data, stationId);
     if (stationData) {

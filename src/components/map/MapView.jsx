@@ -53,7 +53,6 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
   const [trafficError, setTrafficError] = useState(null);
 
   const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
-  const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
 
   const getAreaFromCameraId = (cameraId) => {
     const id = cameraId.toString();
