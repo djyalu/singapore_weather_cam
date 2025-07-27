@@ -33,6 +33,20 @@ const App = React.memo(() => {
   const [showMonitoringDashboard, setShowMonitoringDashboard] = React.useState(false);
   const [showPerformanceDashboard, setShowPerformanceDashboard] = React.useState(false);
 
+  // Use custom hooks for cleaner component logic - MUST be called first
+  const {
+    weatherData,
+    webcamData,
+    isInitialLoading,
+    isRefreshing,
+    error,
+    retryCount,
+    refresh,
+    forceRefresh,
+    dataFreshness,
+    reliabilityMetrics,
+  } = useDataLoader(5 * 60 * 1000); // 5 minute refresh interval
+
   // Metrics tracking
   const { trackPageView, trackUserInteraction } = useMetrics();
 
@@ -47,20 +61,6 @@ const App = React.memo(() => {
     trackMemory: true,
     threshold: 20, // Allow slightly longer render time for main app
   });
-
-  // Use custom hooks for cleaner component logic
-  const {
-    weatherData,
-    webcamData,
-    isInitialLoading,
-    isRefreshing,
-    error,
-    retryCount,
-    refresh,
-    forceRefresh,
-    dataFreshness,
-    reliabilityMetrics,
-  } = useDataLoader(5 * 60 * 1000); // 5 minute refresh interval
 
   // Use custom hook for system stats calculation
   const systemStats = useSystemStats(webcamData);
