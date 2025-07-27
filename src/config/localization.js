@@ -25,7 +25,6 @@ export const KOREAN_STRINGS = {
   TEMPERATURE_TREND: '기온 트렌드',
   HUMIDITY_ANALYSIS: '습도 분석', 
   RAINFALL_PREDICTION: '강수량 예측',
-  WEATHER_REFERENCE: 'Bukit Timah 기준',
   
   // Weather Status
   HIGH: '높음',
@@ -133,7 +132,6 @@ export const ENGLISH_STRINGS = {
   TEMPERATURE_TREND: 'Temperature Trend',
   HUMIDITY_ANALYSIS: 'Humidity Analysis',
   RAINFALL_PREDICTION: 'Rainfall Prediction', 
-  WEATHER_REFERENCE: 'Based on Bukit Timah region',
   
   // Weather Status
   HIGH: 'High',
@@ -185,8 +183,8 @@ export const UI_STRINGS = {
   },
   
   APP_SUBTITLE: {
-    ko: 'Enterprise Weather Monitoring System',
-    en: 'Enterprise Weather Monitoring System'
+    ko: '실시간 날씨 모니터링',
+    en: 'Real-time Weather Monitoring'
   },
   
   // Icons & Emojis (language-neutral but centralized)

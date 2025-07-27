@@ -13,10 +13,10 @@ const WeatherDashboard = lazy(() => import('./components/weather/WeatherDashboar
 const WebcamGallery = lazy(() => import('./components/webcam/WebcamGallery'));
 const MapView = lazy(() => import('./components/map/MapView'));
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
+const HwaChongWeatherAnalysis = lazy(() => import('./components/weather/HwaChongWeatherAnalysis'));
 
 /**
- * Main Singapore Weather Cam Application
- * Enterprise-grade weather monitoring with advanced features
+ * Singapore Weather Cam Application
  */
 const App = () => {
   const [activeTab, setActiveTab] = useState(UI_CONFIG.DEFAULT_TAB);
@@ -131,9 +131,15 @@ const App = () => {
       case 'analysis':
         return (
           <div className="space-y-6">
+            {/* CCTV 기반 실시간 날씨 분석 - Hwa Chong 중심 */}
+            <Suspense fallback={<LoadingFallback message="Loading CCTV analysis..." />}>
+              <HwaChongWeatherAnalysis className="mb-6" />
+            </Suspense>
+
+            {/* 기존 센서 기반 분석 */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                {UI_STRINGS.ICONS.ANALYSIS} {getLocalizedString('ANALYSIS')}
+                {UI_STRINGS.ICONS.ANALYSIS} 센서 기반 {getLocalizedString('ANALYSIS')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-blue-50 rounded-lg p-4">
@@ -141,7 +147,7 @@ const App = () => {
                   <p className="text-2xl font-bold text-blue-600">
                     {weatherData?.locations?.[0]?.temperature || '--'}°C
                   </p>
-                  <p className="text-sm text-blue-600">{getLocalizedString('WEATHER_REFERENCE')}</p>
+                  <p className="text-sm text-blue-600">현재 온도</p>
                 </div>
 
                 <div className="bg-green-50 rounded-lg p-4">
@@ -180,7 +186,7 @@ const App = () => {
       
       <AppLayout
         title={`${UI_STRINGS.ICONS.WEATHER} Singapore Weather Cam`}
-        subtitle="Enterprise Weather Monitoring System"
+        subtitle="실시간 날씨 모니터링"
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}

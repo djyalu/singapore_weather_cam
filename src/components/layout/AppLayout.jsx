@@ -5,6 +5,7 @@ import SystemFooter from './SystemFooter';
 import SystemStatus from '../common/SystemStatus';
 import LoadingScreen from '../common/LoadingScreen';
 import ScrollProgress from '../navigation/ScrollProgress';
+import DataSyncGuide from '../common/DataSyncGuide';
 import { useSystemStatus } from "../../contexts/AppDataContextSimple";
 import { usePullToRefresh } from '../../hooks/useTouchGestures';
 
@@ -103,6 +104,17 @@ const AppLayout = React.memo(({ children }) => {
           onRefresh={refresh}
           onForceRefresh={forceRefresh}
         />
+
+        {/* Data Sync Guide - GitHub Actions 주기 및 수동 새로고침 안내 */}
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 pt-4">
+          <DataSyncGuide
+            onRefresh={refresh}
+            onForceRefresh={forceRefresh}
+            isRefreshing={isRefreshing || isPullRefreshing}
+            lastUpdate={lastFetch}
+            className="mb-4"
+          />
+        </div>
 
         {/* Main content area with mobile-optimized spacing */}
         <main

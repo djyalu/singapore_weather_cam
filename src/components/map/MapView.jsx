@@ -116,18 +116,9 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             icon={schoolIcon}
           >
             <Popup>
-              <div className="p-3">
-                <h3 className="font-bold text-purple-800 text-lg mb-2">🏫 Hwa Chong International School</h3>
-                <div className="space-y-1 text-sm">
-                  <p><strong>주소:</strong> 663 Bukit Timah Road, Singapore</p>
-                  <p><strong>중심 좌표:</strong> {COORDINATES.HWA_CHONG_SCHOOL.lat}°N, {COORDINATES.HWA_CHONG_SCHOOL.lng}°E</p>
-                  <p><strong>역할:</strong> 날씨 모니터링 중심점</p>
-                  <div className="mt-3 p-2 bg-purple-50 rounded-lg">
-                    <p className="text-xs text-purple-700">
-                      🎯 이 위치를 중심으로 싱가포르 날씨와 웹캠 정보를 제공합니다.
-                    </p>
-                  </div>
-                </div>
+              <div className="p-2">
+                <h3 className="font-bold text-purple-800">🏫 Hwa Chong School</h3>
+                <p className="text-sm text-gray-600">모니터링 중심점</p>
               </div>
             </Popup>
           </Marker>
@@ -152,7 +143,7 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             </div>
           </div>
           <div className="text-xs text-gray-500 hidden md:block">
-            📍 Monitoring Center: 663 Bukit Timah Road
+            📍 중심지: Hwa Chong School
           </div>
         </div>
       </div>

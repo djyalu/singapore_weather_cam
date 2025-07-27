@@ -2,8 +2,8 @@ name: Capture Webcam Images
 
 on:
   schedule:
-    # Every 3 hours, 30 minutes after weather collection (8 runs/day = 240 runs/month)
-    - cron: '30 */3 * * *'
+    # Every 6 hours, 30 minutes after weather collection (4 runs/day = 120 runs/month)
+    - cron: '30 */6 * * *'
   workflow_dispatch:
     inputs:
       capture_mode:
@@ -134,7 +134,7 @@ jobs:
 Singapore webcam capture update:
 - Captures: ${CAPTURE_STATS}
 - Mode: ${{ github.event.inputs.capture_mode || 'standard' }}
-- Schedule: Every 3 hours (60% budget optimized)
+- Schedule: Every 6 hours (30% budget optimized)
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
