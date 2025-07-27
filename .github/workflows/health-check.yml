@@ -1,9 +1,10 @@
 name: System Health Check
 
 on:
-  schedule:
-    # Run health check once daily (reduced for free tier)
-    - cron: '0 6 * * *'
+  # Temporarily disabled due to YAML syntax issues
+  # schedule:
+  #   # Run health check once daily (reduced for free tier)
+  #   - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       check_type:
@@ -240,20 +241,24 @@ jobs:
             
             // Don't create duplicate issues
             if (issues.data.length === 0) {
+              const healthScore = '${{ steps.health.outputs.health_score }}';
+              const status = '${{ steps.health.outputs.status }}';
+              const healthIssues = '${{ steps.health.outputs.issues }}';
+              
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `🚨 System Health Critical: Score ${{ steps.health.outputs.health_score }}/100`,
+                title: `🚨 System Health Critical: Score ${healthScore}/100`,
                 body: `## Automated Health Check Alert
                 
 The system health check has detected critical issues:
 
-**Health Score**: ${{ steps.health.outputs.health_score }}/100
-**Status**: ${{ steps.health.outputs.status }}
+**Health Score**: ${healthScore}/100
+**Status**: ${status}
 **Time**: ${new Date().toISOString()}
 
 ### Issues Found:
-${{ steps.health.outputs.issues }}
+${healthIssues}
 
 ### Recommended Actions:
 1. Check GitHub Actions workflow runs for failures
