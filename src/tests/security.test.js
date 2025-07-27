@@ -23,12 +23,12 @@ describe('Security Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
       expect(cspMeta).toBeTruthy();
-      
+
       const cspContent = cspMeta?.getAttribute('content');
       expect(cspContent).toContain('default-src');
       expect(cspContent).toContain('script-src');
@@ -40,7 +40,7 @@ describe('Security Compliance Tests', () => {
     test('should restrict script sources', () => {
       const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
       const cspContent = cspMeta?.getAttribute('content') || '';
-      
+
       // Should not allow unsafe-eval or overly permissive script sources
       expect(cspContent).not.toContain("'unsafe-eval'");
       expect(cspContent).not.toContain('*');
@@ -89,7 +89,7 @@ describe('Security Compliance Tests', () => {
       test('should enforce HTTPS for external URLs', () => {
         const httpUrl = 'http://api.data.gov.sg/v1/environment/air-temperature';
         const result = securityValidator.validateApiUrl(httpUrl);
-        
+
         expect(result.isValid).toBe(false);
         expect(result.error).toContain('HTTPS');
       });
@@ -195,7 +195,7 @@ describe('Security Compliance Tests', () => {
     test('should sanitize string inputs', () => {
       const maliciousString = '<script>alert("xss")</script>Hello World';
       const sanitized = securityValidator.sanitizeString(maliciousString);
-      
+
       expect(sanitized).not.toContain('<script>');
       expect(sanitized).not.toContain('</script>');
       expect(sanitized).toContain('Hello World');
@@ -214,7 +214,7 @@ describe('Security Compliance Tests', () => {
       };
 
       const sanitized = securityValidator.sanitizeObjectProperties(maliciousObject);
-      
+
       expect(sanitized.name).toBe('Legitimate Data');
       expect(sanitized.description).not.toContain('<script>');
       expect(sanitized.nested.value).not.toContain('onerror');
@@ -225,7 +225,7 @@ describe('Security Compliance Tests', () => {
   describe('Rate Limiting Tests', () => {
     test('should allow requests within rate limit', () => {
       const clientId = 'test-client-1';
-      
+
       // Make requests within limit
       for (let i = 0; i < 5; i++) {
         const result = securityValidator.checkRateLimit(clientId, 10, 60000);
@@ -237,12 +237,12 @@ describe('Security Compliance Tests', () => {
     test('should block requests exceeding rate limit', () => {
       const clientId = 'test-client-2';
       const maxRequests = 3;
-      
+
       // Exhaust rate limit
       for (let i = 0; i < maxRequests; i++) {
         securityValidator.checkRateLimit(clientId, maxRequests, 60000);
       }
-      
+
       // Next request should be blocked
       const result = securityValidator.checkRateLimit(clientId, maxRequests, 60000);
       expect(result.allowed).toBe(false);
@@ -253,15 +253,15 @@ describe('Security Compliance Tests', () => {
       const clientId = 'test-client-3';
       const maxRequests = 2;
       const windowMs = 100; // Very short window for testing
-      
+
       // Exhaust rate limit
       for (let i = 0; i < maxRequests; i++) {
         securityValidator.checkRateLimit(clientId, maxRequests, windowMs);
       }
-      
+
       // Should be blocked
       expect(securityValidator.checkRateLimit(clientId, maxRequests, windowMs).allowed).toBe(false);
-      
+
       // Wait for window to reset
       return new Promise(resolve => {
         setTimeout(() => {
@@ -321,18 +321,18 @@ describe('Security Compliance Tests', () => {
     test('should not log sensitive information', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       // Simulate an operation that might log data
       securityValidator.validateApiUrl('https://api.data.gov.sg/test?secret=12345');
-      
+
       // Check that no sensitive data appears in logs
       const allLogs = [...consoleSpy.mock.calls, ...consoleErrorSpy.mock.calls];
       const logString = JSON.stringify(allLogs);
-      
+
       expect(logString).not.toContain('secret=12345');
       expect(logString).not.toContain('password');
       expect(logString).not.toContain('token');
-      
+
       consoleSpy.mockRestore();
       consoleErrorSpy.mockRestore();
     });
@@ -356,7 +356,7 @@ describe('Security Compliance Tests', () => {
         render(
           <I18nProvider>
             <App />
-          </I18nProvider>
+          </I18nProvider>,
         );
       }).not.toThrow();
 
@@ -397,16 +397,16 @@ describe('Security Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Find image elements
       const images = document.querySelectorAll('img');
-      
+
       images.forEach(img => {
         // Simulate image load error
         fireEvent.error(img);
-        
+
         // Should not crash and should have fallback
         expect(img.src).toBeTruthy();
       });
@@ -427,7 +427,7 @@ describe('Security Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Should handle missing session data gracefully
@@ -452,7 +452,7 @@ describe('Security Compliance Tests', () => {
   describe('Error Handling Security', () => {
     test('should not expose sensitive error information', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       // Simulate an error that might contain sensitive info
       try {
         throw new Error('Database connection failed: username=admin, password=secret123');
@@ -460,7 +460,7 @@ describe('Security Compliance Tests', () => {
         // Error handling should sanitize the message
         expect(error.message).not.toContain('password=secret123');
       }
-      
+
       consoleSpy.mockRestore();
     });
 
@@ -470,7 +470,7 @@ describe('Security Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Should show user-friendly error instead of technical details
@@ -499,7 +499,7 @@ describe('HTTPS and Secure Context Tests', () => {
     render(
       <I18nProvider>
         <App />
-      </I18nProvider>
+      </I18nProvider>,
     );
 
     expect(window.isSecureContext).toBe(true);
@@ -516,7 +516,7 @@ describe('HTTPS and Secure Context Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
     }).not.toThrow();
   });
@@ -552,7 +552,7 @@ describe('Third-party Integration Security', () => {
     fetch.mockResolvedValueOnce(rateLimitResponse);
 
     const response = await fetch('https://api.data.gov.sg/test');
-    
+
     expect(response.status).toBe(429);
     // Application should handle rate limiting gracefully
   });

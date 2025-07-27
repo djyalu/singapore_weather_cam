@@ -20,7 +20,7 @@ export const useAccessibility = (options = {}) => {
 
   // Detect keyboard usage
   useEffect(() => {
-    if (!enableKeyboardNavigation) return;
+    if (!enableKeyboardNavigation) {return;}
 
     const handleKeyDown = (e) => {
       if (e.key === 'Tab') {
@@ -45,7 +45,7 @@ export const useAccessibility = (options = {}) => {
 
   // Check for reduced motion preference
   useEffect(() => {
-    if (!enableReducedMotion) return;
+    if (!enableReducedMotion) {return;}
 
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setHasReducedMotion(mediaQuery.matches);
@@ -54,7 +54,7 @@ export const useAccessibility = (options = {}) => {
       setHasReducedMotion(e.matches);
       document.documentElement.style.setProperty(
         '--motion-duration',
-        e.matches ? '0.01ms' : '300ms'
+        e.matches ? '0.01ms' : '300ms',
       );
     };
 
@@ -67,7 +67,7 @@ export const useAccessibility = (options = {}) => {
 
   // Focus management
   const manageFocus = useCallback((element, options = {}) => {
-    if (!enableFocusManagement || !element) return;
+    if (!enableFocusManagement || !element) {return;}
 
     const {
       preventScroll = false,
@@ -92,14 +92,14 @@ export const useAccessibility = (options = {}) => {
   // Create focus trap for modals and dialogs
   const createFocusTrap = useCallback((container) => {
     const focusableElements = container.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
 
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
 
     const handleTabKey = (e) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab') {return;}
 
       if (e.shiftKey) {
         if (document.activeElement === firstElement) {
@@ -123,7 +123,7 @@ export const useAccessibility = (options = {}) => {
 
   // Screen reader announcements
   const announce = useCallback((message, priority = 'polite') => {
-    if (!enableScreenReaderSupport || !announceChanges) return;
+    if (!enableScreenReaderSupport || !announceChanges) {return;}
 
     if (!announcementRef.current) {
       // Create announcement container if it doesn't exist
@@ -155,7 +155,7 @@ export const useAccessibility = (options = {}) => {
 
   // Keyboard navigation helpers
   const handleArrowKeys = useCallback((e, items, currentIndex, onSelect) => {
-    if (!enableKeyboardNavigation) return;
+    if (!enableKeyboardNavigation) {return;}
 
     let newIndex = currentIndex;
 
@@ -224,7 +224,7 @@ export const useAccessibility = (options = {}) => {
     // Simple contrast ratio calculation
     const getLuminance = (color) => {
       const rgb = color.match(/\d+/g);
-      if (!rgb) return 0;
+      if (!rgb) {return 0;}
 
       const [r, g, b] = rgb.map(c => {
         c = parseInt(c) / 255;
@@ -308,11 +308,11 @@ export const useFocusTrap = (isActive = false) => {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    if (!isActive || !containerRef.current) return;
+    if (!isActive || !containerRef.current) {return;}
 
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
 
     const firstElement = focusableElements[0];
@@ -324,7 +324,7 @@ export const useFocusTrap = (isActive = false) => {
     }
 
     const handleTabKey = (e) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab') {return;}
 
       if (e.shiftKey) {
         if (document.activeElement === firstElement) {

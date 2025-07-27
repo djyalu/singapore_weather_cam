@@ -53,14 +53,14 @@ const translations = {
     'nav.webcam': 'Webcam',
     'nav.traffic': 'Traffic',
     'nav.analysis': 'Analysis',
-    
+
     // Header
     'header.title': 'Singapore Weather Cam',
     'header.subtitle': 'Real-time weather information and webcam feeds',
     'header.lastUpdate': 'Last updated',
     'header.refresh': 'Refresh',
     'header.settings': 'Settings',
-    
+
     // Weather
     'weather.temperature': 'Temperature',
     'weather.humidity': 'Humidity',
@@ -72,7 +72,7 @@ const translations = {
     'weather.max': 'Max',
     'weather.current': 'Current',
     'weather.forecast': 'Forecast',
-    
+
     // Webcam
     'webcam.title': 'Live Webcam Feeds',
     'webcam.trafficCameras': 'Traffic Cameras',
@@ -81,20 +81,20 @@ const translations = {
     'webcam.lastCaptured': 'Last captured',
     'webcam.noImage': 'No image available',
     'webcam.loading': 'Loading webcam feed...',
-    
+
     // Traffic
     'traffic.conditions': 'Traffic Conditions',
     'traffic.smooth': 'Smooth',
     'traffic.heavy': 'Heavy',
     'traffic.congested': 'Congested',
     'traffic.roadwork': 'Road Work',
-    
+
     // Analysis
     'analysis.title': 'Weather Analysis',
     'analysis.trends': 'Trends',
     'analysis.insights': 'Insights',
     'analysis.aiGenerated': 'AI Generated Analysis',
-    
+
     // Time and Date
     'time.now': 'Now',
     'time.today': 'Today',
@@ -105,7 +105,7 @@ const translations = {
     'time.minutes': 'minutes',
     'time.hours': 'hours',
     'time.days': 'days',
-    
+
     // Status
     'status.online': 'Online',
     'status.offline': 'Offline',
@@ -113,7 +113,7 @@ const translations = {
     'status.error': 'Error',
     'status.success': 'Success',
     'status.warning': 'Warning',
-    
+
     // Actions
     'action.close': 'Close',
     'action.cancel': 'Cancel',
@@ -124,7 +124,7 @@ const translations = {
     'action.view': 'View',
     'action.retry': 'Retry',
     'action.refresh': 'Refresh',
-    
+
     // Accessibility
     'a11y.skipToContent': 'Skip to main content',
     'a11y.menu': 'Main menu',
@@ -132,14 +132,14 @@ const translations = {
     'a11y.closeDialog': 'Close dialog',
     'a11y.expandMenu': 'Expand menu',
     'a11y.collapseMenu': 'Collapse menu',
-    
+
     // Errors
     'error.generic': 'An error occurred',
     'error.network': 'Network error. Please check your connection.',
     'error.timeout': 'Request timeout. Please try again.',
     'error.notFound': 'Data not found',
     'error.serverError': 'Server error. Please try again later.',
-    
+
     // Units
     'units.celsius': '°C',
     'units.fahrenheit': '°F',
@@ -149,7 +149,7 @@ const translations = {
     'units.percent': '%',
     'units.hpa': 'hPa',
   },
-  
+
   ko: {
     // Navigation
     'nav.home': '홈',
@@ -157,14 +157,14 @@ const translations = {
     'nav.webcam': '웹캠',
     'nav.traffic': '교통',
     'nav.analysis': '분석',
-    
+
     // Header
     'header.title': '싱가포르 날씨 캠',
     'header.subtitle': '실시간 날씨 정보와 웹캠 영상',
     'header.lastUpdate': '마지막 업데이트',
     'header.refresh': '새로고침',
     'header.settings': '설정',
-    
+
     // Weather
     'weather.temperature': '기온',
     'weather.humidity': '습도',
@@ -176,7 +176,7 @@ const translations = {
     'weather.max': '최고',
     'weather.current': '현재',
     'weather.forecast': '예보',
-    
+
     // Webcam
     'webcam.title': '실시간 웹캠',
     'webcam.trafficCameras': '교통 카메라',
@@ -185,20 +185,20 @@ const translations = {
     'webcam.lastCaptured': '마지막 촬영',
     'webcam.noImage': '이미지 없음',
     'webcam.loading': '웹캠 영상 로딩 중...',
-    
+
     // Traffic
     'traffic.conditions': '교통 상황',
     'traffic.smooth': '원활',
     'traffic.heavy': '혼잡',
     'traffic.congested': '정체',
     'traffic.roadwork': '도로공사',
-    
+
     // Analysis
     'analysis.title': '날씨 분석',
     'analysis.trends': '동향',
     'analysis.insights': '인사이트',
     'analysis.aiGenerated': 'AI 생성 분석',
-    
+
     // Time and Date
     'time.now': '지금',
     'time.today': '오늘',
@@ -209,7 +209,7 @@ const translations = {
     'time.minutes': '분',
     'time.hours': '시간',
     'time.days': '일',
-    
+
     // Status
     'status.online': '온라인',
     'status.offline': '오프라인',
@@ -217,7 +217,7 @@ const translations = {
     'status.error': '오류',
     'status.success': '성공',
     'status.warning': '경고',
-    
+
     // Actions
     'action.close': '닫기',
     'action.cancel': '취소',
@@ -228,7 +228,7 @@ const translations = {
     'action.view': '보기',
     'action.retry': '다시 시도',
     'action.refresh': '새로고침',
-    
+
     // Accessibility
     'a11y.skipToContent': '본문으로 건너뛰기',
     'a11y.menu': '메인 메뉴',
@@ -236,14 +236,14 @@ const translations = {
     'a11y.closeDialog': '대화상자 닫기',
     'a11y.expandMenu': '메뉴 펼치기',
     'a11y.collapseMenu': '메뉴 접기',
-    
+
     // Errors
     'error.generic': '오류가 발생했습니다',
     'error.network': '네트워크 오류입니다. 연결을 확인해주세요.',
     'error.timeout': '요청 시간이 초과되었습니다. 다시 시도해주세요.',
     'error.notFound': '데이터를 찾을 수 없습니다',
     'error.serverError': '서버 오류입니다. 나중에 다시 시도해주세요.',
-    
+
     // Units
     'units.celsius': '°C',
     'units.fahrenheit': '°F',
@@ -287,7 +287,7 @@ export const I18nProvider = ({ children, defaultLanguage = 'ko' }) => {
   // Translation function
   const t = useCallback((key, params = {}) => {
     const translation = translations[currentLanguage]?.[key] || translations.en[key] || key;
-    
+
     // Simple parameter replacement
     return Object.keys(params).reduce((str, param) => {
       return str.replace(new RegExp(`{${param}}`, 'g'), params[param]);
@@ -302,14 +302,14 @@ export const I18nProvider = ({ children, defaultLanguage = 'ko' }) => {
     }
 
     setIsLoading(true);
-    
+
     try {
       // In a real app, you might load translations from a server here
       await new Promise(resolve => setTimeout(resolve, 100)); // Simulate async loading
-      
+
       setCurrentLanguage(languageCode);
       localStorage.setItem('preferred-language', languageCode);
-      
+
       // Announce language change for screen readers
       const announcement = t('status.success') + ': ' + SUPPORTED_LANGUAGES[languageCode].nativeName;
       const announcer = document.createElement('div');
@@ -317,11 +317,11 @@ export const I18nProvider = ({ children, defaultLanguage = 'ko' }) => {
       announcer.className = 'sr-only';
       announcer.textContent = announcement;
       document.body.appendChild(announcer);
-      
+
       setTimeout(() => {
         document.body.removeChild(announcer);
       }, 1000);
-      
+
     } catch (error) {
       console.error('Failed to change language:', error);
     } finally {
@@ -346,7 +346,7 @@ export const I18nProvider = ({ children, defaultLanguage = 'ko' }) => {
     const now = new Date();
     const target = new Date(date);
     const diffInSeconds = Math.floor((now - target) / 1000);
-    
+
     if (diffInSeconds < 60) {
       return t('time.now');
     } else if (diffInSeconds < 3600) {
@@ -377,20 +377,20 @@ export const I18nProvider = ({ children, defaultLanguage = 'ko' }) => {
     currentLanguageInfo: SUPPORTED_LANGUAGES[currentLanguage],
     isLoading,
     isRTL: isRTL(),
-    
+
     // Translation functions
     t,
     translate: t, // alias
-    
+
     // Language management
     changeLanguage,
     getAvailableLanguages,
-    
+
     // Formatting functions
     formatDate,
     formatNumber,
     formatRelativeTime,
-    
+
     // Utilities
     isRTL,
     getSupportedLanguages: () => SUPPORTED_LANGUAGES,
@@ -429,12 +429,12 @@ export const withI18n = (Component) => {
  */
 export const Trans = ({ i18nKey, values = {}, children }) => {
   const { t } = useI18n();
-  
+
   if (children) {
     // For complex translations with nested components
     return children;
   }
-  
+
   return t(i18nKey, values);
 };
 

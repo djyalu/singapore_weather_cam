@@ -32,8 +32,8 @@ const ProgressiveDisclosure = ({
   }, [children, isExpanded]);
 
   const handleToggle = () => {
-    if (disabled) return;
-    
+    if (disabled) {return;}
+
     const newState = !isExpanded;
     setIsExpanded(newState);
     onToggle?.(newState);
@@ -71,12 +71,12 @@ const ProgressiveDisclosure = ({
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           {/* Optional icon */}
           {Icon && (
-            <Icon 
-              className="w-5 h-5 text-gray-500 flex-shrink-0" 
-              aria-hidden="true" 
+            <Icon
+              className="w-5 h-5 text-gray-500 flex-shrink-0"
+              aria-hidden="true"
             />
           )}
-          
+
           {/* Title and summary */}
           <div className="flex-1 min-w-0">
             <div className={`${levelClasses[level]} flex items-center space-x-2`}>
@@ -87,7 +87,7 @@ const ProgressiveDisclosure = ({
                 </span>
               )}
             </div>
-            
+
             {/* Summary text when collapsed */}
             {summary && !isExpanded && (
               <p className="mt-1 text-sm text-gray-600 line-clamp-2">
@@ -101,12 +101,12 @@ const ProgressiveDisclosure = ({
         <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
           {helpText && (
             <div className="relative group">
-              <InformationCircleIcon 
+              <InformationCircleIcon
                 className="w-5 h-5 text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label="Help information"
               />
               <div className="
-                absolute right-0 bottom-full mb-2 w-64 p-3 
+                absolute right-0 bottom-full mb-2 w-64 p-3
                 bg-gray-900 text-white text-sm rounded-lg
                 opacity-0 invisible group-hover:opacity-100 group-hover:visible
                 transition-all duration-200 z-10
@@ -117,15 +117,15 @@ const ProgressiveDisclosure = ({
               </div>
             </div>
           )}
-          
+
           {isExpanded ? (
-            <ChevronUpIcon 
-              className="w-5 h-5 text-gray-500 transition-transform duration-200" 
+            <ChevronUpIcon
+              className="w-5 h-5 text-gray-500 transition-transform duration-200"
               aria-hidden="true"
             />
           ) : (
-            <ChevronDownIcon 
-              className="w-5 h-5 text-gray-500 transition-transform duration-200" 
+            <ChevronDownIcon
+              className="w-5 h-5 text-gray-500 transition-transform duration-200"
               aria-hidden="true"
             />
           )}
@@ -141,7 +141,7 @@ const ProgressiveDisclosure = ({
         }}
         aria-hidden={!isExpanded}
       >
-        <div 
+        <div
           ref={contentRef}
           className={`
             px-4 pb-4
@@ -159,11 +159,11 @@ const ProgressiveDisclosure = ({
 /**
  * Disclosure Group for managing multiple related disclosures
  */
-export const DisclosureGroup = ({ 
-  children, 
+export const DisclosureGroup = ({
+  children,
   allowMultiple = true,
   className = '',
-  spacing = 'normal' // tight, normal, relaxed
+  spacing = 'normal', // tight, normal, relaxed
 }) => {
   const [openItems, setOpenItems] = useState(new Set());
 
@@ -209,12 +209,12 @@ export const DisclosureGroup = ({
 /**
  * Contextual Help Tooltip Component
  */
-export const ContextualHelp = ({ 
-  content, 
+export const ContextualHelp = ({
+  content,
   position = 'top',
   trigger = 'hover', // hover, click, focus
   className = '',
-  children 
+  children,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const triggerRef = useRef(null);
@@ -296,7 +296,7 @@ export const OnboardingTooltip = ({
       const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
       let top, left;
-      
+
       switch (position) {
         case 'bottom':
           top = rect.bottom + scrollTop + 10;
@@ -323,10 +323,10 @@ export const OnboardingTooltip = ({
     }
   }, [isVisible, targetRef, position]);
 
-  if (!isVisible) return null;
+  if (!isVisible) {return null;}
 
   return (
-    <div 
+    <div
       className="fixed z-50 max-w-sm bg-white rounded-lg shadow-xl border border-gray-200 p-4"
       style={{
         top: tooltipPosition.top,

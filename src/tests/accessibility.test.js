@@ -54,7 +54,7 @@ describe('Accessibility Compliance Tests', () => {
       const { container } = render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       const results = await axe(container);
@@ -65,7 +65,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       const headings = screen.getAllByRole('heading');
@@ -81,7 +81,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Test keyboard navigation
@@ -94,7 +94,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       const skipLink = screen.getByText('Skip to main content');
@@ -106,7 +106,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Check for main landmark
@@ -121,9 +121,9 @@ describe('Accessibility Compliance Tests', () => {
       const buttons = screen.getAllByRole('button');
       buttons.forEach(button => {
         expect(
-          button.getAttribute('aria-label') || 
-          button.textContent || 
-          button.getAttribute('title')
+          button.getAttribute('aria-label') ||
+          button.textContent ||
+          button.getAttribute('title'),
         ).toBeTruthy();
       });
     });
@@ -132,7 +132,7 @@ describe('Accessibility Compliance Tests', () => {
       const { container } = render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // This would require a more sophisticated color contrast checker
@@ -157,13 +157,13 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Check that reduced motion classes are applied
       const animatedElements = document.querySelectorAll('.animate-spin, .animate-pulse');
       animatedElements.forEach(element => {
-        expect(element.classList.contains('motion-reduce:animate-none') || 
+        expect(element.classList.contains('motion-reduce:animate-none') ||
                element.style.animationDuration === '0.01ms').toBeTruthy();
       });
     });
@@ -188,7 +188,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       const buttons = screen.getAllByRole('button');
@@ -203,12 +203,12 @@ describe('Accessibility Compliance Tests', () => {
       const { container } = render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Test touch events
       const touchableElement = container.querySelector('[data-testid="swipeable"]') || container.firstChild;
-      
+
       fireEvent.touchStart(touchableElement, {
         touches: [{ clientX: 100, clientY: 100 }],
       });
@@ -229,7 +229,7 @@ describe('Accessibility Compliance Tests', () => {
       const { container } = render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       const pullableElement = container.firstChild;
@@ -257,7 +257,7 @@ describe('Accessibility Compliance Tests', () => {
       const { container } = render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Check for responsive classes
@@ -269,7 +269,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       const inputs = screen.queryAllByRole('textbox');
@@ -288,7 +288,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       const focusableElements = screen.getAllByRole('button')
@@ -311,12 +311,12 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Find menu items (this would need specific menu implementation)
       const menuItems = screen.queryAllByRole('menuitem');
-      
+
       if (menuItems.length > 1) {
         menuItems[0].focus();
         await user.keyboard('[ArrowDown]');
@@ -332,16 +332,16 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Find and open a modal (this would need specific modal implementation)
       const modalTrigger = screen.queryByRole('button', { name: /open|view|show/i });
-      
+
       if (modalTrigger) {
         await user.click(modalTrigger);
         await user.keyboard('[Escape]');
-        
+
         // Check that modal is closed (implementation specific)
         expect(true).toBeTruthy();
       }
@@ -353,7 +353,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Check for ARIA live regions
@@ -365,16 +365,16 @@ describe('Accessibility Compliance Tests', () => {
       const { container } = render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Look for loading indicators with proper announcements
       const loadingElements = container.querySelectorAll('[aria-busy="true"], [role="progressbar"]');
       loadingElements.forEach(element => {
         expect(
-          element.getAttribute('aria-label') || 
+          element.getAttribute('aria-label') ||
           element.textContent ||
-          element.getAttribute('aria-describedby')
+          element.getAttribute('aria-describedby'),
         ).toBeTruthy();
       });
     });
@@ -383,7 +383,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider>
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Check for error messages with proper announcements
@@ -401,7 +401,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider defaultLanguage="en">
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // Check that document language is set
@@ -412,7 +412,7 @@ describe('Accessibility Compliance Tests', () => {
       render(
         <I18nProvider defaultLanguage="ar">
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // For RTL languages, check direction
@@ -425,7 +425,7 @@ describe('Accessibility Compliance Tests', () => {
       const { rerender } = render(
         <I18nProvider defaultLanguage="en">
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       // This would require checking specific formatted content
@@ -434,7 +434,7 @@ describe('Accessibility Compliance Tests', () => {
       rerender(
         <I18nProvider defaultLanguage="ko">
           <App />
-        </I18nProvider>
+        </I18nProvider>,
       );
 
       expect(document.documentElement.lang).toBeTruthy();
@@ -445,11 +445,11 @@ describe('Accessibility Compliance Tests', () => {
 describe('Performance and UX Tests', () => {
   test('should load within acceptable time limits', async () => {
     const startTime = performance.now();
-    
+
     render(
       <I18nProvider>
         <App />
-      </I18nProvider>
+      </I18nProvider>,
     );
 
     const endTime = performance.now();
@@ -469,7 +469,7 @@ describe('Performance and UX Tests', () => {
     render(
       <I18nProvider>
         <App />
-      </I18nProvider>
+      </I18nProvider>,
     );
 
     // Check for offline indicators or fallback content
@@ -485,21 +485,21 @@ describe('Performance and UX Tests', () => {
     render(
       <I18nProvider>
         <App />
-      </I18nProvider>
+      </I18nProvider>,
     );
 
     const interactiveElements = screen.getAllByRole('button');
-    
+
     if (interactiveElements.length > 0) {
       const button = interactiveElements[0];
-      
+
       // Check for hover/focus states
       await user.hover(button);
       // Should have visual feedback (implementation specific)
-      
+
       await user.click(button);
       // Should provide click feedback (implementation specific)
-      
+
       expect(true).toBeTruthy();
     }
   });
@@ -509,7 +509,7 @@ describe('Performance and UX Tests', () => {
 describe('useAccessibility Hook Tests', () => {
   test('should provide accessibility utilities', () => {
     let hookResult;
-    
+
     function TestComponent() {
       hookResult = useAccessibility();
       return <div>Test</div>;
@@ -527,7 +527,7 @@ describe('useAccessibility Hook Tests', () => {
   test('should detect keyboard users', async () => {
     const user = userEvent.setup();
     let hookResult;
-    
+
     function TestComponent() {
       hookResult = useAccessibility();
       return <button>Test Button</button>;
@@ -540,7 +540,7 @@ describe('useAccessibility Hook Tests', () => {
 
     // After tabbing, should detect keyboard usage
     await user.tab();
-    
+
     // Note: This test would need more sophisticated state management
     // to properly test the keyboard detection
     expect(true).toBeTruthy();

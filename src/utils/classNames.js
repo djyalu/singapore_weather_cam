@@ -16,7 +16,7 @@ export function responsive(mobile, tablet, desktop) {
   return cn(
     mobile,
     tablet && `sm:${tablet}`,
-    desktop && `lg:${desktop}`
+    desktop && `lg:${desktop}`,
   );
 }
 
@@ -29,7 +29,7 @@ export function focusRing(color = 'blue-500') {
     'focus-visible:ring-2',
     `focus-visible:ring-${color}`,
     'focus-visible:ring-offset-2',
-    'focus-visible:ring-offset-white'
+    'focus-visible:ring-offset-white',
   );
 }
 
@@ -42,7 +42,7 @@ export function touchTarget(size = 'md') {
     md: 'min-h-[44px] min-w-[44px]',
     lg: 'min-h-[48px] min-w-[48px]',
   };
-  
+
   return cn(sizes[size], 'touch-manipulation');
 }
 
@@ -57,7 +57,7 @@ export function safeArea(sides = 'all') {
     left: 'pl-[env(safe-area-inset-left)]',
     right: 'pr-[env(safe-area-inset-right)]',
   };
-  
+
   return sideClasses[sides] || sideClasses.all;
 }
 
@@ -65,16 +65,16 @@ export function safeArea(sides = 'all') {
  * Generate animation classes with reduced motion support
  */
 export function animation(name, options = {}) {
-  const { 
+  const {
     duration = '200ms',
     delay = '0ms',
     timing = 'ease-in-out',
-    respectMotion = true 
+    respectMotion = true,
   } = options;
-  
+
   return cn(
     `animate-${name}`,
-    respectMotion && 'motion-safe:animate-none motion-reduce:animate-none'
+    respectMotion && 'motion-safe:animate-none motion-reduce:animate-none',
   );
 }
 

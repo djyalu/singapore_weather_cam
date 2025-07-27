@@ -32,7 +32,7 @@ const AppLayout = React.memo(({ children }) => {
     async () => {
       setIsPullRefreshing(true);
       setShowRefreshFeedback(true);
-      
+
       try {
         await forceRefresh();
         // Show success feedback
@@ -50,7 +50,7 @@ const AppLayout = React.memo(({ children }) => {
       threshold: 80,
       resistance: 2.5,
       enabled: !isRefreshing && !isPullRefreshing,
-    }
+    },
   );
 
   // Set container reference for pull-to-refresh
@@ -62,7 +62,7 @@ const AppLayout = React.memo(({ children }) => {
 
   return (
     <ErrorBoundary>
-      <div 
+      <div
         ref={containerRef}
         className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 transition-transform duration-300 ease-out"
         {...pullToRefreshProps}
@@ -105,10 +105,10 @@ const AppLayout = React.memo(({ children }) => {
         />
 
         {/* Main content area with mobile-optimized spacing */}
-        <main 
-          id="main" 
-          className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-8 safe-bottom" 
-          role="main" 
+        <main
+          id="main"
+          className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-8 safe-bottom"
+          role="main"
           tabIndex="-1"
         >
           <Suspense fallback={<LoadingScreen />}>

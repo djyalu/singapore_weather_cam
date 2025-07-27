@@ -31,11 +31,11 @@ const MapSection = React.memo(() => {
         </p>
       </div>
 
-      <Suspense 
+      <Suspense
         fallback={
           <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-8 sm:p-12 text-center" aria-live="polite">
-            <div 
-              className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600 mx-auto" 
+            <div
+              className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600 mx-auto"
               aria-hidden="true"
             />
             <p className="mt-4 sm:mt-6 text-gray-600 text-base sm:text-lg">
@@ -44,9 +44,9 @@ const MapSection = React.memo(() => {
           </div>
         }
       >
-        <RegionalMapView 
-          weatherData={weatherData} 
-          webcamData={webcamData} 
+        <RegionalMapView
+          weatherData={weatherData}
+          webcamData={webcamData}
         />
       </Suspense>
     </section>

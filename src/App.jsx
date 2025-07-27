@@ -77,10 +77,10 @@ const AppContent = React.memo(() => {
       <AnalysisSection />
       <WebcamSection />
       <TrafficSection />
-      
+
       {/* Admin panels and monitoring */}
       <AdminPanels />
-      
+
       {/* Performance optimization component */}
       <PerformanceOptimizer />
     </AppLayout>

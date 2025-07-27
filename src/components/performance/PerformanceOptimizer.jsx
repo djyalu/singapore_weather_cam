@@ -28,14 +28,14 @@ const PerformanceOptimizer = React.memo(() => {
     if ('memory' in performance) {
       const memInfo = performance.memory;
       const usage = memInfo.usedJSHeapSize / memInfo.totalJSHeapSize;
-      
+
       if (usage > 0.85) {
         console.warn('🚨 High memory usage detected:', {
           used: Math.round(memInfo.usedJSHeapSize / 1048576) + ' MB',
           total: Math.round(memInfo.totalJSHeapSize / 1048576) + ' MB',
-          usage: Math.round(usage * 100) + '%'
+          usage: Math.round(usage * 100) + '%',
         });
-        
+
         // Clear image caches if memory is high
         if ('caches' in window) {
           caches.keys().then(cacheNames => {
@@ -52,17 +52,17 @@ const PerformanceOptimizer = React.memo(() => {
 
   // Intersection Observer for visibility-based optimizations
   const setupIntersectionObserver = useCallback(() => {
-    if (!('IntersectionObserver' in window)) return;
+    if (!('IntersectionObserver' in window)) {return;}
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const element = entry.target;
-          
+
           if (entry.isIntersecting) {
             // Element is visible - enable full functionality
             element.classList.remove('performance-optimized');
-            
+
             // Lazy load images
             const images = element.querySelectorAll('img[data-src]');
             images.forEach(img => {
@@ -74,23 +74,23 @@ const PerformanceOptimizer = React.memo(() => {
           } else {
             // Element is not visible - apply optimizations
             element.classList.add('performance-optimized');
-            
+
             // Pause animations and videos
             const videos = element.querySelectorAll('video');
             videos.forEach(video => video.pause());
-            
+
             const canvases = element.querySelectorAll('canvas');
             canvases.forEach(canvas => {
               const ctx = canvas.getContext('2d');
-              if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+              if (ctx) {ctx.clearRect(0, 0, canvas.width, canvas.height);}
             });
           }
         });
       },
       {
         threshold: [0, 0.1, 0.5, 1.0],
-        rootMargin: '50px'
-      }
+        rootMargin: '50px',
+      },
     );
 
     // Observe all major sections
@@ -103,19 +103,19 @@ const PerformanceOptimizer = React.memo(() => {
   // Image optimization
   const optimizeImages = useCallback(() => {
     const images = document.querySelectorAll('img:not([data-optimized])');
-    
+
     images.forEach(img => {
       // Add loading="lazy" to images
       if (!img.hasAttribute('loading')) {
         img.setAttribute('loading', 'lazy');
       }
-      
+
       // Add performance-optimized decoding
       img.setAttribute('decoding', 'async');
-      
+
       // Mark as optimized
       img.setAttribute('data-optimized', 'true');
-      
+
       // Error handling for broken images
       img.onerror = () => {
         img.style.display = 'none';
@@ -128,21 +128,21 @@ const PerformanceOptimizer = React.memo(() => {
   const monitorPerformance = useCallback(() => {
     let frameCount = 0;
     let lastTime = performance.now();
-    
+
     const measureFPS = () => {
       frameCount++;
       const currentTime = performance.now();
-      
+
       if (currentTime >= lastTime + 1000) {
         const fps = Math.round(frameCount * 1000 / (currentTime - lastTime));
-        
+
         if (fps < 30) {
           // Low FPS detected - apply throttling
           console.warn('🐌 Low FPS detected:', fps);
-          
+
           // Reduce animation frequency
           document.documentElement.style.setProperty('--animation-duration', '2s');
-          
+
           // Disable some visual effects
           document.body.classList.add('performance-mode');
         } else if (fps > 50) {
@@ -150,14 +150,14 @@ const PerformanceOptimizer = React.memo(() => {
           document.documentElement.style.removeProperty('--animation-duration');
           document.body.classList.remove('performance-mode');
         }
-        
+
         frameCount = 0;
         lastTime = currentTime;
       }
-      
+
       requestAnimationFrame(measureFPS);
     };
-    
+
     requestAnimationFrame(measureFPS);
   }, []);
 
@@ -181,7 +181,7 @@ const PerformanceOptimizer = React.memo(() => {
               if (node.tagName === 'IMG' && !node.hasAttribute('data-optimized')) {
                 images.push(node);
               }
-              
+
               images.forEach(img => {
                 img.setAttribute('loading', 'lazy');
                 img.setAttribute('decoding', 'async');
@@ -195,7 +195,7 @@ const PerformanceOptimizer = React.memo(() => {
 
     imageObserver.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
 
     // Page visibility API for aggressive optimization
@@ -203,13 +203,13 @@ const PerformanceOptimizer = React.memo(() => {
       if (document.hidden) {
         // Page is hidden - aggressive optimization
         performanceRef.current.isVisible = false;
-        
+
         // Pause all videos
         document.querySelectorAll('video').forEach(video => video.pause());
-        
+
         // Stop all animations
         document.body.classList.add('page-hidden');
-        
+
         // Clear unnecessary intervals
         optimizeMemory();
       } else {
@@ -224,11 +224,11 @@ const PerformanceOptimizer = React.memo(() => {
     // Cleanup
     return () => {
       clearInterval(memoryInterval);
-      
+
       if (performanceRef.current.intersectionObserver) {
         performanceRef.current.intersectionObserver.disconnect();
       }
-      
+
       imageObserver.disconnect();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };

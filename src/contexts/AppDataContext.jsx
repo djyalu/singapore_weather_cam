@@ -73,20 +73,20 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
       webcam: webcamData,
       systemStats,
     },
-    
+
     // Loading states
     loading: {
       isInitialLoading,
       isRefreshing,
       loading,
     },
-    
+
     // Error handling
     error: {
       error,
       retryCount,
     },
-    
+
     // Data freshness and quality
     freshness: {
       lastFetch,
@@ -94,7 +94,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
       reliabilityMetrics,
       getReliabilityReport,
     },
-    
+
     // Actions
     actions: {
       refresh,
@@ -102,7 +102,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
       trackPageView,
       trackUserInteraction,
     },
-    
+
     // PWA functionality
     pwa: {
       isOnline,
@@ -112,7 +112,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
       updateServiceWorker,
       requestNotificationPermission,
     },
-    
+
     // Performance metadata
     performance: {
       contextPerformance,
@@ -158,16 +158,16 @@ AppDataProvider.displayName = 'AppDataProvider';
  */
 export const useAppData = (selector) => {
   const context = useContext(AppDataContext);
-  
+
   if (!context) {
     throw new Error('useAppData must be used within AppDataProvider');
   }
-  
+
   // If no selector provided, return full context
   if (!selector) {
     return context;
   }
-  
+
   // Apply selector for performance optimization
   return useMemo(() => selector(context), [context, selector]);
 };

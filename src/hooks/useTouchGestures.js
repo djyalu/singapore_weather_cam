@@ -72,7 +72,7 @@ export const useTouchGestures = (options = {}) => {
     if (onDoubleTap && e.touches.length === 1) {
       const now = Date.now();
       const timeSinceLastTap = now - lastTapRef.current;
-      
+
       if (timeSinceLastTap < doubleTapDelay && timeSinceLastTap > 0) {
         onDoubleTap({
           x: touch.clientX,
@@ -123,7 +123,7 @@ export const useTouchGestures = (options = {}) => {
       longPressTimerRef.current = null;
     }
 
-    if (!touchStartRef.current || touchCountRef.current > 1) return;
+    if (!touchStartRef.current || touchCountRef.current > 1) {return;}
 
     const touch = e.changedTouches[0];
     touchEndRef.current = {
@@ -237,8 +237,8 @@ export const usePullToRefresh = (onRefresh, options = {}) => {
   const containerRef = useRef(null);
 
   const handleTouchStart = useCallback((e) => {
-    if (!enabled || window.scrollY > 0) return;
-    
+    if (!enabled || window.scrollY > 0) {return;}
+
     const touch = e.touches[0];
     pullStartRef.current = {
       y: touch.clientY,
@@ -247,7 +247,7 @@ export const usePullToRefresh = (onRefresh, options = {}) => {
   }, [enabled]);
 
   const handleTouchMove = useCallback((e) => {
-    if (!enabled || !pullStartRef.current || window.scrollY > 0) return;
+    if (!enabled || !pullStartRef.current || window.scrollY > 0) {return;}
 
     const touch = e.touches[0];
     const deltaY = touch.clientY - pullStartRef.current.y;
@@ -273,7 +273,7 @@ export const usePullToRefresh = (onRefresh, options = {}) => {
   }, [enabled, threshold, resistance]);
 
   const handleTouchEnd = useCallback(() => {
-    if (!enabled || !isPullingRef.current) return;
+    if (!enabled || !isPullingRef.current) {return;}
 
     const shouldRefresh = pullDistanceRef.current >= threshold;
 
@@ -282,7 +282,7 @@ export const usePullToRefresh = (onRefresh, options = {}) => {
       containerRef.current.style.transform = '';
       containerRef.current.style.transition = 'transform 0.3s ease';
     }
-    
+
     document.body.classList.remove('pull-to-refresh-ready');
 
     // Trigger refresh if threshold met

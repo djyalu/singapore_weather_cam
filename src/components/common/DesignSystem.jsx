@@ -117,24 +117,24 @@ const buttonVariants = cva(
       size: 'md',
       fullWidth: false,
     },
-  }
+  },
 );
 
-export const Button = forwardRef(({ 
-  className, 
-  variant, 
-  size, 
-  fullWidth, 
+export const Button = forwardRef(({
+  className,
+  variant,
+  size,
+  fullWidth,
   loading = false,
-  children, 
-  ...props 
+  children,
+  ...props
 }, ref) => {
   return (
     <button
       className={cn(
         buttonVariants({ variant, size, fullWidth }),
         'button-press touch-feedback',
-        className
+        className,
       )}
       ref={ref}
       disabled={loading || props.disabled}
@@ -195,16 +195,16 @@ const cardVariants = cva(
       padding: 'md',
       interactive: false,
     },
-  }
+  },
 );
 
-export const Card = forwardRef(({ 
-  className, 
-  variant, 
-  padding, 
-  interactive, 
-  children, 
-  ...props 
+export const Card = forwardRef(({
+  className,
+  variant,
+  padding,
+  interactive,
+  children,
+  ...props
 }, ref) => {
   return (
     <div
@@ -239,15 +239,15 @@ const inputVariants = cva(
       variant: 'default',
       size: 'md',
     },
-  }
+  },
 );
 
-export const Input = forwardRef(({ 
-  className, 
-  variant, 
-  size, 
-  type = 'text', 
-  ...props 
+export const Input = forwardRef(({
+  className,
+  variant,
+  size,
+  type = 'text',
+  ...props
 }, ref) => {
   return (
     <input
@@ -284,7 +284,7 @@ const badgeVariants = cva(
       variant: 'default',
       size: 'md',
     },
-  }
+  },
 );
 
 export const Badge = ({ className, variant, size, children, ...props }) => {
@@ -353,7 +353,7 @@ const alertVariants = cva(
     defaultVariants: {
       variant: 'default',
     },
-  }
+  },
 );
 
 export const Alert = ({ className, variant, children, ...props }) => {
@@ -365,14 +365,14 @@ export const Alert = ({ className, variant, children, ...props }) => {
 };
 
 // Typography components
-export const Text = ({ 
-  as: Component = 'p', 
-  size = 'base', 
-  weight = 'normal', 
+export const Text = ({
+  as: Component = 'p',
+  size = 'base',
+  weight = 'normal',
   color = 'gray-900',
-  className, 
-  children, 
-  ...props 
+  className,
+  children,
+  ...props
 }) => {
   const sizeClasses = {
     xs: 'text-xs',
@@ -397,7 +397,7 @@ export const Text = ({
         sizeClasses[size],
         weightClasses[weight],
         `text-${color}`,
-        className
+        className,
       )}
       {...props}
     >
@@ -406,14 +406,14 @@ export const Text = ({
   );
 };
 
-export const Heading = ({ 
-  as: Component = 'h2', 
-  size = '2xl', 
-  weight = 'semibold', 
+export const Heading = ({
+  as: Component = 'h2',
+  size = '2xl',
+  weight = 'semibold',
   color = 'gray-900',
-  className, 
-  children, 
-  ...props 
+  className,
+  children,
+  ...props
 }) => {
   return (
     <Text
@@ -430,11 +430,11 @@ export const Heading = ({
 };
 
 // Container component for consistent spacing
-export const Container = ({ 
-  size = 'default', 
-  className, 
-  children, 
-  ...props 
+export const Container = ({
+  size = 'default',
+  className,
+  children,
+  ...props
 }) => {
   const sizeClasses = {
     sm: 'max-w-3xl',
@@ -448,7 +448,7 @@ export const Container = ({
       className={cn(
         'mx-auto px-4 sm:px-6 lg:px-8',
         sizeClasses[size],
-        className
+        className,
       )}
       {...props}
     >
@@ -458,12 +458,12 @@ export const Container = ({
 };
 
 // Grid system
-export const Grid = ({ 
-  cols = 1, 
-  gap = 'md', 
-  className, 
-  children, 
-  ...props 
+export const Grid = ({
+  cols = 1,
+  gap = 'md',
+  className,
+  children,
+  ...props
 }) => {
   const colsClasses = {
     1: 'grid-cols-1',
@@ -486,7 +486,7 @@ export const Grid = ({
         'grid',
         colsClasses[cols],
         gapClasses[gap],
-        className
+        className,
       )}
       {...props}
     >
@@ -496,12 +496,12 @@ export const Grid = ({
 };
 
 // Stack component for vertical layouts
-export const Stack = ({ 
-  space = 'md', 
-  align = 'stretch', 
-  className, 
-  children, 
-  ...props 
+export const Stack = ({
+  space = 'md',
+  align = 'stretch',
+  className,
+  children,
+  ...props
 }) => {
   const spaceClasses = {
     xs: 'space-y-1',
@@ -524,7 +524,7 @@ export const Stack = ({
         'flex flex-col',
         spaceClasses[space],
         alignClasses[align],
-        className
+        className,
       )}
       {...props}
     >
@@ -534,15 +534,15 @@ export const Stack = ({
 };
 
 // Flex component for horizontal layouts
-export const Flex = ({ 
-  direction = 'row', 
-  align = 'center', 
-  justify = 'start', 
+export const Flex = ({
+  direction = 'row',
+  align = 'center',
+  justify = 'start',
   wrap = false,
-  gap = 'md', 
-  className, 
-  children, 
-  ...props 
+  gap = 'md',
+  className,
+  children,
+  ...props
 }) => {
   const directionClasses = {
     row: 'flex-row',
@@ -581,7 +581,7 @@ export const Flex = ({
         justifyClasses[justify],
         wrap && 'flex-wrap',
         gapClasses[gap],
-        className
+        className,
       )}
       {...props}
     >
