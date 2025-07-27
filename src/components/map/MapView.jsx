@@ -2,22 +2,23 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { API_ENDPOINTS, COORDINATES, DESIGN_TOKENS } from '../../config/constants';
 
 // Fix for default markers
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconRetinaUrl: `${API_ENDPOINTS.LEAFLET_CDN}/images/marker-icon-2x.png`,
+  iconUrl: `${API_ENDPOINTS.LEAFLET_CDN}/images/marker-icon.png`,
+  shadowUrl: `${API_ENDPOINTS.LEAFLET_CDN}/images/marker-shadow.png`,
 });
 
 // Helper function to get region colors
 const getRegionColor = (colorScheme) => {
   const colorMap = {
-    'primary': '#DC0032',
-    'secondary': '#0EA5E9',
-    'accent': '#65a30d',
-    'neutral': '#64748b',
+    'primary': DESIGN_TOKENS.COLORS.SINGAPORE_RED,
+    'secondary': DESIGN_TOKENS.COLORS.WEATHER_BLUE,
+    'accent': DESIGN_TOKENS.COLORS.ACCENT_GREEN,
+    'neutral': DESIGN_TOKENS.COLORS.WEATHER_GRAY,
   };
   return colorMap[colorScheme] || colorMap.primary;
 };
@@ -41,8 +42,8 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
 
     // Initialize map with regional configuration
     console.log('🗺️ MapView: Creating Leaflet map instance...');
-    const initialCenter = regionConfig ? [regionConfig.center.lat, regionConfig.center.lng] : [1.3437, 103.7640];
-    const initialZoom = regionConfig ? regionConfig.zoom : 13;
+    const initialCenter = regionConfig ? [regionConfig.center.lat, regionConfig.center.lng] : COORDINATES.DEFAULT_CENTER;
+    const initialZoom = regionConfig ? regionConfig.zoom : COORDINATES.DEFAULT_ZOOM;
 
     const map = L.map(mapRef.current).setView(initialCenter, initialZoom);
     mapInstanceRef.current = map;
@@ -50,9 +51,9 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
 
     // Add tile layer
     console.log('🗺️ MapView: Adding tile layer...');
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer(API_ENDPOINTS.OPENSTREETMAP, {
       attribution: '© OpenStreetMap contributors',
-      maxZoom: 18,
+      maxZoom: COORDINATES.MAX_ZOOM,
     }).addTo(map);
     console.log('🗺️ MapView: Tile layer added successfully');
 

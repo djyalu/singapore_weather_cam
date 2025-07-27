@@ -7,13 +7,15 @@ import MapView from './components/map/MapView';
 import AdminPanels from './components/admin/AdminPanels';
 import LoadingScreen from './components/common/LoadingScreen';
 import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSimple';
+import { INTERVALS, UI_CONFIG, COORDINATES } from './config/constants';
+import { getLocalizedString, UI_STRINGS } from './config/localization';
 
 /**
  * Main Singapore Weather Cam Application
  * Enterprise-grade weather monitoring with advanced features
  */
 const App = () => {
-  const [activeTab, setActiveTab] = useState('map');
+  const [activeTab, setActiveTab] = useState(UI_CONFIG.DEFAULT_TAB);
   const [showAdmin, setShowAdmin] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   
@@ -22,13 +24,13 @@ const App = () => {
   const { webcamData, isLoading: webcamLoading, error: webcamError, refresh: refetchWebcam } = useWebcamData();
   const appData = useAppData();
 
-  // Auto-refresh data every 5 minutes
+  // Auto-refresh data using configured interval
   useEffect(() => {
     const interval = setInterval(() => {
       refetchWeather();
       refetchWebcam();
       setLastUpdate(new Date());
-    }, 5 * 60 * 1000);
+    }, INTERVALS.APP_REFRESH);
 
     return () => clearInterval(interval);
   }, [refetchWeather, refetchWebcam]);
@@ -37,10 +39,28 @@ const App = () => {
   const hasError = weatherError || webcamError;
 
   const tabs = [
-    { id: 'dashboard', name: '대시보드', icon: '🌤️', badge: weatherData?.stations?.length },
-    { id: 'webcam', name: '웹캠', icon: '📹', badge: webcamData?.cameras?.length },
-    { id: 'map', name: '지도', icon: '🗺️' },
-    { id: 'analysis', name: '분석', icon: '📊' },
+    { 
+      id: 'dashboard', 
+      name: getLocalizedString('DASHBOARD'), 
+      icon: UI_STRINGS.ICONS.WEATHER, 
+      badge: weatherData?.stations?.length 
+    },
+    { 
+      id: 'webcam', 
+      name: getLocalizedString('WEBCAM'), 
+      icon: UI_STRINGS.ICONS.WEBCAM, 
+      badge: webcamData?.cameras?.length 
+    },
+    { 
+      id: 'map', 
+      name: getLocalizedString('MAP'), 
+      icon: UI_STRINGS.ICONS.MAP 
+    },
+    { 
+      id: 'analysis', 
+      name: getLocalizedString('ANALYSIS'), 
+      icon: UI_STRINGS.ICONS.ANALYSIS 
+    },
   ];
 
   const handleRefresh = () => {
@@ -51,7 +71,7 @@ const App = () => {
 
   const renderContent = () => {
     if (isLoading && (!weatherData && !webcamData)) {
-      return <LoadingScreen message="날씨 데이터를 불러오는 중..." />;
+      return <LoadingScreen message={getLocalizedString('LOADING_WEATHER')} />;
     }
 
     // Admin panel
@@ -92,8 +112,8 @@ const App = () => {
           <MapView 
             weatherData={weatherData}
             webcamData={webcamData}
-            center={[1.3437, 103.7640]} // Hwa Chong International School
-            zoom={13}
+            center={COORDINATES.DEFAULT_CENTER}
+            zoom={COORDINATES.DEFAULT_ZOOM}
           />
         );
         
@@ -101,33 +121,35 @@ const App = () => {
         return (
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 데이터 분석</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                {UI_STRINGS.ICONS.ANALYSIS} {getLocalizedString('ANALYSIS')}
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-blue-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-800">기온 트렌드</h3>
+                  <h3 className="font-semibold text-blue-800">{getLocalizedString('TEMPERATURE_TREND')}</h3>
                   <p className="text-2xl font-bold text-blue-600">
                     {weatherData?.stations?.[0]?.temperature || '--'}°C
                   </p>
-                  <p className="text-sm text-blue-600">Bukit Timah 기준</p>
+                  <p className="text-sm text-blue-600">{getLocalizedString('WEATHER_REFERENCE')}</p>
                 </div>
                 
                 <div className="bg-green-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-green-800">습도 분석</h3>
+                  <h3 className="font-semibold text-green-800">{getLocalizedString('HUMIDITY_ANALYSIS')}</h3>
                   <p className="text-2xl font-bold text-green-600">
                     {weatherData?.stations?.[0]?.humidity || '--'}%
                   </p>
                   <p className="text-sm text-green-600">
-                    {(weatherData?.stations?.[0]?.humidity || 0) > 70 ? '높음' : '보통'}
+                    {(weatherData?.stations?.[0]?.humidity || 0) > 70 ? getLocalizedString('HIGH') : getLocalizedString('NORMAL')}
                   </p>
                 </div>
                 
                 <div className="bg-purple-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-purple-800">강수량 예측</h3>
+                  <h3 className="font-semibold text-purple-800">{getLocalizedString('RAINFALL_PREDICTION')}</h3>
                   <p className="text-2xl font-bold text-purple-600">
-                    {weatherData?.stations?.[0]?.rainfall || 0}mm
+                    {weatherData?.stations?.[0]?.rainfall || 0}{getLocalizedString('RAINFALL_UNIT')}
                   </p>
                   <p className="text-sm text-purple-600">
-                    {(weatherData?.stations?.[0]?.rainfall || 0) > 0 ? '비 감지' : '맑음'}
+                    {(weatherData?.stations?.[0]?.rainfall || 0) > 0 ? getLocalizedString('RAIN_DETECTED') : getLocalizedString('CLEAR')}
                   </p>
                 </div>
               </div>
@@ -143,7 +165,7 @@ const App = () => {
   return (
     <ErrorBoundary>
       <AppLayout
-        title="🌤️ Singapore Weather Cam"
+        title={`${UI_STRINGS.ICONS.WEATHER} Singapore Weather Cam`}
         subtitle="Enterprise Weather Monitoring System"
         tabs={tabs}
         activeTab={activeTab}

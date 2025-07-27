@@ -1,16 +1,18 @@
 /**
  * Singapore Weather Stations Configuration
- * Based on Bukit Timah Nature Reserve focus
+ * Now imports from centralized constants
  */
 
+import { WEATHER_STATIONS } from './constants';
+
 export const STATION_MAPPING = {
-  // Primary stations (actually available in NEA data)
+  // Primary stations (using centralized coordinates)
   'S117': {
     name: 'Newton',
     displayName: 'Newton (Primary)',
     description: 'Central Singapore urban monitoring - closest to Bukit Timah',
     priority: 'primary',
-    coordinates: { lat: 1.3138, lng: 103.8420 },
+    coordinates: WEATHER_STATIONS.COORDINATES.S117,
     region: 'central',
   },
   'S50': {
@@ -18,7 +20,7 @@ export const STATION_MAPPING = {
     displayName: 'Clementi (Primary)',
     description: 'Western residential area - near Bukit Timah corridor',
     priority: 'primary',
-    coordinates: { lat: 1.3162, lng: 103.7649 },
+    coordinates: WEATHER_STATIONS.COORDINATES.S50,
     region: 'west',
   },
   'S106': {
@@ -26,7 +28,7 @@ export const STATION_MAPPING = {
     displayName: 'Tai Seng (Primary)',
     description: 'Central-eastern business district',
     priority: 'primary',
-    coordinates: { lat: 1.3369, lng: 103.8847 },
+    coordinates: WEATHER_STATIONS.COORDINATES.S106,
     region: 'central',
   },
 

@@ -7,6 +7,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Clock, CloudSun, Camera, Wifi, AlertTriangle, RefreshCw, Zap, X } from 'lucide-react';
+import { INTERVALS, TIMEOUTS, UI_CONFIG, LIMITS, A11Y_CONFIG } from '../../config/constants';
+import { getLocalizedString, UI_STRINGS } from '../../config/localization';
 import SkeletonLoader from './SkeletonLoader.jsx';
 import { NetworkError, DataError, ErrorUtils } from './ErrorComponents.jsx';
 import { announceToScreenReader } from '../../utils/accessibility.js';
@@ -101,37 +103,47 @@ const SystemStatus = React.memo(({
     const webcamAge = webcamData?.reliabilityMetadata?.dataAge || 0;
     const maxAge = Math.max(weatherAge, webcamAge);
 
-    if (maxAge > 30 * 60 * 1000) {return 'stale';} // > 30 minutes
-    if (maxAge > 15 * 60 * 1000) {return 'warning';} // > 15 minutes
+    if (maxAge > INTERVALS.SYSTEM_HEALTH_CHECK * 6) {return 'stale';} // > 30 minutes
+    if (maxAge > INTERVALS.SYSTEM_HEALTH_CHECK * 3) {return 'warning';} // > 15 minutes
 
     return 'healthy';
   };
 
-  // Get weather data status
-  const getWeatherStatus = () => {
-    if (!weatherData) {return 'offline';}
+  // Get weather data status - with safety checks
+  const getWeatherStatus = useCallback(() => {
+    try {
+      if (!weatherData) {return 'offline';}
 
-    const quality = reliabilityMetrics.weatherQuality;
-    const dataAge = weatherData?.reliabilityMetadata?.dataAge || 0;
+      const quality = reliabilityMetrics?.weatherQuality;
+      const dataAge = weatherData?.reliabilityMetadata?.dataAge || 0;
 
-    if (dataAge > 30 * 60 * 1000) {return 'stale';}
-    if (quality && quality < 0.8) {return 'degraded';}
+      if (dataAge > INTERVALS.SYSTEM_HEALTH_CHECK * 6) {return 'stale';}
+      if (quality && quality < LIMITS.MIN_DATA_QUALITY) {return 'degraded';}
 
-    return 'online';
-  };
+      return 'online';
+    } catch (error) {
+      console.warn('getWeatherStatus error:', error);
+      return 'offline';
+    }
+  }, [weatherData, reliabilityMetrics]);
 
-  // Get webcam data status
-  const getWebcamStatus = () => {
-    if (!webcamData) {return 'offline';}
+  // Get webcam data status - with safety checks
+  const getWebcamStatus = useCallback(() => {
+    try {
+      if (!webcamData) {return 'offline';}
 
-    const quality = reliabilityMetrics.webcamQuality;
-    const dataAge = webcamData?.reliabilityMetadata?.dataAge || 0;
+      const quality = reliabilityMetrics?.webcamQuality;
+      const dataAge = webcamData?.reliabilityMetadata?.dataAge || 0;
 
-    if (dataAge > 30 * 60 * 1000) {return 'stale';}
-    if (quality && quality < 0.8) {return 'degraded';}
+      if (dataAge > INTERVALS.SYSTEM_HEALTH_CHECK * 6) {return 'stale';}
+      if (quality && quality < LIMITS.MIN_DATA_QUALITY) {return 'degraded';}
 
-    return 'online';
-  };
+      return 'online';
+    } catch (error) {
+      console.warn('getWebcamStatus error:', error);
+      return 'offline';
+    }
+  }, [webcamData, reliabilityMetrics]);
 
   // Enhanced error handling - memoized
   const handleDismissError = useCallback((errorId) => {
@@ -294,20 +306,20 @@ const SystemStatus = React.memo(({
       switch (status) {
         case 'online':
         case 'healthy':
-          return 'Operating normally';
+          return getLocalizedString('STATUS_OPERATING_NORMALLY');
         case 'degraded':
         case 'warning':
-          return 'Experiencing issues';
+          return getLocalizedString('STATUS_EXPERIENCING_ISSUES');
         case 'stale':
-          return 'Data may be outdated';
+          return getLocalizedString('STATUS_DATA_OUTDATED');
         case 'offline':
         case 'error':
-          return 'Not available';
+          return getLocalizedString('STATUS_NOT_AVAILABLE');
         case 'loading':
         case 'updating':
-          return 'Currently updating';
+          return getLocalizedString('STATUS_CURRENTLY_UPDATING');
         default:
-          return 'Status unknown';
+          return getLocalizedString('STATUS_UNKNOWN');
       }
     };
 
@@ -317,12 +329,16 @@ const SystemStatus = React.memo(({
         className={`
           flex items-center px-3 py-2 rounded-lg text-xs font-medium 
           status-transition hover-lift
-          min-h-[44px] min-w-[44px] justify-center sm:justify-start sm:px-2 sm:py-1 sm:min-h-auto sm:min-w-auto
+          justify-center sm:justify-start sm:px-2 sm:py-1 sm:min-h-auto sm:min-w-auto
           active:scale-95 touch-manipulation cursor-pointer
           animate-fade-in
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
           ${getStatusColor(status)}
         `}
+        style={{
+          minHeight: `${UI_CONFIG.MIN_TOUCH_TARGET}px`,
+          minWidth: `${UI_CONFIG.MIN_TOUCH_TARGET}px`,
+        }}
         title={tooltip}
         role="button"
         tabIndex="0"

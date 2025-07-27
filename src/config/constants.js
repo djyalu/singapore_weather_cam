@@ -147,6 +147,20 @@ export const LIMITS = {
   // File size limits
   MAX_IMAGE_SIZE: 5 * 1024 * 1024,      // 5MB max image size
   MAX_LOG_ENTRIES: 1000,                // maximum log entries
+  
+  // Camera limits
+  MAX_CAMERA_SELECTION: 20,             // maximum cameras in selector
+  
+  // Data quality thresholds
+  MIN_DATA_QUALITY: 0.8,                // minimum acceptable data quality (80%)
+  
+  // Temperature thresholds (Singapore climate)
+  TEMP_MIN_SINGAPORE: -10,              // minimum reasonable temperature (°C)
+  TEMP_MAX_SINGAPORE: 60,               // maximum reasonable temperature (°C)
+  TEMP_HOT: 35,                         // hot temperature threshold (°C)
+  TEMP_WARM: 32,                        // warm temperature threshold (°C)
+  TEMP_PLEASANT: 28,                    // pleasant temperature threshold (°C)
+  TEMP_COOL: 24,                        // cool temperature threshold (°C)
 };
 
 // ===============================

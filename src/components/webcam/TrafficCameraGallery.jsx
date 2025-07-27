@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { INTERVALS, TIMEOUTS, UI_CONFIG, LIMITS } from '../../config/constants';
+import { getLocalizedString, UI_STRINGS } from '../../config/localization';
 import {
   fetchTrafficCameras,
   filterCamerasByArea,
@@ -574,7 +576,7 @@ const TrafficCameraGallery = () => {
         <TrafficCameraSelector
           onCameraSelectionChange={handleCameraSelectionChange}
           selectedCameras={selectedCameraIds}
-          maxSelection={20}
+          maxSelection={LIMITS.MAX_CAMERA_SELECTION}
           className="mb-6"
         />
       )}

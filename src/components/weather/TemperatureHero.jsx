@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { INTERVALS, LIMITS, UI_CONFIG, DESIGN_TOKENS } from '../../config/constants';
+import { getLocalizedString, UI_STRINGS } from '../../config/localization';
 import { getStationInfo } from '../../config/weatherStations.js';
 import SkeletonLoader from '../common/SkeletonLoader.jsx';
 import { ErrorDisplay, DataError, PartialError, ErrorUtils } from '../common/ErrorComponents.jsx';
@@ -271,7 +273,7 @@ const TemperatureHero = React.memo(({
   const validateTemperature = useCallback((temp) => {
     if (temp === null || temp === undefined) {return false;}
     if (typeof temp !== 'number') {return false;}
-    if (temp < -10 || temp > 60) {return false;} // Reasonable range for Singapore
+    if (temp < LIMITS.TEMP_MIN_SINGAPORE || temp > LIMITS.TEMP_MAX_SINGAPORE) {return false;} // Reasonable range for Singapore
     return true;
   }, []);
 
@@ -282,9 +284,9 @@ const TemperatureHero = React.memo(({
   const getDataQualityInfo = useMemo(() => {
     if (!dataQuality) {return null;}
 
-    if (dataQuality < 0.5) {
+    if (dataQuality < LIMITS.MIN_DATA_QUALITY / 1.6) {
       return { level: 'poor', message: 'Data quality is poor', color: 'text-red-300' };
-    } else if (dataQuality < 0.8) {
+    } else if (dataQuality < LIMITS.MIN_DATA_QUALITY) {
       return { level: 'fair', message: 'Data quality is fair', color: 'text-yellow-300' };
     }
     return { level: 'good', message: 'Data quality is good', color: 'text-green-300' };
@@ -294,19 +296,19 @@ const TemperatureHero = React.memo(({
 
   const getTemperatureColor = useCallback((temp) => {
     if (temp === null || temp === undefined) {return 'text-white';}
-    if (temp >= 35) {return 'text-red-100';}
-    if (temp >= 32) {return 'text-orange-100';}
-    if (temp >= 28) {return 'text-yellow-100';}
-    if (temp >= 24) {return 'text-green-100';}
+    if (temp >= LIMITS.TEMP_HOT) {return 'text-red-100';}
+    if (temp >= LIMITS.TEMP_WARM) {return 'text-orange-100';}
+    if (temp >= LIMITS.TEMP_PLEASANT) {return 'text-yellow-100';}
+    if (temp >= LIMITS.TEMP_COOL) {return 'text-green-100';}
     return 'text-blue-100';
   }, []);
 
   const getBackgroundGradient = useCallback((temp) => {
     if (temp === null || temp === undefined) {return 'from-neutral-500 to-neutral-600';}
-    if (temp >= 35) {return 'from-red-500 to-orange-600';}
-    if (temp >= 32) {return 'from-orange-500 to-red-500';}
-    if (temp >= 28) {return 'from-primary-500 to-secondary-500';}
-    if (temp >= 24) {return 'from-secondary-500 to-accent-500';}
+    if (temp >= LIMITS.TEMP_HOT) {return 'from-red-500 to-orange-600';}
+    if (temp >= LIMITS.TEMP_WARM) {return 'from-orange-500 to-red-500';}
+    if (temp >= LIMITS.TEMP_PLEASANT) {return 'from-primary-500 to-secondary-500';}
+    if (temp >= LIMITS.TEMP_COOL) {return 'from-secondary-500 to-accent-500';}
     return 'from-secondary-600 to-secondary-700';
   }, []);
 
