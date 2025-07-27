@@ -3,7 +3,7 @@ import HealthMonitor from '../system/HealthMonitor';
 import MonitoringDashboard from './MonitoringDashboard';
 import PerformanceDashboard from './PerformanceDashboard';
 import PWAStatus from '../common/PWAStatus';
-import { usePWAStatus, useAppMetrics } from '../../contexts/AppDataContext';
+import { usePWAStatus, useAppMetrics } from "../../contexts/AppDataContextSimple";
 
 /**
  * Admin Panels Component

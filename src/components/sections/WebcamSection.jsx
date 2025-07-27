@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { useWebcamData } from '../../contexts/AppDataContext';
+import { useWebcamData } from "../../contexts/AppDataContextSimple";
 
 // Lazy load webcam components
 const WebcamGallery = React.lazy(() => import('../webcam/WebcamGallery'));

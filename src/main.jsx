@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import AppDataProvider from './contexts/AppDataContext';
+import AppDataProvider from './contexts/AppDataContextSimple';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import './index.css';
 

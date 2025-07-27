@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { useAppData } from '../../contexts/AppDataContext';
+import { useAppData } from "../../contexts/AppDataContextSimple";
 
 // Lazy load the map component for better performance
 const RegionalMapView = React.lazy(() => import('../map/RegionalMapView'));

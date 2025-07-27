@@ -229,7 +229,7 @@ const SystemStatus = React.memo(({
   const errorState = getErrorState();
   const weatherStatus = getWeatherStatus();
   const webcamStatus = getWebcamStatus();
-  const timeSinceUpdate = getTimeSinceUpdate();
+  const timeSinceUpdate = getTimeSinceUpdate;
 
   // Show loading skeleton if initial loading
   if (isLoading) {

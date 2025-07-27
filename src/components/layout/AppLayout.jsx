@@ -5,7 +5,7 @@ import SystemFooter from './SystemFooter';
 import SystemStatus from '../common/SystemStatus';
 import LoadingScreen from '../common/LoadingScreen';
 import ScrollProgress from '../navigation/ScrollProgress';
-import { useSystemStatus } from '../../contexts/AppDataContext';
+import { useSystemStatus } from "../../contexts/AppDataContextSimple";
 import { usePullToRefresh } from '../../hooks/useTouchGestures';
 
 /**
