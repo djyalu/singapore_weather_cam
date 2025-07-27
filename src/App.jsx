@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
+import WeatherStatusBar from './components/layout/WeatherStatusBar';
 import LoadingScreen from './components/common/LoadingScreen';
 import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG } from './config/constants';
@@ -179,6 +180,9 @@ const App = () => {
 
   return (
     <EnhancedErrorBoundary maxRetries={3}>
+      {/* 상단 날씨 정보 바 - Hwa Chong 중심 */}
+      <WeatherStatusBar weatherData={weatherData} />
+      
       <AppLayout
         title={`${UI_STRINGS.ICONS.WEATHER} Singapore Weather Cam`}
         subtitle="Enterprise Weather Monitoring System"
