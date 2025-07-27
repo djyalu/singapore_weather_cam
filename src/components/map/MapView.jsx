@@ -41,8 +41,8 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
 
     // Initialize map with regional configuration
     console.log('🗺️ MapView: Creating Leaflet map instance...');
-    const initialCenter = regionConfig ? [regionConfig.center.lat, regionConfig.center.lng] : [1.3520, 103.7767];
-    const initialZoom = regionConfig ? regionConfig.zoom : 12;
+    const initialCenter = regionConfig ? [regionConfig.center.lat, regionConfig.center.lng] : [1.3437, 103.7640];
+    const initialZoom = regionConfig ? regionConfig.zoom : 13;
 
     const map = L.map(mapRef.current).setView(initialCenter, initialZoom);
     mapInstanceRef.current = map;
