@@ -28,18 +28,15 @@ const App = () => {
   const { webcamData, isLoading: webcamLoading, error: webcamError, refresh: refetchWebcam } = useWebcamData();
   // const appData = useAppData(); // Reserved for future use
 
-  // Auto-refresh data using configured interval
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetchWeather();
-      refetchWebcam();
-      setLastUpdate(new Date());
-    }, INTERVALS.APP_REFRESH);
+  // Manual refresh only - Context handles auto-refresh
+  const handleManualRefresh = () => {
+    refetchWeather();
+    refetchWebcam();
+    setLastUpdate(new Date());
+  };
 
-    return () => clearInterval(interval);
-  }, [refetchWeather, refetchWebcam]);
-
-  const isLoading = weatherLoading || webcamLoading;
+  // 더 스마트한 로딩 상태 관리
+  const isInitialLoading = (weatherLoading || webcamLoading) && (!weatherData && !webcamData);
   const hasError = weatherError || webcamError;
 
   const tabs = [
@@ -67,14 +64,12 @@ const App = () => {
     },
   ];
 
-  const handleRefresh = () => {
-    refetchWeather();
-    refetchWebcam();
-    setLastUpdate(new Date());
-  };
+  // Use the consolidated manual refresh function
+  const handleRefresh = handleManualRefresh;
 
   const renderContent = () => {
-    if (isLoading && (!weatherData && !webcamData)) {
+    // 초기 로딩만 LoadingScreen 표시
+    if (isInitialLoading) {
       return <LoadingScreen message={getLocalizedString('LOADING_WEATHER')} />;
     }
 
@@ -190,7 +185,7 @@ const App = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         lastUpdate={formatDateSafely(lastUpdate)}
-        isLoading={isLoading}
+        isLoading={isInitialLoading}
         hasError={hasError}
         errorMessage={weatherError || webcamError}
         onRefresh={handleRefresh}

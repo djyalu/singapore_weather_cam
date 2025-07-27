@@ -28,6 +28,14 @@ const webcamIcon = L.divIcon({
   iconAnchor: [16, 32],
 });
 
+// Hwa Chong International School icon
+const schoolIcon = L.divIcon({
+  html: '<div class="bg-purple-600 text-white rounded-lg w-10 h-10 flex items-center justify-center text-lg font-bold shadow-lg border-2 border-white">🏫</div>',
+  className: 'custom-div-icon',
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+});
+
 const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', regionConfig = null, className = '' }) => {
   console.log('🗺️ MapView: Rendering with data:', {
     weatherData: weatherData ? 'present' : 'missing',
@@ -101,13 +109,39 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
               </Marker>
             )
           ))}
+
+          {/* Hwa Chong International School marker */}
+          <Marker
+            position={[COORDINATES.HWA_CHONG_SCHOOL.lat, COORDINATES.HWA_CHONG_SCHOOL.lng]}
+            icon={schoolIcon}
+          >
+            <Popup>
+              <div className="p-3">
+                <h3 className="font-bold text-purple-800 text-lg mb-2">🏫 Hwa Chong International School</h3>
+                <div className="space-y-1 text-sm">
+                  <p><strong>주소:</strong> 663 Bukit Timah Road, Singapore</p>
+                  <p><strong>중심 좌표:</strong> {COORDINATES.HWA_CHONG_SCHOOL.lat}°N, {COORDINATES.HWA_CHONG_SCHOOL.lng}°E</p>
+                  <p><strong>역할:</strong> 날씨 모니터링 중심점</p>
+                  <div className="mt-3 p-2 bg-purple-50 rounded-lg">
+                    <p className="text-xs text-purple-700">
+                      🎯 이 위치를 중심으로 싱가포르 날씨와 웹캠 정보를 제공합니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
         </MapContainer>
       </div>
 
       {/* Map legend */}
       <div className="p-4 border-t bg-gray-50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-3 text-sm flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-purple-600 rounded-sm border border-white shadow-sm"></div>
+              <span className="font-medium">🏫 Hwa Chong School</span>
+            </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
               <span>Weather Stations</span>
@@ -117,8 +151,8 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
               <span>Webcam Locations</span>
             </div>
           </div>
-          <div className="text-xs text-gray-500">
-            Center: Hwa Chong International School
+          <div className="text-xs text-gray-500 hidden md:block">
+            📍 Monitoring Center: 663 Bukit Timah Road
           </div>
         </div>
       </div>

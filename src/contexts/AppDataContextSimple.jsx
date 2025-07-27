@@ -15,9 +15,12 @@ const useSimpleDataLoader = (refreshInterval) => {
   const [error, setError] = useState(null);
   const [lastFetch, setLastFetch] = useState(new Date());
 
-  const loadData = async () => {
+  const loadData = async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true);
+      // 백그라운드 새로고침이 아닌 경우에만 로딩 상태 표시
+      if (!isBackgroundRefresh) {
+        setLoading(true);
+      }
       setError(null);
 
       const basePath = import.meta.env.BASE_URL || '/';
@@ -31,11 +34,15 @@ const useSimpleDataLoader = (refreshInterval) => {
           // Transform NEA API data to UI-friendly format
           const transformedWeatherData = transformWeatherData(weatherJson);
           setWeatherData(transformedWeatherData);
-          console.log('🌤️ Weather data loaded and transformed:', {
-            temperature: transformedWeatherData.current?.temperature,
-            locations: transformedWeatherData.locations?.length,
-            timestamp: transformedWeatherData.timestamp
-          });
+          
+          // 개발 모드에서만 로깅
+          if (import.meta.env.MODE === 'development') {
+            console.log('🌤️ Weather data loaded and transformed:', {
+              temperature: transformedWeatherData.current?.temperature,
+              locations: transformedWeatherData.locations?.length,
+              timestamp: transformedWeatherData.timestamp
+            });
+          }
         }
       } catch (err) {
         // Only log in development mode
@@ -71,9 +78,13 @@ const useSimpleDataLoader = (refreshInterval) => {
   };
 
   useEffect(() => {
-    loadData();
+    loadData(); // 초기 로딩
     
-    const interval = setInterval(loadData, refreshInterval);
+    // 백그라운드 자동 새로고침 (스피너 없이)
+    const interval = setInterval(() => {
+      loadData(true); // 백그라운드 새로고침 플래그
+    }, refreshInterval);
+    
     return () => clearInterval(interval);
   }, [refreshInterval]);
 
@@ -83,9 +94,9 @@ const useSimpleDataLoader = (refreshInterval) => {
     loading,
     error,
     lastFetch,
-    refresh: loadData,
+    refresh: () => loadData(false), // 수동 새로고침은 스피너 표시
     isInitialLoading: loading && !weatherData && !webcamData,
-    isRefreshing: loading && (weatherData || webcamData)
+    isRefreshing: false // 백그라운드 새로고침은 숨김
   };
 };
 
