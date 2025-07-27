@@ -1,25 +1,28 @@
 // Service Worker for Singapore Weather Cam PWA
 // Provides offline functionality and caching strategies
 
-const CACHE_NAME = 'singapore-weather-cam-v1.1.0';
-const STATIC_CACHE = 'static-v1.1.0';
-const DATA_CACHE = 'data-v1.1.0';
+const CACHE_NAME = 'singapore-weather-cam-v1.1.1';
+const STATIC_CACHE = 'static-v1.1.1';
+const DATA_CACHE = 'data-v1.1.1';
+
+// Get base path for GitHub Pages deployment
+const BASE_PATH = '/singapore_weather_cam';
 
 // Static assets to cache
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.ico',
-  '/android-chrome-192x192.png',
-  '/android-chrome-512x512.png',
-  '/weather-icon.svg'
+  `${BASE_PATH}/`,
+  `${BASE_PATH}/index.html`,
+  `${BASE_PATH}/manifest.json`,
+  `${BASE_PATH}/favicon.ico`,
+  `${BASE_PATH}/android-chrome-192x192.png`,
+  `${BASE_PATH}/android-chrome-512x512.png`,
+  `${BASE_PATH}/weather-icon.svg`
 ];
 
 // Data endpoints to cache
 const DATA_ENDPOINTS = [
-  '/data/weather/latest.json',
-  '/data/webcam/latest.json'
+  `${BASE_PATH}/data/weather/latest.json`,
+  `${BASE_PATH}/data/webcam/latest.json`
 ];
 
 // Install event - cache static assets
@@ -130,7 +133,7 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'explore') {
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow(`${BASE_PATH}/`)
     );
   }
 });
@@ -206,7 +209,7 @@ async function cacheFirstStrategy(request, maxAge = null) {
     
     // Return offline fallback for HTML requests
     if (request.destination === 'document') {
-      return caches.match('/index.html');
+      return caches.match(`${BASE_PATH}/index.html`);
     }
     
     throw error;
@@ -223,7 +226,7 @@ async function getCachedResponse(request) {
   
   // No cache available, return offline fallback
   if (request.destination === 'document') {
-    return caches.match('/index.html');
+    return caches.match(`${BASE_PATH}/index.html`);
   }
   
   throw new Error('No cached response available');
@@ -245,15 +248,15 @@ function updateCache(request) {
 async function syncWeatherData() {
   try {
     const responses = await Promise.all([
-      fetch('/data/weather/latest.json'),
-      fetch('/data/webcam/latest.json')
+      fetch(`${BASE_PATH}/data/weather/latest.json`),
+      fetch(`${BASE_PATH}/data/webcam/latest.json`)
     ]);
     
     const cache = await caches.open(DATA_CACHE);
     
     responses.forEach((response, index) => {
       if (response.ok) {
-        const url = index === 0 ? '/data/weather/latest.json' : '/data/webcam/latest.json';
+        const url = index === 0 ? `${BASE_PATH}/data/weather/latest.json` : `${BASE_PATH}/data/webcam/latest.json`;
         cache.put(url, response.clone());
       }
     });
