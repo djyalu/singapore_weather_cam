@@ -1,9 +1,9 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 import LoadingScreen from './components/common/LoadingScreen';
 import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSimple';
-import { INTERVALS, UI_CONFIG, COORDINATES } from './config/constants';
+import { INTERVALS, UI_CONFIG } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
 import { formatDateSafely } from './components/common/SafeDateFormatter';
 
@@ -21,11 +21,11 @@ const App = () => {
   const [activeTab, setActiveTab] = useState(UI_CONFIG.DEFAULT_TAB);
   const [showAdmin, setShowAdmin] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  
+
   // Data hooks from context
   const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather } = useWeatherData();
   const { webcamData, isLoading: webcamLoading, error: webcamError, refresh: refetchWebcam } = useWebcamData();
-  const appData = useAppData();
+  // const appData = useAppData(); // Reserved for future use
 
   // Auto-refresh data using configured interval
   useEffect(() => {
@@ -42,27 +42,27 @@ const App = () => {
   const hasError = weatherError || webcamError;
 
   const tabs = [
-    { 
-      id: 'dashboard', 
-      name: getLocalizedString('DASHBOARD'), 
-      icon: UI_STRINGS.ICONS.WEATHER, 
-      badge: weatherData?.locations?.length 
+    {
+      id: 'dashboard',
+      name: getLocalizedString('DASHBOARD'),
+      icon: UI_STRINGS.ICONS.WEATHER,
+      badge: weatherData?.locations?.length,
     },
-    { 
-      id: 'webcam', 
-      name: getLocalizedString('WEBCAM'), 
-      icon: UI_STRINGS.ICONS.WEBCAM, 
-      badge: webcamData?.captures?.length 
+    {
+      id: 'webcam',
+      name: getLocalizedString('WEBCAM'),
+      icon: UI_STRINGS.ICONS.WEBCAM,
+      badge: webcamData?.captures?.length,
     },
-    { 
-      id: 'map', 
-      name: getLocalizedString('MAP'), 
-      icon: UI_STRINGS.ICONS.MAP 
+    {
+      id: 'map',
+      name: getLocalizedString('MAP'),
+      icon: UI_STRINGS.ICONS.MAP,
     },
-    { 
-      id: 'analysis', 
-      name: getLocalizedString('ANALYSIS'), 
-      icon: UI_STRINGS.ICONS.ANALYSIS 
+    {
+      id: 'analysis',
+      name: getLocalizedString('ANALYSIS'),
+      icon: UI_STRINGS.ICONS.ANALYSIS,
     },
   ];
 
@@ -81,7 +81,7 @@ const App = () => {
     if (showAdmin) {
       return (
         <Suspense fallback={<LoadingScreen message="Loading admin panel..." />}>
-          <AdminPanels 
+          <AdminPanels
             weatherData={weatherData}
             webcamData={webcamData}
             onClose={() => setShowAdmin(false)}
@@ -90,28 +90,28 @@ const App = () => {
       );
     }
 
-    const LoadingFallback = ({ message }) => (
-      <LoadingScreen message={message || 'Loading component...'} />
+    const LoadingFallback = ({ message = 'Loading component...' }) => (
+      <LoadingScreen message={message} />
     );
 
     switch (activeTab) {
       case 'dashboard':
         return (
           <Suspense fallback={<LoadingFallback message="Loading weather dashboard..." />}>
-            <WeatherDashboard 
+            <WeatherDashboard
               data={{
                 current: weatherData?.locations?.[0],
                 locations: weatherData?.locations,
-                forecast: weatherData?.forecast || []
+                forecast: weatherData?.forecast || [],
               }}
             />
           </Suspense>
         );
-        
+
       case 'webcam':
         return (
           <Suspense fallback={<LoadingFallback message="Loading webcam gallery..." />}>
-            <WebcamGallery 
+            <WebcamGallery
               data={webcamData}
               isLoading={webcamLoading}
               error={webcamError}
@@ -119,11 +119,11 @@ const App = () => {
             />
           </Suspense>
         );
-        
+
       case 'map':
         return (
           <Suspense fallback={<LoadingFallback message="Loading map..." />}>
-            <MapView 
+            <MapView
               weatherData={weatherData}
               webcamData={webcamData}
               selectedRegion="all"
@@ -131,7 +131,7 @@ const App = () => {
             />
           </Suspense>
         );
-        
+
       case 'analysis':
         return (
           <div className="space-y-6">
@@ -147,7 +147,7 @@ const App = () => {
                   </p>
                   <p className="text-sm text-blue-600">{getLocalizedString('WEATHER_REFERENCE')}</p>
                 </div>
-                
+
                 <div className="bg-green-50 rounded-lg p-4">
                   <h3 className="font-semibold text-green-800">{getLocalizedString('HUMIDITY_ANALYSIS')}</h3>
                   <p className="text-2xl font-bold text-green-600">
@@ -157,7 +157,7 @@ const App = () => {
                     {(weatherData?.locations?.[0]?.humidity || 0) > 70 ? getLocalizedString('HIGH') : getLocalizedString('NORMAL')}
                   </p>
                 </div>
-                
+
                 <div className="bg-purple-50 rounded-lg p-4">
                   <h3 className="font-semibold text-purple-800">{getLocalizedString('RAINFALL_PREDICTION')}</h3>
                   <p className="text-2xl font-bold text-purple-600">
@@ -171,7 +171,7 @@ const App = () => {
             </div>
           </div>
         );
-        
+
       default:
         return null;
     }
