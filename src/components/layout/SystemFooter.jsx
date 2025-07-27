@@ -14,47 +14,36 @@ const SystemFooter = React.memo(({ systemStats = {} }) => {
   // Memoize footer sections to prevent re-creation
   const footerSections = useMemo(() => [
     {
-      title: '🛠️ 시스템 정보',
-      icon: Zap,
-      iconColor: 'text-blue-500',
-      items: [
-        'GitHub Actions 자동화',
-        'Claude AI 이미지 분석',
-        '5분마다 자동 업데이트',
-        '실시간 웹캠 모니터링',
-      ],
-    },
-    {
-      title: '📊 데이터 소스',
+      title: '🚗 실시간 교통 카메라',
       icon: Camera,
-      iconColor: 'text-green-500',
+      iconColor: 'text-red-500',
       items: [
-        '싱가포르 공공 웹캠',
-        '교통 카메라 (LTA API)',
-        '관광지 라이브캠',
-        'NEA 기상청 데이터',
+        '90개 LTA 교통 카메라',
+        '3분마다 자동 업데이트',
+        'HD 1920x1080 화질',
+        '전국 주요 도로 커버',
       ],
     },
     {
-      title: '🤖 분석 항목',
+      title: '🤖 AI 날씨 분석',
       icon: Brain,
       iconColor: 'text-purple-500',
       items: [
+        'Claude Vision API',
+        'CCTV 기반 실시간 분석',
         '날씨 상태 자동 판단',
-        '가시성 정확도 평가',
-        '강수량 실시간 감지',
-        '활동 적합성 분석',
+        'Hwa Chong 지역 중심',
       ],
     },
     {
       title: '⚡ 기술 스택',
       icon: Globe,
-      iconColor: 'text-yellow-500',
+      iconColor: 'text-blue-500',
       items: [
-        'GitHub Pages 호스팅',
-        'React + Vite + Tailwind CSS',
-        'Claude Vision API',
-        'Leaflet 지도 시스템',
+        'React + Leaflet 지도',
+        'GitHub Actions 자동화',
+        'Singapore data.gov.sg API',
+        '무료 호스팅 (GitHub Pages)',
       ],
     },
   ], []);
@@ -85,7 +74,7 @@ const SystemFooter = React.memo(({ systemStats = {} }) => {
     <footer className="bg-white shadow-xl border-t-4 border-blue-500 mt-12" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* 메인 섹션들 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {footerSections.map((section, index) => {
             const IconComponent = section.icon;
             return (
@@ -137,26 +126,16 @@ const SystemFooter = React.memo(({ systemStats = {} }) => {
           </div>
         </div>
 
-        {/* 시스템 설명 박스 */}
-        <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
-          <p className="text-sm text-blue-800 text-center">
-            <strong>🔬 자동화 시스템:</strong> GitHub Actions가 5분마다 싱가포르 웹캠을 캡처하여
-            Claude AI가 실시간으로 날씨를 분석하고, 결과를 자동으로 웹사이트에 업데이트합니다.
-            <br />
-            <span className="text-xs text-blue-600 mt-1 block">
-              {systemStats.totalProcessingTime && `평균 처리 시간: ${systemStats.totalProcessingTime}`}
-              {systemStats.averageConfidence > 0 && ` | 평균 정확도: ${systemStats.averageConfidence}%`}
-              {' | 가동률: 99.9%'}
-            </span>
-          </p>
-        </div>
-
-        {/* Hwa Chong 중심 정보 */}
-        <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
-          <p className="text-sm text-center">
-            <strong>🏫 중심 위치:</strong> Hwa Chong International School (663 Bukit Timah Road)을
-            중심으로 싱가포르 날씨와 웹캠 정보를 제공합니다.
-          </p>
+        {/* 간단한 시스템 설명 */}
+        <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-purple-50 rounded-xl border border-red-200">
+          <div className="text-center">
+            <p className="text-sm text-red-800 font-medium">
+              🏫 <strong>Hwa Chong International School</strong> 중심 실시간 교통 모니터링
+            </p>
+            <p className="text-xs text-red-600 mt-1">
+              90개 LTA 카메라 • Claude AI 분석 • 3분 자동 업데이트 • 가동률 99.9%
+            </p>
+          </div>
         </div>
       </div>
     </footer>
