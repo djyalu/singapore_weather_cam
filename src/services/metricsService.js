@@ -484,19 +484,70 @@ export class MetricsService {
 export const metricsService = new MetricsService();
 
 /**
- * React hook for metrics tracking
+ * React hook for metrics tracking with safety checks
  */
 export const useMetrics = () => {
-  const trackPageView = (page, metadata) => metricsService.trackPageView(page, metadata);
-  const trackUserInteraction = (type, element, metadata) => metricsService.trackUserInteraction(type, element, metadata);
-  const trackCustomMetric = (name, value, unit, metadata) => metricsService.trackCustomMetric(name, value, unit, metadata);
+  // Safe wrapper functions that check if service is initialized
+  const trackPageView = (page, metadata) => {
+    try {
+      if (metricsService && typeof metricsService.trackPageView === 'function') {
+        return metricsService.trackPageView(page, metadata);
+      }
+    } catch (error) {
+      console.warn('trackPageView failed:', error);
+    }
+  };
+
+  const trackUserInteraction = (type, element, metadata) => {
+    try {
+      if (metricsService && typeof metricsService.trackUserInteraction === 'function') {
+        return metricsService.trackUserInteraction(type, element, metadata);
+      }
+    } catch (error) {
+      console.warn('trackUserInteraction failed:', error);
+    }
+  };
+
+  const trackCustomMetric = (name, value, unit, metadata) => {
+    try {
+      if (metricsService && typeof metricsService.trackCustomMetric === 'function') {
+        return metricsService.trackCustomMetric(name, value, unit, metadata);
+      }
+    } catch (error) {
+      console.warn('trackCustomMetric failed:', error);
+    }
+  };
+
+  const getDashboardData = () => {
+    try {
+      if (metricsService && typeof metricsService.getDashboardData === 'function') {
+        return metricsService.getDashboardData();
+      }
+      return { realTime: {}, health: {}, reliability: {}, session: {} };
+    } catch (error) {
+      console.warn('getDashboardData failed:', error);
+      return { realTime: {}, health: {}, reliability: {}, session: {} };
+    }
+  };
+
+  const getMetricsReport = () => {
+    try {
+      if (metricsService && typeof metricsService.getMetricsReport === 'function') {
+        return metricsService.getMetricsReport();
+      }
+      return { metrics: [], summary: {}, timestamp: Date.now() };
+    } catch (error) {
+      console.warn('getMetricsReport failed:', error);
+      return { metrics: [], summary: {}, timestamp: Date.now() };
+    }
+  };
 
   return {
     trackPageView,
     trackUserInteraction,
     trackCustomMetric,
-    getDashboardData: () => metricsService.getDashboardData(),
-    getMetricsReport: () => metricsService.getMetricsReport(),
+    getDashboardData,
+    getMetricsReport,
   };
 };
 

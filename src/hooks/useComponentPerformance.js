@@ -6,7 +6,31 @@
  */
 
 import { useEffect, useRef, useCallback, useMemo } from 'react';
-import performanceMonitor from '../services/performanceMonitor.js';
+
+// Create a safe fallback for performance monitor
+const createFallbackMonitor = () => ({
+  startComponentMeasure: () => null,
+  endComponentMeasure: () => 0,
+  getMemoryUsage: () => ({ supported: false }),
+  monitorAnimation: () => () => {},
+  monitorElement: () => () => {},
+});
+
+// Dynamically import performance monitor with safety
+let performanceMonitor = createFallbackMonitor();
+
+// Try to load the real performance monitor
+try {
+  import('../services/performanceMonitor.js').then(module => {
+    if (module.default) {
+      performanceMonitor = module.default;
+    }
+  }).catch(error => {
+    console.warn('Performance monitor dynamic import failed:', error);
+  });
+} catch (error) {
+  console.warn('Performance monitor not available:', error);
+}
 
 /**
  * Hook for monitoring component performance
