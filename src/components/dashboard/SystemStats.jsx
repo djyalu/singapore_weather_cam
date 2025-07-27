@@ -124,7 +124,7 @@ const SystemStats = React.memo(({
             <span>LIVE • 실시간 분석 중</span>
           </div>
           {lastUpdate && (
-            <span>• 마지막 업데이트: {new Date(lastUpdate).toLocaleTimeString('ko-KR')}</span>
+            <span>• 마지막 업데이트: {lastUpdate instanceof Date ? lastUpdate.toLocaleTimeString('ko-KR') : new Date(lastUpdate).toLocaleTimeString('ko-KR')}</span>
           )}
         </div>
       </div>

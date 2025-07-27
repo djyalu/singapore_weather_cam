@@ -112,7 +112,7 @@ const SystemFooter = React.memo(({ systemStats = {} }) => {
                 Made with ❤️ using AI • GitHub Actions + Pages
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {systemStats.lastUpdate && `Last updated: ${systemStats.lastUpdate}`}
+                {systemStats.lastUpdate && `Last updated: ${systemStats.lastUpdate instanceof Date ? systemStats.lastUpdate.toLocaleString('ko-KR') : systemStats.lastUpdate}`}
                 {systemStats.totalProcessingTime && ` • Processing time: ${systemStats.totalProcessingTime}`}
               </p>
             </div>

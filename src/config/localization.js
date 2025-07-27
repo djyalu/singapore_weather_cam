@@ -46,6 +46,7 @@ export const KOREAN_STRINGS = {
   CLOSE: '닫기',
   OPEN: '열기',
   VIEW_DETAILS: '자세히 보기',
+  NO_DATA: '데이터 없음',
   
   // Time & Updates
   LAST_UPDATE: '마지막 업데이트',
