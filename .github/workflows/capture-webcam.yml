@@ -1,15 +1,15 @@
-name: Capture Webcam Images
+name: Traffic Camera Monitor
 
 on:
   schedule:
-    # Every 6 hours, 30 minutes after weather collection (4 runs/day = 120 runs/month)
-    - cron: '30 */6 * * *'
+    # Every 3 hours for traffic camera monitoring (8 runs/day = 240 runs/month)
+    - cron: '15 */3 * * *'
   workflow_dispatch:
     inputs:
       capture_mode:
         type: choice
-        options: [standard, priority, test]
-        default: standard
+        options: [traffic_only, priority, test]
+        default: traffic_only
 
 env:
   NODE_ENV: production

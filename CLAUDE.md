@@ -182,7 +182,7 @@ npm run format       # Prettier 포맷팅
 ### 데이터 처리
 - 모든 날씨 데이터는 `/data` 디렉토리의 JSON 파일로 관리
 - 이미지는 `/public/images` 디렉토리에 저장
-- GitHub Actions가 30분/1시간 주기로 자동 업데이트
+- GitHub Actions가 6시간 주기로 자동 업데이트 + 사용자 수동 새로고침
 
 ### Git 커밋 규칙
 - feat: 새로운 기능 추가
