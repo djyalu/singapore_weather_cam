@@ -413,86 +413,25 @@ const TemperatureHero = React.memo(({
             )}
 
             {primaryData.feelsLike && (
-              <div className="text-white/80 text-sm sm:text-sm md:text-base mb-4 animate-fade-in delay-500">
-                Feels like{' '}
-                <span className="font-semibold text-white">
-                  {formatTemperature(primaryData.feelsLike)}°C
-                </span>
+              <div className="text-white/70 text-xs mb-2 animate-fade-in delay-500">
+                체감: {formatTemperature(primaryData.feelsLike)}°C
               </div>
             )}
           </div>
 
-          {/* Additional Weather Info */}
+          {/* Compact Weather Summary */}
           <div className="flex-shrink-0 w-full lg:w-auto animate-slide-in-right">
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4 lg:gap-6 animate-stagger-in">
-
-              {/* Humidity with enhanced accessibility */}
-              {primaryData.humidity && (
-                <div
-                  className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center lg:text-left hover:bg-white/15 hover-lift group min-h-[80px] sm:min-h-auto flex flex-col justify-center touch-manipulation animate-fade-in delay-600"
-                  role="group"
-                  aria-labelledby="humidity-label"
-                >
-                  <div className="flex items-center justify-center lg:justify-start gap-2 mb-1">
-                    <span
-                      className="text-base sm:text-lg group-hover:scale-110 transition-transform duration-300 animate-pulse-slow"
-                      role="img"
-                      aria-label="Humidity indicator"
-                    >
-                      💧
-                    </span>
-                    <span
-                      id="humidity-label"
-                      className="text-white/70 text-xs sm:text-xs uppercase tracking-wide font-medium"
-                    >
-                      Humidity
-                    </span>
-                  </div>
-                  <div
-                    className="text-white text-lg sm:text-xl lg:text-2xl font-bold animate-scale-in delay-700"
-                    aria-label={`Humidity level: ${Math.round(primaryData.humidity)} percent`}
-                  >
-                    {Math.round(primaryData.humidity)}%
-                  </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center lg:text-left">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div className="text-white/70 text-xs mb-1">💧 습도</div>
+                  <div className="text-white font-bold">{Math.round(primaryData.humidity || 0)}%</div>
                 </div>
-              )}
-
-              {/* Wind with enhanced accessibility */}
-              {primaryData.windSpeed && (
-                <div
-                  className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 text-center lg:text-left hover:bg-white/15 hover-lift group min-h-[80px] sm:min-h-auto flex flex-col justify-center touch-manipulation animate-fade-in delay-700"
-                  role="group"
-                  aria-labelledby="wind-label"
-                >
-                  <div className="flex items-center justify-center lg:justify-start gap-2 mb-1">
-                    <span
-                      className="text-base sm:text-lg group-hover:scale-110 transition-transform duration-300 animate-pulse-slow"
-                      role="img"
-                      aria-label="Wind indicator"
-                    >
-                      💨
-                    </span>
-                    <span
-                      id="wind-label"
-                      className="text-white/70 text-xs sm:text-xs uppercase tracking-wide font-medium"
-                    >
-                      Wind
-                    </span>
-                  </div>
-                  <div
-                    className="text-white text-sm sm:text-base lg:text-lg font-semibold animate-scale-in delay-800"
-                    aria-label={`Wind speed: ${Math.round(primaryData.windSpeed * 10) / 10} kilometers per hour`}
-                  >
-                    {Math.round(primaryData.windSpeed * 10) / 10} km/h
-                  </div>
-                  <div
-                    className="text-white/60 text-xs truncate animate-fade-in delay-900"
-                    aria-label={`Wind direction: ${primaryData.windDirection}`}
-                  >
-                    {primaryData.windDirection}
-                  </div>
+                <div>
+                  <div className="text-white/70 text-xs mb-1">💨 바람</div>
+                  <div className="text-white font-bold text-xs">{primaryData.windDirection || '--'}</div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

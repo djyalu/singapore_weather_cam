@@ -64,24 +64,29 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
     return 'Singapore';
   };
 
-  useEffect(() => {
-    const loadTrafficCameras = async () => {
-      try {
-        setIsLoadingTraffic(true);
-        setTrafficError(null);
-        
-        const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
+  const loadTrafficCameras = useCallback(async () => {
+    try {
+      setIsLoadingTraffic(true);
+      setTrafficError(null);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
         
         if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
           throw new Error('No traffic camera data available');
@@ -160,7 +165,9 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
         
         setTrafficCameras(processedCameras);
       } catch (error) {
-        setTrafficError(error.message);
+        if (error.name !== 'AbortError') {
+          setTrafficError(error.message);
+        }
         
         const mockCameras = [
           {
@@ -190,12 +197,14 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
         setIsLoadingTraffic(false);
       }
     };
+  }, []);
 
+  useEffect(() => {
     loadTrafficCameras();
 
     const interval = setInterval(loadTrafficCameras, 3 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadTrafficCameras]);
 
 
   return (

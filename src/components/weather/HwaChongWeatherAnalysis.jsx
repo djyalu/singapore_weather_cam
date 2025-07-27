@@ -219,26 +219,20 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '' }) => {
             <div className="bg-white rounded-lg p-4 shadow-sm border border-purple-100">
               <div className="flex items-center gap-2 mb-3">
                 <Eye className="w-4 h-4 text-purple-600" />
-                <span className="font-medium text-gray-800">시각적 날씨 분석</span>
+                <span className="font-medium text-gray-800">CCTV 시각 분석</span>
               </div>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>날씨 상태:</span>
-                  <span className={`font-medium ${getStatusColor(aiAnalysis.weather_condition)}`}>
-                    {aiAnalysis.weather_condition}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>가시성:</span>
+                  <span>시야:</span>
                   <span className="font-medium text-green-600">{aiAnalysis.visibility}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>강수:</span>
-                  <span className="font-medium text-blue-600">{aiAnalysis.precipitation}</span>
+                  <span>도로상태:</span>
+                  <span className="font-medium text-blue-600">{aiAnalysis.road_conditions}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>구름 커버:</span>
-                  <span className="font-medium text-gray-600">{aiAnalysis.cloud_coverage}</span>
+                  <span>조명:</span>
+                  <span className="font-medium text-gray-600">{aiAnalysis.lighting_conditions}</span>
                 </div>
               </div>
             </div>

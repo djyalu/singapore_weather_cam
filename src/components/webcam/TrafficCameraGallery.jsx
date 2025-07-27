@@ -131,11 +131,11 @@ const CameraCard = React.memo(({ camera, index, onImageTap, onCardPress }) => {
           </div>
         )}
 
-        {/* Actual camera image */}
+        {/* Optimized camera image */}
         <img
-          src={`${camera.image.url}?t=${Date.now()}`}
-          alt={`${camera.name} 실시간 카메라`}
-          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-active:scale-95"
+          src={camera.image.url}
+          alt={`${camera.name} 실시간`}
+          className="w-full h-full object-cover transition-opacity duration-300"
           loading="lazy"
           onLoad={handleImageLoad}
           onError={handleImageError}
@@ -282,7 +282,7 @@ const TrafficCameraGallery = () => {
     }
   }, [cameras, viewMode, selectedArea, selectedCameraIds]);
 
-  const fetchCameras = async (isManualRefresh = false) => {
+  const fetchCameras = useCallback(async (isManualRefresh = false) => {
     try {
       if (isManualRefresh) {
         setIsRefreshing(true);
@@ -292,7 +292,6 @@ const TrafficCameraGallery = () => {
 
       const data = await fetchTrafficCameras();
       setCameras(data.cameras);
-      // Safe date handling - ensure valid Date object
       const timestamp = data.timestamp ? new Date(data.timestamp) : new Date();
       setLastUpdate(timestamp instanceof Date && !isNaN(timestamp.getTime()) ? timestamp : new Date());
       setError(null);
