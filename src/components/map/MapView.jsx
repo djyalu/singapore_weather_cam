@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -64,7 +64,7 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
     return 'Singapore';
   };
 
-  const loadTrafficCameras = useCallback(async () => {
+  const loadTrafficCameras = async () => {
     try {
       setIsLoadingTraffic(true);
       setTrafficError(null);
@@ -197,14 +197,13 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
         setIsLoadingTraffic(false);
       }
     };
-  }, []);
 
   useEffect(() => {
     loadTrafficCameras();
 
     const interval = setInterval(loadTrafficCameras, 3 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [loadTrafficCameras]);
+  }, []);
 
 
   return (

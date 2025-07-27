@@ -338,7 +338,7 @@ const SystemStatus = React.memo(({
       switch (status) {
         case 'online':
         case 'healthy':
-          return 'text-accent-600 bg-accent-50 hover:bg-accent-100 focus:bg-accent-100';
+          return 'text-green-600 bg-green-50 hover:bg-green-100 focus:bg-green-100';
         case 'degraded':
         case 'warning':
           return 'text-yellow-600 bg-yellow-50 hover:bg-yellow-100 focus:bg-yellow-100';
@@ -349,9 +349,9 @@ const SystemStatus = React.memo(({
           return 'text-red-600 bg-red-50 hover:bg-red-100 focus:bg-red-100';
         case 'loading':
         case 'updating':
-          return 'text-secondary-600 bg-secondary-50 animate-pulse-gentle';
+          return 'text-blue-600 bg-blue-50 animate-pulse-gentle';
         default:
-          return 'text-neutral-500 bg-neutral-50 hover:bg-neutral-100 focus:bg-neutral-100';
+          return 'text-gray-500 bg-gray-50 hover:bg-gray-100 focus:bg-gray-100';
       }
     };
 
