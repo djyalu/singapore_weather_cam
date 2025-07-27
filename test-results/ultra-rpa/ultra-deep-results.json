@@ -1,0 +1,225 @@
+{
+  "timestamp": "2025-07-27T12:58:37.774Z",
+  "target_url": "https://djyalu.github.io/singapore_weather_cam/",
+  "test_type": "ultra-deep-rpa",
+  "execution_time": 691,
+  "status": "good",
+  "tests": {
+    "basic_connectivity": {
+      "status": "passed",
+      "http_status": 200,
+      "response_time_ms": 108,
+      "content_length": 4337,
+      "content_type": "text/html; charset=utf-8",
+      "server": "GitHub.com",
+      "cache_control": "max-age=600",
+      "details": "HTTP 200 - 108ms - 4337 bytes"
+    },
+    "html_structure": {
+      "status": "passed",
+      "analysis": {
+        "hasReactRoot": true,
+        "hasReactScripts": true,
+        "hasReactCSS": true,
+        "hasTitle": true,
+        "title": "Singapore Weather Cam - 실시간 날씨 정보",
+        "hasDescription": true,
+        "hasKeywords": true,
+        "hasManifest": true,
+        "hasServiceWorker": true,
+        "hasIcons": true,
+        "hasCSP": true,
+        "hasXFrame": true,
+        "hasXSS": true,
+        "hasOGTitle": true,
+        "hasOGDescription": true,
+        "hasOGImage": true,
+        "headSize": 3734,
+        "bodySize": 557,
+        "scriptTags": 2,
+        "linkTags": 11,
+        "metaTags": 24
+      },
+      "score": 100,
+      "details": "HTML structure analysis completed"
+    },
+    "resource_loading": {
+      "status": "passed",
+      "total_resources": 2,
+      "passed_resources": 2,
+      "failed_resources": 0,
+      "success_rate": 100,
+      "details": {
+        "javascript": [
+          {
+            "status": "passed",
+            "url": "https://djyalu.github.io/singapore_weather_cam/assets/js/index-c81d9c4d.js",
+            "http_status": 200,
+            "size": "395",
+            "content_type": "application/javascript; charset=utf-8",
+            "response_time": 13
+          }
+        ],
+        "css": [
+          {
+            "status": "passed",
+            "url": "https://djyalu.github.io/singapore_weather_cam/assets/css/index-07d52504.css",
+            "http_status": 200,
+            "size": "14636",
+            "content_type": "text/css; charset=utf-8",
+            "response_time": 19
+          }
+        ]
+      }
+    }
+  },
+  "performance": {
+    "timestamp": "2025-07-27T12:58:38.424Z",
+    "load_tests": {
+      "normal_load": {
+        "status": "passed",
+        "load_time": 10,
+        "http_status": 200,
+        "content_length": 1525,
+        "cache_status": "unknown"
+      },
+      "cached_load": {
+        "status": "passed",
+        "load_time": 23,
+        "http_status": 200,
+        "content_length": 1525,
+        "cache_status": "unknown"
+      },
+      "parallel_load": {
+        "status": "passed",
+        "load_time": 7,
+        "http_status": 200,
+        "content_length": 1525,
+        "cache_status": "unknown"
+      }
+    },
+    "resource_timing": {},
+    "recommendations": []
+  },
+  "user_scenarios": {
+    "weather_data_access": {
+      "status": "passed",
+      "response_time": 228,
+      "content_length": 6800,
+      "content_type": "application/json; charset=utf-8",
+      "analysis": {
+        "is_valid_json": true,
+        "has_timestamp": true,
+        "has_data": true,
+        "data_size": 7,
+        "content_keys": [
+          "timestamp",
+          "source",
+          "collection_time_ms",
+          "api_calls",
+          "successful_calls"
+        ]
+      },
+      "details": "날씨 데이터 API 접근 successful"
+    },
+    "webcam_data_access": {
+      "status": "passed",
+      "response_time": 220,
+      "content_length": 4334,
+      "content_type": "application/json; charset=utf-8",
+      "analysis": {
+        "is_valid_json": true,
+        "has_timestamp": true,
+        "has_data": true,
+        "data_size": 7,
+        "content_keys": [
+          "timestamp",
+          "total_cameras",
+          "successful_captures",
+          "failed_captures",
+          "skipped_captures"
+        ]
+      },
+      "details": "웹캠 데이터 API 접근 successful"
+    },
+    "service_worker_access": {
+      "status": "passed",
+      "response_time": 10,
+      "content_length": 7504,
+      "content_type": "application/javascript; charset=utf-8",
+      "analysis": {},
+      "details": "Service Worker 파일 접근 successful"
+    },
+    "manifest_access": {
+      "status": "passed",
+      "response_time": 8,
+      "content_length": 407,
+      "content_type": "application/json; charset=utf-8",
+      "analysis": {
+        "is_valid_json": true,
+        "has_timestamp": false,
+        "has_data": true,
+        "data_size": 4,
+        "content_keys": [
+          "_chunk-4ed993c7.js",
+          "_chunk-c42ce534.js",
+          "index.css",
+          "index.html"
+        ]
+      },
+      "details": "PWA Manifest 파일 접근 successful"
+    }
+  },
+  "accessibility": {
+    "has_lang_attribute": true,
+    "has_viewport_meta": true,
+    "has_skip_links": false,
+    "has_alt_text_pattern": false,
+    "has_aria_labels": false,
+    "has_headings_structure": false,
+    "has_landmarks": false,
+    "has_focus_indicators": false,
+    "has_high_contrast_support": false,
+    "score": 22
+  },
+  "security": {
+    "has_csp": true,
+    "has_x_frame_options": true,
+    "has_x_content_type": true,
+    "has_referrer_policy": true,
+    "has_permissions_policy": true,
+    "uses_https": true,
+    "has_sri_integrity": false,
+    "has_noopener_links": false,
+    "has_inline_scripts": true,
+    "has_eval_usage": false,
+    "score": 100
+  },
+  "errors": [],
+  "recommendations": [],
+  "ultra_analysis": {
+    "overall_health": 92,
+    "critical_issues": [
+      "접근성 개선 필요: 22/100 (권장: 80 이상)"
+    ],
+    "performance_insights": [],
+    "user_experience_insights": [],
+    "technical_recommendations": [
+      "ARIA 레이블 및 시맨틱 마크업 보완",
+      "키보드 네비게이션 지원 강화",
+      "색상 대비 및 텍스트 크기 개선"
+    ],
+    "business_impact": {
+      "user_accessibility": "Needs Improvement",
+      "data_reliability": "Excellent",
+      "performance_satisfaction": "Excellent",
+      "security_compliance": "Excellent"
+    },
+    "next_steps": [
+      "🚨 Critical Issues 해결 (최우선)",
+      "♿ 접근성 개선 작업",
+      "📊 정기적인 모니터링 시스템 구축",
+      "🔄 지속적인 개선 프로세스 운영"
+    ]
+  }
+}
