@@ -516,3 +516,340 @@ body:not(.user-is-tabbing) *:focus {
     padding-top: env(safe-area-inset-top);
   }
 }
+
+/* ================================================
+   MOBILE-FIRST UX ENHANCEMENTS
+   ================================================ */
+
+/* Pull-to-refresh visual feedback */
+.pull-to-refresh-ready {
+  --pull-ready-color: #10b981;
+}
+
+body.pull-to-refresh-ready {
+  background: linear-gradient(to bottom, var(--pull-ready-color) 0%, transparent 100px);
+}
+
+/* Enhanced touch interactions */
+.touch-feedback {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-feedback::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.touch-feedback:active::before {
+  width: 200px;
+  height: 200px;
+}
+
+/* Improved gesture area sizing */
+.gesture-area {
+  padding: 12px;
+  margin: -12px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Swipe indicators */
+.swipe-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.swipe-indicator.left {
+  left: 10px;
+}
+
+.swipe-indicator.right {
+  right: 10px;
+}
+
+/* Enhanced modal animations for mobile */
+@keyframes slideUpModal {
+  from {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDownModal {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.modal-mobile-enter {
+  animation: slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-mobile-exit {
+  animation: slideDownModal 0.3s ease-in;
+}
+
+/* Floating action button for mobile */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+}
+
+.fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+/* Safe area enhancements */
+.safe-area-inset {
+  padding-top: max(env(safe-area-inset-top), 12px);
+  padding-bottom: max(env(safe-area-inset-bottom), 12px);
+  padding-left: max(env(safe-area-inset-left), 16px);
+  padding-right: max(env(safe-area-inset-right), 16px);
+}
+
+/* Mobile navigation improvements */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 8px 0;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  z-index: 30;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #6b7280;
+  transition: color 0.2s ease;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.mobile-nav-item.active {
+  color: #3b82f6;
+}
+
+.mobile-nav-item:active {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Progressive disclosure enhancements */
+.disclosure-smooth {
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s ease-in-out;
+}
+
+/* Haptic feedback simulation */
+@keyframes hapticPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.haptic-feedback {
+  animation: hapticPulse 0.1s ease-out;
+}
+
+/* Enhanced loading states for mobile */
+.mobile-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 24px;
+}
+
+.loading-dots {
+  display: flex;
+  space-x: 4px;
+}
+
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  animation: loadingDot 1.4s infinite ease-in-out both;
+}
+
+.loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes loadingDot {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Mobile-optimized form controls */
+@media (hover: none) and (pointer: coarse) {
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    line-height: 1.5;
+    padding: 12px 16px;
+  }
+
+  /* Better checkbox and radio styling for touch */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin: 8px;
+  }
+
+  /* Improved button styling for mobile */
+  button,
+  .btn {
+    min-height: 48px;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+
+  /* Touch-friendly dropdown menus */
+  select {
+    background-size: 20px;
+    padding-right: 48px;
+  }
+}
+
+/* Dark mode preparation for mobile */
+@media (prefers-color-scheme: dark) {
+  .mobile-nav {
+    background: #1f2937;
+    border-top-color: #374151;
+  }
+
+  .mobile-nav-item {
+    color: #9ca3af;
+  }
+
+  .mobile-nav-item.active {
+    color: #60a5fa;
+  }
+
+  .fab {
+    background: #1f2937;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Micro-interactions for better feedback */
+.button-press {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.button-press:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced focus states for mobile accessibility */
+@media (hover: none) and (pointer: coarse) {
+  *:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  button:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
+  }
+}
+
+/* Scroll enhancements for mobile */
+.scroll-area {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.scroll-area::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Mobile-specific layout adjustments */
+@media (max-width: 640px) {
+  .container-mobile {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .grid-mobile {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+  }
+
+  .grid-mobile-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .text-mobile {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .heading-mobile {
+    font-size: 18px;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+}

@@ -4,6 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com;
+      style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+      img-src 'self' data: blob: https://*.data.gov.sg https://*.lta.gov.sg https://res.cloudinary.com;
+      font-src 'self' https://fonts.gstatic.com;
+      connect-src 'self' https://api.data.gov.sg https://datamall2.mytransport.sg https://*.openweathermap.org;
+      frame-src 'none';
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      upgrade-insecure-requests;
+    " />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="
+      camera=(),
+      microphone=(),
+      geolocation=(self),
+      interest-cohort=()
+    " />
+    
     <!-- SEO Meta Tags -->
     <title>Singapore Weather Cam - 실시간 날씨 정보</title>
     <meta name="description" content="싱가포르의 실시간 날씨 정보와 웹캠 영상을 확인하세요. NEA 공식 데이터 기반으로 5분마다 업데이트됩니다." />

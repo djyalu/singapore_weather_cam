@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useRef, useEffect, useState } from 'react';
 import ErrorBoundary from '../common/ErrorBoundary';
 import Header from './Header';
 import SystemFooter from './SystemFooter';
@@ -6,10 +6,11 @@ import SystemStatus from '../common/SystemStatus';
 import LoadingScreen from '../common/LoadingScreen';
 import ScrollProgress from '../navigation/ScrollProgress';
 import { useSystemStatus } from '../../contexts/AppDataContext';
+import { usePullToRefresh } from '../../hooks/useTouchGestures';
 
 /**
  * Main Application Layout Component
- * Handles overall page structure and accessibility features
+ * Handles overall page structure and accessibility features with mobile-first UX
  */
 const AppLayout = React.memo(({ children }) => {
   const {
@@ -22,9 +23,63 @@ const AppLayout = React.memo(({ children }) => {
     forceRefresh,
   } = useSystemStatus();
 
+  const containerRef = useRef(null);
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  const [showRefreshFeedback, setShowRefreshFeedback] = useState(false);
+
+  // Pull-to-refresh functionality
+  const { pullToRefreshProps, setContainerRef } = usePullToRefresh(
+    async () => {
+      setIsPullRefreshing(true);
+      setShowRefreshFeedback(true);
+      
+      try {
+        await forceRefresh();
+        // Show success feedback
+        setTimeout(() => {
+          setShowRefreshFeedback(false);
+        }, 2000);
+      } catch (error) {
+        console.error('Refresh failed:', error);
+        setShowRefreshFeedback(false);
+      } finally {
+        setIsPullRefreshing(false);
+      }
+    },
+    {
+      threshold: 80,
+      resistance: 2.5,
+      enabled: !isRefreshing && !isPullRefreshing,
+    }
+  );
+
+  // Set container reference for pull-to-refresh
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerRef(containerRef.current);
+    }
+  }, [setContainerRef]);
+
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div 
+        ref={containerRef}
+        className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 transition-transform duration-300 ease-out"
+        {...pullToRefreshProps}
+      >
+        {/* Pull-to-refresh feedback */}
+        {showRefreshFeedback && (
+          <div className="fixed top-0 left-0 right-0 z-50 bg-green-500 text-white text-center py-2 text-sm font-medium">
+            <div className="flex items-center justify-center space-x-2">
+              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span>Refreshing data...</span>
+            </div>
+          </div>
+        )}
+
         {/* Scroll progress indicator */}
         <ScrollProgress />
 
@@ -44,15 +99,15 @@ const AppLayout = React.memo(({ children }) => {
           lastFetch={lastFetch}
           reliabilityMetrics={reliabilityMetrics}
           error={error}
-          isRefreshing={isRefreshing}
+          isRefreshing={isRefreshing || isPullRefreshing}
           onRefresh={refresh}
           onForceRefresh={forceRefresh}
         />
 
-        {/* Main content area */}
+        {/* Main content area with mobile-optimized spacing */}
         <main 
           id="main" 
-          className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-8" 
+          className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-8 safe-bottom" 
           role="main" 
           tabIndex="-1"
         >
