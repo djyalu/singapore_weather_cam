@@ -53,7 +53,7 @@ function extractCurrentWeather(data) {
     rainfall: rainfall ? Math.round(rainfall * 10) / 10 : 0,
     windSpeed: windSpeed ? Math.round(windSpeed * 10) / 10 : null,
     windDirection: formatWindDirection(getAverageWindDirection(data.wind_direction?.readings) || data.forecast?.general?.wind?.direction) || '🌪️ 다양함',
-    feelsLike: temperature ? Math.round((temperature + 2) * 10) / 10 : null, // 간단한 체감온도 계산
+    feelsLike: temperature ? Math.round(temperature * 10) / 10 + 2.0 : null, // 체감온도: 실제온도 + 2.0°C (고정)
     uvIndex: '--', // NEA에서 제공하지 않음
     visibility: '--', // NEA에서 제공하지 않음
     location: 'Singapore',

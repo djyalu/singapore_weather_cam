@@ -9,9 +9,12 @@ import { MapPin, Thermometer, Droplet, Wind, Clock } from 'lucide-react';
 const RegionalWeatherCard = React.memo(({
   region,
   temperature,
+  feelsLike,
   humidity,
   rainfall = 0,
   windDirection,
+  weatherDescription,
+  weatherIcon,
   stationName,
   isActive = false,
   onClick,
@@ -122,15 +125,37 @@ const RegionalWeatherCard = React.memo(({
           <MapPin className="w-4 h-4 text-gray-500" />
         </div>
 
-        {/* 메인 온도 표시 */}
+        {/* 날씨 상태 표시 */}
+        {(weatherIcon || weatherDescription) && (
+          <div className="flex items-center justify-center mb-2">
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              {weatherIcon && <span className="text-lg">{weatherIcon}</span>}
+              {weatherDescription && <span className="font-medium">{weatherDescription}</span>}
+            </div>
+          </div>
+        )}
+
+        {/* 온도 정보 - 실제온도와 체감온도 구분 */}
         <div className="flex items-center justify-center mb-3">
           <div className="text-center">
-            <div className={`text-3xl font-bold ${tempColor} drop-shadow-sm`}>
-              {formatTemperature(temperature)}°
+            <div className="mb-2">
+              <div className={`text-3xl font-bold ${tempColor} drop-shadow-sm`}>
+                {formatTemperature(temperature)}°C
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                실제온도
+              </div>
             </div>
-            <div className="text-xs text-gray-600 mt-1">
-              체감온도
-            </div>
+            {feelsLike !== null && feelsLike !== undefined && (
+              <div className="border-t border-gray-200 pt-1">
+                <div className={`text-lg font-semibold ${tempColor} opacity-80`}>
+                  {formatTemperature(feelsLike)}°C
+                </div>
+                <div className="text-xs text-gray-500">
+                  체감온도
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -191,9 +216,12 @@ const RegionalWeatherCard = React.memo(({
 RegionalWeatherCard.propTypes = {
   region: PropTypes.string.isRequired,
   temperature: PropTypes.number,
+  feelsLike: PropTypes.number,
   humidity: PropTypes.number,
   rainfall: PropTypes.number,
   windDirection: PropTypes.string,
+  weatherDescription: PropTypes.string,
+  weatherIcon: PropTypes.string,
   stationName: PropTypes.string,
   isActive: PropTypes.bool,
   onClick: PropTypes.func,

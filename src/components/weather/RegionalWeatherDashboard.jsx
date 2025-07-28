@@ -333,12 +333,22 @@ const RegionalWeatherDashboard = React.memo(({
           apiCallsRemaining: analysisData.api_calls_remaining
         });
         
-        // 사용자에게 피드백 제공
+        // 사용자에게 피드백 제공 (API 사용량 정보 포함)
+        const apiCallsRemaining = analysisData.api_calls_remaining || 0;
+        const apiCallsLimit = analysisData.api_calls_limit || 20;
+        const apiCallsToday = analysisData.api_calls_today || 0;
+        
         if (window.showNotification) {
           if (matchingCameras.length === cameraIds.length) {
-            window.showNotification(`🎯 선택된 ${matchingCameras.length}개 지역의 최신 Cohere AI 분석 결과를 표시합니다.`, 'success');
+            window.showNotification(
+              `🎯 선택된 ${matchingCameras.length}개 지역의 최신 Cohere AI 분석 결과를 표시합니다. (API: ${apiCallsRemaining}/${apiCallsLimit} 남음)`, 
+              'success'
+            );
           } else {
-            window.showNotification(`📊 ${matchingCameras.length}/${cameraIds.length}개 지역의 AI 분석 데이터가 사용 가능합니다.`, 'info');
+            window.showNotification(
+              `📊 ${matchingCameras.length}/${cameraIds.length}개 지역의 AI 분석 데이터가 사용 가능합니다. (API: ${apiCallsRemaining}/${apiCallsLimit} 남음)`, 
+              'info'
+            );
           }
         }
         
@@ -458,9 +468,12 @@ const RegionalWeatherDashboard = React.memo(({
               key={region.id}
               region={`${region.emoji} ${cardData.region}`}
               temperature={cardData.temperature}
+              feelsLike={cardData.feelsLike}
               humidity={cardData.humidity}
               rainfall={cardData.rainfall}
               windDirection={cardData.windDirection}
+              weatherDescription={cardData.description}
+              weatherIcon={cardData.icon}
               stationName={cardData.stationName}
               isActive={activeRegion === region.id}
               onClick={() => handleRegionClick(region.id)}
