@@ -13,68 +13,89 @@ const RegionalWeatherDashboard = React.memo(({
   activeRegion = 'hwa-chong',
   className = ''
 }) => {
-  // 3개 주요 지역 설정 (Hwa Chong 우선)
+  // 3개 주요 지역 설정 (실제 온도 데이터가 있는 스테이션 기준)
   const PRIORITY_REGIONS = [
     {
       id: 'hwa-chong',
       name: 'Hwa Chong',
-      stationIds: ['S116', 'S121'], // Bukit Timah 지역
+      stationIds: ['S50', 'S115'], // Clementi & West 지역 (Bukit Timah 인근)
       description: 'Hwa Chong International School 지역'
     },
     {
       id: 'newton',
       name: 'Newton',
-      stationIds: ['S117', 'S109'], // Newton 지역
-      description: 'Newton MRT 및 Orchard 인근'
+      stationIds: ['S109', 'S102'], // Newton & Central 지역
+      description: 'Newton MRT 및 Central 지역'
     },
     {
       id: 'changi',
       name: 'Changi',
-      stationIds: ['S24', 'S107'], // East 지역
+      stationIds: ['S24', 'S107'], // East Coast & Airport 지역
       description: 'Changi Airport 및 동부 지역'
     }
   ];
 
-  // 지역별 날씨 데이터 가져오기
+  // 지역별 날씨 데이터 가져오기 (NEA 데이터 구조에 맞춤)
   const getRegionalWeatherData = useMemo(() => {
-    if (!weatherData?.locations) return {};
+    if (!weatherData?.data) return {};
 
     const regionalData = {};
+    const tempReadings = weatherData.data.temperature?.readings || [];
+    const humidityReadings = weatherData.data.humidity?.readings || [];
+    const rainfallReadings = weatherData.data.rainfall?.readings || [];
 
     PRIORITY_REGIONS.forEach(region => {
-      // 해당 지역의 스테이션 데이터 찾기
-      const stationData = region.stationIds
-        .map(stationId => weatherData.locations.find(loc => loc.station_id === stationId))
+      // 해당 지역의 스테이션 온도 데이터 찾기
+      const stationTemps = region.stationIds
+        .map(stationId => tempReadings.find(reading => reading.station === stationId))
+        .filter(Boolean);
+      
+      // 해당 지역의 스테이션 습도 데이터 찾기
+      const stationHumidity = region.stationIds
+        .map(stationId => humidityReadings.find(reading => reading.station === stationId))
         .filter(Boolean);
 
-      if (stationData.length > 0) {
+      // 해당 지역의 스테이션 강우량 데이터 찾기
+      const stationRainfall = region.stationIds
+        .map(stationId => rainfallReadings.find(reading => reading.station === stationId))
+        .filter(Boolean);
+
+      if (stationTemps.length > 0 || stationHumidity.length > 0) {
         // 여러 스테이션의 평균값 계산
-        const avgTemperature = stationData.reduce((sum, station) => sum + (station.temperature || 0), 0) / stationData.length;
-        const avgHumidity = stationData.reduce((sum, station) => sum + (station.humidity || 0), 0) / stationData.length;
-        const totalRainfall = stationData.reduce((sum, station) => sum + (station.rainfall || 0), 0);
+        const avgTemperature = stationTemps.length > 0 
+          ? stationTemps.reduce((sum, reading) => sum + (reading.value || 0), 0) / stationTemps.length
+          : weatherData.data.temperature?.average || null;
+
+        const avgHumidity = stationHumidity.length > 0
+          ? stationHumidity.reduce((sum, reading) => sum + (reading.value || 0), 0) / stationHumidity.length
+          : weatherData.data.humidity?.average || null;
+
+        const totalRainfall = stationRainfall.length > 0
+          ? stationRainfall.reduce((sum, reading) => sum + (reading.value || 0), 0)
+          : 0;
 
         // 대표 스테이션 정보
-        const primaryStation = stationData[0];
-        const stationInfo = getStationInfo(primaryStation.station_id);
+        const primaryStationId = stationTemps.length > 0 ? stationTemps[0].station : region.stationIds[0];
+        const stationInfo = getStationInfo(primaryStationId);
 
         regionalData[region.id] = {
           region: region.name,
           temperature: avgTemperature,
           humidity: avgHumidity,
           rainfall: totalRainfall,
-          windDirection: weatherData.current?.windDirection,
-          stationName: stationInfo?.name || primaryStation.name,
-          stationCount: stationData.length,
+          windDirection: weatherData.data.forecast?.general?.wind?.direction || '--',
+          stationName: stationInfo?.name || `Station ${primaryStationId}`,
+          stationCount: Math.max(stationTemps.length, stationHumidity.length),
           lastUpdate: weatherData.timestamp
         };
       } else {
-        // 데이터가 없는 경우 평균 데이터 사용
+        // 데이터가 없는 경우 전체 평균 데이터 사용
         regionalData[region.id] = {
           region: region.name,
-          temperature: weatherData.current?.temperature,
-          humidity: weatherData.current?.humidity,
-          rainfall: weatherData.current?.rainfall || 0,
-          windDirection: weatherData.current?.windDirection,
+          temperature: weatherData.data.temperature?.average || null,
+          humidity: weatherData.data.humidity?.average || null,
+          rainfall: weatherData.data.rainfall?.total || 0,
+          windDirection: weatherData.data.forecast?.general?.wind?.direction || '--',
           stationName: '평균 데이터',
           stationCount: 0,
           lastUpdate: weatherData.timestamp
