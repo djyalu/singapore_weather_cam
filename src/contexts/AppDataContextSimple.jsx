@@ -10,7 +10,7 @@ const useSimpleDataLoader = (refreshInterval) => {
   const [error, setError] = useState(null);
   const [lastFetch, setLastFetch] = useState(new Date());
 
-  const loadData = async (isBackgroundRefresh = false) => {
+  const loadData = async (isBackgroundRefresh = false, forceRealtime = false) => {
     try {
       // 백그라운드 새로고침이 아닌 경우에만 로딩 상태 표시
       if (!isBackgroundRefresh) {
@@ -21,11 +21,64 @@ const useSimpleDataLoader = (refreshInterval) => {
       const basePath = import.meta.env.BASE_URL || '/';
       const timestamp = new Date().getTime();
 
-      // Load weather data
+      // Load weather data - 실시간 강제 새로고침 시 NEA API 직접 호출
       try {
-        const weatherResponse = await fetch(`${basePath}data/weather/latest.json?t=${timestamp}`);
-        if (weatherResponse.ok) {
-          const weatherJson = await weatherResponse.json();
+        let weatherJson = null;
+        
+        if (forceRealtime) {
+          console.log('🔄 Force refresh: Attempting real-time NEA API call...');
+          
+          // NEA Singapore API 직접 호출 시도
+          try {
+            const neaApiUrl = 'https://api.data.gov.sg/v1/environment/air-temperature';
+            const neaResponse = await fetch(neaApiUrl, {
+              headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'Singapore-Weather-Cam/1.0'
+              },
+              timeout: 10000
+            });
+            
+            if (neaResponse.ok) {
+              const neaData = await neaResponse.json();
+              console.log('✅ Real-time NEA data fetched successfully');
+              
+              // NEA API 응답을 우리 형식으로 변환
+              weatherJson = {
+                timestamp: new Date().toISOString(),
+                source: "NEA Singapore (Real-time)",
+                collection_time_ms: Date.now() - timestamp,
+                api_calls: 1,
+                successful_calls: 1,
+                failed_calls: 0,
+                data: {
+                  temperature: {
+                    readings: neaData.items?.[0]?.readings?.map(reading => ({
+                      station: reading.station_id,
+                      value: reading.value
+                    })) || []
+                  },
+                  humidity: { readings: [] },
+                  rainfall: { readings: [] },
+                  wind: { readings: [] }
+                }
+              };
+            } else {
+              throw new Error(`NEA API responded with ${neaResponse.status}`);
+            }
+          } catch (neaError) {
+            console.warn('⚠️ Real-time NEA API failed:', neaError.message);
+            throw neaError;
+          }
+        } else {
+          // 일반 로딩: 로컬 파일 사용
+          const weatherResponse = await fetch(`${basePath}data/weather/latest.json?t=${timestamp}`);
+          if (weatherResponse.ok) {
+            weatherJson = await weatherResponse.json();
+          }
+        }
+        
+        if (weatherJson) {
           // Transform NEA API data to UI-friendly format
           const transformedWeatherData = transformWeatherData(weatherJson);
           setWeatherData(transformedWeatherData);
@@ -33,16 +86,36 @@ const useSimpleDataLoader = (refreshInterval) => {
           // 개발 모드에서만 로깅
           if (import.meta.env.MODE === 'development') {
             console.log('🌤️ Weather data loaded and transformed:', {
+              source: weatherJson.source,
               temperature: transformedWeatherData.current?.temperature,
               locations: transformedWeatherData.locations?.length,
-              timestamp: transformedWeatherData.timestamp
+              timestamp: transformedWeatherData.timestamp,
+              isRealtime: forceRealtime
             });
           }
         }
       } catch (err) {
-        // Only log in development mode
-        if (import.meta.env.MODE === 'development') {
-          console.warn('Weather data load failed:', err);
+        // 실시간 API 실패 시 로컬 파일로 폴백
+        if (forceRealtime) {
+          console.log('🔄 Real-time API failed, falling back to cached data...');
+          try {
+            const fallbackResponse = await fetch(`${basePath}data/weather/latest.json?t=${timestamp}`);
+            if (fallbackResponse.ok) {
+              const fallbackJson = await fallbackResponse.json();
+              const transformedWeatherData = transformWeatherData(fallbackJson);
+              setWeatherData(transformedWeatherData);
+              setError('실시간 데이터 가져오기 실패 - 캐시된 데이터 사용 중');
+            }
+          } catch (fallbackErr) {
+            console.warn('Fallback data load also failed:', fallbackErr);
+            setError('날씨 데이터를 불러올 수 없습니다');
+          }
+        } else {
+          // Only log in development mode
+          if (import.meta.env.MODE === 'development') {
+            console.warn('Weather data load failed:', err);
+          }
+          setError('날씨 데이터 로딩 실패');
         }
       }
 
@@ -75,7 +148,8 @@ const useSimpleDataLoader = (refreshInterval) => {
     loading,
     error,
     lastFetch,
-    refresh: () => loadData(false), // 수동 새로고침은 스피너 표시
+    refresh: () => loadData(false, false), // 수동 새로고침 (캐시된 데이터)
+    forceRefresh: () => loadData(false, true), // 강제 새로고침 (실시간 API)
     isInitialLoading: loading && !weatherData,
     isRefreshing: false // 백그라운드 새로고침은 숨김
   };
@@ -88,6 +162,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     error,
     lastFetch,
     refresh,
+    forceRefresh,
     isInitialLoading,
     isRefreshing
   } = useSimpleDataLoader(refreshInterval);
@@ -132,7 +207,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     // Actions
     actions: {
       refresh,
-      forceRefresh: refresh,
+      forceRefresh,
       trackPageView: () => {},
       trackUserInteraction: () => {},
     },
@@ -160,6 +235,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     error,
     lastFetch,
     refresh,
+    forceRefresh,
   ]);
 
   return (
@@ -192,6 +268,7 @@ export const useWeatherData = () => {
     isLoading: context.loading.isInitialLoading,
     error: context.error.error,
     refresh: context.actions.refresh,
+    forceRefresh: context.actions.forceRefresh,
     dataFreshness: context.freshness.dataFreshness,
   }));
 };

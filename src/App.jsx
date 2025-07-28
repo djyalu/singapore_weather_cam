@@ -28,12 +28,18 @@ const App = () => {
   const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']); // 선택된 지역들
 
   // Data hooks from context
-  const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather } = useWeatherData();
+  const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather, forceRefresh: forceRefetchWeather } = useWeatherData();
   // const appData = useAppData(); // Reserved for future use
 
   // Manual refresh only - Context handles auto-refresh
   const handleManualRefresh = () => {
     refetchWeather();
+    setLastUpdate(new Date());
+  };
+
+  // Force refresh - 실시간 NEA API 호출
+  const handleForceRefresh = () => {
+    forceRefetchWeather();
     setLastUpdate(new Date());
   };
 

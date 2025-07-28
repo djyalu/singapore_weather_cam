@@ -10,17 +10,35 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
   const [imageError, setImageError] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [currentImageUrl, setCurrentImageUrl] = useState(camera.image);
 
   // 이미지 로드 핸들러
   const handleImageLoad = () => {
     setImageLoading(false);
+    setImageError(false);
+    setRetryCount(0);
     // AI 분석 시작 (실제 구현에서는 API 호출)
     performAIAnalysis();
   };
 
   const handleImageError = () => {
     setImageLoading(false);
-    setImageError(true);
+    
+    // 재시도 로직 (최대 2회)
+    if (retryCount < 2) {
+      console.log(`🔄 Retrying image load for camera ${camera.id}, attempt ${retryCount + 1}`);
+      setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+        setImageLoading(true);
+        setImageError(false);
+        // 캐시 버스터를 추가해서 재시도
+        setCurrentImageUrl(`${camera.image}${camera.image.includes('?') ? '&' : '?'}retry=${retryCount + 1}&t=${Date.now()}`);
+      }, 1000 * (retryCount + 1)); // 1초, 2초 지연
+    } else {
+      console.error(`❌ Image load failed for camera ${camera.id} after ${retryCount + 1} attempts`);
+      setImageError(true);
+    }
   };
 
   // 실제 Cohere API 분석 데이터 가져오기
@@ -150,7 +168,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
         )}
         
         <img
-          src={`${camera.image}${camera.image.includes('?') ? '&' : '?'}t=${Date.now()}`}
+          src={currentImageUrl}
           alt={`${region.name} 교통 카메라`}
           className={`w-full h-full object-cover cursor-pointer transition-opacity duration-300 ${
             imageLoading ? 'opacity-0' : 'opacity-100'
@@ -161,8 +179,13 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
         />
         
         {imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-            <span className="text-gray-500 text-sm">이미지 로드 실패</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200">
+            <span className="text-gray-500 text-sm mb-2">
+              {retryCount >= 2 ? '이미지 로드 실패' : '이미지 재시도 중...'}
+            </span>
+            {retryCount < 2 && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+            )}
           </div>
         )}
 
@@ -407,7 +430,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     const fallbackCameras = [
       {
         id: '6710',
-        image: `https://images.data.gov.sg/api/traffic-images/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/hwa-chong-traffic.jpg?t=${Date.now()}`,
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/c08fc5ad-f86e-40bb-a833-b5ef49e54fb0.jpg',
         location: {
           latitude: 1.344205,
           longitude: 103.78577,
@@ -431,12 +454,12 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '1701',
-        image: `https://images.data.gov.sg/api/traffic-images/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/changi-camera.jpg?t=${Date.now()}`,
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/5671f037-0042-4732-84d3-5059e7f6cfa6.jpg',
         location: {
           latitude: 1.3644, // Changi Airport에 더 정확한 좌표
           longitude: 103.9915, // Changi Airport에 더 정확한 좌표
-          name: 'Changi Airport Terminal', 
-          description: 'Changi Airport 터미널 지역'
+          name: 'Changi Airport Area', 
+          description: 'Changi Airport 지역'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
@@ -506,7 +529,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '1703',
-        image: `https://images.data.gov.sg/api/traffic-images/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/north-camera.jpg?t=${Date.now()}`,
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/15daf950-86e1-45c9-9f57-3c4e2655fc11.jpg',
         location: {
           latitude: 1.4382, // 더 북쪽으로 이동 (Woodlands 지역)
           longitude: 103.7880, // 더 북쪽으로 이동
@@ -519,7 +542,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       // Changi 지역을 위한 추가 카메라 (더 정확한 위치)
       {
         id: '7797',
-        image: `https://images.data.gov.sg/api/traffic-images/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/changi-ecp.jpg?t=${Date.now()}`,
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/0c11ae6e-8c12-4978-89b8-0d36de8d5bc8.jpg',
         location: {
           latitude: 1.3500, // ECP Changi 지역
           longitude: 103.9800, // ECP Changi 지역
