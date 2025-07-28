@@ -4,10 +4,12 @@ name: Traffic Camera AI Analysis
 # Generates AI analysis data for real-time traffic conditions
 
 on:
-  schedule:
-    - cron: '15 */3 * * *'  # Every 3 hours at 15 minutes past the hour
   workflow_dispatch:
     inputs:
+      camera_ids:
+        description: 'Comma-separated camera IDs to analyze (e.g., 6710,2701,2703)'
+        required: false
+        default: '6710,2701,2703,1701,4712'
       force_analysis:
         description: 'Force AI analysis even if daily limit reached'
         type: boolean
