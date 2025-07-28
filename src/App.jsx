@@ -3,7 +3,7 @@ import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
-import TrafficCameraGallery from './components/webcam/TrafficCameraGallery';
+import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import { useWeatherData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
@@ -23,6 +23,7 @@ const App = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [selectedCamera, setSelectedCamera] = useState(null); // Camera selected from map
+  const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']); // 선택된 지역들
 
   // Data hooks from context
   const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather } = useWeatherData();
@@ -41,6 +42,11 @@ const App = () => {
   // 지역 선택 핸들러
   const handleRegionSelect = (regionId) => {
     setActiveRegion(regionId);
+  };
+
+  // 선택된 지역들 업데이트 핸들러 (RegionalWeatherDashboard에서 전달받음)
+  const handleSelectedRegionsChange = (newSelectedRegions) => {
+    setSelectedRegions(newSelectedRegions);
   };
 
   // 카메라 선택 핸들러 (지도에서 클릭 시)
@@ -85,33 +91,42 @@ const App = () => {
           weatherData={weatherData}
           onRegionSelect={handleRegionSelect}
           activeRegion={activeRegion}
+          onSelectedRegionsChange={handleSelectedRegionsChange}
           className="mb-8"
         />
 
         {/* 선택된 지역의 상세 정보는 상단 카드에서 표시 */}
-        <div className="space-y-6">
+        <div className="space-y-8">
 
-          {/* 교통 카메라 갤러리 - 향상된 실시간 모니터링 */}
-          <div className="card mb-6">
-            <div className="mb-4">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
-                🚗 실시간 교통 카메라
-              </h2>
-              <p className="text-sm text-gray-600">
-                싱가포르 전국 90개 교통 카메라 실시간 영상 (data.gov.sg)
-              </p>
-            </div>
-            <TrafficCameraGallery />
+          {/* 지역별 교통 카메라 - 선택된 날씨 지역과 연동 */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <RegionalTrafficCameras
+              selectedRegions={selectedRegions}
+              onCameraClick={handleCameraSelect}
+            />
           </div>
 
-          {/* 지도 뷰 */}
+          {/* 지도 뷰 - 크기 확대 */}
           <Suspense fallback={<LoadingFallback message="Loading map..." />}>
-            <MapView
-              weatherData={weatherData}
-              selectedRegion={activeRegion}
-              regionConfig={null}
-              onCameraSelect={handleCameraSelect}
-            />
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="p-4 border-b border-gray-200">
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  🗺️ 실시간 날씨 및 교통 지도
+                </h2>
+                <p className="text-sm text-gray-600">
+                  날씨 스테이션과 교통 카메라 위치 통합 보기
+                </p>
+              </div>
+              <div className="h-96 lg:h-[500px]">
+                <MapView
+                  weatherData={weatherData}
+                  selectedRegion={activeRegion}
+                  regionConfig={null}
+                  onCameraSelect={handleCameraSelect}
+                  className="h-full"
+                />
+              </div>
+            </div>
           </Suspense>
 
           {/* CCTV 기반 실시간 날씨 분석 */}

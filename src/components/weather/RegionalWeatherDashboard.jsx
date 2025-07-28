@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import RegionalWeatherCard from './RegionalWeatherCard';
 import { getStationInfo } from '../../config/weatherStations';
@@ -11,6 +11,7 @@ const RegionalWeatherDashboard = React.memo(({
   weatherData,
   onRegionSelect,
   activeRegion = 'hwa-chong',
+  onSelectedRegionsChange,
   className = ''
 }) => {
   // 사용 가능한 모든 지역 (실제 온도 데이터가 있는 스테이션 기준)
@@ -75,6 +76,13 @@ const RegionalWeatherDashboard = React.memo(({
 
   // 선택된 지역 상태 (기본값: Hwa Chong, Newton, Changi)
   const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']);
+
+  // 컴포넌트 마운트 시 초기 선택된 지역들을 App.jsx에 알림
+  useEffect(() => {
+    if (onSelectedRegionsChange) {
+      onSelectedRegionsChange(selectedRegions);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 지역별 날씨 데이터 가져오기 (변환된 데이터 구조에 맞춤)
   const getRegionalWeatherData = useMemo(() => {
@@ -233,7 +241,10 @@ const RegionalWeatherDashboard = React.memo(({
                 onClick={() => {
                   if (!selectedRegions.includes(region.id)) {
                     // 새 지역 선택 - 항상 3개 유지, 가장 오래된 것 교체
-                    setSelectedRegions(prev => [...prev.slice(1), region.id]);
+                    const newSelectedRegions = [...selectedRegions.slice(1), region.id];
+                    setSelectedRegions(newSelectedRegions);
+                    // App.jsx에 변경사항 알림
+                    onSelectedRegionsChange?.(newSelectedRegions);
                   }
                 }}
                 title={region.description}
@@ -306,6 +317,7 @@ RegionalWeatherDashboard.propTypes = {
   }),
   onRegionSelect: PropTypes.func,
   activeRegion: PropTypes.string,
+  onSelectedRegionsChange: PropTypes.func,
   className: PropTypes.string,
 };
 
