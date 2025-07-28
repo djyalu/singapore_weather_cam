@@ -54,14 +54,42 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
 
   const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
 
-  const getAreaFromCameraId = (cameraId) => {
-    const id = cameraId.toString();
-    if (id.startsWith('17')) return 'North';
-    if (id.startsWith('27')) return 'Central';
-    if (id.startsWith('37')) return 'East';
-    if (id.startsWith('47')) return 'West';
-    if (id.startsWith('67')) return 'PIE';
-    return 'Singapore';
+  const getAreaFromCoordinates = (lat, lng) => {
+    // Singapore 실제 지역 경계 기반 분류
+    if (lat >= 1.4000) return 'North'; // 북부 (Woodlands, Yishun)
+    if (lat <= 1.2500) return 'South'; // 남부 (Sentosa, Marina Bay)
+    if (lng <= 103.7500) return 'West'; // 서부 (Jurong, Tuas)
+    if (lng >= 103.9000) return 'East'; // 동부 (Changi, Pasir Ris)
+    return 'Central'; // 중부 (Orchard, CBD)
+  };
+
+  const getLocationName = (lat, lng, cameraId) => {
+    // 좌표 기반 실제 위치명 생성
+    const area = getAreaFromCoordinates(lat, lng);
+    
+    // 알려진 랜드마크 근처 확인 (100m 내)
+    const landmarks = [
+      { name: 'Marina Bay', lat: 1.2741, lng: 103.8513, radius: 0.01 },
+      { name: 'Orchard Road', lat: 1.3048, lng: 103.8318, radius: 0.01 },
+      { name: 'Changi Airport', lat: 1.3644, lng: 103.9915, radius: 0.02 },
+      { name: 'Woodlands', lat: 1.4380, lng: 103.7850, radius: 0.02 },
+      { name: 'Jurong', lat: 1.3204, lng: 103.7065, radius: 0.02 },
+      { name: 'Bukit Timah', lat: 1.3520, lng: 103.7767, radius: 0.02 },
+      { name: 'Sentosa', lat: 1.2494, lng: 103.8303, radius: 0.015 },
+      { name: 'CBD', lat: 1.2884, lng: 103.8470, radius: 0.015 }
+    ];
+    
+    for (const landmark of landmarks) {
+      const distance = Math.sqrt(
+        Math.pow(lat - landmark.lat, 2) + Math.pow(lng - landmark.lng, 2)
+      );
+      if (distance <= landmark.radius) {
+        return `${landmark.name} (${cameraId})`;
+      }
+    }
+    
+    // 랜드마크와 매치되지 않으면 지역명 + 카메라 ID 사용
+    return `${area} Traffic Cam ${cameraId}`;
   };
 
   const loadTrafficCameras = async () => {
@@ -97,45 +125,7 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
           throw new Error('Invalid camera data structure');
         }
         
-        const cameraNames = {
-          '1701': 'Woodlands Causeway',
-          '1702': 'Woodlands Checkpoint', 
-          '1703': 'BKE Woodlands Flyover',
-          '1704': 'BKE Dairy Farm',
-          '1705': 'BKE Sungei Kadut',
-          '1706': 'BKE Mandai',
-          '1707': 'KJE BC Exit',
-          '1709': 'Changi Airport',
-          '2701': 'Sentosa Gateway',
-          '2702': 'West Coast Highway',
-          '2703': 'ECP Marina Bay',
-          '2704': 'Orchard Boulevard',
-          '2705': 'Marina Coastal Drive',
-          '2706': 'ECP Fort Road',
-          '2707': 'Fullerton Road',
-          '2708': 'Marina Boulevard',
-          '3701': 'Central Boulevard',
-          '3702': 'PIE Tuas',
-          '3704': 'PIE Kim Keat',
-          '3705': 'PIE Eunos',
-          '4701': 'AYE After Tuas',
-          '4702': 'AYE Keppel',
-          '4703': 'TPE Punggol',
-          '4704': 'TPE Seletar',
-          '4705': 'TPE Sengkang',
-          '4706': 'TPE Tampines',
-          '4707': 'CTE Braddell',
-          '4708': 'CTE Ang Mo Kio',
-          '4709': 'CTE Yishun',
-          '4710': 'Tuas Second Link',
-          '4712': 'MCE Marina Bay',
-          '4713': 'MCE Maxwell',
-          '4714': 'MCE MBFC',
-          '4716': 'MCE Bayfront',
-          '6710': 'PIE Bukit Timah',
-          '6711': 'PIE Clementi',
-          '6712': 'PIE Jurong',
-        };
+        // 하드코딩된 카메라 이름 제거하고 좌표 기반 동적 생성 사용
 
         const processedCameras = latestItem.cameras
           .filter(camera => 
@@ -145,23 +135,27 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
             typeof camera.location.latitude === 'number' &&
             typeof camera.location.longitude === 'number'
           )
-          .map(camera => ({
-            id: camera.camera_id,
-            name: cameraNames[camera.camera_id] || `Traffic Camera ${camera.camera_id}`,
-            area: getAreaFromCameraId(camera.camera_id),
-            location: {
-              latitude: parseFloat(camera.location.latitude),
-              longitude: parseFloat(camera.location.longitude),
-            },
-            image: {
-              url: camera.image,
-              width: camera.image_metadata?.width || 0,
-              height: camera.image_metadata?.height || 0,
-            },
-            timestamp: camera.timestamp,
-            quality: (camera.image_metadata?.width >= 1920) ? 'HD' : 'Standard',
-            status: 'active',
-          }));
+          .map(camera => {
+            const lat = parseFloat(camera.location.latitude);
+            const lng = parseFloat(camera.location.longitude);
+            return {
+              id: camera.camera_id,
+              name: getLocationName(lat, lng, camera.camera_id),
+              area: getAreaFromCoordinates(lat, lng),
+              location: {
+                latitude: lat,
+                longitude: lng,
+              },
+              image: {
+                url: camera.image,
+                width: camera.image_metadata?.width || 0,
+                height: camera.image_metadata?.height || 0,
+              },
+              timestamp: camera.timestamp,
+              quality: (camera.image_metadata?.width >= 1920) ? 'HD' : 'Standard',
+              status: 'active',
+            };
+          });
         
         setTrafficCameras(processedCameras);
       } catch (error) {
@@ -169,22 +163,23 @@ const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', r
           setTrafficError(error.message);
         }
         
+        // 실제 API 데이터를 가져올 수 없는 경우의 fallback
         const mockCameras = [
           {
-            id: '2703',
-            name: 'ECP Marina Bay',
-            area: 'Marina Bay',
-            location: { latitude: 1.2740, longitude: 103.8518 },
+            id: '1501',
+            name: getLocationName(1.2741, 103.8513, '1501'),
+            area: getAreaFromCoordinates(1.2741, 103.8513),
+            location: { latitude: 1.2741, longitude: 103.8513 },
             image: { url: '', width: 1920, height: 1080 },
             timestamp: new Date().toISOString(),
             quality: 'HD',
             status: 'active',
           },
           {
-            id: '2704',
-            name: 'Orchard Boulevard',
-            area: 'Orchard',
-            location: { latitude: 1.3048, longitude: 103.8318 },
+            id: '6710',
+            name: getLocationName(1.3442, 103.7858, '6710'),
+            area: getAreaFromCoordinates(1.3442, 103.7858),
+            location: { latitude: 1.3442, longitude: 103.7858 },
             image: { url: '', width: 1920, height: 1080 },
             timestamp: new Date().toISOString(),
             quality: 'HD',
