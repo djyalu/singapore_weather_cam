@@ -4,11 +4,13 @@ name: Traffic Camera Monitor (Disabled)
 # This workflow is disabled but kept for reference
 
 on:
+  # Disabled scheduled runs - webcam functionality replaced with real-time traffic cameras
   # schedule:
   #   - cron: '15 */3 * * *'
   workflow_dispatch:
     inputs:
-      capture_mode:
+      notice:
+        description: 'This workflow has been disabled'
         type: choice
         options: [disabled]
         default: disabled
@@ -25,128 +27,15 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
+      - name: Webcam functionality disabled
         run: |
-          npm ci --prefer-offline --no-audit --silent
-          echo "✅ Dependencies installed"
-          echo "🚫 Puppeteer disabled for GitHub Actions environment"
-
-      - name: Create data directories
-        run: |
-          mkdir -p data/webcam
-          mkdir -p public/data/webcam
-          mkdir -p public/images/webcam
-
-      - name: Monitor traffic cameras
-        env:
-          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
-          CAPTURE_MODE: ${{ github.event.inputs.capture_mode || 'traffic_only' }}
-          TRAFFIC_ONLY_MODE: 'true'
-          MAX_CONCURRENT_CAPTURES: '12'
-        run: |
-          echo "🚗 Starting traffic camera monitoring..."
-          timeout 8m node scripts/capture-webcam.js || {
-            echo "⚠️ Traffic camera monitoring failed, creating fallback data"
-            
-            # Create minimal fallback data for traffic cameras
-            FALLBACK_TIME=$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')
-            cat > data/webcam/latest.json << EOF
-            {
-              "timestamp": "$FALLBACK_TIME",
-              "total_cameras": 90,
-              "successful_captures": 0,
-              "failed_captures": 0,
-              "captures": [],
-              "error": "Traffic camera service temporarily unavailable - automatic recovery in progress",
-              "status": "degraded",
-              "service_type": "traffic_cameras_only",
-              "next_attempt": "$(date -u -d '+3 hours' '+%Y-%m-%dT%H:%M:%S.000Z')"
-            }
-            EOF
-            echo "📝 Traffic camera fallback data created"
-          }
-
-      - name: Verify capture results
-        run: |
-          if [ -f "data/webcam/latest.json" ]; then
-            echo "✅ Webcam data processed successfully"
-            echo "File size: $(du -h data/webcam/latest.json | cut -f1)"
-            
-            # Count captured images
-            IMAGE_COUNT=$(find public/images/webcam -name "*.jpg" -type f 2>/dev/null | wc -l)
-            echo "Total images: $IMAGE_COUNT"
-          else
-            echo "❌ Webcam capture failed"
-            exit 1
-          fi
-
-      - name: Copy data to public directory
-        run: |
-          cp data/webcam/latest.json public/data/webcam/ 2>/dev/null || true
-
-      - name: Image cleanup
-        run: |
-          # Clean up images older than 7 days to save space
-          find public/images/webcam -name "*.jpg" -type f -mtime +7 -delete 2>/dev/null || true
-          
-          AFTER_COUNT=$(find public/images/webcam -name "*.jpg" -type f 2>/dev/null | wc -l)
-          echo "Images after cleanup: $AFTER_COUNT"
-
-      - name: Configure Git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Commit and push webcam data
-        run: |
-          git add data/webcam/ public/data/webcam/ public/images/webcam/
-          
-          if ! git diff --staged --quiet; then
-            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
-            
-            # Get capture stats
-            CAPTURE_STATS="0/0"
-            if [ -f "data/webcam/latest.json" ]; then
-              CAPTURE_STATS=$(node -pe "
-                try {
-                  const data = JSON.parse(require('fs').readFileSync('data/webcam/latest.json', 'utf8'));
-                  \`\${data.successful_captures || 0}/\${data.total_cameras || 0}\`;
-                } catch(e) { '0/0'; }
-              " 2>/dev/null || echo "0/0")
-            fi
-            
-            git commit -m "chore(traffic): Update traffic camera data - ${TIMESTAMP}
-
-Singapore traffic camera monitoring:
-- Cameras: ${CAPTURE_STATS}
-- Mode: ${{ github.event.inputs.capture_mode || 'traffic_only' }}
-- Schedule: Every 3 hours (traffic-focused)
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-            
-            git push
-            echo "✅ Webcam data committed and pushed successfully"
-          else
-            echo "ℹ️ No changes to commit"
-          fi
-
-      - name: Cleanup
-        if: always()
-        run: |
-          rm -rf node_modules/.cache 2>/dev/null || true
-          find public/images/webcam -name "*.tmp" -delete 2>/dev/null || true
-          echo "🧹 Cleanup completed"
+          echo "🚗 Webcam functionality has been replaced with real-time traffic camera system"
+          echo "📱 Traffic cameras provide better real-time monitoring via data.gov.sg API"
+          echo "✅ 90 traffic cameras are available through the web interface"
+          echo "🔄 No webcam capture needed - real-time API provides live images"
+          echo ""
+          echo "This workflow has been disabled to prevent unnecessary resource usage."
+          echo "The Singapore Weather Cam application now uses:"
+          echo "  - Real-time LTA traffic camera API (90 cameras)"
+          echo "  - Live weather data from NEA Singapore"
+          echo "  - Interactive map with real-time updates"
