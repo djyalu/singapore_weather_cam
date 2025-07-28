@@ -7,7 +7,6 @@ import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashbo
 import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
-import { formatDateSafely } from './components/common/SafeDateFormatter';
 
 // Lazy load heavy components for better performance
 const WeatherDashboard = lazy(() => import('./components/weather/WeatherDashboard'));
@@ -165,19 +164,7 @@ const App = () => {
         </div>
       </div>
       
-      <AppLayout
-        title=""
-        subtitle=""
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        lastUpdate={formatDateSafely(lastUpdate)}
-        isLoading={isInitialLoading}
-        hasError={hasError}
-        errorMessage={weatherError || webcamError}
-        onAdminToggle={() => setShowAdmin(!showAdmin)}
-        showAdmin={showAdmin}
-      >
+      <AppLayout>
         {renderContent()}
       </AppLayout>
     </EnhancedErrorBoundary>
