@@ -181,7 +181,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
               </div>
             </div>
             <div className="text-xs text-gray-500 text-center">
-              🤖 Claude AI 분석
+              🤖 Cohere AI 분석
             </div>
           </div>
         ) : (

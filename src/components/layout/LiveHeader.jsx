@@ -108,7 +108,7 @@ const LiveHeader = React.memo(({ systemStats = {} }) => {
                   <span>마지막 업데이트: {systemStats.lastUpdate || '정보 없음'}</span>
                 </div>
                 <div className="text-xs text-gray-500 space-y-1">
-                  <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🤖 Claude AI 분석</div>
+                  <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🤖 Cohere AI 분석</div>
                   <div>⚡ 처리시간: {systemStats.totalProcessingTime || '0초'} • 🔄 5분마다 업데이트</div>
                   {systemStats.averageConfidence > 0 && (
                     <div>🎯 평균 신뢰도: {systemStats.averageConfidence}%</div>
