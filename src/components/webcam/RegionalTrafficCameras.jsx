@@ -142,16 +142,54 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 지역별 카메라 매핑 (예시 - 실제로는 더 정확한 위치 기반 매핑 필요)
-  const regionCameraMapping = {
-    'hwa-chong': ['2701', '2702', '2703'], // Bukit Timah 지역
-    'newton': ['1001', '1002', '1003'],    // Newton 중부
-    'changi': ['4701', '4702', '4703'],    // Changi 동부
-    'jurong': ['5798', '5799', '6701'],    // Jurong 서부
-    'central': ['1111', '1112', '1113'],   // Central
-    'east': ['3701', '3702', '3703'],      // East Coast
-    'north': ['7001', '7002', '7003'],     // North
-    'south': ['8001', '8002', '8003']      // South
+  // 지역별 중심 좌표 (날씨 스테이션 기준)
+  const regionCoordinates = {
+    'hwa-chong': { lat: 1.3437, lng: 103.7640 }, // Hwa Chong International School
+    'newton': { lat: 1.3138, lng: 103.8420 },    // Newton MRT
+    'changi': { lat: 1.3644, lng: 103.9915 },    // Changi Airport
+    'jurong': { lat: 1.3496, lng: 103.7063 },    // Jurong West
+    'central': { lat: 1.3048, lng: 103.8318 },   // Central area
+    'east': { lat: 1.3048, lng: 103.9318 },      // East Coast
+    'north': { lat: 1.4382, lng: 103.7880 },     // North area
+    'south': { lat: 1.2494, lng: 103.8303 }      // South (Sentosa)
+  };
+
+  // 두 지점 간의 거리 계산 (Haversine formula)
+  const calculateDistance = (lat1, lng1, lat2, lng2) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // 지역에서 가장 가까운 카메라 찾기
+  const findNearestCamera = (regionId, availableCameras) => {
+    const regionCoord = regionCoordinates[regionId];
+    if (!regionCoord || !availableCameras.length) return null;
+
+    let nearestCamera = null;
+    let minDistance = Infinity;
+
+    availableCameras.forEach(camera => {
+      if (camera.location?.latitude && camera.location?.longitude) {
+        const distance = calculateDistance(
+          regionCoord.lat, regionCoord.lng,
+          camera.location.latitude, camera.location.longitude
+        );
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestCamera = camera;
+        }
+      }
+    });
+
+    return nearestCamera ? { camera: nearestCamera, distance: minDistance } : null;
   };
 
   // 교통 카메라 데이터 가져오기
@@ -173,32 +211,55 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     fetchCameras();
   }, []);
 
-  // 선택된 지역에 맞는 카메라 필터링
+  // 선택된 지역에 맞는 가장 가까운 카메라 찾기
   const selectedCameras = useMemo(() => {
     if (!cameras.length || !selectedRegions.length) return [];
 
+    console.log('🔍 RegionalTrafficCameras - Finding cameras for regions:', selectedRegions);
+    console.log('📷 Available cameras count:', cameras.length);
+
     const result = [];
+    const usedCameras = new Set(); // 중복 방지
     
     selectedRegions.forEach(regionId => {
-      const cameraIds = regionCameraMapping[regionId] || [];
+      console.log(`🎯 Finding camera for region: ${regionId}`);
       
-      // 해당 지역의 첫 번째 카메라 찾기
-      for (const cameraId of cameraIds) {
-        const camera = cameras.find(cam => cam.id.toString() === cameraId);
-        if (camera) {
-          result.push({ camera, regionId });
-          break; // 지역당 1개만
-        }
-      }
+      // 사용되지 않은 카메라들 중에서 가장 가까운 것 찾기
+      const availableCameras = cameras.filter(cam => !usedCameras.has(cam.id));
+      const nearestResult = findNearestCamera(regionId, availableCameras);
       
-      // 매핑된 카메라가 없으면 랜덤으로 선택
-      if (!result.find(item => item.regionId === regionId)) {
-        const randomCamera = cameras[Math.floor(Math.random() * cameras.length)];
-        if (randomCamera && !result.find(item => item.camera.id === randomCamera.id)) {
-          result.push({ camera: randomCamera, regionId });
+      if (nearestResult) {
+        console.log(`✅ Found nearest camera for ${regionId}:`, {
+          id: nearestResult.camera.id,
+          name: nearestResult.camera.location?.description || nearestResult.camera.location?.name,
+          distance: `${nearestResult.distance.toFixed(2)}km`
+        });
+        
+        result.push({ 
+          camera: nearestResult.camera, 
+          regionId,
+          distance: nearestResult.distance 
+        });
+        usedCameras.add(nearestResult.camera.id);
+      } else {
+        console.log(`⚠️ No camera found for region: ${regionId}`);
+        
+        // 폴백: 사용되지 않은 랜덤 카메라 선택
+        const availableRandomCameras = cameras.filter(cam => !usedCameras.has(cam.id));
+        if (availableRandomCameras.length > 0) {
+          const randomCamera = availableRandomCameras[0]; // 첫 번째 사용 가능한 카메라
+          console.log(`🔄 Fallback camera for ${regionId}:`, randomCamera.id);
+          result.push({ camera: randomCamera, regionId, distance: null });
+          usedCameras.add(randomCamera.id);
         }
       }
     });
+
+    console.log('📊 Final selected cameras:', result.map(item => ({
+      region: item.regionId,
+      cameraId: item.camera.id,
+      distance: item.distance ? `${item.distance.toFixed(2)}km` : 'fallback'
+    })));
 
     return result.slice(0, 3); // 최대 3개
   }, [cameras, selectedRegions]);
@@ -263,13 +324,23 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
 
       {/* 카메라 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {selectedCameras.map(({ camera, regionId }, index) => (
-          <RegionalCameraCard
-            key={`${regionId}-${camera.id}`}
-            camera={camera}
-            region={regionInfo[regionId]}
-            onImageClick={onCameraClick}
-          />
+        {selectedCameras.map(({ camera, regionId, distance }, index) => (
+          <div key={`${regionId}-${camera.id}`} className="relative">
+            <RegionalCameraCard
+              camera={camera}
+              region={{
+                ...regionInfo[regionId],
+                distance: distance
+              }}
+              onImageClick={onCameraClick}
+            />
+            {/* 거리 정보 표시 */}
+            {distance && (
+              <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-lg text-xs">
+                📍 {distance.toFixed(1)}km
+              </div>
+            )}
+          </div>
         ))}
       </div>
 
