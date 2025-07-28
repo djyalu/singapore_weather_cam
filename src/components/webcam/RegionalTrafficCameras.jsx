@@ -325,11 +325,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     fetchCameras();
   }, []);
 
-  // 폴백 카메라 데이터 생성 (실제 Singapore 교통 카메라 API 사용)
+  // 폴백 카메라 데이터 생성 (실제 AI 분석 데이터와 일치하도록 수정)
   const generateFallbackCameras = () => {
     const currentTimestamp = new Date().toISOString();
     
-    // 실제 작동하는 Singapore 교통 카메라 - API에서 확인된 이미지 URL
+    // 실제 AI 분석 데이터와 매칭되는 카메라 정보 (latest.json과 일치)
     const fallbackCameras = [
       {
         id: '6710',
@@ -337,8 +337,8 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         location: {
           latitude: 1.344205,
           longitude: 103.78577,
-          name: 'PIE Bukit Timah',
-          description: 'Hwa Chong International School 인근'
+          name: 'PIE (BKE) - Bukit Timah Rd',
+          description: 'Bukit Timah Road 인근 (Hwa Chong 근처)'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
@@ -349,8 +349,8 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         location: {
           latitude: 1.3138,
           longitude: 103.8420,
-          name: 'Newton Road',
-          description: 'Newton MRT 인근'
+          name: 'Newton Circus',
+          description: 'Newton MRT Station 인근'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
@@ -361,56 +361,8 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         location: {
           latitude: 1.3644,
           longitude: 103.9915,
-          name: 'Changi Airport T2', 
-          description: 'Changi Airport 터미널 2'
-        },
-        timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
-      },
-      {
-        id: '6712',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/810a30ac-e2a1-428f-a584-ff3c3d53ea94.jpg',
-        location: {
-          latitude: 1.332691,
-          longitude: 103.770278,
-          name: 'PIE Jurong',
-          description: 'Jurong West 산업단지'
-        },
-        timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
-      },
-      {
-        id: '2703',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/e0463016-e443-430e-848c-4cdeb5bfb0bc.jpg',
-        location: {
-          latitude: 1.35047790791386,
-          longitude: 103.791033581325,
-          name: 'Central Boulevard',
-          description: '중부 도심 지역'
-        },
-        timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
-      },
-      {
-        id: '2706',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
-        location: {
-          latitude: 1.414142,
-          longitude: 103.771168,
-          name: 'ECP Fort Road',
-          description: 'East Coast Parkway'
-        },
-        timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
-      },
-      {
-        id: '1703',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/15daf950-86e1-45c9-9f57-3c4e2655fc11.jpg',
-        location: {
-          latitude: 1.32814722194857,
-          longitude: 103.862203282048,
-          name: 'BKE Sungei Kadut',
-          description: '북부 주거 지역'
+          name: 'Changi Airport Terminal 2', 
+          description: 'Changi Airport 터미널 2 지역'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
@@ -423,6 +375,18 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
           longitude: 103.7716543,
           name: 'Sentosa Gateway',
           description: 'Sentosa 및 남부 지역'
+        },
+        timestamp: currentTimestamp,
+        quality: 'HD 1920x1080'
+      },
+      {
+        id: '2703',
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/e0463016-e443-430e-848c-4cdeb5bfb0bc.jpg',
+        location: {
+          latitude: 1.35047790791386,
+          longitude: 103.791033581325,
+          name: 'Marina Bay - Central Boulevard',
+          description: 'Marina Bay 중부 도심 지역'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
