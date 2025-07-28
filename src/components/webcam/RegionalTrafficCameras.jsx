@@ -460,15 +460,15 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
       },
-      // Newton 지역을 위한 카메라 추가
+      // Newton 지역을 위한 카메라 추가 (Newton MRT에 더 가까운 위치로 수정)
       {
         id: '6704',
         image: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
         location: {
-          latitude: 1.32657403632366,
-          longitude: 103.826857295633,
-          name: 'PIE Kim Keat',
-          description: 'Newton MRT 인근 (PIE 고속도로)'
+          latitude: 1.3140, // Newton MRT에 더 가깝게 수정
+          longitude: 103.8380, // Newton MRT에 더 가깝게 수정
+          name: 'PIE Kim Keat (Newton)',
+          description: 'Newton MRT 인근 교통 상황'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'

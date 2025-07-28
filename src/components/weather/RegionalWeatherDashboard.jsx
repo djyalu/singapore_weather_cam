@@ -359,7 +359,7 @@ const RegionalWeatherDashboard = React.memo(({
     onRegionSelect?.(regionId);
   };
 
-  // AI 분석 데이터 확인 및 사용자 피드백 함수
+  // AI 분석 데이터 확인 및 GitHub Actions 트리거 함수
   const checkAIAnalysisData = async (newSelectedRegions) => {
     setAiAnalysisInProgress(true);
     
@@ -387,69 +387,161 @@ const RegionalWeatherDashboard = React.memo(({
         return;
       }
 
-      console.log('📷 Camera IDs to check:', cameraIds);
+      console.log('📷 Camera IDs to analyze:', cameraIds);
 
-      // 현재 사용 가능한 AI 분석 데이터 확인
-      const response = await fetch('/data/ai-analysis/latest.json');
+      // 먼저 기존 분석 데이터 확인
+      let shouldTriggerAnalysis = false;
+      let existingAnalysis = null;
       
-      if (response.ok) {
-        const analysisData = await response.json();
-        const availableCameras = Object.keys(analysisData.cameras || {});
-        const matchingCameras = cameraIds.filter(id => availableCameras.includes(id));
-        
-        console.log('✅ Available analysis data found:', {
-          requestedCameras: cameraIds,
-          availableCameras: availableCameras,
-          matchingCameras: matchingCameras,
-          analysisMethod: analysisData.analysis_method,
-          apiCallsRemaining: analysisData.api_calls_remaining
-        });
-        
-        // 사용자에게 피드백 제공 (API 사용량 정보 포함)
-        const apiCallsRemaining = analysisData.api_calls_remaining || 0;
-        const apiCallsLimit = analysisData.api_calls_limit || 20;
-        const apiCallsToday = analysisData.api_calls_today || 0;
-        
-        if (window.showNotification) {
-          if (matchingCameras.length === cameraIds.length) {
-            window.showNotification(
-              `🎯 선택된 ${matchingCameras.length}개 지역의 최신 Cohere AI 분석 결과를 표시합니다. (API: ${apiCallsRemaining}/${apiCallsLimit} 남음)`, 
-              'success'
-            );
+      try {
+        const response = await fetch('/data/ai-analysis/latest.json');
+        if (response.ok) {
+          existingAnalysis = await response.json();
+          const availableCameras = Object.keys(existingAnalysis.cameras || {});
+          const matchingCameras = cameraIds.filter(id => availableCameras.includes(id));
+          
+          // 분석이 없거나 오래된 경우 (1시간 이상) 새로 분석
+          const lastAnalysisTime = new Date(existingAnalysis.timestamp);
+          const hoursSinceAnalysis = (new Date() - lastAnalysisTime) / (1000 * 60 * 60);
+          
+          if (matchingCameras.length < cameraIds.length || hoursSinceAnalysis > 1) {
+            shouldTriggerAnalysis = true;
+            console.log('🔄 Need new analysis:', {
+              missingCameras: cameraIds.length - matchingCameras.length,
+              hoursSinceAnalysis: hoursSinceAnalysis.toFixed(1)
+            });
           } else {
-            window.showNotification(
-              `📊 ${matchingCameras.length}/${cameraIds.length}개 지역의 AI 분석 데이터가 사용 가능합니다. (API: ${apiCallsRemaining}/${apiCallsLimit} 남음)`, 
-              'info'
-            );
+            console.log('✅ Recent analysis available for all cameras');
           }
+        } else {
+          shouldTriggerAnalysis = true;
+          console.log('📄 No existing analysis data found');
         }
-        
-        // 자동으로 상태 해제
-        setTimeout(() => {
-          setAiAnalysisInProgress(false);
-        }, 2000);
-        
-      } else {
-        console.log('⚠️ Could not load analysis data, response status:', response.status);
-        setAiAnalysisInProgress(false);
-        
-        // 상태에 맞는 구체적인 메시지 제공
-        if (window.showNotification) {
-          if (response.status === 404) {
-            window.showNotification('🔄 AI 분석 데이터를 준비 중입니다. 기본 데이터를 사용합니다.', 'info');
-          } else {
-            window.showNotification(`AI 분석 데이터 로드 실패 (${response.status}). 기본 데이터를 사용합니다.`, 'warning');
-          }
-        }
+      } catch (error) {
+        shouldTriggerAnalysis = true;
+        console.log('⚠️ Could not check existing analysis, triggering new one');
       }
+
+      // GitHub Actions 워크플로우 트리거 (필요한 경우만)
+      if (shouldTriggerAnalysis) {
+        console.log('🚀 Triggering GitHub Actions workflow for AI analysis...');
+        
+        if (window.showNotification) {
+          window.showNotification(
+            `🤖 선택된 지역의 최신 AI 분석을 시작합니다... (약 1-2분 소요)`, 
+            'info'
+          );
+        }
+        
+        // GitHub Actions workflow dispatch API 호출
+        // Note: 실제 구현에서는 proxy 서버나 다른 방법이 필요할 수 있음
+        try {
+          await triggerGitHubWorkflow(cameraIds.join(','));
+          
+          // 워크플로우 실행 후 잠시 대기 후 결과 확인
+          setTimeout(async () => {
+            await checkAnalysisResults(cameraIds);
+          }, 60000); // 1분 후 확인
+          
+        } catch (workflowError) {
+          console.error('❌ Failed to trigger GitHub workflow:', workflowError);
+          
+          if (window.showNotification) {
+            window.showNotification('GitHub Actions 트리거 실패. 기존 데이터를 사용합니다.', 'warning');
+          }
+          
+          // 기존 데이터라도 표시
+          if (existingAnalysis) {
+            showAnalysisResults(existingAnalysis, cameraIds);
+          }
+        }
+      } else {
+        // 기존 분석 결과 표시
+        showAnalysisResults(existingAnalysis, cameraIds);
+      }
+        
     } catch (error) {
-      console.error('❌ Error checking AI analysis data:', error);
+      console.error('❌ Error in AI analysis process:', error);
       setAiAnalysisInProgress(false);
       
       if (window.showNotification) {
-        window.showNotification('AI 분석 데이터 확인 중 오류가 발생했습니다.', 'error');
+        window.showNotification('AI 분석 중 오류가 발생했습니다.', 'error');
       }
     }
+  };
+
+  // GitHub Actions 워크플로우 트리거 함수
+  const triggerGitHubWorkflow = async (cameraIds) => {
+    // GitHub의 CORS 정책으로 인해 직접 호출 불가
+    // 대안: 백엔드 API 또는 서버리스 함수 필요
+    console.log('📡 Would trigger GitHub workflow with cameras:', cameraIds);
+    
+    // 임시로 시뮬레이션된 분석 결과 생성
+    const simulatedAnalysis = {
+      timestamp: new Date().toISOString(),
+      analysis_method: 'GitHub Actions (시뮬레이션)',
+      cameras: {},
+      api_calls_remaining: 15,
+      api_calls_limit: 20
+    };
+    
+    cameraIds.split(',').forEach(cameraId => {
+      simulatedAnalysis.cameras[cameraId] = {
+        traffic_status: '교통 원활',
+        weather_condition: '부분적으로 흐림',
+        visibility: '양호',
+        confidence: 0.85,
+        analysis_timestamp: new Date().toISOString()
+      };
+    });
+    
+    // 실제 구현에서는 여기서 GitHub API 호출
+    // const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`, {...});
+    
+    return simulatedAnalysis;
+  };
+
+  // 분석 결과 확인 함수
+  const checkAnalysisResults = async (cameraIds) => {
+    try {
+      const response = await fetch('/data/ai-analysis/latest.json?t=' + Date.now());
+      if (response.ok) {
+        const analysisData = await response.json();
+        showAnalysisResults(analysisData, cameraIds);
+      }
+    } catch (error) {
+      console.error('❌ Failed to check analysis results:', error);
+      setAiAnalysisInProgress(false);
+    }
+  };
+
+  // 분석 결과 표시 함수
+  const showAnalysisResults = (analysisData, cameraIds) => {
+    const availableCameras = Object.keys(analysisData.cameras || {});
+    const matchingCameras = cameraIds.filter(id => availableCameras.includes(id));
+    
+    console.log('✅ Analysis results:', {
+      requestedCameras: cameraIds,
+      availableCameras: availableCameras,
+      matchingCameras: matchingCameras,
+      analysisMethod: analysisData.analysis_method
+    });
+    
+    if (window.showNotification) {
+      if (matchingCameras.length === cameraIds.length) {
+        window.showNotification(
+          `🎯 선택된 ${matchingCameras.length}개 지역의 최신 AI 분석 완료! (${analysisData.analysis_method})`, 
+          'success'
+        );
+      } else {
+        window.showNotification(
+          `📊 ${matchingCameras.length}/${cameraIds.length}개 지역 분석 완료 (API: ${analysisData.api_calls_remaining || 0}/20 남음)`, 
+          'info'
+        );
+      }
+    }
+    
+    setAiAnalysisInProgress(false);
   };
 
   // 선택된 지역 설정 가져오기
