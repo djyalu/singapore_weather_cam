@@ -280,11 +280,11 @@ const RegionalWeatherDashboard = React.memo(({
     try {
       console.log('🚀 Triggering AI analysis for regions:', newSelectedRegions);
       
-      // 지역별 대표 카메라 ID 매핑
+      // 지역별 대표 카메라 ID 매핑 (현재 분석 가능한 카메라로 업데이트)
       const regionToCameraMap = {
         'hwa-chong': '6710',  // PIE Bukit Timah (Hwa Chong 인근)
-        'newton': '4708',     // CTE Ang Mo Kio (Newton 인근)  
-        'changi': '1709',     // Changi Airport
+        'newton': '4712',     // 사용 가능한 카메라로 대체
+        'changi': '1701',     // 사용 가능한 카메라로 대체
         'jurong': '6712',     // PIE Jurong
         'central': '2703',    // Central Boulevard
         'east': '2706',       // ECP Fort Road
