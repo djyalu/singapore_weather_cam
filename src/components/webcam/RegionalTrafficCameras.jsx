@@ -440,15 +440,15 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
       },
-      // Jurong 지역을 위한 카메라 추가 (AI 분석 데이터에는 없지만 지역 매칭을 위해)
+      // Bukit Timah/Hwa Chong 지역을 위한 카메라 추가 (실제 위치 기준)
       {
         id: '6712',
         image: 'https://images.data.gov.sg/api/traffic-images/2025/07/810a30ac-e2a1-428f-a584-ff3c3d53ea94.jpg',
         location: {
           latitude: 1.332691,
           longitude: 103.770278,
-          name: 'PIE Jurong',
-          description: 'Jurong West 산업단지'
+          name: 'PIE Bukit Timah West',
+          description: 'Bukit Timah West 지역 (Hwa Chong 인근)'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
