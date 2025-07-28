@@ -1,0 +1,63 @@
+name: Fetch Real-time Traffic Cameras
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Every 10 minutes for real-time updates
+  workflow_dispatch:
+    inputs:
+      force_fetch:
+        description: 'Force fetch even if recent data exists'
+        type: boolean
+        default: false
+
+env:
+  NODE_ENV: production
+
+jobs:
+  fetch-traffic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch real-time traffic cameras
+        env:
+          FORCE_FETCH: ${{ inputs.force_fetch || 'false' }}
+        run: |
+          echo "📷 Fetching real-time Singapore traffic cameras..."
+          node scripts/fetch-realtime-traffic.js
+
+      - name: Commit traffic camera data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if [ -f "data/traffic-cameras/latest.json" ]; then
+            git add data/traffic-cameras/
+            git commit -m "feat: Update real-time traffic camera data
+
+            📷 Updated Singapore traffic cameras from data.gov.sg API
+            🕐 Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            🎯 Real-time data for accurate traffic monitoring
+            
+            Auto-updated every 10 minutes for live traffic status" || exit 0
+            git push
+            echo "✅ Real-time traffic data committed successfully"
+          else
+            echo "⚠️ No traffic camera data generated"
+          fi

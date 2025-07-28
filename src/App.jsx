@@ -114,6 +114,16 @@ const App = () => {
             />
           </div>
 
+          {/* CCTV 기반 실시간 날씨 분석 - 지도 상단으로 이동 */}
+          <Suspense fallback={<LoadingFallback message="Loading CCTV analysis..." />}>
+            <div id="cctv-analysis">
+              <HwaChongWeatherAnalysis 
+                className="mb-6" 
+                selectedCamera={selectedCamera}
+              />
+            </div>
+          </Suspense>
+
           {/* 지도 뷰 - 크기 확대 */}
           <Suspense fallback={<LoadingFallback message="Loading map..." />}>
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -134,16 +144,6 @@ const App = () => {
                   className="h-full"
                 />
               </div>
-            </div>
-          </Suspense>
-
-          {/* CCTV 기반 실시간 날씨 분석 */}
-          <Suspense fallback={<LoadingFallback message="Loading CCTV analysis..." />}>
-            <div id="cctv-analysis">
-              <HwaChongWeatherAnalysis 
-                className="mb-6" 
-                selectedCamera={selectedCamera}
-              />
             </div>
           </Suspense>
         </div>

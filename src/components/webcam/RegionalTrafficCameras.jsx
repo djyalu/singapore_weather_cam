@@ -329,12 +329,30 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     fetchApiUsageInfo();
   }, [selectedRegions]); // 지역 변경 시마다 업데이트
 
-  // 교통 카메라 데이터 가져오기
+  // 교통 카메라 데이터 가져오기 (실시간 우선, 폴백 지원)
   useEffect(() => {
     const fetchCameras = async () => {
       try {
         setLoading(true);
         console.log('🚗 Fetching traffic cameras...');
+        
+        // 1차 시도: 실시간 GitHub Actions 데이터
+        try {
+          const realtimeResponse = await fetch('/data/traffic-cameras/latest.json?t=' + Date.now());
+          if (realtimeResponse.ok) {
+            const realtimeData = await realtimeResponse.json();
+            if (realtimeData.cameras && realtimeData.cameras.length > 0) {
+              console.log('✅ Using real-time traffic data:', realtimeData.cameras.length, 'cameras');
+              setCameras(realtimeData.cameras);
+              setError(null);
+              return;
+            }
+          }
+        } catch (realtimeError) {
+          console.log('⚠️ Real-time data not available, trying API...');
+        }
+        
+        // 2차 시도: 직접 API 호출
         const data = await fetchTrafficCameras();
         console.log('📷 Traffic cameras received:', data?.cameras?.length || 0);
         
@@ -389,7 +407,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     const fallbackCameras = [
       {
         id: '6710',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/c08fc5ad-f86e-40bb-a833-b5ef49e54fb0.jpg',
+        image: `https://images.data.gov.sg/api/traffic-images/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/hwa-chong-traffic.jpg?t=${Date.now()}`,
         location: {
           latitude: 1.344205,
           longitude: 103.78577,
