@@ -105,7 +105,6 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     // Data state
     data: {
       weather: weatherData,
-      webcam: webcamData,
       systemStats,
     },
 
@@ -125,7 +124,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     // Data freshness
     freshness: {
       lastFetch,
-      dataFreshness: { weather: 'unknown', webcam: 'unknown' },
+      dataFreshness: { weather: 'unknown' },
       reliabilityMetrics: {},
       getReliabilityReport: () => ({}),
     },
@@ -154,7 +153,6 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     },
   }), [
     weatherData,
-    webcamData,
     systemStats,
     isInitialLoading,
     isRefreshing,
@@ -198,14 +196,6 @@ export const useWeatherData = () => {
   }));
 };
 
-export const useWebcamData = () => {
-  return useAppData(context => ({
-    webcamData: context.data.webcam,
-    isLoading: context.loading.isInitialLoading,
-    error: context.error.error,
-    refresh: context.actions.refresh,
-  }));
-};
 
 export const useSystemStatus = () => {
   return useAppData(context => ({

@@ -1,7 +1,7 @@
 /**
  * SystemStatus Component
  * Compact horizontal system health indicator for the top of the page
- * Shows key metrics: last update time, weather data status, webcam status
+ * Shows key metrics: last update time, weather data status, traffic camera status
  */
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -16,7 +16,6 @@ import { announceToScreenReader } from '../../utils/accessibility.js';
 const SystemStatus = React.memo(({
   lastFetch = null,
   weatherData = null,
-  webcamData = null,
   reliabilityMetrics = {},
   error = null,
   isRefreshing = false,
@@ -32,9 +31,7 @@ const SystemStatus = React.memo(({
     console.log('🚦 SystemStatus props:', {
       lastFetch,
       hasWeatherData: !!weatherData,
-      hasWebcamData: !!webcamData,
       weatherDataKeys: weatherData ? Object.keys(weatherData) : [],
-      webcamDataKeys: webcamData ? Object.keys(webcamData) : [],
       reliabilityMetrics,
       error,
       isRefreshing,
@@ -113,14 +110,12 @@ const SystemStatus = React.memo(({
   const getSystemStatus = () => {
     if (error) {return 'error';}
     if (isRefreshing) {return 'updating';}
-    if (!weatherData || !webcamData) {return 'loading';}
+    if (!weatherData) {return 'loading';}
 
     const weatherAge = weatherData?.reliabilityMetadata?.dataAge || 0;
-    const webcamAge = webcamData?.reliabilityMetadata?.dataAge || 0;
-    const maxAge = Math.max(weatherAge, webcamAge);
 
-    if (maxAge > INTERVALS.SYSTEM_HEALTH_CHECK * 6) {return 'stale';} // > 30 minutes
-    if (maxAge > INTERVALS.SYSTEM_HEALTH_CHECK * 3) {return 'warning';} // > 15 minutes
+    if (weatherAge > INTERVALS.SYSTEM_HEALTH_CHECK * 6) {return 'stale';} // > 30 minutes
+    if (weatherAge > INTERVALS.SYSTEM_HEALTH_CHECK * 3) {return 'warning';} // > 15 minutes
 
     return 'healthy';
   };
@@ -162,42 +157,6 @@ const SystemStatus = React.memo(({
     }
   }, [weatherData, reliabilityMetrics]);
 
-  // Get webcam data status - with safety checks
-  const getWebcamStatus = useCallback(() => {
-    try {
-      if (!webcamData) {
-        // Debug logging in development
-        if (import.meta.env.MODE === 'development') {
-          console.log('📷 WebcamStatus: No webcamData provided', { webcamData });
-        }
-        return 'offline';
-      }
-
-      const quality = reliabilityMetrics?.webcamQuality;
-      const dataAge = webcamData?.reliabilityMetadata?.dataAge || 0;
-
-      if (dataAge > INTERVALS.SYSTEM_HEALTH_CHECK * 6) {return 'stale';}
-      if (quality && quality < LIMITS.MIN_DATA_QUALITY) {return 'degraded';}
-
-      // Debug logging in development
-      if (import.meta.env.MODE === 'development') {
-        console.log('📷 WebcamStatus: online', { 
-          hasData: !!webcamData, 
-          dataAge, 
-          quality,
-          captures: webcamData?.captures?.length
-        });
-      }
-
-      return 'online';
-    } catch (error) {
-      // Use safe logging for production
-      if (import.meta.env.MODE === 'development') {
-        console.warn('getWebcamStatus error:', error);
-      }
-      return 'offline';
-    }
-  }, [webcamData, reliabilityMetrics]);
 
   // Enhanced error handling - memoized
   const handleDismissError = useCallback((errorId) => {
@@ -294,7 +253,6 @@ const SystemStatus = React.memo(({
 
   const errorState = getErrorState();
   const weatherStatus = getWeatherStatus();
-  const webcamStatus = getWebcamStatus();
   const timeSinceUpdate = getTimeSinceUpdate;
 
   // Show loading skeleton if initial loading
@@ -500,11 +458,12 @@ const SystemStatus = React.memo(({
                 index={0}
               />
 
+              {/* Traffic Camera status indicator */}
               <StatusIndicator
-                status={webcamStatus}
+                status="online"
                 icon={Camera}
-                label="Webcam"
-                tooltip={`Webcam data: ${webcamStatus} (Quality: ${Math.round((reliabilityMetrics.webcamQuality || 0) * 100)}%)`}
+                label="Traffic Cams"
+                tooltip="Traffic cameras: online (Real-time LTA data)"
                 index={1}
               />
 
@@ -641,8 +600,7 @@ const SystemStatus = React.memo(({
 
   // Compare object references first, then key properties if needed
   if (prevProps.error !== nextProps.error || 
-      prevProps.weatherData !== nextProps.weatherData ||
-      prevProps.webcamData !== nextProps.webcamData) {
+      prevProps.weatherData !== nextProps.weatherData) {
     return false;
   }
 
@@ -652,7 +610,6 @@ const SystemStatus = React.memo(({
   
   return (
     prevMetrics.weatherQuality === nextMetrics.weatherQuality &&
-    prevMetrics.webcamQuality === nextMetrics.webcamQuality &&
     prevMetrics.fallbackMode === nextMetrics.fallbackMode
   );
 });
@@ -660,10 +617,8 @@ const SystemStatus = React.memo(({
 SystemStatus.propTypes = {
   lastFetch: PropTypes.instanceOf(Date),
   weatherData: PropTypes.object,
-  webcamData: PropTypes.object,
   reliabilityMetrics: PropTypes.shape({
     weatherQuality: PropTypes.number,
-    webcamQuality: PropTypes.number,
     fallbackMode: PropTypes.bool,
     dataAge: PropTypes.number,
   }),

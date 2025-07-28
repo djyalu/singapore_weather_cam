@@ -49,6 +49,27 @@ const RegionalWeatherDashboard = React.memo(({
       stationIds: ['S43', 'S109'], // Kim Chuan & Newton
       description: 'Central Singapore 도심 지역',
       emoji: '🌆'
+    },
+    {
+      id: 'east',
+      name: 'East',
+      stationIds: ['S107', 'S24'], // East Coast 지역
+      description: 'East Coast 및 Marine Parade 지역',
+      emoji: '🏖️'
+    },
+    {
+      id: 'north',
+      name: 'North',
+      stationIds: ['S109', 'S115'], // North 지역
+      description: 'Woodlands 및 북부 지역',
+      emoji: '🌳'
+    },
+    {
+      id: 'south',
+      name: 'South',
+      stationIds: ['S60', 'S104'], // South 지역
+      description: 'Sentosa 및 남부 지역',
+      emoji: '🏝️'
     }
   ];
 

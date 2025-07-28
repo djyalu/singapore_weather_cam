@@ -19,12 +19,6 @@ const weatherIcon = L.divIcon({
   iconAnchor: [16, 32],
 });
 
-const webcamIcon = L.divIcon({
-  html: '<div class="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">📷</div>',
-  className: 'custom-div-icon',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-});
 
 const trafficCameraIcon = L.divIcon({
   html: '<div class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md border border-white">🚗</div>',
@@ -47,7 +41,7 @@ const schoolIcon = L.divIcon({
   iconAnchor: [20, 40],
 });
 
-const MapView = React.memo(({ weatherData, webcamData, selectedRegion = 'all', regionConfig = null, className = '' }) => {
+const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig = null, className = '' }) => {
   const [trafficCameras, setTrafficCameras] = useState([]);
   const [isLoadingTraffic, setIsLoadingTraffic] = useState(true);
   const [trafficError, setTrafficError] = useState(null);
@@ -400,27 +394,6 @@ MapView.propTypes = {
       humidity: PropTypes.number,
       rainfall: PropTypes.number,
       description: PropTypes.string,
-      priority: PropTypes.string,
-    })),
-  }),
-  webcamData: PropTypes.shape({
-    timestamp: PropTypes.string,
-    total_cameras: PropTypes.number,
-    successful_captures: PropTypes.number,
-    failed_captures: PropTypes.number,
-    captures: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      coordinates: PropTypes.shape({
-        lat: PropTypes.number,
-        lng: PropTypes.number,
-      }),
-      type: PropTypes.string,
-      status: PropTypes.string,
-      file_info: PropTypes.shape({
-        url: PropTypes.string,
-      }),
-      ai_analysis: PropTypes.object,
       priority: PropTypes.string,
     })),
   }),

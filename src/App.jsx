@@ -81,7 +81,17 @@ const App = () => {
         <div className="space-y-6">
 
           {/* 교통 카메라 갤러리 - 향상된 실시간 모니터링 */}
-          <TrafficCameraGallery />
+          <div className="card mb-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                🚗 실시간 교통 카메라
+              </h2>
+              <p className="text-sm text-gray-600">
+                싱가포르 전국 90개 교통 카메라 실시간 영상 (data.gov.sg)
+              </p>
+            </div>
+            <TrafficCameraGallery />
+          </div>
 
           {/* 지도 뷰 */}
           <Suspense fallback={<LoadingFallback message="Loading map..." />}>
