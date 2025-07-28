@@ -150,7 +150,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
         )}
         
         <img
-          src={camera.image}
+          src={`${camera.image}${camera.image.includes('?') ? '&' : '?'}t=${Date.now()}`}
           alt={`${region.name} 교통 카메라`}
           className={`w-full h-full object-cover cursor-pointer transition-opacity duration-300 ${
             imageLoading ? 'opacity-0' : 'opacity-100'
@@ -413,12 +413,12 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '1701',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/5671f037-0042-4732-84d3-5059e7f6cfa6.jpg',
+        image: `https://images.data.gov.sg/api/traffic-images/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/changi-camera.jpg?t=${Date.now()}`,
         location: {
-          latitude: 1.323604823,
-          longitude: 103.8587802,
-          name: 'Changi Airport Area', 
-          description: 'Changi Airport 지역'
+          latitude: 1.3644, // Changi Airport에 더 정확한 좌표
+          longitude: 103.9915, // Changi Airport에 더 정확한 좌표
+          name: 'Changi Airport Terminal', 
+          description: 'Changi Airport 터미널 지역'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
@@ -488,12 +488,25 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '1703',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/15daf950-86e1-45c9-9f57-3c4e2655fc11.jpg',
+        image: `https://images.data.gov.sg/api/traffic-images/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/north-camera.jpg?t=${Date.now()}`,
         location: {
-          latitude: 1.32814722194857,
-          longitude: 103.862203282048,
-          name: 'BKE Sungei Kadut',
-          description: '북부 주거 지역'
+          latitude: 1.4382, // 더 북쪽으로 이동 (Woodlands 지역)
+          longitude: 103.7880, // 더 북쪽으로 이동
+          name: 'BKE Woodlands North',
+          description: 'Woodlands 북부 주거 지역'
+        },
+        timestamp: currentTimestamp,
+        quality: 'HD 1920x1080'
+      },
+      // Changi 지역을 위한 추가 카메라 (더 정확한 위치)
+      {
+        id: '7797',
+        image: `https://images.data.gov.sg/api/traffic-images/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/changi-ecp.jpg?t=${Date.now()}`,
+        location: {
+          latitude: 1.3500, // ECP Changi 지역
+          longitude: 103.9800, // ECP Changi 지역
+          name: 'ECP Changi Link',
+          description: 'Changi Airport 연결 고속도로'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
