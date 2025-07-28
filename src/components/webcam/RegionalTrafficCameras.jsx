@@ -344,25 +344,25 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         quality: 'HD 1920x1080'
       },
       {
-        id: '4708', 
+        id: '4712', 
         image: 'https://images.data.gov.sg/api/traffic-images/2025/07/e7ca3b45-ee47-46dc-9fe6-379cd60fcffb.jpg',
         location: {
-          latitude: 1.29939,
-          longitude: 103.7799,
-          name: 'CTE Ang Mo Kio',
-          description: 'Newton MRT 주변'
+          latitude: 1.3138,
+          longitude: 103.8420,
+          name: 'Newton Road',
+          description: 'Newton MRT 인근'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
       },
       {
-        id: '1709',
+        id: '1701',
         image: 'https://images.data.gov.sg/api/traffic-images/2025/07/5671f037-0042-4732-84d3-5059e7f6cfa6.jpg',
         location: {
-          latitude: 1.31384231654635,
-          longitude: 103.845603032574,
-          name: 'Changi Airport', 
-          description: 'Changi Airport 주변'
+          latitude: 1.3644,
+          longitude: 103.9915,
+          name: 'Changi Airport T2', 
+          description: 'Changi Airport 터미널 2'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
