@@ -23,23 +23,72 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
     setImageError(true);
   };
 
-  // AI 분석 시뮬레이션 (실제로는 Claude Vision API 호출)
+  // 실제 Cohere API 분석 데이터 가져오기
   const performAIAnalysis = async () => {
     setAnalysisLoading(true);
     
-    // 시뮬레이션된 AI 분석 결과
-    setTimeout(() => {
+    try {
+      console.log(`🤖 Loading Cohere AI analysis for camera ${camera.id}...`);
+      
+      // GitHub Actions에서 생성된 실제 Cohere AI 분석 데이터 로드
+      const response = await fetch('/data/ai-analysis/latest.json');
+      
+      if (response.ok) {
+        const analysisData = await response.json();
+        const cameraAnalysis = analysisData.cameras?.[camera.id];
+        
+        if (cameraAnalysis) {
+          console.log(`✅ Found Cohere analysis for camera ${camera.id}`);
+          
+          // Cohere 데이터를 카드 UI 형식으로 변환
+          const transformedAnalysis = {
+            traffic: cameraAnalysis.traffic_status,
+            weather: cameraAnalysis.weather_condition,
+            visibility: cameraAnalysis.visibility,
+            confidence: cameraAnalysis.confidence,
+            details: cameraAnalysis.details,
+            aiModel: cameraAnalysis.ai_model,
+            timestamp: cameraAnalysis.analysis_timestamp
+          };
+          
+          setAiAnalysis(transformedAnalysis);
+          console.log(`🎯 Cohere analysis loaded:`, transformedAnalysis);
+        } else {
+          console.log(`⚠️ No Cohere analysis found for camera ${camera.id}, using fallback`);
+          // 해당 카메라의 분석이 없는 경우 일반적인 상태 표시
+          setAiAnalysis({
+            traffic: '분석 대기중',
+            weather: '확인중',
+            visibility: '대기중',
+            confidence: 0,
+            aiModel: 'Cohere Command API (대기중)',
+            note: '다음 분석 주기에서 업데이트 예정'
+          });
+        }
+      } else {
+        throw new Error('Analysis data not available');
+      }
+    } catch (error) {
+      console.error(`❌ Failed to load Cohere analysis:`, error);
+      
+      // API 실패 시 현재 시뮬레이션 유지
       const analysisResults = [
-        { traffic: '원활', weather: '맑음', visibility: '양호' },
-        { traffic: '보통', weather: '흐림', visibility: '보통' },
-        { traffic: '혼잡', weather: '맑음', visibility: '양호' },
-        { traffic: '원활', weather: '소나기', visibility: '불량' }
+        { traffic: '교통 원활', weather: '맑음', visibility: '양호' },
+        { traffic: '교통 혼잡', weather: '흐림', visibility: '보통' },
+        { traffic: '교통 정체중', weather: '맑음', visibility: '양호' },
+        { traffic: '교통량 적음', weather: '부분적으로 흐림', visibility: '양호' }
       ];
       
       const randomResult = analysisResults[Math.floor(Math.random() * analysisResults.length)];
-      setAiAnalysis(randomResult);
+      setAiAnalysis({
+        ...randomResult,
+        confidence: 0.75,
+        aiModel: 'Enhanced Simulation (Cohere API 일시 불가)',
+        note: 'Cohere API 연결 문제로 시뮬레이션 사용 중'
+      });
+    } finally {
       setAnalysisLoading(false);
-    }, 1500);
+    }
   };
 
   const getTrafficColor = (traffic) => {

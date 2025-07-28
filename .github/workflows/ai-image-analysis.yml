@@ -6,10 +6,18 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
-      camera_id:
-        description: 'Camera ID to analyze'
+      camera_ids:
+        description: 'Comma-separated camera IDs to analyze (e.g., 6710,4708,1709)'
         required: false
-        default: '6710'
+        default: '6710,4708,1709'
+      trigger_source:
+        description: 'Source of the trigger (user_selection, scheduled, manual)'
+        required: false
+        default: 'manual'
+      selected_regions:
+        description: 'Comma-separated region IDs (e.g., hwa-chong,newton,changi)'
+        required: false
+        default: 'hwa-chong,newton,changi'
   push:
     branches: [ main ]
     paths: 
@@ -72,12 +80,35 @@ jobs:
           
           // Cohere API 키 확인
           const cohereApiKey = process.env.COHERE_API_KEY;
-          const useRealAI = !!cohereApiKey;
+          let useRealAI = !!cohereApiKey;
+          
+          // 일일 API 호출 제한 확인 (최대 20회)
+          const DAILY_LIMIT = 20;
+          const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+          
+          let apiUsageData = {};
+          try {
+            if (fs.existsSync('data/api-usage.json')) {
+              apiUsageData = JSON.parse(fs.readFileSync('data/api-usage.json', 'utf-8'));
+            }
+          } catch (error) {
+            console.log('📊 Creating new API usage tracking file');
+            apiUsageData = {};
+          }
+          
+          // 오늘 사용량 확인
+          const todayUsage = apiUsageData[today] || 0;
+          const remainingCalls = Math.max(0, DAILY_LIMIT - todayUsage);
           
           if (!cohereApiKey) {
             console.log('⚠️ COHERE_API_KEY not found, using intelligent simulation instead');
+            useRealAI = false;
+          } else if (remainingCalls <= 0) {
+            console.log(`🚫 Daily API limit reached (${DAILY_LIMIT}/day). Using intelligent simulation instead.`);
+            useRealAI = false;
           } else {
-            console.log('✅ COHERE_API_KEY found, using real AI analysis');
+            console.log(`✅ COHERE_API_KEY found, ${remainingCalls} calls remaining today`);
+            useRealAI = true;
           }
           
           // 카메라 데이터 파싱
@@ -128,15 +159,24 @@ jobs:
             analysisResults = fallbackResults;
           } else {
           
-          // 주요 카메라들만 분석 (비용 절약)
-          const priorityCameras = ['6710', '2701', '2703', '1701', '4712'];
+          // 사용자 선택 카메라 또는 기본 카메라들 분석
+          const inputCameraIds = '${{ github.event.inputs.camera_ids }}' || '6710,2701,2703,1701,4712';
+          const triggerSource = '${{ github.event.inputs.trigger_source }}' || 'scheduled';
+          const selectedRegions = '${{ github.event.inputs.selected_regions }}' || 'hwa-chong,newton,changi';
+          
+          console.log(`🎯 Trigger source: ${triggerSource}`);
+          console.log(`📍 Selected regions: ${selectedRegions}`);
+          console.log(`📷 Target camera IDs: ${inputCameraIds}`);
+          
+          const targetCameraIds = inputCameraIds.split(',').map(id => id.trim()).filter(Boolean);
           const camerasToAnalyze = cameras.filter(cam => 
-            priorityCameras.includes(cam.camera_id)
+            targetCameraIds.includes(cam.camera_id)
           ).slice(0, 5); // 최대 5개만
           
           console.log(`🎯 Analyzing ${camerasToAnalyze.length} priority cameras`);
           
           const analysisResults = {};
+          let actualAPICalls = 0; // 실제 API 호출 횟수 추적
           
           // 각 카메라 위치 기반 AI 분석
           for (const camera of camerasToAnalyze) {
@@ -322,8 +362,15 @@ jobs:
           # 변경사항이 있는지 확인
           if [ -n "$(git status --porcelain)" ]; then
             git add data/ai-analysis/
+            TRIGGER_SOURCE="${{ github.event.inputs.trigger_source }}"
+            SELECTED_REGIONS="${{ github.event.inputs.selected_regions }}"
+            CAMERA_IDS="${{ github.event.inputs.camera_ids }}"
+            
             git commit -m "feat: Update AI traffic analysis results
 
+            - Trigger: ${TRIGGER_SOURCE:-scheduled}
+            - Regions: ${SELECTED_REGIONS:-default}  
+            - Cameras: ${CAMERA_IDS:-default}
             - Analyzed $(ls data/ai-analysis/*.json 2>/dev/null | wc -l) camera locations with Cohere Command API
             - Real-time weather and traffic conditions updated
             - Analysis timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")

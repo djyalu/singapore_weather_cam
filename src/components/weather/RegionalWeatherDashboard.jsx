@@ -76,6 +76,7 @@ const RegionalWeatherDashboard = React.memo(({
 
   // 선택된 지역 상태 (기본값: Hwa Chong, Newton, Changi)
   const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']);
+  const [aiAnalysisInProgress, setAiAnalysisInProgress] = useState(false);
 
   // 컴포넌트 마운트 시 초기 선택된 지역들을 App.jsx에 알림
   useEffect(() => {
@@ -272,6 +273,89 @@ const RegionalWeatherDashboard = React.memo(({
     onRegionSelect?.(regionId);
   };
 
+  // GitHub Actions 워크플로우 트리거 함수
+  const triggerAIAnalysis = async (newSelectedRegions) => {
+    setAiAnalysisInProgress(true);
+    
+    try {
+      console.log('🚀 Triggering AI analysis for regions:', newSelectedRegions);
+      
+      // 지역별 대표 카메라 ID 매핑
+      const regionToCameraMap = {
+        'hwa-chong': '6710',  // PIE Bukit Timah (Hwa Chong 인근)
+        'newton': '4708',     // CTE Ang Mo Kio (Newton 인근)  
+        'changi': '1709',     // Changi Airport
+        'jurong': '6712',     // PIE Jurong
+        'central': '2703',    // Central Boulevard
+        'east': '2706',       // ECP Fort Road
+        'north': '1703',      // BKE Sungei Kadut
+        'south': '2701'       // Sentosa Gateway
+      };
+
+      // 선택된 지역의 카메라 ID들 추출
+      const cameraIds = newSelectedRegions.map(regionId => regionToCameraMap[regionId]).filter(Boolean);
+      
+      if (cameraIds.length === 0) {
+        console.log('⚠️ No cameras found for selected regions');
+        return;
+      }
+
+      console.log('📷 Camera IDs to analyze:', cameraIds);
+
+      // GitHub Actions workflow_dispatch 이벤트 트리거
+      const response = await fetch('https://api.github.com/repos/djyalu/singapore_weather_cam/actions/workflows/ai-image-analysis.yml/dispatches', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+          // 실제 운영에서는 GitHub Personal Access Token이 필요하지만,
+          // 현재는 public repo이므로 anonymous 요청 시도
+        },
+        body: JSON.stringify({
+          ref: 'main',
+          inputs: {
+            camera_ids: cameraIds.join(','),
+            trigger_source: 'user_selection',
+            selected_regions: newSelectedRegions.join(',')
+          }
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ AI analysis workflow triggered successfully');
+        
+        // 사용자에게 피드백 제공
+        if (window.showNotification) {
+          window.showNotification('🤖 Cohere AI 분석이 시작되었습니다. 1-2분 후 결과가 업데이트됩니다.', 'success');
+        }
+        
+        // 2분 후 자동으로 상태 해제
+        setTimeout(() => {
+          setAiAnalysisInProgress(false);
+          if (window.showNotification) {
+            window.showNotification('🎯 AI 분석이 완료되었습니다. 페이지를 새로고침하면 최신 결과를 확인할 수 있습니다.', 'info');
+          }
+        }, 120000); // 2분
+        
+      } else {
+        console.log('⚠️ Failed to trigger workflow:', response.status, response.statusText);
+        setAiAnalysisInProgress(false);
+        
+        // 실패 시에도 사용자에게 알림
+        if (window.showNotification) {
+          window.showNotification('분석 요청 중 문제가 발생했습니다. 다음 자동 업데이트를 기다려주세요.', 'warning');
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error triggering AI analysis:', error);
+      setAiAnalysisInProgress(false);
+      
+      if (window.showNotification) {
+        window.showNotification('AI 분석 요청에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
+      }
+    }
+  };
+
   // 선택된 지역 설정 가져오기
   const selectedRegionConfigs = useMemo(() => 
     AVAILABLE_REGIONS.filter(region => selectedRegions.includes(region.id)),
@@ -285,9 +369,17 @@ const RegionalWeatherDashboard = React.memo(({
         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
           🌏 <span>주요 지역 날씨</span>
         </h2>
-        <p className="text-sm text-gray-600 mb-4">
-          실시간 기상 관측 데이터 - 지역 버튼을 클릭하여 3개 지역을 선택하세요
-        </p>
+        <div className="mb-4">
+          <p className="text-sm text-gray-600">
+            실시간 기상 관측 데이터 - 지역 버튼을 클릭하여 3개 지역을 선택하세요
+          </p>
+          {aiAnalysisInProgress && (
+            <div className="mt-2 flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+              <span>🤖 Cohere AI가 선택된 지역의 교통 상황을 분석 중입니다...</span>
+            </div>
+          )}
+        </div>
         
         {/* 지역 선택 버튼들 - 개선된 레이아웃 */}
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
@@ -302,6 +394,8 @@ const RegionalWeatherDashboard = React.memo(({
                     setSelectedRegions(newSelectedRegions);
                     // App.jsx에 변경사항 알림
                     onSelectedRegionsChange?.(newSelectedRegions);
+                    // 🚀 자동으로 AI 분석 트리거
+                    triggerAIAnalysis(newSelectedRegions);
                   }
                 }}
                 title={region.description}

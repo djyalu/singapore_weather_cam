@@ -7,6 +7,7 @@ import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import { useWeatherData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
+import './utils/notifications'; // 알림 시스템 초기화
 
 // Lazy load heavy components for better performance
 const WeatherDashboard = lazy(() => import('./components/weather/WeatherDashboard'));
