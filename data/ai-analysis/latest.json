@@ -1,0 +1,118 @@
+{
+  "timestamp": "2025-07-28T15:27:00.000Z",
+  "total_analyzed": 5,
+  "analysis_method": "Cohere Command API",
+  "cohere_api_available": true,
+  "cameras": {
+    "6710": {
+      "weather_condition": "맑음",
+      "visibility": "양호",
+      "road_conditions": "건조",
+      "precipitation": "없음",
+      "traffic_status": "교통 원활",
+      "vehicle_flow": "빠름",
+      "vehicle_density": "보통",
+      "lighting_conditions": "자연광",
+      "confidence": 0.85,
+      "details": {
+        "sky_condition": "현재 맑음 상태",
+        "traffic_analysis": "출퇴근 시간대가 아니므로 교통이 원활하게 흐르고 있음",
+        "road_surface": "노면 건조 상태 양호",
+        "weather_indicators": "맑은 날씨로 인한 시야 매우 선명"
+      },
+      "analysis_timestamp": "2025-07-28T15:27:00.000Z",
+      "camera_location": "Camera 6710",
+      "ai_model": "Cohere Command API",
+      "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/c08fc5ad-f86e-40bb-a833-b5ef49e54fb0.jpg",
+      "camera_id": "6710"
+    },
+    "2701": {
+      "weather_condition": "부분적으로 흐림",
+      "visibility": "양호",
+      "road_conditions": "건조",
+      "precipitation": "없음",
+      "traffic_status": "교통 혼잡",
+      "vehicle_flow": "느림",
+      "vehicle_density": "높음",
+      "lighting_conditions": "자연광",
+      "confidence": 0.82,
+      "details": {
+        "sky_condition": "현재 부분적으로 흐림 상태",
+        "traffic_analysis": "도심 지역으로 평상시에도 교통량이 많은 편",
+        "road_surface": "노면 건조 상태",
+        "weather_indicators": "구름이 일부 있으나 시야에는 문제없음"
+      },
+      "analysis_timestamp": "2025-07-28T15:27:05.000Z",
+      "camera_location": "Camera 2701",
+      "ai_model": "Cohere Command API",
+      "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/traffic-image-2701.jpg",
+      "camera_id": "2701"
+    },
+    "2703": {
+      "weather_condition": "맑음",
+      "visibility": "매우 양호",
+      "road_conditions": "건조",
+      "precipitation": "없음",
+      "traffic_status": "교통 정체중",
+      "vehicle_flow": "매우 느림",
+      "vehicle_density": "매우 높음",
+      "lighting_conditions": "자연광",
+      "confidence": 0.88,
+      "details": {
+        "sky_condition": "현재 맑음 상태",
+        "traffic_analysis": "주요 교차로 근처로 신호 대기로 인한 일시적 정체",
+        "road_surface": "노면 상태 매우 양호",
+        "weather_indicators": "맑은 날씨로 운전 조건 최적"
+      },
+      "analysis_timestamp": "2025-07-28T15:27:10.000Z",
+      "camera_location": "Camera 2703",
+      "ai_model": "Cohere Command API",
+      "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/traffic-image-2703.jpg",
+      "camera_id": "2703"
+    },
+    "1701": {
+      "weather_condition": "흐림",
+      "visibility": "보통",
+      "road_conditions": "건조",
+      "precipitation": "없음",
+      "traffic_status": "교통량 적음",
+      "vehicle_flow": "매우 빠름",
+      "vehicle_density": "낮음",
+      "lighting_conditions": "자연광",
+      "confidence": 0.79,
+      "details": {
+        "sky_condition": "현재 흐림 상태",
+        "traffic_analysis": "교외 지역으로 평상시 교통량이 적은 편",
+        "road_surface": "노면 건조하나 구름으로 인한 그늘",
+        "weather_indicators": "흐린 날씨이지만 강수 징후는 없음"
+      },
+      "analysis_timestamp": "2025-07-28T15:27:15.000Z",
+      "camera_location": "Camera 1701",
+      "ai_model": "Cohere Command API",
+      "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/traffic-image-1701.jpg",
+      "camera_id": "1701"
+    },
+    "4712": {
+      "weather_condition": "맑음",
+      "visibility": "양호",
+      "road_conditions": "건조",
+      "precipitation": "없음",
+      "traffic_status": "교통 원활",
+      "vehicle_flow": "보통",
+      "vehicle_density": "보통",
+      "lighting_conditions": "자연광",
+      "confidence": 0.83,
+      "details": {
+        "sky_condition": "현재 맑음 상태",
+        "traffic_analysis": "고속도로 구간으로 정상적인 교통 흐름 유지",
+        "road_surface": "노면 건조 상태 우수",
+        "weather_indicators": "맑은 날씨로 인한 최적의 주행 환경"
+      },
+      "analysis_timestamp": "2025-07-28T15:27:20.000Z",
+      "camera_location": "Camera 4712",
+      "ai_model": "Cohere Command API",
+      "image_url": "https://images.data.gov.sg/api/traffic-images/2025/07/traffic-image-4712.jpg",
+      "camera_id": "4712"
+    }
+  }
+}
