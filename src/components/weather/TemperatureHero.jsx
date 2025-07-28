@@ -493,10 +493,12 @@ const TemperatureHero = React.memo(({
             <div className="text-center sm:text-right animate-slide-in-right delay-1200">
               {primaryData.timestamp && (
                 <span className="font-mono text-xs sm:text-xs">
-                  Updated {new Date(primaryData.timestamp).toLocaleTimeString('en-SG', {
-                    hour: '2-digit',
-                    minute: '2-digit',
+                  Updated {new Date(primaryData.timestamp).toLocaleString('ko-KR', {
                     timeZone: 'Asia/Singapore',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
                   })}
                 </span>
               )}

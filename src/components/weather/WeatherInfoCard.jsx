@@ -68,7 +68,14 @@ const WeatherInfoCard = React.memo(({ weatherData, className = '' }) => {
             {weatherData.timestamp && (
               <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {new Date(weatherData.timestamp).toLocaleString('ko-KR')}
+                {new Date(weatherData.timestamp).toLocaleString('ko-KR', {
+                  timeZone: 'Asia/Singapore',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
               </p>
             )}
           </div>
