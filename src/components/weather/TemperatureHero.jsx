@@ -72,33 +72,41 @@ const TemperatureHero = React.memo(({
   // Error state handling
   if (error && !hasPartialData) {
     return (
-      <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 shadow-2xl ${className} animate-scale-in`}>
-        <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
+      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-500 via-rose-500 to-pink-600 shadow-2xl border border-red-300/20 ${className} animate-scale-in`}>
+        {/* Enhanced glassmorphism background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-red-300/10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.15),transparent_50%)]" />
 
-        <div className="relative p-4 sm:p-6 md:p-8 lg:p-12">
+        <div className="relative p-6 sm:p-8 md:p-10 lg:p-12">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <AlertTriangle className="w-12 h-12 text-white animate-pulse-slow" />
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="relative">
+                <AlertTriangle className="w-14 h-14 text-white animate-pulse-slow drop-shadow-lg" />
+                <div className="absolute inset-0 w-14 h-14 bg-white/20 rounded-full animate-ping" />
+              </div>
               <div className="text-white">
-                <h2 className="text-xl font-bold mb-1">Temperature Data Unavailable</h2>
-                <p className="text-white/80 text-sm">{ErrorUtils.getFriendlyMessage(error)}</p>
+                <h2 className="text-2xl font-bold mb-2 drop-shadow-md">온도 데이터 불가</h2>
+                <p className="text-white/90 text-base backdrop-blur-sm bg-white/10 px-4 py-2 rounded-lg">
+                  {ErrorUtils.getFriendlyMessage(error)}
+                </p>
               </div>
             </div>
 
-            <div className="text-6xl sm:text-7xl md:text-8xl font-bold text-white/60 mb-4">
+            <div className="text-7xl sm:text-8xl md:text-9xl font-bold text-white/70 mb-6 drop-shadow-2xl tracking-tight">
               --°C
             </div>
 
             {onRetry && ErrorUtils.isRecoverable(error) && (
               <button
                 onClick={onRetry}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30
-                           text-white rounded-lg transition-colors backdrop-blur-sm
-                           focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent"
+                className="group inline-flex items-center gap-3 px-8 py-4 bg-white/20 hover:bg-white/30
+                           text-white rounded-2xl transition-all duration-300 backdrop-blur-md
+                           focus:outline-none focus:ring-4 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-transparent
+                           hover:scale-105 active:scale-95 transform shadow-lg hover:shadow-xl border border-white/20"
               >
-                <RefreshCw className="w-4 h-4" />
-                Retry Loading Weather Data
+                <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+                <span className="font-semibold text-lg">다시 시도</span>
               </button>
             )}
           </div>
