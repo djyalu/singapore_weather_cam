@@ -19,7 +19,17 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
 
   // 날씨 데이터에서 전체 평균값 추출
   const getOverallWeatherData = () => {
-    if (!weatherData?.data) {
+    console.log('🔍 SingaporeOverallWeather weatherData structure check:', {
+      hasWeatherData: !!weatherData,
+      hasCurrent: !!weatherData?.current,
+      hasLocations: !!weatherData?.locations,
+      hasMeta: !!weatherData?.meta,
+      currentTemp: weatherData?.current?.temperature,
+      locationsCount: weatherData?.locations?.length,
+      metaStations: weatherData?.meta?.stations
+    });
+    
+    if (!weatherData?.current) {
       return {
         temperature: 29.0,
         humidity: 80,
@@ -30,15 +40,15 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
       };
     }
 
-    const { temperature, humidity, rainfall, forecast } = weatherData.data;
+    const { current, meta, locations } = weatherData;
 
     return {
-      temperature: temperature?.average || 29.0,
-      humidity: humidity?.average || 80,
-      rainfall: rainfall?.total || 0,
-      forecast: forecast?.general?.forecast || 'Partly Cloudy',
+      temperature: current.temperature || 29.0,
+      humidity: current.humidity || 80,
+      rainfall: current.rainfall || 0,
+      forecast: current.description || 'Partly Cloudy',
       lastUpdate: weatherData.timestamp,
-      stationCount: temperature?.readings?.length || 0
+      stationCount: meta?.stations || locations?.length || 0
     };
   };
 

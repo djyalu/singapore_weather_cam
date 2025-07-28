@@ -44,6 +44,19 @@ const useSimpleDataLoader = (refreshInterval) => {
               console.log('✅ Real-time NEA data fetched successfully');
               
               // NEA API 응답을 우리 형식으로 변환
+              const temperatureReadings = neaData.items?.[0]?.readings?.map(reading => ({
+                station: reading.station_id,
+                value: reading.value
+              })) || [];
+              
+              console.log('📊 Real-time NEA API response details:', {
+                totalItems: neaData.items?.length,
+                latestItemTimestamp: neaData.items?.[0]?.timestamp,
+                totalStations: temperatureReadings.length,
+                sampleStations: temperatureReadings.slice(0, 3),
+                allStationIds: temperatureReadings.map(r => r.station)
+              });
+              
               weatherJson = {
                 timestamp: new Date().toISOString(),
                 source: "NEA Singapore (Real-time)",
@@ -53,10 +66,7 @@ const useSimpleDataLoader = (refreshInterval) => {
                 failed_calls: 0,
                 data: {
                   temperature: {
-                    readings: neaData.items?.[0]?.readings?.map(reading => ({
-                      station: reading.station_id,
-                      value: reading.value
-                    })) || []
+                    readings: temperatureReadings
                   },
                   humidity: { readings: [] },
                   rainfall: { readings: [] },
