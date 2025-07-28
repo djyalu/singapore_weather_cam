@@ -340,7 +340,6 @@ jobs:
               console.log(`❌ Failed to analyze camera ${camera.camera_id}:`, error.message);
             }
           }
-          }
           
           // API 사용량 업데이트 및 저장
           if (actualAPICalls > 0) {
