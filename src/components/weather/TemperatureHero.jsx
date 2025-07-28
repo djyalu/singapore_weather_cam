@@ -127,9 +127,11 @@ const TemperatureHero = React.memo(({
   // Enhanced loading state with skeleton
   if (isLoading || !primaryData) {
     return (
-      <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-400 to-neutral-500 shadow-2xl ${className} animate-scale-in`}>
+      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-500 via-gray-500 to-slate-600 shadow-2xl border border-slate-300/20 ${className} animate-scale-in`}>
+        {/* Enhanced glassmorphism background */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-slate-300/10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.12),transparent_50%)]" />
 
         <div className="relative p-4 sm:p-6 md:p-8 lg:p-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
@@ -323,7 +325,7 @@ const TemperatureHero = React.memo(({
   return (
     <section
       ref={heroRef}
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${getBackgroundGradient(displayTemperature)} shadow-2xl ${className} animate-scale-in loading-to-loaded loaded`}
+      className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${getBackgroundGradient(displayTemperature)} shadow-2xl border border-white/10 ${className} animate-scale-in loading-to-loaded loaded`}
       role="region"
       aria-label="Current weather information"
       aria-describedby="temperature-details"
@@ -353,9 +355,10 @@ const TemperatureHero = React.memo(({
           />
         </div>
       )}
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
+      {/* Enhanced glassmorphism background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/5" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.15),transparent_50%)]" />
 
       {/* Content */}
       <div className="relative p-4 sm:p-6 md:p-8 lg:p-12">
@@ -427,18 +430,25 @@ const TemperatureHero = React.memo(({
             )}
           </div>
 
-          {/* Compact Weather Summary */}
+          {/* Enhanced Weather Summary Cards */}
           <div className="flex-shrink-0 w-full lg:w-auto animate-slide-in-right">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center lg:text-left">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="text-white/70 text-xs mb-1">💧 습도</div>
-                  <div className="text-white font-bold">{Math.round(primaryData.humidity || 0)}%</div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              {/* Humidity Card */}
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 text-center lg:text-left border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 transform shadow-lg">
+                <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
+                  <span className="text-xl" role="img" aria-label="습도">💧</span>
+                  <div className="text-white/80 text-xs font-medium">습도</div>
                 </div>
-                <div>
-                  <div className="text-white/70 text-xs mb-1">💨 바람</div>
-                  <div className="text-white font-bold text-xs">{primaryData.windDirection || '--'}</div>
+                <div className="text-white font-bold text-lg drop-shadow-md">{Math.round(primaryData.humidity || 0)}%</div>
+              </div>
+              
+              {/* Wind Card */}
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 text-center lg:text-left border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 transform shadow-lg">
+                <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
+                  <span className="text-xl" role="img" aria-label="바람">💨</span>
+                  <div className="text-white/80 text-xs font-medium">바람</div>
                 </div>
+                <div className="text-white font-bold text-sm drop-shadow-md">{primaryData.windDirection || '--'}</div>
               </div>
             </div>
           </div>

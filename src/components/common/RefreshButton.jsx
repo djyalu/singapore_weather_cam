@@ -136,9 +136,9 @@ const RefreshButton = React.memo(({
         };
       default:
         return {
-          container: 'flex items-center gap-2',
-          button: 'px-3 py-2 text-xs font-medium min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto',
-          icon: 'w-4 h-4 sm:w-3 sm:h-3',
+          container: 'flex items-center gap-3',
+          button: 'px-4 py-3 text-sm font-semibold min-h-[48px] min-w-[48px] rounded-2xl backdrop-blur-md border shadow-lg hover:shadow-xl transition-all duration-300',
+          icon: 'w-5 h-5 sm:w-4 sm:h-4',
           text: 'hidden sm:inline'
         };
     }
@@ -176,9 +176,9 @@ const RefreshButton = React.memo(({
           disabled={!canRefresh}
           className={`
             flex items-center justify-center ${styles.button}
-            text-blue-600 bg-blue-50 hover:bg-blue-100
+            text-blue-600 bg-blue-50/80 hover:bg-blue-100/90 border-blue-200/50
             disabled:opacity-50 disabled:cursor-not-allowed
-            rounded-lg transition-all duration-200
+            transition-all duration-300
             hover:scale-105 active:scale-95 touch-manipulation
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
             disabled:focus:ring-0 disabled:hover:scale-100
@@ -227,9 +227,9 @@ const RefreshButton = React.memo(({
           disabled={!canRefresh}
           className={`
             flex items-center justify-center ${styles.button}
-            text-orange-600 bg-orange-50 hover:bg-orange-100
+            text-orange-600 bg-orange-50/80 hover:bg-orange-100/90 border-orange-200/50
             disabled:opacity-50 disabled:cursor-not-allowed
-            rounded-lg transition-all duration-200
+            transition-all duration-300
             hover:scale-105 active:scale-95 touch-manipulation
             focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
             disabled:focus:ring-0 disabled:hover:scale-100
