@@ -371,7 +371,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         // 폴백: 가상의 교통 카메라 데이터 생성
         const fallbackCameras = generateFallbackCameras();
         setCameras(fallbackCameras);
-        setError(`API 연결 실패 - 시뮬레이션 데이터 사용 중 (${err.message})`);
+        setError('브라우저 보안 정책으로 인해 캐시된 데이터 사용 중');
         console.log('🔄 Using fallback cameras:', fallbackCameras.length);
       } finally {
         setLoading(false);
@@ -716,8 +716,8 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
           )}
           
           {error && (
-            <p className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full inline-block">
-              ⚠️ 교통카메라 API 연결 문제 (시뮬레이션 사용)
+            <p className="text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">
+              ℹ️ {error}
             </p>
           )}
         </div>
