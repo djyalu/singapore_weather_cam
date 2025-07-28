@@ -1,9 +1,9 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
-import WeatherStatusBar from './components/layout/WeatherStatusBar';
 import LoadingScreen from './components/common/LoadingScreen';
 import RefreshButton from './components/common/RefreshButton';
+import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
@@ -20,7 +20,8 @@ const HwaChongWeatherAnalysis = lazy(() => import('./components/weather/HwaChong
  * Singapore Weather Cam Application
  */
 const App = () => {
-  const [activeTab, setActiveTab] = useState(UI_CONFIG.DEFAULT_TAB);
+  const [activeRegion, setActiveRegion] = useState('hwa-chong');
+  const [activeView, setActiveView] = useState('weather');
   const [showAdmin, setShowAdmin] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
@@ -40,30 +41,10 @@ const App = () => {
   const isInitialLoading = (weatherLoading || webcamLoading) && (!weatherData && !webcamData);
   const hasError = weatherError || webcamError;
 
-  const tabs = [
-    {
-      id: 'dashboard',
-      name: getLocalizedString('DASHBOARD'),
-      icon: UI_STRINGS.ICONS.WEATHER,
-      badge: weatherData?.locations?.length,
-    },
-    {
-      id: 'webcam',
-      name: getLocalizedString('WEBCAM'),
-      icon: UI_STRINGS.ICONS.WEBCAM,
-      badge: webcamData?.captures?.length,
-    },
-    {
-      id: 'map',
-      name: getLocalizedString('MAP'),
-      icon: UI_STRINGS.ICONS.MAP,
-    },
-    {
-      id: 'analysis',
-      name: getLocalizedString('ANALYSIS'),
-      icon: UI_STRINGS.ICONS.ANALYSIS,
-    },
-  ];
+  // 지역 선택 핸들러
+  const handleRegionSelect = (regionId) => {
+    setActiveRegion(regionId);
+  };
 
   // Use the consolidated manual refresh function
   const handleRefresh = handleManualRefresh;
@@ -91,9 +72,19 @@ const App = () => {
       <LoadingScreen message={message} />
     );
 
-    switch (activeTab) {
-      case 'dashboard':
-        return (
+    return (
+      <div className="space-y-6">
+        {/* 지역별 날씨 카드 대시보드 */}
+        <RegionalWeatherDashboard
+          weatherData={weatherData}
+          onRegionSelect={handleRegionSelect}
+          activeRegion={activeRegion}
+          className="mb-8"
+        />
+
+        {/* 선택된 지역의 상세 정보 */}
+        <div className="space-y-6">
+          {/* 메인 온도 히어로 섹션 */}
           <Suspense fallback={<LoadingFallback message="Loading weather dashboard..." />}>
             <WeatherDashboard
               data={{
@@ -103,10 +94,8 @@ const App = () => {
               }}
             />
           </Suspense>
-        );
 
-      case 'webcam':
-        return (
+          {/* 웹캠 갤러리 */}
           <Suspense fallback={<LoadingFallback message="Loading webcam gallery..." />}>
             <WebcamGallery
               data={webcamData}
@@ -115,69 +104,24 @@ const App = () => {
               lastUpdate={lastUpdate}
             />
           </Suspense>
-        );
 
-      case 'map':
-        return (
+          {/* 지도 뷰 */}
           <Suspense fallback={<LoadingFallback message="Loading map..." />}>
             <MapView
               weatherData={weatherData}
               webcamData={webcamData}
-              selectedRegion="all"
+              selectedRegion={activeRegion}
               regionConfig={null}
             />
           </Suspense>
-        );
 
-      case 'analysis':
-        return (
-          <div className="space-y-6">
-            {/* CCTV 기반 실시간 날씨 분석 - Hwa Chong 중심 */}
-            <Suspense fallback={<LoadingFallback message="Loading CCTV analysis..." />}>
-              <HwaChongWeatherAnalysis className="mb-6" />
-            </Suspense>
-
-            {/* 기존 센서 기반 분석 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                {UI_STRINGS.ICONS.ANALYSIS} 센서 기반 {getLocalizedString('ANALYSIS')}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-800">{getLocalizedString('TEMPERATURE_TREND')}</h3>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {weatherData?.locations?.[0]?.temperature || '--'}°C
-                  </p>
-                  <p className="text-sm text-blue-600">현재 온도</p>
-                </div>
-
-                <div className="bg-green-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-green-800">{getLocalizedString('HUMIDITY_ANALYSIS')}</h3>
-                  <p className="text-2xl font-bold text-green-600">
-                    {weatherData?.locations?.[0]?.humidity || '--'}%
-                  </p>
-                  <p className="text-sm text-green-600">
-                    {(weatherData?.locations?.[0]?.humidity || 0) > 70 ? getLocalizedString('HIGH') : getLocalizedString('NORMAL')}
-                  </p>
-                </div>
-
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-purple-800">{getLocalizedString('RAINFALL_PREDICTION')}</h3>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {weatherData?.locations?.[0]?.rainfall || 0}{getLocalizedString('RAINFALL_UNIT')}
-                  </p>
-                  <p className="text-sm text-purple-600">
-                    {(weatherData?.locations?.[0]?.rainfall || 0) > 0 ? getLocalizedString('RAIN_DETECTED') : getLocalizedString('CLEAR')}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
+          {/* CCTV 기반 실시간 날씨 분석 */}
+          <Suspense fallback={<LoadingFallback message="Loading CCTV analysis..." />}>
+            <HwaChongWeatherAnalysis className="mb-6" />
+          </Suspense>
+        </div>
+      </div>
+    );
   };
 
   return (
