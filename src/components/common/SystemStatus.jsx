@@ -25,6 +25,7 @@ const SystemStatus = React.memo(({
   onForceRefresh = null,
   retryAttempts = 0,
   maxRetries = 3,
+  showRefreshControls = true,
 }) => {
   // Debug logging in development
   if (import.meta.env.MODE === 'development') {
@@ -526,87 +527,89 @@ const SystemStatus = React.memo(({
               </div>
             </div>
 
-            {/* Refresh controls with enhanced accessibility */}
-            <div
-              className="flex items-center space-x-1 animate-stagger-in"
-              role="group"
-              aria-label="Data refresh controls"
-            >
-              {enhancedOnRefresh && (
-                <button
-                  ref={refreshButtonRef}
-                  onClick={() => {
-                    enhancedOnRefresh();
-                    announceToScreenReader('Refreshing data', 'polite');
-                  }}
-                  disabled={isRefreshing || !isOnline}
-                  className="
-                    flex items-center justify-center px-3 py-2 sm:px-2 sm:py-1
-                    text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100
-                    disabled:opacity-50 disabled:cursor-not-allowed rounded-lg sm:rounded-md
-                    status-transition hover-lift active:scale-95 touch-manipulation
-                    min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto
-                    animate-fade-in delay-300
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                    disabled:focus:ring-0
-                  "
-                  title={!isOnline ? 'Cannot refresh while offline' : 'Refresh data (respects cache)'}
-                  aria-label={isRefreshing ? 'Refreshing data' : 'Refresh system data'}
-                  aria-describedby="refresh-help"
-                >
-                  <RefreshCw
-                    className={`
-                      w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 transition-transform duration-200
-                      ${isRefreshing ? 'animate-spin-smooth' : ''}
-                    `}
-                    aria-hidden="true"
-                  />
-                  <span className="hidden md:inline">Refresh</span>
-                  <span id="refresh-help" className="sr-only">
-                    {!isOnline ? 'Cannot refresh while offline' :
-                      isRefreshing ? 'Currently refreshing data' :
-                        'Refresh weather and camera data from cache'}
-                  </span>
-                </button>
-              )}
+            {/* Refresh controls with enhanced accessibility (조건부 표시) */}
+            {showRefreshControls && (
+              <div
+                className="flex items-center space-x-1 animate-stagger-in"
+                role="group"
+                aria-label="Data refresh controls"
+              >
+                {enhancedOnRefresh && (
+                  <button
+                    ref={refreshButtonRef}
+                    onClick={() => {
+                      enhancedOnRefresh();
+                      announceToScreenReader('Refreshing data', 'polite');
+                    }}
+                    disabled={isRefreshing || !isOnline}
+                    className="
+                      flex items-center justify-center px-3 py-2 sm:px-2 sm:py-1
+                      text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100
+                      disabled:opacity-50 disabled:cursor-not-allowed rounded-lg sm:rounded-md
+                      status-transition hover-lift active:scale-95 touch-manipulation
+                      min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto
+                      animate-fade-in delay-300
+                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                      disabled:focus:ring-0
+                    "
+                    title={!isOnline ? 'Cannot refresh while offline' : 'Refresh data (respects cache)'}
+                    aria-label={isRefreshing ? 'Refreshing data' : 'Refresh system data'}
+                    aria-describedby="refresh-help"
+                  >
+                    <RefreshCw
+                      className={`
+                        w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 transition-transform duration-200
+                        ${isRefreshing ? 'animate-spin-smooth' : ''}
+                      `}
+                      aria-hidden="true"
+                    />
+                    <span className="hidden md:inline">Refresh</span>
+                    <span id="refresh-help" className="sr-only">
+                      {!isOnline ? 'Cannot refresh while offline' :
+                        isRefreshing ? 'Currently refreshing data' :
+                          'Refresh weather and camera data from cache'}
+                    </span>
+                  </button>
+                )}
 
-              {enhancedOnForceRefresh && (
-                <button
-                  onClick={() => {
-                    enhancedOnForceRefresh();
-                    announceToScreenReader('Force refreshing data', 'polite');
-                  }}
-                  disabled={isRefreshing || !isOnline}
-                  className="
-                    flex items-center justify-center px-3 py-2 sm:px-2 sm:py-1
-                    text-xs font-medium text-orange-600 bg-orange-50 hover:bg-orange-100
-                    disabled:opacity-50 disabled:cursor-not-allowed rounded-lg sm:rounded-md
-                    status-transition hover-lift active:scale-95 touch-manipulation
-                    min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto
-                    animate-fade-in delay-500
-                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
-                    disabled:focus:ring-0
-                  "
-                  title={!isOnline ? 'Cannot force refresh while offline' : 'Force refresh (bypasses cache)'}
-                  aria-label={isRefreshing ? 'Force refreshing data' : 'Force refresh system data'}
-                  aria-describedby="force-refresh-help"
-                >
-                  <Zap
-                    className={`
-                      w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 transition-transform duration-200
-                      ${isRefreshing ? 'animate-pulse-gentle' : ''}
-                    `}
-                    aria-hidden="true"
-                  />
-                  <span className="hidden md:inline">Force</span>
-                  <span id="force-refresh-help" className="sr-only">
-                    {!isOnline ? 'Cannot force refresh while offline' :
-                      isRefreshing ? 'Currently force refreshing data' :
-                        'Force refresh weather and camera data, bypassing cache'}
-                  </span>
-                </button>
-              )}
-            </div>
+                {enhancedOnForceRefresh && (
+                  <button
+                    onClick={() => {
+                      enhancedOnForceRefresh();
+                      announceToScreenReader('Force refreshing data', 'polite');
+                    }}
+                    disabled={isRefreshing || !isOnline}
+                    className="
+                      flex items-center justify-center px-3 py-2 sm:px-2 sm:py-1
+                      text-xs font-medium text-orange-600 bg-orange-50 hover:bg-orange-100
+                      disabled:opacity-50 disabled:cursor-not-allowed rounded-lg sm:rounded-md
+                      status-transition hover-lift active:scale-95 touch-manipulation
+                      min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto
+                      animate-fade-in delay-500
+                      focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
+                      disabled:focus:ring-0
+                    "
+                    title={!isOnline ? 'Cannot force refresh while offline' : 'Force refresh (bypasses cache)'}
+                    aria-label={isRefreshing ? 'Force refreshing data' : 'Force refresh system data'}
+                    aria-describedby="force-refresh-help"
+                  >
+                    <Zap
+                      className={`
+                        w-4 h-4 sm:w-3 sm:h-3 sm:mr-1 transition-transform duration-200
+                        ${isRefreshing ? 'animate-pulse-gentle' : ''}
+                      `}
+                      aria-hidden="true"
+                    />
+                    <span className="hidden md:inline">Force</span>
+                    <span id="force-refresh-help" className="sr-only">
+                      {!isOnline ? 'Cannot force refresh while offline' :
+                        isRefreshing ? 'Currently force refreshing data' :
+                          'Force refresh weather and camera data, bypassing cache'}
+                    </span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -679,6 +682,7 @@ SystemStatus.propTypes = {
   networkStatus: PropTypes.oneOf(['online', 'offline', 'slow']),
   retryAttempts: PropTypes.number,
   maxRetries: PropTypes.number,
+  showRefreshControls: PropTypes.bool,
 };
 
 export default SystemStatus;

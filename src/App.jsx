@@ -3,6 +3,7 @@ import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 import WeatherStatusBar from './components/layout/WeatherStatusBar';
 import LoadingScreen from './components/common/LoadingScreen';
+import RefreshButton from './components/common/RefreshButton';
 import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
@@ -184,9 +185,38 @@ const App = () => {
       {/* 상단 날씨 정보 바 - Hwa Chong 중심 */}
       <WeatherStatusBar weatherData={weatherData} />
       
+      {/* 메인 새로고침 버튼 - 독립적 위치 */}
+      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-lg font-bold text-gray-800 hidden sm:block">
+                {`${UI_STRINGS.ICONS.WEATHER} Singapore Weather Cam`}
+              </h1>
+              <span className="text-sm text-gray-500 hidden md:block">
+                실시간 날씨 모니터링
+              </span>
+            </div>
+            
+            {/* 독립적인 새로고침 버튼 */}
+            <RefreshButton
+              onRefresh={refetchWeather}
+              onForceRefresh={refetchWebcam}
+              isRefreshing={weatherLoading || webcamLoading}
+              isOnline={navigator.onLine}
+              lastUpdate={lastUpdate}
+              variant="default"
+              showStatus={false}
+              showTimer={true}
+              className="animate-fade-in"
+            />
+          </div>
+        </div>
+      </div>
+      
       <AppLayout
-        title={`${UI_STRINGS.ICONS.WEATHER} Singapore Weather Cam`}
-        subtitle="실시간 날씨 모니터링"
+        title=""
+        subtitle=""
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -194,7 +224,6 @@ const App = () => {
         isLoading={isInitialLoading}
         hasError={hasError}
         errorMessage={weatherError || webcamError}
-        onRefresh={handleRefresh}
         onAdminToggle={() => setShowAdmin(!showAdmin)}
         showAdmin={showAdmin}
       >

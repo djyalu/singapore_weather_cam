@@ -95,7 +95,7 @@ const AppLayout = React.memo(({ children }) => {
         {/* Header with system stats */}
         <Header systemStats={systemStats} />
 
-        {/* System Status - Compact at top with refresh controls */}
+        {/* System Status - 시스템 상태만 표시 (새로고침 버튼 제거) */}
         <SystemStatus
           lastFetch={lastFetch}
           weatherData={systemStats?.weatherData}
@@ -103,17 +103,15 @@ const AppLayout = React.memo(({ children }) => {
           reliabilityMetrics={reliabilityMetrics}
           error={error}
           isRefreshing={isRefreshing || isPullRefreshing}
-          onRefresh={refresh}
-          onForceRefresh={forceRefresh}
+          showRefreshControls={false}
         />
 
-        {/* Data Sync Guide - GitHub Actions 주기 및 수동 새로고침 안내 */}
+        {/* Data Sync Guide - 시스템 정보만 표시 (새로고침 버튼 제거) */}
         <div className="max-w-7xl mx-auto px-2 sm:px-4 pt-4">
           <DataSyncGuide
-            onRefresh={refresh}
-            onForceRefresh={forceRefresh}
             isRefreshing={isRefreshing || isPullRefreshing}
             lastUpdate={lastFetch}
+            showRefreshControls={false}
             className="mb-4"
           />
         </div>

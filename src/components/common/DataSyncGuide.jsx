@@ -11,7 +11,8 @@ const DataSyncGuide = React.memo(({
   onForceRefresh, 
   isRefreshing = false, 
   lastUpdate = null,
-  className = '' 
+  className = '',
+  showRefreshControls = true
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
