@@ -203,6 +203,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   const [cameras, setCameras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [apiUsageInfo, setApiUsageInfo] = useState(null);
 
   // 디버깅: props 확인
   console.log('🔍 RegionalTrafficCameras props check:', {
@@ -261,6 +262,29 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
 
     return nearestCamera ? { camera: nearestCamera, distance: minDistance } : null;
   };
+
+  // API 사용량 정보 가져오기
+  useEffect(() => {
+    const fetchApiUsageInfo = async () => {
+      try {
+        const response = await fetch('/data/ai-analysis/latest.json');
+        if (response.ok) {
+          const analysisData = await response.json();
+          setApiUsageInfo({
+            remaining: analysisData.api_calls_remaining || 0,
+            limit: analysisData.api_calls_limit || 20,
+            today: analysisData.api_calls_today || 0,
+            limitReached: analysisData.api_limit_reached || false,
+            analysisMethod: analysisData.analysis_method || 'Unknown'
+          });
+        }
+      } catch (error) {
+        console.log('⚠️ Could not load API usage info:', error);
+      }
+    };
+
+    fetchApiUsageInfo();
+  }, [selectedRegions]); // 지역 변경 시마다 업데이트
 
   // 교통 카메라 데이터 가져오기
   useEffect(() => {
@@ -542,10 +566,30 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         <h3 className="text-lg font-bold text-gray-800 mb-2">
           🚗 선택된 지역 교통 상황
         </h3>
-        <div className="space-y-1">
+        <div className="space-y-2">
           <p className="text-sm text-gray-600">
             실시간 교통 카메라 + Cohere AI 분석
           </p>
+          
+          {/* API 사용량 정보 표시 */}
+          {apiUsageInfo && (
+            <div className="flex justify-center">
+              <div className={`text-xs px-3 py-1 rounded-full inline-flex items-center gap-1 ${
+                apiUsageInfo.limitReached 
+                  ? 'text-red-600 bg-red-50' 
+                  : apiUsageInfo.remaining <= 5 
+                    ? 'text-orange-600 bg-orange-50'
+                    : 'text-blue-600 bg-blue-50'
+              }`}>
+                <span>🤖</span>
+                <span>
+                  Cohere API: {apiUsageInfo.remaining}/{apiUsageInfo.limit} 남음
+                  {apiUsageInfo.limitReached && ' (제한 도달)'}
+                </span>
+              </div>
+            </div>
+          )}
+          
           {error && (
             <p className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full inline-block">
               ⚠️ 교통카메라 API 연결 문제 (시뮬레이션 사용)
