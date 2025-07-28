@@ -2,12 +2,11 @@ name: Simple AI Analysis
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *'  # 6시간마다 실행 (하루 4회)
-  push:
-    branches: [ main ]
-    paths: 
-      - '.github/workflows/simple-ai-analysis.yml'
+    inputs:
+      camera_ids:
+        description: 'Comma-separated camera IDs (e.g., 6710,2701,2703)'
+        required: false
+        default: '6710,2701,2703,1701,4712'
 
 jobs:
   analyze:
@@ -41,8 +40,11 @@ jobs:
           
           console.log('API Key available:', useRealAI);
           
-          // Simple priority cameras
-          const priorityCameras = ['6710', '2701', '2703', '1701', '4712'];
+          // 사용자 요청 카메라 또는 기본 카메라들
+          const inputCameraIds = '${{ github.event.inputs.camera_ids }}' || '6710,2701,2703,1701,4712';
+          const priorityCameras = inputCameraIds.split(',').map(id => id.trim()).filter(Boolean);
+          
+          console.log('📷 Analyzing cameras:', priorityCameras);
           const analysisResults = {};
           
           for (const cameraId of priorityCameras) {
