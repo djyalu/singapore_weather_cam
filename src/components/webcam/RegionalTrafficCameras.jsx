@@ -35,8 +35,13 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
       
       if (response.ok) {
         const analysisData = await response.json();
-        console.log(`🔍 Checking analysis data for camera ${camera.id}:`, analysisData);
-        console.log(`📊 Available camera analyses:`, Object.keys(analysisData.cameras || {}));
+        console.log(`🔍 AI Analysis Data Response:`, {
+          timestamp: analysisData.timestamp,
+          method: analysisData.analysis_method,
+          totalAnalyzed: analysisData.total_analyzed,
+          availableCameras: Object.keys(analysisData.cameras || {}),
+          requestedCamera: camera.id
+        });
         
         // 카메라 ID를 문자열과 숫자 모두로 확인
         const cameraAnalysis = analysisData.cameras?.[camera.id] || 
@@ -48,56 +53,77 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
         const analysisMethod = analysisData.analysis_method || 'Unknown';
         
         if (cameraAnalysis) {
-          console.log(`✅ Found Cohere analysis for camera ${camera.id}`);
+          console.log(`✅ Real Cohere analysis found for camera ${camera.id}:`, cameraAnalysis);
           
-          // Cohere 데이터를 카드 UI 형식으로 변환
+          // Cohere 데이터를 카드 UI 형식으로 변환 (실제 데이터 확인)
           const transformedAnalysis = {
-            traffic: cameraAnalysis.traffic_status,
-            weather: cameraAnalysis.weather_condition,
-            visibility: cameraAnalysis.visibility,
-            confidence: cameraAnalysis.confidence,
-            details: cameraAnalysis.details,
-            aiModel: cameraAnalysis.ai_model,
+            traffic: cameraAnalysis.traffic_status || '데이터 없음',
+            weather: cameraAnalysis.weather_condition || '확인중',
+            visibility: cameraAnalysis.visibility || '보통',
+            confidence: cameraAnalysis.confidence || 0.85,
+            details: cameraAnalysis.details || 'AI 분석 완료',
+            aiModel: `${cameraAnalysis.ai_model || 'Cohere Command API'} (실제 분석)`,
             timestamp: cameraAnalysis.analysis_timestamp,
             analysisMethod: analysisMethod,
             apiStatus: isApiLimitReached ? 'Daily limit reached' : 'Active',
-            apiCallsRemaining: analysisData.api_calls_remaining || 0
+            apiCallsRemaining: analysisData.api_calls_remaining || 0,
+            isRealAnalysis: true // 실제 분석 표시를 위한 플래그
           };
           
           setAiAnalysis(transformedAnalysis);
-          console.log(`🎯 Cohere analysis loaded:`, transformedAnalysis);
+          console.log(`🎯 Real Cohere analysis successfully loaded:`, transformedAnalysis);
+          return; // 실제 데이터 로드 성공 시 여기서 종료
         } else {
-          console.log(`⚠️ No Cohere analysis found for camera ${camera.id}, using fallback`);
-          // 해당 카메라의 분석이 없는 경우 일반적인 상태 표시
+          console.log(`⚠️ No Cohere analysis found for camera ${camera.id}`);
+          console.log(`📋 Available cameras in analysis data:`, Object.keys(analysisData.cameras || {}));
+          
+          // 분석 데이터가 있지만 해당 카메라가 없는 경우
           setAiAnalysis({
             traffic: '분석 대기중',
-            weather: '확인중',
+            weather: '확인중', 
             visibility: '대기중',
             confidence: 0,
-            aiModel: 'Cohere Command API (대기중)',
-            note: '다음 분석 주기에서 업데이트 예정'
+            aiModel: 'Cohere Command API (해당 카메라 분석 없음)',
+            note: `카메라 ${camera.id}의 분석 데이터가 없습니다`,
+            isRealAnalysis: false
           });
+          return;
         }
       } else {
-        throw new Error('Analysis data not available');
+        console.log(`⚠️ Analysis data file not found (${response.status}), using enhanced simulation`);
+        throw new Error(`HTTP ${response.status}: Analysis data not available`);
       }
     } catch (error) {
-      console.error(`❌ Failed to load Cohere analysis:`, error);
+      console.error(`❌ Failed to load Cohere analysis for camera ${camera.id}:`, error);
       
-      // API 실패 시 현재 시뮬레이션 유지
-      const analysisResults = [
+      // API 실패 시 결정론적 시뮬레이션 (동일 카메라는 동일 결과)
+      const cameraId = parseInt(camera.id) || 1;
+      const hour = new Date().getHours();
+      const isRushHour = (hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19);
+      
+      // 카메라별 고유 시뮬레이션 결과 생성
+      const analysisOptions = [
         { traffic: '교통 원활', weather: '맑음', visibility: '양호' },
         { traffic: '교통 혼잡', weather: '흐림', visibility: '보통' },
         { traffic: '교통 정체중', weather: '맑음', visibility: '양호' },
         { traffic: '교통량 적음', weather: '부분적으로 흐림', visibility: '양호' }
       ];
       
-      const randomResult = analysisResults[Math.floor(Math.random() * analysisResults.length)];
+      // 결정론적 선택 (카메라 ID + 시간 기반)
+      const seed = (cameraId * 7 + hour * 3) % analysisOptions.length;
+      const selectedResult = analysisOptions[seed];
+      
+      // 러시아워 시간대에는 혼잡도 증가
+      if (isRushHour && selectedResult.traffic === '교통 원활') {
+        selectedResult.traffic = '교통 혼잡';
+      }
+      
       setAiAnalysis({
-        ...randomResult,
+        ...selectedResult,
         confidence: 0.75,
-        aiModel: 'Enhanced Simulation (Cohere API 일시 불가)',
-        note: 'Cohere API 연결 문제로 시뮬레이션 사용 중'
+        aiModel: 'Enhanced Simulation (실제 AI 분석 일시 불가)',
+        note: `Cohere API 연결 실패: ${error.message}`,
+        isRealAnalysis: false
       });
     } finally {
       setAnalysisLoading(false);
@@ -180,8 +206,10 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
                 👁️ {aiAnalysis.visibility}
               </div>
             </div>
-            <div className="text-xs text-gray-500 text-center">
-              🤖 Cohere AI 분석
+            <div className={`text-xs text-center ${
+              aiAnalysis.isRealAnalysis ? 'text-green-600' : 'text-orange-600'
+            }`}>
+              {aiAnalysis.isRealAnalysis ? '🤖 실제 Cohere AI 분석' : '🔄 시뮬레이션 데이터'}
             </div>
           </div>
         ) : (
