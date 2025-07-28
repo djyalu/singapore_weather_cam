@@ -287,12 +287,12 @@ const RegionalWeatherDashboard = React.memo(({
     onRegionSelect?.(regionId);
   };
 
-  // GitHub Actions 워크플로우 트리거 함수
-  const triggerAIAnalysis = async (newSelectedRegions) => {
+  // AI 분석 데이터 확인 및 사용자 피드백 함수
+  const checkAIAnalysisData = async (newSelectedRegions) => {
     setAiAnalysisInProgress(true);
     
     try {
-      console.log('🚀 Triggering AI analysis for regions:', newSelectedRegions);
+      console.log('🔍 Checking available AI analysis for regions:', newSelectedRegions);
       
       // 지역별 대표 카메라 ID 매핑 (현재 분석 가능한 카메라로 업데이트)
       const regionToCameraMap = {
@@ -311,61 +311,56 @@ const RegionalWeatherDashboard = React.memo(({
       
       if (cameraIds.length === 0) {
         console.log('⚠️ No cameras found for selected regions');
+        setAiAnalysisInProgress(false);
         return;
       }
 
-      console.log('📷 Camera IDs to analyze:', cameraIds);
+      console.log('📷 Camera IDs to check:', cameraIds);
 
-      // GitHub Actions workflow_dispatch 이벤트 트리거
-      const response = await fetch('https://api.github.com/repos/djyalu/singapore_weather_cam/actions/workflows/ai-image-analysis.yml/dispatches', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-          // 실제 운영에서는 GitHub Personal Access Token이 필요하지만,
-          // 현재는 public repo이므로 anonymous 요청 시도
-        },
-        body: JSON.stringify({
-          ref: 'main',
-          inputs: {
-            camera_ids: cameraIds.join(','),
-            trigger_source: 'user_selection',
-            selected_regions: newSelectedRegions.join(',')
-          }
-        })
-      });
-
+      // 현재 사용 가능한 AI 분석 데이터 확인
+      const response = await fetch('/data/ai-analysis/latest.json');
+      
       if (response.ok) {
-        console.log('✅ AI analysis workflow triggered successfully');
+        const analysisData = await response.json();
+        const availableCameras = Object.keys(analysisData.cameras || {});
+        const matchingCameras = cameraIds.filter(id => availableCameras.includes(id));
+        
+        console.log('✅ Available analysis data found:', {
+          requestedCameras: cameraIds,
+          availableCameras: availableCameras,
+          matchingCameras: matchingCameras,
+          analysisMethod: analysisData.analysis_method,
+          apiCallsRemaining: analysisData.api_calls_remaining
+        });
         
         // 사용자에게 피드백 제공
         if (window.showNotification) {
-          window.showNotification('🤖 Cohere AI 분석이 시작되었습니다. 1-2분 후 결과가 업데이트됩니다.', 'success');
+          if (matchingCameras.length === cameraIds.length) {
+            window.showNotification(`🎯 선택된 ${matchingCameras.length}개 지역의 최신 Cohere AI 분석 결과를 표시합니다.`, 'success');
+          } else {
+            window.showNotification(`📊 ${matchingCameras.length}/${cameraIds.length}개 지역의 AI 분석 데이터가 사용 가능합니다.`, 'info');
+          }
         }
         
-        // 2분 후 자동으로 상태 해제
+        // 자동으로 상태 해제
         setTimeout(() => {
           setAiAnalysisInProgress(false);
-          if (window.showNotification) {
-            window.showNotification('🎯 AI 분석이 완료되었습니다. 페이지를 새로고침하면 최신 결과를 확인할 수 있습니다.', 'info');
-          }
-        }, 120000); // 2분
+        }, 2000);
         
       } else {
-        console.log('⚠️ Failed to trigger workflow:', response.status, response.statusText);
+        console.log('⚠️ Could not load analysis data');
         setAiAnalysisInProgress(false);
         
-        // 실패 시에도 사용자에게 알림
         if (window.showNotification) {
-          window.showNotification('분석 요청 중 문제가 발생했습니다. 다음 자동 업데이트를 기다려주세요.', 'warning');
+          window.showNotification('AI 분석 데이터를 불러올 수 없습니다. 기본 데이터를 사용합니다.', 'warning');
         }
       }
     } catch (error) {
-      console.error('❌ Error triggering AI analysis:', error);
+      console.error('❌ Error checking AI analysis data:', error);
       setAiAnalysisInProgress(false);
       
       if (window.showNotification) {
-        window.showNotification('AI 분석 요청에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
+        window.showNotification('AI 분석 데이터 확인 중 오류가 발생했습니다.', 'error');
       }
     }
   };
@@ -390,7 +385,7 @@ const RegionalWeatherDashboard = React.memo(({
           {aiAnalysisInProgress && (
             <div className="mt-2 flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-              <span>🤖 Cohere AI가 선택된 지역의 교통 상황을 분석 중입니다...</span>
+              <span>🔍 선택된 지역의 AI 분석 데이터를 확인하고 있습니다...</span>
             </div>
           )}
         </div>
@@ -408,8 +403,8 @@ const RegionalWeatherDashboard = React.memo(({
                     setSelectedRegions(newSelectedRegions);
                     // App.jsx에 변경사항 알림
                     onSelectedRegionsChange?.(newSelectedRegions);
-                    // 🚀 자동으로 AI 분석 트리거
-                    triggerAIAnalysis(newSelectedRegions);
+                    // 🔍 AI 분석 데이터 확인 및 피드백
+                    checkAIAnalysisData(newSelectedRegions);
                   }
                 }}
                 title={region.description}
