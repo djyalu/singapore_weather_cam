@@ -2,15 +2,14 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 import LoadingScreen from './components/common/LoadingScreen';
-import RefreshButton from './components/common/RefreshButton';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
-import { useWeatherData, useWebcamData, useAppData } from './contexts/AppDataContextSimple';
+import TrafficCameraGallery from './components/webcam/TrafficCameraGallery';
+import { useWeatherData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
 
 // Lazy load heavy components for better performance
 const WeatherDashboard = lazy(() => import('./components/weather/WeatherDashboard'));
-const WebcamGallery = lazy(() => import('./components/webcam/WebcamGallery'));
 const MapView = lazy(() => import('./components/map/MapView'));
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
 const HwaChongWeatherAnalysis = lazy(() => import('./components/weather/HwaChongWeatherAnalysis'));
@@ -26,19 +25,17 @@ const App = () => {
 
   // Data hooks from context
   const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather } = useWeatherData();
-  const { webcamData, isLoading: webcamLoading, error: webcamError, refresh: refetchWebcam } = useWebcamData();
   // const appData = useAppData(); // Reserved for future use
 
   // Manual refresh only - Context handles auto-refresh
   const handleManualRefresh = () => {
     refetchWeather();
-    refetchWebcam();
     setLastUpdate(new Date());
   };
 
   // 더 스마트한 로딩 상태 관리
-  const isInitialLoading = (weatherLoading || webcamLoading) && (!weatherData && !webcamData);
-  const hasError = weatherError || webcamError;
+  const isInitialLoading = weatherLoading && !weatherData;
+  const hasError = weatherError;
 
   // 지역 선택 핸들러
   const handleRegionSelect = (regionId) => {
@@ -60,7 +57,6 @@ const App = () => {
         <Suspense fallback={<LoadingScreen message="Loading admin panel..." />}>
           <AdminPanels
             weatherData={weatherData}
-            webcamData={webcamData}
             onClose={() => setShowAdmin(false)}
           />
         </Suspense>
@@ -84,21 +80,13 @@ const App = () => {
         {/* 선택된 지역의 상세 정보는 상단 카드에서 표시 */}
         <div className="space-y-6">
 
-          {/* 웹캠 갤러리 */}
-          <Suspense fallback={<LoadingFallback message="Loading webcam gallery..." />}>
-            <WebcamGallery
-              data={webcamData}
-              isLoading={webcamLoading}
-              error={webcamError}
-              lastUpdate={lastUpdate}
-            />
-          </Suspense>
+          {/* 교통 카메라 갤러리 - 향상된 실시간 모니터링 */}
+          <TrafficCameraGallery />
 
           {/* 지도 뷰 */}
           <Suspense fallback={<LoadingFallback message="Loading map..." />}>
             <MapView
               weatherData={weatherData}
-              webcamData={webcamData}
               selectedRegion={activeRegion}
               regionConfig={null}
             />

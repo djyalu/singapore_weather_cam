@@ -6,7 +6,6 @@ const AppDataContext = createContext(null);
 
 const useSimpleDataLoader = (refreshInterval) => {
   const [weatherData, setWeatherData] = useState(null);
-  const [webcamData, setWebcamData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastFetch, setLastFetch] = useState(new Date());
@@ -47,19 +46,6 @@ const useSimpleDataLoader = (refreshInterval) => {
         }
       }
 
-      // Load webcam data
-      try {
-        const webcamResponse = await fetch(`${basePath}data/webcam/latest.json?t=${timestamp}`);
-        if (webcamResponse.ok) {
-          const webcamJson = await webcamResponse.json();
-          setWebcamData(webcamJson);
-        }
-      } catch (err) {
-        // Only log in development mode
-        if (import.meta.env.MODE === 'development') {
-          console.warn('Webcam data load failed:', err);
-        }
-      }
 
       setLastFetch(new Date());
     } catch (err) {
@@ -86,12 +72,11 @@ const useSimpleDataLoader = (refreshInterval) => {
 
   return {
     weatherData,
-    webcamData,
     loading,
     error,
     lastFetch,
     refresh: () => loadData(false), // 수동 새로고침은 스피너 표시
-    isInitialLoading: loading && !weatherData && !webcamData,
+    isInitialLoading: loading && !weatherData,
     isRefreshing: false // 백그라운드 새로고침은 숨김
   };
 };
@@ -99,7 +84,6 @@ const useSimpleDataLoader = (refreshInterval) => {
 export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 * 1000 }) => {
   const {
     weatherData,
-    webcamData,
     loading,
     error,
     lastFetch,
@@ -110,15 +94,12 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
 
   // Simple system stats
   const systemStats = useMemo(() => ({
-    totalCameras: webcamData?.captures?.length || 0,
-    activeCameras: webcamData?.captures?.filter(c => c.file_info?.url).length || 0,
     weatherStations: weatherData?.locations?.length || 0,
     lastUpdate: lastFetch instanceof Date ? lastFetch.toLocaleString('ko-KR') : lastFetch,
     status: error ? 'error' : 'healthy',
     // Include data for SystemStatus component
-    weatherData,
-    webcamData
-  }), [webcamData, weatherData, lastFetch, error]);
+    weatherData
+  }), [weatherData, lastFetch, error]);
 
   const contextValue = useMemo(() => ({
     // Data state
