@@ -194,10 +194,21 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '', selectedCamera = n
           <div>
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <Camera className="w-5 h-5 text-purple-600" />
-              🏫 Hwa Chong CCTV 실시간 분석
+              {selectedCamera ? (
+                <>📹 {cameraData?.name || cameraData?.id} 실시간 분석</>
+              ) : (
+                <>🏫 Hwa Chong CCTV 실시간 분석</>
+              )}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Claude AI 기반 시각적 날씨 분석 • 거리: {cameraData?.distance}km
+              Claude AI 기반 시각적 날씨 분석 
+              {cameraData?.area && <> • 위치: {cameraData.area}</>}
+              {cameraData?.distance && <> • 거리: {cameraData.distance}km</>}
+              {selectedCamera && (
+                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                  지도에서 선택됨
+                </span>
+              )}
             </p>
           </div>
           <div className="text-right">
@@ -333,6 +344,21 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '', selectedCamera = n
 
 HwaChongWeatherAnalysis.propTypes = {
   className: PropTypes.string,
+  selectedCamera: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    area: PropTypes.string,
+    location: PropTypes.shape({
+      latitude: PropTypes.number,
+      longitude: PropTypes.number,
+    }),
+    image: PropTypes.shape({
+      url: PropTypes.string,
+    }),
+    timestamp: PropTypes.string,
+    quality: PropTypes.string,
+    distance: PropTypes.number,
+  }),
 };
 
 HwaChongWeatherAnalysis.displayName = 'HwaChongWeatherAnalysis';

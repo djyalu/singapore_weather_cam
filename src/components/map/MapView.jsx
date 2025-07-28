@@ -404,6 +404,7 @@ MapView.propTypes = {
   selectedRegion: PropTypes.string,
   regionConfig: PropTypes.object,
   className: PropTypes.string,
+  onCameraSelect: PropTypes.func,
   weatherData: PropTypes.shape({
     timestamp: PropTypes.string,
     locations: PropTypes.arrayOf(PropTypes.shape({
