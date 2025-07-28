@@ -258,30 +258,7 @@ const TrafficCameraGallery = () => {
     };
   }, []);
 
-  // Fetch cameras on mount and set up auto-refresh
-  useEffect(() => {
-    fetchCameras();
-
-    if (autoRefresh) {
-      const interval = setInterval(fetchCameras, 60000); // Update every minute
-      return () => clearInterval(interval);
-    }
-  }, [autoRefresh]);
-
-  // Filter cameras when selection changes
-  useEffect(() => {
-    if (viewMode === 'featured') {
-      setFilteredCameras(getFeaturedCameras(cameras));
-    } else if (viewMode === 'area' && selectedArea !== 'all') {
-      setFilteredCameras(filterCamerasByArea(cameras, selectedArea));
-    } else if (viewMode === 'selector' && selectedCameraIds.length > 0) {
-      // Show only selected cameras when in selector mode
-      setFilteredCameras(cameras.filter(camera => selectedCameraIds.includes(camera.id.toString())));
-    } else {
-      setFilteredCameras(cameras);
-    }
-  }, [cameras, viewMode, selectedArea, selectedCameraIds]);
-
+  // Define fetchCameras function before useEffects that use it
   const fetchCameras = useCallback(async (isManualRefresh = false) => {
     try {
       if (isManualRefresh) {
@@ -303,7 +280,31 @@ const TrafficCameraGallery = () => {
       setLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, []);
+
+  // Fetch cameras on mount and set up auto-refresh
+  useEffect(() => {
+    fetchCameras();
+
+    if (autoRefresh) {
+      const interval = setInterval(fetchCameras, 60000); // Update every minute
+      return () => clearInterval(interval);
+    }
+  }, [fetchCameras, autoRefresh]);
+
+  // Filter cameras when selection changes
+  useEffect(() => {
+    if (viewMode === 'featured') {
+      setFilteredCameras(getFeaturedCameras(cameras));
+    } else if (viewMode === 'area' && selectedArea !== 'all') {
+      setFilteredCameras(filterCamerasByArea(cameras, selectedArea));
+    } else if (viewMode === 'selector' && selectedCameraIds.length > 0) {
+      // Show only selected cameras when in selector mode
+      setFilteredCameras(cameras.filter(camera => selectedCameraIds.includes(camera.id.toString())));
+    } else {
+      setFilteredCameras(cameras);
+    }
+  }, [cameras, viewMode, selectedArea, selectedCameraIds]);
 
   const handleRetry = async () => {
     await fetchCameras(false);

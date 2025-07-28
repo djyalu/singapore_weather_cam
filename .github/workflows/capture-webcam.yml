@@ -1,32 +1,28 @@
-name: Traffic Camera Monitor
+name: Traffic Camera Monitor (Disabled)
+
+# Webcam functionality has been replaced with real-time traffic camera system
+# This workflow is disabled but kept for reference
 
 on:
-  schedule:
-    # Every 3 hours for traffic camera monitoring (8 runs/day = 240 runs/month)
-    - cron: '15 */3 * * *'
+  # schedule:
+  #   - cron: '15 */3 * * *'
   workflow_dispatch:
     inputs:
       capture_mode:
         type: choice
-        options: [traffic_only, priority, test]
-        default: traffic_only
+        options: [disabled]
+        default: disabled
 
 env:
   NODE_ENV: production
-  REQUEST_TIMEOUT: 12000
-  MAX_RETRIES: 2
-  DISABLE_BROWSER_CAPTURE: 'true'
-  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+  WORKFLOW_DISABLED: 'true'
 
 jobs:
-  capture-webcam:
+  disabled-notice:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 1
     permissions:
-      contents: write
-    concurrency:
-      group: webcam-capture
-      cancel-in-progress: true
+      contents: read
 
     steps:
       - name: Checkout repository

@@ -196,45 +196,53 @@ const RegionalWeatherDashboard = React.memo(({
   );
 
   return (
-    <div className={`${className}`}>
+    <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
       {/* 헤더 */}
       <div className="mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-2">
-          🌏 선택된 지역 날씨
+        <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+          🌏 <span>주요 지역 날씨</span>
         </h2>
         <p className="text-sm text-gray-600 mb-4">
           실시간 기상 관측 데이터 - 지역 버튼을 클릭하여 3개 지역을 선택하세요
         </p>
         
-        {/* 지역 선택 버튼들 */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {AVAILABLE_REGIONS.map(region => (
-            <button
-              key={region.id}
-              onClick={() => {
-                if (!selectedRegions.includes(region.id)) {
-                  // 새 지역 선택 - 항상 3개 유지, 가장 오래된 것 교체
-                  setSelectedRegions(prev => [...prev.slice(1), region.id]);
-                }
-              }}
-              className={`
-                px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                flex items-center gap-2 cursor-pointer
-                ${selectedRegions.includes(region.id)
-                  ? 'bg-blue-500 text-white shadow-md ring-2 ring-blue-300'
-                  : 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700'
-                }
-              `}
-            >
-              <span>{region.emoji}</span>
-              <span>{region.name}</span>
-            </button>
-          ))}
+        {/* 지역 선택 버튼들 - 개선된 레이아웃 */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+            {AVAILABLE_REGIONS.map(region => (
+              <button
+                key={region.id}
+                onClick={() => {
+                  if (!selectedRegions.includes(region.id)) {
+                    // 새 지역 선택 - 항상 3개 유지, 가장 오래된 것 교체
+                    setSelectedRegions(prev => [...prev.slice(1), region.id]);
+                  }
+                }}
+                title={region.description}
+                className={`
+                  px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                  flex flex-col items-center gap-1 cursor-pointer min-h-[60px]
+                  ${selectedRegions.includes(region.id)
+                    ? 'bg-blue-500 text-white shadow-md ring-2 ring-blue-300 scale-105'
+                    : 'bg-white text-gray-700 hover:bg-blue-100 hover:text-blue-700 border border-gray-200'
+                  }
+                `}
+              >
+                <span className="text-lg">{region.emoji}</span>
+                <span className="text-xs font-medium">{region.name}</span>
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 text-xs text-gray-500 text-center">
+            현재 선택된 지역: {selectedRegions.map(id => 
+              AVAILABLE_REGIONS.find(r => r.id === id)?.name
+            ).join(', ')}
+          </div>
         </div>
       </div>
 
-      {/* 지역별 날씨 카드 그리드 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* 지역별 날씨 카드 그리드 - 개선된 레이아웃 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {selectedRegionConfigs.map(region => {
           const data = getRegionalWeatherData[region.id];
           
@@ -253,7 +261,7 @@ const RegionalWeatherDashboard = React.memo(({
           return (
             <RegionalWeatherCard
               key={region.id}
-              region={cardData.region}
+              region={`${region.emoji} ${cardData.region}`}
               temperature={cardData.temperature}
               humidity={cardData.humidity}
               rainfall={cardData.rainfall}
@@ -262,7 +270,7 @@ const RegionalWeatherDashboard = React.memo(({
               isActive={activeRegion === region.id}
               onClick={() => handleRegionClick(region.id)}
               lastUpdate={formatLastUpdate(cardData.lastUpdate)}
-              className={`min-h-[200px] ${activeRegion === region.id ? 'lg:col-span-2' : ''}`}
+              className="min-h-[200px] transition-all duration-300 hover:shadow-lg"
             />
           );
         })}
