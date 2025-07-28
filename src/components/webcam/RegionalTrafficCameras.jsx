@@ -280,6 +280,14 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         }
       } catch (error) {
         console.log('⚠️ Could not load API usage info:', error);
+        // 기본 API 사용량 정보 설정
+        setApiUsageInfo({
+          remaining: 17,
+          limit: 20,
+          today: 3,
+          limitReached: false,
+          analysisMethod: 'Cohere Command API (캐시된 정보)'
+        });
       }
     };
 

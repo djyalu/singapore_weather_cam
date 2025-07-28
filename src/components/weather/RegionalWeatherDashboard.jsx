@@ -106,12 +106,16 @@ const RegionalWeatherDashboard = React.memo(({
       selectedRegions.forEach(regionId => {
         const region = AVAILABLE_REGIONS.find(r => r.id === regionId);
         if (region) {
+          const fallbackTemp = 29.5 + (Math.random() * 2); // 29.5-31.5°C
           fallbackData[regionId] = {
             region: region.name,
-            temperature: 29.5 + (Math.random() * 2), // 29.5-31.5°C
+            temperature: fallbackTemp,
+            feelsLike: Math.round((fallbackTemp + 2.0) * 10) / 10, // 체감온도 추가
             humidity: 75 + Math.floor(Math.random() * 10), // 75-85%
             rainfall: 0,
             windDirection: '--',
+            description: getWeatherDescription(fallbackTemp, 0), // 날씨 설명 추가
+            icon: getWeatherIcon(fallbackTemp, 0), // 날씨 아이콘 추가
             stationName: '평균 데이터 (로딩 중)',
             stationCount: 0,
             lastUpdate: new Date().toISOString()
@@ -156,12 +160,22 @@ const RegionalWeatherDashboard = React.memo(({
         const primaryStation = stationData[0];
         const stationInfo = getStationInfo(primaryStation.station_id);
 
+        // 체감온도 계산 (실제온도 + 2도)
+        const calculatedFeelsLike = avgTemperature ? Math.round((avgTemperature + 2.0) * 10) / 10 : null;
+        
+        // 날씨 설명과 아이콘 생성
+        const weatherDescription = getWeatherDescription(avgTemperature, totalRainfall);
+        const weatherIcon = getWeatherIcon(avgTemperature, totalRainfall);
+
         regionalData[region.id] = {
           region: region.name,
           temperature: Math.round(avgTemperature * 10) / 10, // 소수점 1자리
+          feelsLike: calculatedFeelsLike, // 체감온도 추가
           humidity: Math.round(avgHumidity),
           rainfall: Math.round(totalRainfall * 10) / 10,
           windDirection: weatherData.current?.windDirection || '--',
+          description: weatherDescription, // 날씨 설명 추가
+          icon: weatherIcon, // 날씨 아이콘 추가
           stationName: stationInfo?.displayName || primaryStation.name || primaryStation.displayName,
           stationCount: stationData.length,
           lastUpdate: weatherData.timestamp
@@ -193,12 +207,22 @@ const RegionalWeatherDashboard = React.memo(({
             const avgTemp = randomStations.reduce((sum, s) => sum + (s.temperature || 0), 0) / randomStations.length;
             const avgHumidity = randomStations.reduce((sum, s) => sum + (s.humidity || 0), 0) / randomStations.length;
             
+            // 체감온도 계산 (실제온도 + 2도)
+            const calculatedFeelsLike = avgTemp ? Math.round((avgTemp + 2.0) * 10) / 10 : null;
+            
+            // 날씨 설명과 아이콘 생성
+            const weatherDescription = getWeatherDescription(avgTemp, 0);
+            const weatherIcon = getWeatherIcon(avgTemp, 0);
+            
             regionalData[region.id] = {
               region: region.name,
               temperature: Math.round(avgTemp * 10) / 10,
+              feelsLike: calculatedFeelsLike, // 체감온도 추가
               humidity: Math.round(avgHumidity),
               rainfall: 0,
               windDirection: weatherData.current?.windDirection || '--',
+              description: weatherDescription, // 날씨 설명 추가
+              icon: weatherIcon, // 날씨 아이콘 추가
               stationName: `추정 데이터 (${randomStations.length}개 스테이션 기준)`,
               stationCount: randomStations.length,
               lastUpdate: weatherData.timestamp
@@ -211,12 +235,18 @@ const RegionalWeatherDashboard = React.memo(({
             });
           } else {
             // 최후의 폴백
+            const fallbackTemp = weatherData.current?.temperature || 29.5;
+            const fallbackRainfall = weatherData.current?.rainfall || 0;
+            
             regionalData[region.id] = {
               region: region.name,
-              temperature: weatherData.current?.temperature || 29.5,
+              temperature: fallbackTemp,
+              feelsLike: fallbackTemp ? Math.round((fallbackTemp + 2.0) * 10) / 10 : null, // 체감온도 추가
               humidity: weatherData.current?.humidity || 78,
-              rainfall: weatherData.current?.rainfall || 0,
+              rainfall: fallbackRainfall,
               windDirection: weatherData.current?.windDirection || '--',
+              description: getWeatherDescription(fallbackTemp, fallbackRainfall), // 날씨 설명 추가
+              icon: getWeatherIcon(fallbackTemp, fallbackRainfall), // 날씨 아이콘 추가
               stationName: '전체 평균 데이터',
               stationCount: 0,
               lastUpdate: weatherData.timestamp
@@ -228,9 +258,12 @@ const RegionalWeatherDashboard = React.memo(({
           regionalData[region.id] = {
             region: region.name,
             temperature: 29.5,
+            feelsLike: 31.5, // 체감온도 추가 (29.5 + 2.0)
             humidity: 78,
             rainfall: 0,
             windDirection: '--',
+            description: getWeatherDescription(29.5, 0), // 날씨 설명 추가
+            icon: getWeatherIcon(29.5, 0), // 날씨 아이콘 추가
             stationName: '기본 데이터',
             stationCount: 0,
             lastUpdate: new Date().toISOString()
@@ -243,26 +276,29 @@ const RegionalWeatherDashboard = React.memo(({
     return regionalData;
   }, [weatherData]);
 
-  // 업데이트 시간 포맷팅 (시간대 고려)
+  // 업데이트 시간 포맷팅 (Asia/Singapore 시간대로 정확한 계산)
   const formatLastUpdate = (timestamp) => {
     if (!timestamp) return '';
     
     try {
       const updateTime = new Date(timestamp);
-      const now = new Date();
+      
+      // Singapore 시간으로 현재 시간 계산 (UTC+8)
+      const singaporeNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Singapore"}));
       
       // 디버깅: 시간 정보 출력
-      console.log('🕐 Time Debug:', {
+      console.log('🕐 Time Debug (Fixed):', {
         originalTimestamp: timestamp,
         updateTime: updateTime.toISOString(),
-        updateTimeLocal: updateTime.toLocaleString('ko-KR', { timeZone: 'Asia/Singapore' }),
-        now: now.toISOString(),
-        nowLocal: now.toLocaleString('ko-KR', { timeZone: 'Asia/Singapore' })
+        singaporeNow: singaporeNow.toISOString(),
+        updateTimeInSingapore: updateTime.toLocaleString('ko-KR', { timeZone: 'Asia/Singapore' }),
+        nowInSingapore: singaporeNow.toLocaleString('ko-KR', { timeZone: 'Asia/Singapore' })
       });
       
-      const diffMinutes = Math.floor((now - updateTime) / (1000 * 60));
+      // Singapore 시간 기준으로 차이 계산
+      const diffMinutes = Math.floor((singaporeNow - updateTime) / (1000 * 60));
       
-      console.log('⏱️ Time difference:', diffMinutes, 'minutes');
+      console.log('⏱️ Time difference (Singapore timezone):', diffMinutes, 'minutes');
       
       if (diffMinutes < 1) return '방금 전';
       if (diffMinutes < 60) return `${diffMinutes}분 전`;
@@ -270,6 +306,7 @@ const RegionalWeatherDashboard = React.memo(({
       const diffHours = Math.floor(diffMinutes / 60);
       if (diffHours < 24) return `${diffHours}시간 전`;
       
+      // 24시간 이상인 경우 정확한 날짜/시간 표시
       return updateTime.toLocaleDateString('ko-KR', {
         timeZone: 'Asia/Singapore',
         month: 'short',
@@ -358,11 +395,16 @@ const RegionalWeatherDashboard = React.memo(({
         }, 2000);
         
       } else {
-        console.log('⚠️ Could not load analysis data');
+        console.log('⚠️ Could not load analysis data, response status:', response.status);
         setAiAnalysisInProgress(false);
         
+        // 상태에 맞는 구체적인 메시지 제공
         if (window.showNotification) {
-          window.showNotification('AI 분석 데이터를 불러올 수 없습니다. 기본 데이터를 사용합니다.', 'warning');
+          if (response.status === 404) {
+            window.showNotification('🔄 AI 분석 데이터를 준비 중입니다. 기본 데이터를 사용합니다.', 'info');
+          } else {
+            window.showNotification(`AI 분석 데이터 로드 실패 (${response.status}). 기본 데이터를 사용합니다.`, 'warning');
+          }
         }
       }
     } catch (error) {
@@ -446,12 +488,16 @@ const RegionalWeatherDashboard = React.memo(({
           const data = getRegionalWeatherData[region.id];
           
           // 데이터가 없어도 현실적인 기본 카드 표시
+          const fallbackTemp = 29.3 + (Math.random() * 1); // 29.3-30.3°C
           const cardData = data || {
             region: region.name,
-            temperature: 29.3 + (Math.random() * 1), // 29.3-30.3°C 
+            temperature: fallbackTemp,
+            feelsLike: Math.round((fallbackTemp + 2.0) * 10) / 10, // 체감온도 추가
             humidity: 76 + Math.floor(Math.random() * 8), // 76-83%
             rainfall: 0,
             windDirection: '--',
+            description: getWeatherDescription(fallbackTemp, 0), // 날씨 설명 추가
+            icon: getWeatherIcon(fallbackTemp, 0), // 날씨 아이콘 추가
             stationName: '추정 데이터 (인근 스테이션 기준)',
             stationCount: 1,
             lastUpdate: new Date().toISOString()
