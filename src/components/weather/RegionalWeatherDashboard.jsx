@@ -243,14 +243,26 @@ const RegionalWeatherDashboard = React.memo(({
     return regionalData;
   }, [weatherData]);
 
-  // 업데이트 시간 포맷팅
+  // 업데이트 시간 포맷팅 (시간대 고려)
   const formatLastUpdate = (timestamp) => {
     if (!timestamp) return '';
     
     try {
       const updateTime = new Date(timestamp);
       const now = new Date();
+      
+      // 디버깅: 시간 정보 출력
+      console.log('🕐 Time Debug:', {
+        originalTimestamp: timestamp,
+        updateTime: updateTime.toISOString(),
+        updateTimeLocal: updateTime.toLocaleString('ko-KR', { timeZone: 'Asia/Singapore' }),
+        now: now.toISOString(),
+        nowLocal: now.toLocaleString('ko-KR', { timeZone: 'Asia/Singapore' })
+      });
+      
       const diffMinutes = Math.floor((now - updateTime) / (1000 * 60));
+      
+      console.log('⏱️ Time difference:', diffMinutes, 'minutes');
       
       if (diffMinutes < 1) return '방금 전';
       if (diffMinutes < 60) return `${diffMinutes}분 전`;
@@ -259,12 +271,14 @@ const RegionalWeatherDashboard = React.memo(({
       if (diffHours < 24) return `${diffHours}시간 전`;
       
       return updateTime.toLocaleDateString('ko-KR', {
+        timeZone: 'Asia/Singapore',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
       });
     } catch (error) {
+      console.error('❌ Time formatting error:', error);
       return '';
     }
   };
