@@ -204,12 +204,43 @@ jobs:
                     weather_indicators: '기상 상황 양호'
                   }
                 };
+              } else {
+                // API 키가 없을 때 지능적인 시뮬레이션
+                const trafficIntensity = isRushHour ? (isWeekend ? 0.3 : 0.8) : 0.4;
+                const numericId = parseInt(camera.camera_id) || 1;
+                const seed = (numericId * 7 + currentTime.getHours() * 3) % 100;
+                
+                const trafficStatuses = ['교통 원활', '교통 혼잡', '교통 정체중', '교통량 적음'];
+                const flows = ['매우 빠름', '빠름', '보통', '느림', '매우 느림'];
+                const densities = ['매우 높음', '높음', '보통', '낮음', '거의 없음'];
+                
+                const statusIndex = Math.floor((seed + trafficIntensity * 100) % trafficStatuses.length);
+                const flowIndex = Math.min(Math.floor(trafficIntensity * flows.length), flows.length - 1);
+                const densityIndex = Math.min(Math.floor(trafficIntensity * densities.length), densities.length - 1);
+                
+                analysis = {
+                  weather_condition: weatherCondition,
+                  visibility: '양호',
+                  road_conditions: weatherCondition.includes('비') ? '젖음' : '건조',
+                  precipitation: weatherCondition.includes('비') ? '약함' : '없음',
+                  traffic_status: trafficStatuses[statusIndex],
+                  vehicle_flow: flows[flowIndex],
+                  vehicle_density: densities[densityIndex],
+                  lighting_conditions: currentTime.getHours() >= 18 || currentTime.getHours() <= 6 ? '가로등' : '자연광',
+                  confidence: 0.70 + (seed % 20) / 100,
+                  details: {
+                    sky_condition: `현재 ${weatherCondition} 상태`,
+                    traffic_analysis: `시간대(${currentTime.getHours()}시)와 요일을 고려한 교통 패턴 분석`,
+                    road_surface: weatherCondition.includes('비') ? '노면 젖어있음, 주의 필요' : '노면 건조 상태',
+                    weather_indicators: `${weatherCondition} 날씨로 인한 시야 및 도로 상태 영향`
+                  }
+                };
               }
               
               // 메타데이터 추가
               analysis.analysis_timestamp = new Date().toISOString();
               analysis.camera_location = `Camera ${camera.camera_id}`;
-              analysis.ai_model = 'Cohere Command API';
+              analysis.ai_model = useRealAI ? 'Cohere Command API' : 'Intelligent Simulation';
               analysis.image_url = camera.image;
               analysis.camera_id = camera.camera_id;
               
@@ -235,7 +266,8 @@ jobs:
           const outputData = {
             timestamp: new Date().toISOString(),
             total_analyzed: Object.keys(analysisResults).length,
-            analysis_method: 'Cohere Command API',
+            analysis_method: useRealAI ? 'Cohere Command API' : 'Intelligent Simulation',
+            cohere_api_available: useRealAI,
             cameras: analysisResults
           };
           
