@@ -536,10 +536,35 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       
       // 사용되지 않은 카메라들 중에서 가장 가까운 것 찾기
       const availableCameras = cameras.filter(cam => !usedCameras.has(cam.id));
+      console.log(`📋 Available cameras for ${regionId}:`, availableCameras.length);
+      
+      // 디버깅: 각 카메라까지의 거리 계산해서 표시
+      const regionCoord = regionCoordinates[regionId];
+      if (regionCoord && availableCameras.length > 0) {
+        console.log(`📍 ${regionId} region coordinates:`, regionCoord);
+        
+        const distances = availableCameras.map(camera => {
+          if (camera.location?.latitude && camera.location?.longitude) {
+            const distance = calculateDistance(
+              regionCoord.lat, regionCoord.lng,
+              camera.location.latitude, camera.location.longitude
+            );
+            return {
+              id: camera.id,
+              name: camera.location.description || camera.location.name,
+              distance: distance.toFixed(2)
+            };
+          }
+          return null;
+        }).filter(Boolean).sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+        
+        console.log(`📏 Distances from ${regionId}:`, distances.slice(0, 3)); // 가장 가까운 3개만 표시
+      }
+      
       const nearestResult = findNearestCamera(regionId, availableCameras);
       
       if (nearestResult) {
-        console.log(`✅ Found nearest camera for ${regionId}:`, {
+        console.log(`✅ Selected camera for ${regionId}:`, {
           id: nearestResult.camera.id,
           name: nearestResult.camera.location?.description || nearestResult.camera.location?.name,
           distance: `${nearestResult.distance.toFixed(2)}km`
