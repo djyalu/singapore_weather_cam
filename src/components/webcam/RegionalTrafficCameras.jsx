@@ -141,8 +141,14 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   const [cameras, setCameras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
-  const [locationMode, setLocationMode] = useState('region'); // 'region' | 'location'
+
+  // 디버깅: props 확인
+  console.log('🔍 RegionalTrafficCameras props check:', {
+    selectedRegions,
+    selectedRegionsType: typeof selectedRegions,
+    selectedRegionsLength: selectedRegions?.length,
+    onCameraClick: typeof onCameraClick
+  });
 
   // 지역별 중심 좌표 (날씨 스테이션 기준)
   const regionCoordinates = {
@@ -318,27 +324,30 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     console.log('🔍 RegionalTrafficCameras - Finding cameras for regions:', selectedRegions);
     console.log('📷 Available cameras count:', cameras.length);
 
-    // 빈 배열 방지 - 항상 최소 3개 카메라 보장
-    if (!selectedRegions.length) {
-      console.log('⚠️ No selected regions, using default regions');
-      return [];
-    }
+    // 기본 지역 설정 (selectedRegions가 없는 경우)
+    const regionsToUse = selectedRegions && selectedRegions.length > 0 
+      ? selectedRegions 
+      : ['hwa-chong', 'newton', 'changi'];
+    
+    console.log('📋 Using regions:', regionsToUse);
 
+    // 카메라가 없는 경우 즉시 fallback 카메라 생성
     if (!cameras.length) {
-      console.log('🚨 No cameras available, this should not happen due to fallback');
-      // 이 상황은 fallback이 제대로 작동하지 않은 경우이므로 즉시 fallback 생성
+      console.log('🚨 No cameras available, generating emergency fallback');
       const emergencyFallback = generateFallbackCameras();
-      return selectedRegions.slice(0, 3).map((regionId, index) => ({
+      const result = regionsToUse.slice(0, 3).map((regionId, index) => ({
         camera: emergencyFallback[index] || emergencyFallback[0],
         regionId,
         distance: null
       }));
+      console.log('🔄 Emergency fallback result:', result.length);
+      return result;
     }
 
     const result = [];
     const usedCameras = new Set(); // 중복 방지
     
-    selectedRegions.forEach(regionId => {
+    regionsToUse.forEach(regionId => {
       console.log(`🎯 Finding camera for region: ${regionId}`);
       
       // 사용되지 않은 카메라들 중에서 가장 가까운 것 찾기
@@ -391,7 +400,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       console.log('🚨 Empty result detected, adding emergency camera');
       result.push({
         camera: cameras[0],
-        regionId: selectedRegions[0] || 'hwa-chong',
+        regionId: regionsToUse[0] || 'hwa-chong',
         distance: null
       });
     }

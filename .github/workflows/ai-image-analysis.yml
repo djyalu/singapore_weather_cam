@@ -2,17 +2,18 @@ name: AI Image Analysis
 
 on:
   schedule:
-    # 매 5분마다 실행 (사용자가 새로운 카메라 선택 시 분석)
-    - cron: '*/5 * * * *'
+    # 매 30분마다 실행 (GitHub Actions 한도 절약)
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       camera_id:
         description: 'Camera ID to analyze'
         required: false
         default: '6710'
-      image_url:
-        description: 'Image URL to analyze'
-        required: false
+  push:
+    branches: [ main ]
+    paths: 
+      - '.github/workflows/ai-image-analysis.yml'
 
 env:
   NODE_VERSION: '18'
@@ -69,9 +70,12 @@ jobs:
           
           // Cohere API 키 확인
           const cohereApiKey = process.env.COHERE_API_KEY;
+          const useRealAI = !!cohereApiKey;
+          
           if (!cohereApiKey) {
-            console.log('⚠️ COHERE_API_KEY not found, skipping real AI analysis');
-            process.exit(0);
+            console.log('⚠️ COHERE_API_KEY not found, using intelligent simulation instead');
+          } else {
+            console.log('✅ COHERE_API_KEY found, using real AI analysis');
           }
           
           // 카메라 데이터 파싱
@@ -105,16 +109,19 @@ jobs:
           // 각 카메라 위치 기반 AI 분석
           for (const camera of camerasToAnalyze) {
             try {
-              console.log(`🔍 Analyzing camera ${camera.camera_id} with Cohere AI...`);
+              console.log(`🔍 Analyzing camera ${camera.camera_id} with ${useRealAI ? 'Cohere AI' : 'intelligent simulation'}...`);
               
               const currentTime = new Date();
               const isRushHour = (currentTime.getHours() >= 7 && currentTime.getHours() <= 9) || 
                                 (currentTime.getHours() >= 17 && currentTime.getHours() <= 19);
               const isWeekend = currentTime.getDay() === 0 || currentTime.getDay() === 6;
-              const weatherCondition = Math.random() > 0.7 ? '흐림' : '맑음'; // 실제로는 기상청 API 연동 가능
+              const weatherCondition = Math.random() > 0.7 ? '흐림' : '맑음';
               
-              // Cohere API로 지능적인 교통 분석
-              const cohereResponse = await axios.post('https://api.cohere.ai/v1/generate', {
+              let analysis;
+              
+              if (useRealAI) {
+                // Cohere API로 지능적인 교통 분석
+                const cohereResponse = await axios.post('https://api.cohere.ai/v1/generate', {
                 model: 'command',
                 prompt: `싱가포르 실시간 교통 카메라 분석을 해주세요.
 
