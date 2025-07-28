@@ -114,48 +114,50 @@ const DataSyncGuide = React.memo(({
               </div>
             </div>
 
-            {/* 수동 새로고침 정보 */}
-            <div className="bg-white rounded-lg p-3 border border-blue-100">
-              <div className="flex items-center gap-2 mb-2">
-                <RefreshCw className="w-4 h-4 text-orange-600" />
-                <h4 className="text-sm font-medium text-orange-800">수동 새로고침</h4>
-              </div>
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <button
-                    onClick={onRefresh}
-                    disabled={isRefreshing}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium 
-                      text-blue-600 bg-blue-50 hover:bg-blue-100 disabled:opacity-50 
-                      rounded-md transition-colors min-h-[36px]"
-                    title="캐시된 데이터 새로고침"
-                  >
-                    <RefreshCw 
-                      className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} 
-                    />
-                    일반
-                  </button>
-                  <button
-                    onClick={onForceRefresh}
-                    disabled={isRefreshing}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium 
-                      text-orange-600 bg-orange-50 hover:bg-orange-100 disabled:opacity-50 
-                      rounded-md transition-colors min-h-[36px]"
-                    title="서버에서 최신 데이터 가져오기"
-                  >
-                    <Zap className="w-3 h-3" />
-                    강제
-                  </button>
+            {/* 수동 새로고침 정보 (조건부 표시) */}
+            {showRefreshControls && (
+              <div className="bg-white rounded-lg p-3 border border-blue-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <RefreshCw className="w-4 h-4 text-orange-600" />
+                  <h4 className="text-sm font-medium text-orange-800">수동 새로고침</h4>
                 </div>
-                <div className="text-xs text-gray-500 space-y-1">
-                  <div>• <strong>일반</strong>: 캐시 활용한 빠른 새로고침</div>
-                  <div>• <strong>강제</strong>: 서버에서 최신 데이터 수집</div>
-                  <div className="text-blue-600 font-medium mt-2">
-                    💡 자주 새로고침하려면 수동 버튼을 이용하세요!
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={onRefresh}
+                      disabled={isRefreshing}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium 
+                        text-blue-600 bg-blue-50 hover:bg-blue-100 disabled:opacity-50 
+                        rounded-md transition-colors min-h-[36px]"
+                      title="캐시된 데이터 새로고침"
+                    >
+                      <RefreshCw 
+                        className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} 
+                      />
+                      일반
+                    </button>
+                    <button
+                      onClick={onForceRefresh}
+                      disabled={isRefreshing}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium 
+                        text-orange-600 bg-orange-50 hover:bg-orange-100 disabled:opacity-50 
+                        rounded-md transition-colors min-h-[36px]"
+                      title="서버에서 최신 데이터 가져오기"
+                    >
+                      <Zap className="w-3 h-3" />
+                      강제
+                    </button>
+                  </div>
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>• <strong>일반</strong>: 캐시 활용한 빠른 새로고침</div>
+                    <div>• <strong>강제</strong>: 서버에서 최신 데이터 수집</div>
+                    <div className="text-blue-600 font-medium mt-2">
+                      💡 자주 새로고침하려면 수동 버튼을 이용하세요!
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* 추가 안내 */}
@@ -187,6 +189,7 @@ DataSyncGuide.propTypes = {
     PropTypes.instanceOf(Date)
   ]),
   className: PropTypes.string,
+  showRefreshControls: PropTypes.bool,
 };
 
 DataSyncGuide.displayName = 'DataSyncGuide';
