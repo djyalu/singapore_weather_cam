@@ -52,7 +52,7 @@ function extractCurrentWeather(data) {
     humidity: humidity ? Math.round(humidity) : null,
     rainfall: rainfall ? Math.round(rainfall * 10) / 10 : 0,
     windSpeed: windSpeed ? Math.round(windSpeed * 10) / 10 : null,
-    windDirection: getAverageWindDirection(data.wind_direction?.readings) || data.forecast?.general?.wind?.direction || 'Variable',
+    windDirection: getAverageWindDirection(data.wind_direction?.readings) || data.forecast?.general?.wind?.direction || '다양함',
     feelsLike: temperature ? Math.round((temperature + 2) * 10) / 10 : null, // 간단한 체감온도 계산
     uvIndex: '--', // NEA에서 제공하지 않음
     visibility: '--', // NEA에서 제공하지 않음
@@ -150,12 +150,14 @@ function calculateAverage(readings) {
 
 function getAverageWindDirection(readings) {
   if (!readings || !Array.isArray(readings) || readings.length === 0) {
-    return 'Variable';
+    return null; // fallback 로직이 작동하도록 null 반환
   }
 
   // 가장 흔한 풍향 반환
   const directions = readings.map(r => r.value).filter(v => v);
-  if (directions.length === 0) {return 'Variable';}
+  if (directions.length === 0) {
+    return null; // fallback 로직이 작동하도록 null 반환
+  }
 
   const directionCounts = {};
   directions.forEach(dir => {
