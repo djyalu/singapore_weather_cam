@@ -175,7 +175,7 @@ jobs:
           
           console.log(`🎯 Analyzing ${camerasToAnalyze.length} priority cameras`);
           
-          const analysisResults = {};
+          let analysisResults = {};
           let actualAPICalls = 0; // 실제 API 호출 횟수 추적
           
           // 각 카메라 위치 기반 AI 분석
@@ -191,8 +191,11 @@ jobs:
               
               let analysis;
               
-              if (useRealAI) {
+              if (useRealAI && remainingCalls > actualAPICalls) {
                 // Cohere API로 지능적인 교통 분석
+                console.log(`🔥 Making real Cohere API call ${actualAPICalls + 1}/${remainingCalls}`);
+                actualAPICalls++; // API 호출 전에 카운터 증가
+                
                 const cohereResponse = await axios.post('https://api.cohere.ai/v1/generate', {
                 model: 'command',
                 prompt: `싱가포르 실시간 교통 카메라 분석을 해주세요.
@@ -312,9 +315,19 @@ jobs:
               // 메타데이터 추가
               analysis.analysis_timestamp = new Date().toISOString();
               analysis.camera_location = `Camera ${camera.camera_id}`;
-              analysis.ai_model = useRealAI ? 'Cohere Command API' : 'Intelligent Simulation';
+              analysis.ai_model = (useRealAI && remainingCalls > (actualAPICalls - 1)) ? 'Cohere Command API' : 'Intelligent Simulation';
               analysis.image_url = camera.image;
               analysis.camera_id = camera.camera_id;
+              
+              // API 제한 상태 표시
+              if (!useRealAI && cohereApiKey && remainingCalls <= 0) {
+                analysis.api_status = `Daily limit reached (${DAILY_LIMIT} calls/day)`;
+                analysis.ai_model = 'Intelligent Simulation (API limit reached)';
+              } else if (!cohereApiKey) {
+                analysis.api_status = 'No API key configured';
+              } else if (useRealAI) {
+                analysis.api_status = `Active (${remainingCalls - actualAPICalls} calls remaining)`;
+              }
               
               analysisResults[camera.camera_id] = analysis;
               
@@ -329,6 +342,30 @@ jobs:
           }
           }
           
+          // API 사용량 업데이트 및 저장
+          if (actualAPICalls > 0) {
+            apiUsageData[today] = (apiUsageData[today] || 0) + actualAPICalls;
+            
+            // 7일 이상 된 데이터는 정리
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const cutoffDate = sevenDaysAgo.toISOString().split('T')[0];
+            
+            Object.keys(apiUsageData).forEach(date => {
+              if (date < cutoffDate) {
+                delete apiUsageData[date];
+              }
+            });
+            
+            // API 사용량 파일 저장
+            if (!fs.existsSync('data')) {
+              fs.mkdirSync('data', { recursive: true });
+            }
+            fs.writeFileSync('data/api-usage.json', JSON.stringify(apiUsageData, null, 2));
+            
+            console.log(`📊 API usage updated: ${actualAPICalls} calls made today (total: ${apiUsageData[today]}/${DAILY_LIMIT})`);
+          }
+          
           // 분석 결과를 JSON 파일로 저장
           const analysisDir = 'data/ai-analysis';
           if (!fs.existsSync(analysisDir)) {
@@ -336,11 +373,16 @@ jobs:
           }
           
           const outputFile = path.join(analysisDir, 'latest.json');
+          const finalApiUsage = apiUsageData[today] || 0;
           const outputData = {
             timestamp: new Date().toISOString(),
             total_analyzed: Object.keys(analysisResults).length,
             analysis_method: useRealAI ? 'Cohere Command API' : 'Intelligent Simulation',
-            cohere_api_available: useRealAI,
+            cohere_api_available: !!cohereApiKey,
+            api_calls_today: finalApiUsage,
+            api_calls_limit: DAILY_LIMIT,
+            api_calls_remaining: Math.max(0, DAILY_LIMIT - finalApiUsage),
+            api_limit_reached: finalApiUsage >= DAILY_LIMIT,
             cameras: analysisResults
           };
           
@@ -361,17 +403,32 @@ jobs:
           
           # 변경사항이 있는지 확인
           if [ -n "$(git status --porcelain)" ]; then
-            git add data/ai-analysis/
+            git add data/ai-analysis/ data/api-usage.json
             TRIGGER_SOURCE="${{ github.event.inputs.trigger_source }}"
             SELECTED_REGIONS="${{ github.event.inputs.selected_regions }}"
             CAMERA_IDS="${{ github.event.inputs.camera_ids }}"
+            
+            # Get API usage info for commit message
+            if [ -f "data/api-usage.json" ]; then
+              API_USAGE_INFO=$(node -e "
+                try {
+                  const data = JSON.parse(require('fs').readFileSync('data/api-usage.json'));
+                  const today = new Date().toISOString().split('T')[0];
+                  const todayUsage = data[today] || 0;
+                  console.log('API calls today: ' + todayUsage + '/20');
+                } catch(e) { console.log('API usage: N/A'); }
+              ")
+            else
+              API_USAGE_INFO="API usage: N/A"
+            fi
             
             git commit -m "feat: Update AI traffic analysis results
 
             - Trigger: ${TRIGGER_SOURCE:-scheduled}
             - Regions: ${SELECTED_REGIONS:-default}  
             - Cameras: ${CAMERA_IDS:-default}
-            - Analyzed $(ls data/ai-analysis/*.json 2>/dev/null | wc -l) camera locations with Cohere Command API
+            - ${API_USAGE_INFO}
+            - Analyzed $(ls data/ai-analysis/*.json 2>/dev/null | wc -l) camera locations
             - Real-time weather and traffic conditions updated
             - Analysis timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
             
@@ -387,12 +444,36 @@ jobs:
         run: |
           echo "## 🤖 AI Traffic Analysis Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Timestamp**: $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Analysis Method**: Cohere Command API" >> $GITHUB_STEP_SUMMARY
           
           if [ -f "data/ai-analysis/latest.json" ]; then
-            ANALYZED_COUNT=$(node -e "console.log(Object.keys(JSON.parse(require('fs').readFileSync('data/ai-analysis/latest.json')).cameras || {}).length)")
-            echo "- **Cameras Analyzed**: $ANALYZED_COUNT" >> $GITHUB_STEP_SUMMARY
+            ANALYSIS_DATA=$(node -e "
+              try {
+                const data = JSON.parse(require('fs').readFileSync('data/ai-analysis/latest.json'));
+                console.log('METHOD:' + data.analysis_method);
+                console.log('COUNT:' + Object.keys(data.cameras || {}).length);
+                console.log('API_CALLS:' + (data.api_calls_today || 0));
+                console.log('API_LIMIT:' + (data.api_calls_limit || 20));
+                console.log('API_REMAINING:' + (data.api_calls_remaining || 0));
+              } catch(e) { 
+                console.log('METHOD:Unknown');
+                console.log('COUNT:0');
+                console.log('API_CALLS:0');
+                console.log('API_LIMIT:20');
+                console.log('API_REMAINING:20');
+              }
+            ")
+            
+            METHOD=$(echo "$ANALYSIS_DATA" | grep "METHOD:" | cut -d: -f2)
+            COUNT=$(echo "$ANALYSIS_DATA" | grep "COUNT:" | cut -d: -f2)
+            API_CALLS=$(echo "$ANALYSIS_DATA" | grep "API_CALLS:" | cut -d: -f2)
+            API_LIMIT=$(echo "$ANALYSIS_DATA" | grep "API_LIMIT:" | cut -d: -f2)
+            API_REMAINING=$(echo "$ANALYSIS_DATA" | grep "API_REMAINING:" | cut -d: -f2)
+            
+            echo "- **Analysis Method**: $METHOD" >> $GITHUB_STEP_SUMMARY
+            echo "- **Cameras Analyzed**: $COUNT" >> $GITHUB_STEP_SUMMARY
+            echo "- **API Usage Today**: $API_CALLS/$API_LIMIT (${API_REMAINING} remaining)" >> $GITHUB_STEP_SUMMARY
             echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
           else
+            echo "- **Analysis Method**: Unknown" >> $GITHUB_STEP_SUMMARY
             echo "- **Status**: ⚠️ No analysis file generated" >> $GITHUB_STEP_SUMMARY
           fi
