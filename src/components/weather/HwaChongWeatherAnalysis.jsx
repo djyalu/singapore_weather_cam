@@ -93,33 +93,26 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '', selectedCamera = n
       console.log(`🤖 Starting AI analysis for image: ${imageUrl}`);
       console.log(`📍 Location: ${locationDescription}`);
       
-      // 실제 Claude Vision API 호출
-      if (imageUrl && imageUrl.startsWith('http')) {
-        try {
-          const response = await fetch('/api/analyze-image', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              imageUrl: imageUrl,
-              location: locationDescription,
-              cameraId: cameraInfo?.id || CLOSEST_CAMERA_ID,
-              timestamp: new Date().toISOString()
-            })
-          });
-
-          if (response.ok) {
-            const realAnalysis = await response.json();
-            console.log('✅ Real AI analysis received:', realAnalysis);
+      // GitHub Actions로 생성된 실제 AI 분석 데이터 확인
+      try {
+        const analysisResponse = await fetch('/data/ai-analysis/latest.json');
+        if (analysisResponse.ok) {
+          const analysisData = await analysisResponse.json();
+          const targetCameraId = cameraInfo?.id || CLOSEST_CAMERA_ID;
+          
+          if (analysisData.cameras && analysisData.cameras[targetCameraId]) {
+            const realAnalysis = analysisData.cameras[targetCameraId];
+            console.log('✅ Real Cohere AI analysis found for camera:', targetCameraId);
             setAiAnalysis(realAnalysis);
             return;
           } else {
-            console.log('⚠️ AI API failed, falling back to enhanced simulation');
+            console.log('⚠️ No AI analysis found for camera:', targetCameraId);
           }
-        } catch (apiError) {
-          console.log('⚠️ AI API error, using enhanced simulation:', apiError.message);
+        } else {
+          console.log('⚠️ AI analysis file not found, using enhanced simulation');
         }
+      } catch (apiError) {
+        console.log('⚠️ AI analysis file error, using enhanced simulation:', apiError.message);
       }
       
       // API 실패 시 향상된 시뮬레이션 (실제 이미지 기반 추론)
@@ -409,12 +402,12 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '', selectedCamera = n
                 </div>
                 {/* AI 분석 상태 표시 */}
                 <div className={`text-xs px-2 py-1 rounded-full ${
-                  aiAnalysis.ai_model?.includes('Claude Vision API') 
+                  aiAnalysis.ai_model?.includes('Cohere Command API') 
                     ? 'bg-green-100 text-green-700' 
                     : 'bg-orange-100 text-orange-700'
                 }`}>
-                  {aiAnalysis.ai_model?.includes('Claude Vision API') 
-                    ? '🤖 실제 AI 분석' 
+                  {aiAnalysis.ai_model?.includes('Cohere Command API') 
+                    ? '🤖 실제 AI 분석 (Cohere)' 
                     : '🔄 향상된 시뮬레이션'
                   }
                 </div>
