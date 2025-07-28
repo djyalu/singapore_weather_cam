@@ -1,131 +1,394 @@
 {
-  "timestamp": "2025-07-26T21:00:00+08:00",
+  "timestamp": "2025-07-28T13:33:57.360Z",
   "source": "NEA Singapore (Enhanced)",
-  "collection_time_ms": 1247,
+  "collection_time_ms": 4772,
+  "api_calls": 4,
+  "successful_calls": 4,
+  "failed_calls": 0,
   "data": {
     "temperature": {
       "readings": [
-        {"station": "S121", "value": 29.2, "location": "Bukit Timah Nature Reserve"},
-        {"station": "S116", "value": 28.8, "location": "Bukit Timah Road"},
-        {"station": "S118", "value": 29.1, "location": "Bukit Timah West"}
+        {
+          "station": "S109",
+          "value": 29.8
+        },
+        {
+          "station": "S50",
+          "value": 29.2
+        },
+        {
+          "station": "S107",
+          "value": 30
+        },
+        {
+          "station": "S43",
+          "value": 29.9
+        },
+        {
+          "station": "S102",
+          "value": 29.5
+        },
+        {
+          "station": "S60",
+          "value": 29.4
+        },
+        {
+          "station": "S115",
+          "value": 29.6
+        },
+        {
+          "station": "S24",
+          "value": 29.6
+        },
+        {
+          "station": "S104",
+          "value": 29.7
+        }
       ],
-      "average": 29.0
+      "average": 29.633333333333333
     },
     "humidity": {
       "readings": [
-        {"station": "S121", "value": 78, "location": "Bukit Timah Nature Reserve"},
-        {"station": "S116", "value": 76, "location": "Bukit Timah Road"},
-        {"station": "S118", "value": 77, "location": "Bukit Timah West"}
+        {
+          "station": "S109",
+          "value": 77.3
+        },
+        {
+          "station": "S50",
+          "value": 84
+        },
+        {
+          "station": "S107",
+          "value": 81.7
+        },
+        {
+          "station": "S43",
+          "value": 79.3
+        },
+        {
+          "station": "S102",
+          "value": 84.7
+        },
+        {
+          "station": "S60",
+          "value": 85.8
+        },
+        {
+          "station": "S115",
+          "value": 82.7
+        },
+        {
+          "station": "S24",
+          "value": 77.3
+        },
+        {
+          "station": "S104",
+          "value": 87.7
+        }
       ],
-      "average": 77
+      "average": 82.27777777777777
     },
     "rainfall": {
       "readings": [
-        {"station": "S121", "value": 0.0, "location": "Bukit Timah Nature Reserve"},
-        {"station": "S116", "value": 0.2, "location": "Bukit Timah Road"},
-        {"station": "S118", "value": 0.0, "location": "Bukit Timah West"}
+        {
+          "station": "S224",
+          "value": 0
+        },
+        {
+          "station": "S77",
+          "value": 0
+        },
+        {
+          "station": "S216",
+          "value": 0
+        },
+        {
+          "station": "S109",
+          "value": 0
+        },
+        {
+          "station": "S117",
+          "value": 0
+        },
+        {
+          "station": "S217",
+          "value": 0
+        },
+        {
+          "station": "S64",
+          "value": 0
+        },
+        {
+          "station": "S90",
+          "value": 0
+        },
+        {
+          "station": "S208",
+          "value": 0
+        },
+        {
+          "station": "S201",
+          "value": 0
+        },
+        {
+          "station": "S50",
+          "value": 0
+        },
+        {
+          "station": "S220",
+          "value": 0
+        },
+        {
+          "station": "S213",
+          "value": 0
+        },
+        {
+          "station": "S107",
+          "value": 0
+        },
+        {
+          "station": "S215",
+          "value": 0
+        },
+        {
+          "station": "S222",
+          "value": 0
+        },
+        {
+          "station": "S221",
+          "value": 0
+        },
+        {
+          "station": "S33",
+          "value": 0
+        },
+        {
+          "station": "S229",
+          "value": 0
+        },
+        {
+          "station": "S228",
+          "value": 0
+        },
+        {
+          "station": "S71",
+          "value": 0
+        },
+        {
+          "station": "S43",
+          "value": 0
+        },
+        {
+          "station": "S211",
+          "value": 0
+        },
+        {
+          "station": "S66",
+          "value": 0
+        },
+        {
+          "station": "S112",
+          "value": 0
+        },
+        {
+          "station": "S07",
+          "value": 0
+        },
+        {
+          "station": "S226",
+          "value": 0
+        },
+        {
+          "station": "S40",
+          "value": 0
+        },
+        {
+          "station": "S223",
+          "value": 0
+        },
+        {
+          "station": "S108",
+          "value": 0
+        },
+        {
+          "station": "S113",
+          "value": 0
+        },
+        {
+          "station": "S44",
+          "value": 0
+        },
+        {
+          "station": "S119",
+          "value": 0
+        },
+        {
+          "station": "S203",
+          "value": 0
+        },
+        {
+          "station": "S29",
+          "value": 0
+        },
+        {
+          "station": "S94",
+          "value": 0
+        },
+        {
+          "station": "S78",
+          "value": 0
+        },
+        {
+          "station": "S106",
+          "value": 0
+        },
+        {
+          "station": "S81",
+          "value": 0
+        },
+        {
+          "station": "S111",
+          "value": 0
+        },
+        {
+          "station": "S900",
+          "value": 0
+        },
+        {
+          "station": "S102",
+          "value": 0
+        },
+        {
+          "station": "S60",
+          "value": 0
+        },
+        {
+          "station": "S84",
+          "value": 0
+        },
+        {
+          "station": "S79",
+          "value": 0
+        },
+        {
+          "station": "S92",
+          "value": 0
+        },
+        {
+          "station": "S214",
+          "value": 0
+        },
+        {
+          "station": "S88",
+          "value": 0
+        },
+        {
+          "station": "S123",
+          "value": 0
+        },
+        {
+          "station": "S115",
+          "value": 0
+        },
+        {
+          "station": "S24",
+          "value": 0
+        },
+        {
+          "station": "S69",
+          "value": 0
+        },
+        {
+          "station": "S08",
+          "value": 0
+        },
+        {
+          "station": "S230",
+          "value": 0
+        },
+        {
+          "station": "S104",
+          "value": 0
+        },
+        {
+          "station": "S210",
+          "value": 0
+        },
+        {
+          "station": "S227",
+          "value": 0
+        },
+        {
+          "station": "S219",
+          "value": 0
+        },
+        {
+          "station": "S209",
+          "value": 0
+        }
       ],
-      "average": 0.1
+      "total": 0
     },
     "forecast": {
-      "condition": "Partly Cloudy",
-      "description": "Partly cloudy with occasional light showers expected",
-      "windSpeed": "10-15 km/h",
-      "windDirection": "Northeast",
-      "uvIndex": 6,
-      "visibility": "Good (>10km)"
+      "general": {
+        "forecast": "Partly Cloudy (Day)",
+        "relative_humidity": {
+          "low": 55,
+          "high": 90
+        },
+        "temperature": {
+          "low": 26,
+          "high": 34
+        },
+        "wind": {
+          "speed": {
+            "low": 10,
+            "high": 25
+          },
+          "direction": "SSE"
+        }
+      },
+      "periods": [
+        {
+          "time": {
+            "start": "2025-07-28T18:00:00+08:00",
+            "end": "2025-07-29T06:00:00+08:00"
+          },
+          "regions": {
+            "west": "Partly Cloudy (Night)",
+            "east": "Partly Cloudy (Night)",
+            "central": "Partly Cloudy (Night)",
+            "south": "Partly Cloudy (Night)",
+            "north": "Partly Cloudy (Night)"
+          }
+        },
+        {
+          "time": {
+            "start": "2025-07-29T06:00:00+08:00",
+            "end": "2025-07-29T12:00:00+08:00"
+          },
+          "regions": {
+            "west": "Partly Cloudy (Day)",
+            "east": "Partly Cloudy (Day)",
+            "central": "Partly Cloudy (Day)",
+            "south": "Partly Cloudy (Day)",
+            "north": "Partly Cloudy (Day)"
+          }
+        },
+        {
+          "time": {
+            "start": "2025-07-29T12:00:00+08:00",
+            "end": "2025-07-29T18:00:00+08:00"
+          },
+          "regions": {
+            "west": "Partly Cloudy (Day)",
+            "east": "Partly Cloudy (Day)",
+            "central": "Partly Cloudy (Day)",
+            "south": "Partly Cloudy (Day)",
+            "north": "Partly Cloudy (Day)"
+          }
+        }
+      ]
     }
-  },
-  "current": {
-    "temperature": 29.0,
-    "feelsLike": 32.5,
-    "humidity": 77,
-    "rainfall": 0.1,
-    "windSpeed": 12,
-    "windDirection": "NE",
-    "uvIndex": 6,
-    "visibility": 10
-  },
-  "locations": [
-    {
-      "id": "bukit_timah_nature_reserve",
-      "name": "Bukit Timah Nature Reserve",
-      "displayName": "Bukit Timah Nature Reserve",
-      "description": "Singapore's highest natural point and biodiversity center",
-      "coordinates": { "lat": 1.3520, "lng": 103.7767 },
-      "temperature": 29.2,
-      "humidity": 78,
-      "rainfall": 0.0,
-      "condition": "partly_cloudy",
-      "weather_description": "Partly cloudy with good visibility",
-      "priority": "primary",
-      "station_id": "S121"
-    },
-    {
-      "id": "bukit_timah_road",
-      "name": "Bukit Timah Road",
-      "displayName": "Bukit Timah Road",
-      "description": "Major road connecting to nature reserve",
-      "coordinates": { "lat": 1.3286, "lng": 103.8023 },
-      "temperature": 28.8,
-      "humidity": 76,
-      "rainfall": 0.2,
-      "condition": "partly_cloudy",
-      "weather_description": "Partly cloudy with light intermittent drizzle",
-      "priority": "primary",
-      "station_id": "S116"
-    },
-    {
-      "id": "bukit_timah_west", 
-      "name": "Bukit Timah West",
-      "displayName": "Bukit Timah West",
-      "description": "Western approach to Bukit Timah area",
-      "coordinates": { "lat": 1.3162, "lng": 103.7649 },
-      "temperature": 29.1,
-      "humidity": 77,
-      "rainfall": 0.0,
-      "condition": "partly_cloudy",
-      "weather_description": "Partly cloudy with moderate humidity",
-      "priority": "primary",
-      "station_id": "S118"
-    },
-    {
-      "id": "newton_area",
-      "name": "Newton",
-      "displayName": "Newton MRT Area",
-      "description": "Secondary monitoring location",
-      "coordinates": { "lat": 1.3138, "lng": 103.8420 },
-      "temperature": 29.3,
-      "humidity": 75,
-      "rainfall": 0.0,
-      "condition": "sunny",
-      "weather_description": "Clear skies with good visibility",
-      "priority": "secondary"
-    }
-  ],
-  "forecast": [
-    { "time": "2025-07-26T22:00:00+08:00", "temperature": 28.5, "rainfall": 0.1, "condition": "partly_cloudy" },
-    { "time": "2025-07-26T23:00:00+08:00", "temperature": 28.2, "rainfall": 0.0, "condition": "partly_cloudy" },
-    { "time": "2025-07-27T00:00:00+08:00", "temperature": 27.8, "rainfall": 0.0, "condition": "clear" },
-    { "time": "2025-07-27T01:00:00+08:00", "temperature": 27.5, "rainfall": 0.0, "condition": "clear" },
-    { "time": "2025-07-27T02:00:00+08:00", "temperature": 27.2, "rainfall": 0.0, "condition": "clear" },
-    { "time": "2025-07-27T03:00:00+08:00", "temperature": 27.0, "rainfall": 0.0, "condition": "clear" }
-  ],
-  "summary": {
-    "description": "Today expect partly cloudy conditions with occasional light showers. Temperature will range 27-31°C with humidity 70-85%.",
-    "maxTemp": 31,
-    "minTemp": 27,
-    "chanceOfRain": 35,
-    "windSpeed": "10-15 km/h",
-    "windDirection": "Northeast",
-    "uvIndex": 6,
-    "visibility": "Good (>10km)"
-  },
-  "lastUpdated": "2025-07-26T21:00:00+08:00",
-  "updateInterval": "30 minutes",
-  "circuit_breaker": {
-    "status": "CLOSED",
-    "failure_count": 0,
-    "last_failure": null
   }
 }
