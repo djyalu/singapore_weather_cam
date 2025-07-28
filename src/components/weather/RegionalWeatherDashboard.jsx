@@ -320,6 +320,24 @@ const RegionalWeatherDashboard = React.memo(({
     }
   };
 
+  // weatherDataTransformer.js에서 가져온 날씨 설명 및 아이콘 생성 함수들
+  const getWeatherDescription = (temperature, rainfall) => {
+    if (rainfall > 5) return 'Rainy';
+    if (rainfall > 0.5) return 'Light Rain';
+    if (temperature > 32) return 'Hot';
+    if (temperature > 28) return 'Warm';
+    if (temperature > 24) return 'Pleasant';
+    return 'Cool';
+  };
+
+  const getWeatherIcon = (temperature, rainfall) => {
+    if (rainfall > 5) return '🌧️';
+    if (rainfall > 0.5) return '🌦️';
+    if (temperature > 32) return '☀️';
+    if (temperature > 28) return '⛅';
+    return '🌤️';
+  };
+
   const handleRegionClick = (regionId) => {
     onRegionSelect?.(regionId);
   };
