@@ -81,18 +81,8 @@ const App = () => {
           className="mb-8"
         />
 
-        {/* 선택된 지역의 상세 정보 */}
+        {/* 선택된 지역의 상세 정보는 상단 카드에서 표시 */}
         <div className="space-y-6">
-          {/* 메인 온도 히어로 섹션 */}
-          <Suspense fallback={<LoadingFallback message="Loading weather dashboard..." />}>
-            <WeatherDashboard
-              data={{
-                current: weatherData?.locations?.[0],
-                locations: weatherData?.locations,
-                forecast: weatherData?.forecast || [],
-              }}
-            />
-          </Suspense>
 
           {/* 웹캠 갤러리 */}
           <Suspense fallback={<LoadingFallback message="Loading webcam gallery..." />}>

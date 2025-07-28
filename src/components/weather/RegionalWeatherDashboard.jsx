@@ -150,7 +150,7 @@ const RegionalWeatherDashboard = React.memo(({
               isActive={activeRegion === region.id}
               onClick={() => handleRegionClick(region.id)}
               lastUpdate={formatLastUpdate(data.lastUpdate)}
-              className="min-h-[200px]"
+              className={`min-h-[200px] ${activeRegion === region.id ? 'lg:col-span-2' : ''}`}
             />
           );
         })}
@@ -161,7 +161,7 @@ const RegionalWeatherDashboard = React.memo(({
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2 text-blue-700">
             <span>ℹ️</span>
-            <span>지역을 클릭하면 상세 정보를 볼 수 있습니다</span>
+            <span>지역을 클릭하면 카드가 확대되어 상세 정보를 볼 수 있습니다</span>
           </div>
           <div className="text-blue-600 text-xs">
             NEA Singapore 공식 데이터

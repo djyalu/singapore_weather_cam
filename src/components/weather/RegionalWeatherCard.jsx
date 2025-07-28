@@ -75,7 +75,7 @@ const RegionalWeatherCard = React.memo(({
         relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl 
         transition-all duration-300 cursor-pointer transform hover:scale-105
         border border-white/20 backdrop-blur-sm
-        ${isActive ? 'ring-2 ring-blue-500 ring-offset-2 shadow-2xl scale-105' : ''}
+        ${isActive ? 'ring-4 ring-blue-500 ring-offset-4 shadow-2xl scale-110' : ''}
         bg-gradient-to-br ${cardBg}
         ${className}
       `}
