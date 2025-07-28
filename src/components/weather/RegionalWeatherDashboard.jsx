@@ -3,6 +3,40 @@ import PropTypes from 'prop-types';
 import RegionalWeatherCard from './RegionalWeatherCard';
 import { getStationInfo } from '../../config/weatherStations';
 
+// weatherDataTransformer.js에서 가져온 날씨 설명 및 아이콘 생성 함수들 (컴포넌트 외부)
+const getWeatherDescription = (temperature, rainfall) => {
+  try {
+    if (typeof temperature !== 'number') return 'Unknown';
+    if (typeof rainfall !== 'number') rainfall = 0;
+    
+    if (rainfall > 5) return 'Rainy';
+    if (rainfall > 0.5) return 'Light Rain';
+    if (temperature > 32) return 'Hot';
+    if (temperature > 28) return 'Warm';
+    if (temperature > 24) return 'Pleasant';
+    return 'Cool';
+  } catch (error) {
+    console.error('Error in getWeatherDescription:', error);
+    return 'Unknown';
+  }
+};
+
+const getWeatherIcon = (temperature, rainfall) => {
+  try {
+    if (typeof temperature !== 'number') return '🌤️';
+    if (typeof rainfall !== 'number') rainfall = 0;
+    
+    if (rainfall > 5) return '🌧️';
+    if (rainfall > 0.5) return '🌦️';
+    if (temperature > 32) return '☀️';
+    if (temperature > 28) return '⛅';
+    return '🌤️';
+  } catch (error) {
+    console.error('Error in getWeatherIcon:', error);
+    return '🌤️';
+  }
+};
+
 /**
  * 지역별 날씨 대시보드 컴포넌트
  * 3개 주요 지역의 날씨 정보를 카드보드 형태로 표시
@@ -320,23 +354,6 @@ const RegionalWeatherDashboard = React.memo(({
     }
   };
 
-  // weatherDataTransformer.js에서 가져온 날씨 설명 및 아이콘 생성 함수들
-  const getWeatherDescription = (temperature, rainfall) => {
-    if (rainfall > 5) return 'Rainy';
-    if (rainfall > 0.5) return 'Light Rain';
-    if (temperature > 32) return 'Hot';
-    if (temperature > 28) return 'Warm';
-    if (temperature > 24) return 'Pleasant';
-    return 'Cool';
-  };
-
-  const getWeatherIcon = (temperature, rainfall) => {
-    if (rainfall > 5) return '🌧️';
-    if (rainfall > 0.5) return '🌦️';
-    if (temperature > 32) return '☀️';
-    if (temperature > 28) return '⛅';
-    return '🌤️';
-  };
 
   const handleRegionClick = (regionId) => {
     onRegionSelect?.(regionId);
