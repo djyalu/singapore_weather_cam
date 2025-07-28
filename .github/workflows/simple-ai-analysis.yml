@@ -33,6 +33,7 @@ jobs:
           const fs = require('fs');
           const axios = require('axios');
           
+          (async () => {
           console.log('🤖 Starting Simple AI Analysis...');
           
           const cohereApiKey = process.env.COHERE_API_KEY;
@@ -146,6 +147,10 @@ jobs:
           
           console.log('✅ Analysis completed successfully');
           console.log('Cameras analyzed:', Object.keys(analysisResults).length);
+          })().catch(error => {
+            console.error('❌ Simple AI Analysis failed:', error);
+            process.exit(1);
+          });
           
           EOF
 
