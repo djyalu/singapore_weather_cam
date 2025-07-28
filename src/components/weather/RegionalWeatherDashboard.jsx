@@ -524,7 +524,11 @@ const RegionalWeatherDashboard = React.memo(({
           console.log(`🎯 Rendering card for ${region.id}:`, {
             hasData: !!data,
             temperature: cardData.temperature,
-            stationName: cardData.stationName
+            feelsLike: cardData.feelsLike,
+            description: cardData.description,
+            icon: cardData.icon,
+            stationName: cardData.stationName,
+            lastUpdate: cardData.lastUpdate
           });
 
           return (

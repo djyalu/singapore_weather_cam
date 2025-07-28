@@ -21,6 +21,17 @@ const RegionalWeatherCard = React.memo(({
   lastUpdate,
   className = ''
 }) => {
+  // 디버깅: 받은 props 확인
+  console.log(`🔧 RegionalWeatherCard props for ${region}:`, {
+    temperature,
+    feelsLike,
+    weatherDescription,
+    weatherIcon,
+    humidity,
+    rainfall,
+    windDirection
+  });
+
   const formatTemperature = (temp) => {
     if (temp === null || temp === undefined) return '--';
     return Math.round(temp * 10) / 10;
