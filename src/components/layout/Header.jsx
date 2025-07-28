@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Camera, Clock, CheckCircle } from 'lucide-react';
+import RefreshButton from '../common/RefreshButton';
 
-const Header = React.memo(({ systemStats = {} }) => {
+const Header = React.memo(({ 
+  systemStats = {}, 
+  onRefresh, 
+  onForceRefresh, 
+  isRefreshing = false,
+  lastUpdate 
+}) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -70,14 +77,32 @@ const Header = React.memo(({ systemStats = {} }) => {
             </div>
 
 
-            <div className="hidden xl:block text-right">
-              <div className="bg-gray-50 p-4 rounded-xl border">
-                <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
-                  <Clock className="w-4 h-4" />
-                  <span>마지막 업데이트: {systemStats.lastUpdate || '정보 없음'}</span>
-                </div>
-                <div className="text-xs text-gray-500">
-                  <div>📹 {systemStats.totalWebcams || 0}개 웹캠</div>
+            <div className="flex items-center gap-4">
+              {/* 새로고침 버튼 */}
+              {onRefresh && (
+                <RefreshButton
+                  onRefresh={onRefresh}
+                  onForceRefresh={onForceRefresh}
+                  isRefreshing={isRefreshing}
+                  isOnline={isOnline}
+                  lastUpdate={lastUpdate}
+                  variant="default"
+                  showStatus={false}
+                  showTimer={true}
+                  className="animate-fade-in"
+                />
+              )}
+              
+              {/* 시스템 정보 */}
+              <div className="hidden xl:block text-right">
+                <div className="bg-gray-50 p-4 rounded-xl border">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
+                    <Clock className="w-4 h-4" />
+                    <span>마지막 업데이트: {systemStats.lastUpdate || '정보 없음'}</span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    <div>📹 {systemStats.totalWebcams || 0}개 웹캠</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -97,6 +122,10 @@ Header.propTypes = {
     totalProcessingTime: PropTypes.string,
     averageConfidence: PropTypes.number,
   }),
+  onRefresh: PropTypes.func,
+  onForceRefresh: PropTypes.func,
+  isRefreshing: PropTypes.bool,
+  lastUpdate: PropTypes.instanceOf(Date),
 };
 
 Header.displayName = 'Header';

@@ -93,7 +93,13 @@ const AppLayout = React.memo(({ children }) => {
         </a>
 
         {/* Header with system stats */}
-        <Header systemStats={systemStats} />
+        <Header 
+          systemStats={systemStats}
+          onRefresh={refresh}
+          onForceRefresh={forceRefresh}
+          isRefreshing={isRefreshing}
+          lastUpdate={lastFetch}
+        />
 
         {/* System Status - 시스템 상태만 표시 (새로고침 버튼 제거) */}
         <SystemStatus

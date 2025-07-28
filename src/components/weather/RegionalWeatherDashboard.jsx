@@ -13,27 +13,47 @@ const RegionalWeatherDashboard = React.memo(({
   activeRegion = 'hwa-chong',
   className = ''
 }) => {
-  // 3개 주요 지역 설정 (실제 온도 데이터가 있는 스테이션 기준)
-  const PRIORITY_REGIONS = [
+  // 사용 가능한 모든 지역 (실제 온도 데이터가 있는 스테이션 기준)
+  const AVAILABLE_REGIONS = [
     {
       id: 'hwa-chong',
       name: 'Hwa Chong',
       stationIds: ['S50', 'S115'], // Clementi & West 지역 (Bukit Timah 인근)
-      description: 'Hwa Chong International School 지역'
+      description: 'Hwa Chong International School 지역',
+      emoji: '🏫'
     },
     {
       id: 'newton',
       name: 'Newton',
       stationIds: ['S109', 'S102'], // Newton & Central 지역
-      description: 'Newton MRT 및 Central 지역'
+      description: 'Newton MRT 및 Central 지역',
+      emoji: '🏙️'
     },
     {
       id: 'changi',
       name: 'Changi',
       stationIds: ['S24', 'S107'], // East Coast & Airport 지역
-      description: 'Changi Airport 및 동부 지역'
+      description: 'Changi Airport 및 동부 지역',
+      emoji: '✈️'
+    },
+    {
+      id: 'jurong',
+      name: 'Jurong',
+      stationIds: ['S104', 'S60'], // Jurong West & Sentosa
+      description: 'Jurong 산업단지 및 서부 지역',
+      emoji: '🏭'
+    },
+    {
+      id: 'central',
+      name: 'Central',
+      stationIds: ['S43', 'S109'], // Kim Chuan & Newton
+      description: 'Central Singapore 도심 지역',
+      emoji: '🌆'
     }
   ];
+
+  // 선택된 지역 상태 (기본값: Hwa Chong, Newton, Changi)
+  const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']);
 
   // 지역별 날씨 데이터 가져오기 (변환된 데이터 구조에 맞춤)
   const getRegionalWeatherData = useMemo(() => {
@@ -45,7 +65,12 @@ const RegionalWeatherDashboard = React.memo(({
 
     const regionalData = {};
 
-    PRIORITY_REGIONS.forEach(region => {
+    // 선택된 지역만 처리
+    const selectedRegionConfigs = AVAILABLE_REGIONS.filter(region => 
+      selectedRegions.includes(region.id)
+    );
+
+    selectedRegionConfigs.forEach(region => {
       // 해당 지역의 스테이션 데이터 찾기
       const stationData = region.stationIds
         .map(stationId => weatherData.locations.find(loc => loc.station_id === stationId))
@@ -119,21 +144,63 @@ const RegionalWeatherDashboard = React.memo(({
     onRegionSelect?.(regionId);
   };
 
+  // 선택된 지역 설정 가져오기
+  const selectedRegionConfigs = useMemo(() => 
+    AVAILABLE_REGIONS.filter(region => selectedRegions.includes(region.id)),
+    [selectedRegions]
+  );
+
   return (
     <div className={`${className}`}>
       {/* 헤더 */}
-      <div className="mb-4">
-        <h2 className="text-lg font-bold text-gray-800 mb-1">
-          🌏 주요 지역 날씨
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-gray-800 mb-2">
+          🌏 선택된 지역 날씨
         </h2>
-        <p className="text-sm text-gray-600">
-          실시간 기상 관측 데이터 (Hwa Chong 중심)
+        <p className="text-sm text-gray-600 mb-4">
+          실시간 기상 관측 데이터 (3개 지역 선택)
         </p>
+        
+        {/* 지역 선택 버튼들 */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {AVAILABLE_REGIONS.map(region => (
+            <button
+              key={region.id}
+              onClick={() => {
+                if (selectedRegions.includes(region.id)) {
+                  // 이미 선택된 지역이면 제거 (최소 1개는 유지)
+                  if (selectedRegions.length > 1) {
+                    setSelectedRegions(prev => prev.filter(id => id !== region.id));
+                  }
+                } else {
+                  // 새 지역 선택 (최대 3개)
+                  if (selectedRegions.length < 3) {
+                    setSelectedRegions(prev => [...prev, region.id]);
+                  } else {
+                    // 3개가 꽉 찬 경우 첫 번째를 제거하고 새것 추가
+                    setSelectedRegions(prev => [...prev.slice(1), region.id]);
+                  }
+                }
+              }}
+              className={`
+                px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                flex items-center gap-2
+                ${selectedRegions.includes(region.id)
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }
+              `}
+            >
+              <span>{region.emoji}</span>
+              <span>{region.name}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 지역별 날씨 카드 그리드 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {PRIORITY_REGIONS.map(region => {
+        {selectedRegionConfigs.map(region => {
           const data = getRegionalWeatherData[region.id];
           
           if (!data) return null;
@@ -156,18 +223,6 @@ const RegionalWeatherDashboard = React.memo(({
         })}
       </div>
 
-      {/* 추가 정보 */}
-      <div className="mt-4 p-3 bg-blue-50/50 rounded-lg border border-blue-200/50">
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2 text-blue-700">
-            <span>ℹ️</span>
-            <span>지역을 클릭하면 카드가 확대되어 상세 정보를 볼 수 있습니다</span>
-          </div>
-          <div className="text-blue-600 text-xs">
-            NEA Singapore 공식 데이터
-          </div>
-        </div>
-      </div>
     </div>
   );
 });
