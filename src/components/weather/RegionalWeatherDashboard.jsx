@@ -46,29 +46,29 @@ const RegionalWeatherDashboard = React.memo(({
     {
       id: 'central',
       name: 'Central',
-      stationIds: ['S43', 'S109'], // Kim Chuan & Newton
-      description: 'Central Singapore 도심 지역',
+      stationIds: ['S109', 'S102'], // Newton & Central 지역
+      description: 'Newton MRT 및 중부 도심 지역',
       emoji: '🌆'
     },
     {
       id: 'east',
       name: 'East',
-      stationIds: ['S107', 'S24'], // East Coast 지역
-      description: 'East Coast 및 Marine Parade 지역',
+      stationIds: ['S107', 'S43'], // East Coast & Kim Chuan 동부 지역
+      description: 'East Coast Parkway 및 동부 산업 지역',
       emoji: '🏖️'
     },
     {
       id: 'north',
       name: 'North',
-      stationIds: ['S109', 'S115'], // North 지역
-      description: 'Woodlands 및 북부 지역',
+      stationIds: ['S24', 'S115'], // 북부 지역 (실제 북부 스테이션)
+      description: '북부 주거 및 산업 지역',
       emoji: '🌳'
     },
     {
       id: 'south',
       name: 'South',
-      stationIds: ['S60', 'S104'], // South 지역
-      description: 'Sentosa 및 남부 지역',
+      stationIds: ['S60', 'S104'], // Sentosa & Jurong (남서부)
+      description: 'Sentosa 및 남서부 지역',
       emoji: '🏝️'
     }
   ];
@@ -78,13 +78,17 @@ const RegionalWeatherDashboard = React.memo(({
 
   // 지역별 날씨 데이터 가져오기 (변환된 데이터 구조에 맞춤)
   const getRegionalWeatherData = useMemo(() => {
-    console.log('RegionalWeatherDashboard - weatherData:', weatherData);
-    console.log('RegionalWeatherDashboard - weatherData structure:', {
-      hasLocations: !!weatherData?.locations,
-      locationsLength: weatherData?.locations?.length,
-      hasCurrent: !!weatherData?.current,
-      currentTemp: weatherData?.current?.temperature
-    });
+    console.log('🔍 RegionalWeatherDashboard - Debug Info:');
+    console.log('- weatherData exists:', !!weatherData);
+    console.log('- weatherData.locations exists:', !!weatherData?.locations);
+    console.log('- weatherData.locations length:', weatherData?.locations?.length);
+    console.log('- weatherData.current exists:', !!weatherData?.current);
+    console.log('- full weatherData structure:', weatherData);
+    
+    if (weatherData?.locations) {
+      console.log('- First location sample:', weatherData.locations[0]);
+      console.log('- Available station IDs:', weatherData.locations.map(loc => loc.station_id));
+    }
 
     if (!weatherData?.locations || !weatherData?.current) {
       console.log('RegionalWeatherDashboard - No weatherData.locations found, using fallback');
@@ -116,10 +120,21 @@ const RegionalWeatherDashboard = React.memo(({
     );
 
     selectedRegionConfigs.forEach(region => {
+      console.log(`🔍 Processing region: ${region.name}, looking for stations:`, region.stationIds);
+      
       // 해당 지역의 스테이션 데이터 찾기
       const stationData = region.stationIds
-        .map(stationId => weatherData.locations.find(loc => loc.station_id === stationId))
+        .map(stationId => {
+          const found = weatherData.locations.find(loc => loc.station_id === stationId);
+          console.log(`  - Station ${stationId}: ${found ? 'found' : 'not found'}`);
+          if (found) {
+            console.log(`    Temperature: ${found.temperature}, Humidity: ${found.humidity}`);
+          }
+          return found;
+        })
         .filter(Boolean);
+
+      console.log(`  - Total stations found for ${region.name}: ${stationData.length}`);
 
       if (stationData.length > 0) {
         // 여러 스테이션의 평균값 계산
@@ -133,20 +148,23 @@ const RegionalWeatherDashboard = React.memo(({
 
         regionalData[region.id] = {
           region: region.name,
-          temperature: avgTemperature,
-          humidity: avgHumidity,
-          rainfall: totalRainfall,
+          temperature: Math.round(avgTemperature * 10) / 10, // 소수점 1자리
+          humidity: Math.round(avgHumidity),
+          rainfall: Math.round(totalRainfall * 10) / 10,
           windDirection: weatherData.current?.windDirection || '--',
-          stationName: stationInfo?.name || primaryStation.name,
+          stationName: stationInfo?.displayName || primaryStation.name || primaryStation.displayName,
           stationCount: stationData.length,
           lastUpdate: weatherData.timestamp
         };
+        
+        console.log(`  ✅ ${region.name} data created:`, regionalData[region.id]);
       } else {
         // 데이터가 없는 경우 전체 평균 데이터 사용
+        console.log(`  ⚠️ No stations found for ${region.name}, using fallback`);
         regionalData[region.id] = {
           region: region.name,
-          temperature: weatherData.current?.temperature || null,
-          humidity: weatherData.current?.humidity || null,
+          temperature: weatherData.current?.temperature || 29,
+          humidity: weatherData.current?.humidity || 75,
           rainfall: weatherData.current?.rainfall || 0,
           windDirection: weatherData.current?.windDirection || '--',
           stationName: '평균 데이터',

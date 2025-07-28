@@ -41,7 +41,7 @@ const schoolIcon = L.divIcon({
   iconAnchor: [20, 40],
 });
 
-const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig = null, className = '' }) => {
+const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig = null, onCameraSelect = null, className = '' }) => {
   const [trafficCameras, setTrafficCameras] = useState([]);
   const [isLoadingTraffic, setIsLoadingTraffic] = useState(true);
   const [trafficError, setTrafficError] = useState(null);
@@ -236,6 +236,13 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                 key={`traffic-${camera.id}`}
                 position={[camera.location.latitude, camera.location.longitude]}
                 icon={isFeatured ? featuredTrafficIcon : trafficCameraIcon}
+                eventHandlers={{
+                  click: () => {
+                    if (onCameraSelect) {
+                      onCameraSelect(camera);
+                    }
+                  }
+                }}
               >
                 <Popup>
                   <div className="p-3 min-w-64">
@@ -301,6 +308,22 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                         ⭐ 주요 교통 지점
                       </div>
                     )}
+                    
+                    {/* Camera selection button */}
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onCameraSelect) {
+                            onCameraSelect(camera);
+                          }
+                        }}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                      >
+                        <span>🔍</span>
+                        <span>하단에서 AI 분석 보기</span>
+                      </button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>

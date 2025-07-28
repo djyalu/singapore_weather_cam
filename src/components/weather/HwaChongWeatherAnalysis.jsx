@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Camera, Eye, Brain, MapPin, Clock, Zap, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const HwaChongWeatherAnalysis = React.memo(({ className = '' }) => {
+const HwaChongWeatherAnalysis = React.memo(({ className = '', selectedCamera = null }) => {
   const [cameraData, setCameraData] = useState(null);
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,16 +13,37 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '' }) => {
   const CLOSEST_CAMERA_ID = '6710';
   const HWA_CHONG_COORDS = { lat: 1.3437, lng: 103.7640 };
 
-  const loadCameraData = async () => {
+  const loadCameraData = async (useSelectedCamera = false) => {
     try {
       setLoading(true);
       setError(null);
 
-      // LTA 교통 카메라 API에서 실시간 이미지 가져오기
-      const basePath = import.meta.env.BASE_URL || '/';
+      // 선택된 카메라가 있으면 그것을 사용, 없으면 기본 카메라 사용
+      if (useSelectedCamera && selectedCamera) {
+        // 지도에서 선택된 카메라 사용
+        setCameraData({
+          id: selectedCamera.id,
+          image_url: selectedCamera.image?.url || '',
+          timestamp: selectedCamera.timestamp || new Date().toISOString(),
+          coordinates: {
+            lat: selectedCamera.location?.latitude || HWA_CHONG_COORDS.lat,
+            lng: selectedCamera.location?.longitude || HWA_CHONG_COORDS.lng
+          },
+          distance: selectedCamera.distance?.toFixed(2) || '알 수 없음',
+          quality: selectedCamera.quality || 'Standard',
+          name: selectedCamera.name || `Camera ${selectedCamera.id}`,
+          area: selectedCamera.area || '알 수 없음'
+        });
+
+        // AI 분석 시뮬레이션
+        await analyzeImageWithAI(selectedCamera.image?.url || '', selectedCamera);
+        
+        setLastUpdate(new Date());
+        return;
+      }
+
+      // 기본 동작: LTA API에서 Hwa Chong 가장 가까운 카메라 가져오기
       const timestamp = new Date().getTime();
-      
-      // Singapore Traffic Images API
       const response = await fetch(`https://api.data.gov.sg/v1/transport/traffic-images?t=${timestamp}`);
       
       if (!response.ok) {
@@ -42,10 +63,12 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '' }) => {
           timestamp: targetCamera.timestamp,
           coordinates: HWA_CHONG_COORDS, // 대략적 위치
           distance: 1.33, // km
-          quality: 'HD 1920x1080'
+          quality: 'HD 1920x1080',
+          name: `Camera ${targetCamera.camera_id}`,
+          area: 'Hwa Chong 인근'
         });
 
-        // AI 분석 시뮬레이션 (실제로는 Claude Vision API 호출)
+        // AI 분석 시뮬레이션
         await analyzeImageWithAI(targetCamera.image);
         
         setLastUpdate(new Date());
@@ -60,10 +83,15 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '' }) => {
     }
   };
 
-  const analyzeImageWithAI = async (imageUrl) => {
+  const analyzeImageWithAI = async (imageUrl, cameraInfo = null) => {
     try {
       // 실제 Claude Vision API 호출 시뮬레이션
       // 프로덕션에서는 백엔드 API를 통해 Claude Vision API 호출
+      
+      // 카메라 위치에 따른 동적 분석 결과
+      const locationDescription = cameraInfo ? 
+        `${cameraInfo.name} (${cameraInfo.area})` : 
+        'Hwa Chong International School 인근 (1.3km)';
       
       // 시뮬레이션된 AI 분석 결과
       const mockAnalysis = {
@@ -81,7 +109,7 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '' }) => {
           atmospheric_conditions: '일반적인 열대 기후의 오후 상태'
         },
         analysis_timestamp: new Date().toISOString(),
-        camera_location: 'Hwa Chong International School 인근 (1.3km)',
+        camera_location: locationDescription,
         ai_model: 'Claude Vision API'
       };
 
@@ -104,6 +132,13 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '' }) => {
     const interval = setInterval(loadCameraData, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // selectedCamera 변경 시 카메라 데이터 업데이트
+  useEffect(() => {
+    if (selectedCamera) {
+      loadCameraData(true); // useSelectedCamera = true
+    }
+  }, [selectedCamera]);
 
   const getConfidenceColor = (confidence) => {
     if (confidence >= 0.8) return 'text-green-600';

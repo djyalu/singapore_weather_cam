@@ -22,6 +22,7 @@ const App = () => {
   const [activeView, setActiveView] = useState('weather');
   const [showAdmin, setShowAdmin] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [selectedCamera, setSelectedCamera] = useState(null); // Camera selected from map
 
   // Data hooks from context
   const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather } = useWeatherData();
@@ -40,6 +41,16 @@ const App = () => {
   // 지역 선택 핸들러
   const handleRegionSelect = (regionId) => {
     setActiveRegion(regionId);
+  };
+
+  // 카메라 선택 핸들러 (지도에서 클릭 시)
+  const handleCameraSelect = (camera) => {
+    setSelectedCamera(camera);
+    // Smooth scroll to analysis section
+    const analysisElement = document.getElementById('cctv-analysis');
+    if (analysisElement) {
+      analysisElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   // Use the consolidated manual refresh function
@@ -99,12 +110,18 @@ const App = () => {
               weatherData={weatherData}
               selectedRegion={activeRegion}
               regionConfig={null}
+              onCameraSelect={handleCameraSelect}
             />
           </Suspense>
 
           {/* CCTV 기반 실시간 날씨 분석 */}
           <Suspense fallback={<LoadingFallback message="Loading CCTV analysis..." />}>
-            <HwaChongWeatherAnalysis className="mb-6" />
+            <div id="cctv-analysis">
+              <HwaChongWeatherAnalysis 
+                className="mb-6" 
+                selectedCamera={selectedCamera}
+              />
+            </div>
           </Suspense>
         </div>
       </div>

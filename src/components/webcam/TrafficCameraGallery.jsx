@@ -11,7 +11,6 @@ import {
 import LoadingSkeleton from './LoadingSkeleton';
 import ErrorState from './ErrorState';
 import WebcamModal from './WebcamModal';
-import TrafficCameraSelector from './TrafficCameraSelector';
 import { formatDateSafely } from '../common/SafeDateFormatter';
 
 /**
@@ -230,7 +229,7 @@ const TrafficCameraGallery = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedArea, setSelectedArea] = useState('all');
-  const [viewMode, setViewMode] = useState('selector'); // 'featured', 'all', 'area', 'selector'
+  const [viewMode, setViewMode] = useState('nearby'); // 'nearby', 'featured', 'all'
   const [lastUpdate, setLastUpdate] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [retryAttempts, setRetryAttempts] = useState(0);
@@ -238,7 +237,37 @@ const TrafficCameraGallery = () => {
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchDevice, setTouchDevice] = useState(false);
-  const [selectedCameraIds, setSelectedCameraIds] = useState([]);
+  
+  // Hwa Chong International School coordinates
+  const HWA_CHONG_COORDS = { lat: 1.3437, lng: 103.7640 };
+
+  // Calculate distance between two points
+  const calculateDistance = (lat1, lng1, lat2, lng2) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // Get cameras near Hwa Chong (within 10km, sorted by distance)
+  const getNearbycameras = (cameras) => {
+    return cameras
+      .map(camera => ({
+        ...camera,
+        distance: calculateDistance(
+          HWA_CHONG_COORDS.lat, HWA_CHONG_COORDS.lng,
+          camera.location.latitude, camera.location.longitude
+        )
+      }))
+      .filter(camera => camera.distance <= 10) // Within 10km
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 12); // Show closest 12 cameras
+  };
 
   // Detect touch device on mount
   useEffect(() => {
@@ -294,17 +323,14 @@ const TrafficCameraGallery = () => {
 
   // Filter cameras when selection changes
   useEffect(() => {
-    if (viewMode === 'featured') {
+    if (viewMode === 'nearby') {
+      setFilteredCameras(getNearbycameras(cameras));
+    } else if (viewMode === 'featured') {
       setFilteredCameras(getFeaturedCameras(cameras));
-    } else if (viewMode === 'area' && selectedArea !== 'all') {
-      setFilteredCameras(filterCamerasByArea(cameras, selectedArea));
-    } else if (viewMode === 'selector' && selectedCameraIds.length > 0) {
-      // Show only selected cameras when in selector mode
-      setFilteredCameras(cameras.filter(camera => selectedCameraIds.includes(camera.id.toString())));
     } else {
-      setFilteredCameras(cameras);
+      setFilteredCameras(cameras); // all mode
     }
-  }, [cameras, viewMode, selectedArea, selectedCameraIds]);
+  }, [cameras, viewMode, selectedArea]);
 
   const handleRetry = async () => {
     await fetchCameras(false);
@@ -314,10 +340,6 @@ const TrafficCameraGallery = () => {
     await fetchCameras(true);
   };
 
-  // Handle camera selection from the selector
-  const handleCameraSelectionChange = useCallback((newSelectedIds) => {
-    setSelectedCameraIds(newSelectedIds);
-  }, []);
 
   // Mobile interaction handlers
   const handleImageTap = useCallback((camera) => {
@@ -340,7 +362,7 @@ const TrafficCameraGallery = () => {
   const handleSwipeGesture = useCallback((direction) => {
     if (!touchDevice) {return;}
 
-    const modes = ['selector', 'featured', 'area', 'all'];
+    const modes = ['nearby', 'featured', 'all'];
     const currentIndex = modes.indexOf(viewMode);
 
     if (direction === 'left' && currentIndex < modes.length - 1) {
@@ -393,26 +415,26 @@ const TrafficCameraGallery = () => {
         )}
 
         <div className="flex flex-col gap-4">
-          {/* View Mode Buttons - Mobile optimized */}
+          {/* View Mode Buttons - Simplified to 3 modes */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="grid grid-cols-4 gap-2 sm:flex sm:gap-2">
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-2">
               <button
-                onClick={() => setViewMode('selector')}
+                onClick={() => setViewMode('nearby')}
                 className={`
                   px-4 py-3 sm:px-3 sm:py-2 rounded-lg text-sm sm:text-sm 
                   font-medium transition-all duration-200 touch-manipulation
                   min-h-[44px] sm:min-h-[auto] flex items-center justify-center
-                  ${viewMode === 'selector'
+                  ${viewMode === 'nearby'
       ? 'bg-green-600 text-white shadow-md transform scale-105'
       : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
     }
                 `}
-                aria-pressed={viewMode === 'selector'}
+                aria-pressed={viewMode === 'nearby'}
               >
                 <span className="flex items-center gap-1">
-                  <span>🎯</span>
-                  <span className="hidden xs:inline">선택기</span>
-                  <span className="xs:hidden">선택</span>
+                  <span>🏫</span>
+                  <span className="hidden xs:inline">Hwa Chong 근처</span>
+                  <span className="xs:hidden">근처</span>
                 </span>
               </button>
               <button
@@ -432,25 +454,6 @@ const TrafficCameraGallery = () => {
                   <span>⭐</span>
                   <span className="hidden xs:inline">주요 지점</span>
                   <span className="xs:hidden">주요</span>
-                </span>
-              </button>
-              <button
-                onClick={() => setViewMode('area')}
-                className={`
-                  px-4 py-3 sm:px-3 sm:py-2 rounded-lg text-sm sm:text-sm 
-                  font-medium transition-all duration-200 touch-manipulation
-                  min-h-[44px] sm:min-h-[auto] flex items-center justify-center
-                  ${viewMode === 'area'
-      ? 'bg-blue-600 text-white shadow-md transform scale-105'
-      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
-    }
-                `}
-                aria-pressed={viewMode === 'area'}
-              >
-                <span className="flex items-center gap-1">
-                  <span>📍</span>
-                  <span className="hidden xs:inline">지역별</span>
-                  <span className="xs:hidden">지역</span>
                 </span>
               </button>
               <button
@@ -482,28 +485,6 @@ const TrafficCameraGallery = () => {
             )}
           </div>
 
-          {/* Area Selection - Mobile optimized */}
-          {viewMode === 'area' && (
-            <div className="w-full">
-              <select
-                value={selectedArea}
-                onChange={(e) => setSelectedArea(e.target.value)}
-                className="
-                  w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-sm
-                  bg-white touch-manipulation min-h-[44px] focus:border-blue-500
-                  focus:ring-2 focus:ring-blue-200 transition-all duration-200
-                "
-                aria-label="지역 선택"
-              >
-                <option value="all">모든 지역</option>
-                {areas.map(area => (
-                  <option key={area} value={area}>
-                    {area} ({groupedCameras[area].length}개)
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {/* Controls Row - Mobile optimized */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
@@ -584,15 +565,6 @@ const TrafficCameraGallery = () => {
         />
       )}
 
-      {/* Camera Selector - Show when in selector mode */}
-      {viewMode === 'selector' && (
-        <TrafficCameraSelector
-          onCameraSelectionChange={handleCameraSelectionChange}
-          selectedCameras={selectedCameraIds}
-          maxSelection={LIMITS.MAX_CAMERA_SELECTION}
-          className="mb-6"
-        />
-      )}
 
       {/* Camera Grid - Enhanced mobile responsiveness */}
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
@@ -611,13 +583,8 @@ const TrafficCameraGallery = () => {
       <div className="card">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
           <span className="text-gray-700">
-            {viewMode === 'selector' ? (
-              <>
-                <strong>{selectedCameraIds.length}</strong>개 카메라 선택됨
-                {filteredCameras.length > 0 && (
-                  <span> • <strong>{filteredCameras.length}</strong>개 표시중</span>
-                )}
-              </>
+            {viewMode === 'nearby' ? (
+              <>Hwa Chong에서 <strong>{filteredCameras.length}</strong>개 가까운 카메라 (10km 이내)</>
             ) : (
               <>총 <strong>{cameras.length}</strong>개 카메라 중 <strong>{filteredCameras.length}</strong>개 표시</>
             )}
