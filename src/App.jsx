@@ -182,23 +182,30 @@ const App = () => {
 
   return (
     <EnhancedErrorBoundary maxRetries={3}>
-      {/* 상단 날씨 정보 바 - Hwa Chong 중심 */}
-      <WeatherStatusBar weatherData={weatherData} />
-      
-      {/* 메인 새로고침 버튼 - 독립적 위치 */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2">
+      {/* 통합된 헤더 - 날씨 정보와 새로고침 버튼 */}
+      <div className="sticky top-0 z-40 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
           <div className="flex items-center justify-between">
+            {/* 왼쪽: 제목과 간단 날씨 정보 */}
             <div className="flex items-center gap-4">
-              <h1 className="text-lg font-bold text-gray-800 hidden sm:block">
+              <h1 className="text-lg font-bold text-gray-800">
                 {`${UI_STRINGS.ICONS.WEATHER} Singapore Weather Cam`}
               </h1>
-              <span className="text-sm text-gray-500 hidden md:block">
-                실시간 날씨 모니터링
-              </span>
+              {weatherData?.current && (
+                <div className="hidden md:flex items-center gap-3 text-sm">
+                  <span className="text-blue-600 font-semibold">
+                    {Math.round(weatherData.current.temperature)}°C
+                  </span>
+                  <span className="text-gray-400">|</span>
+                  <span className="text-green-600">
+                    {Math.round(weatherData.current.humidity)}%
+                  </span>
+                  <span className="text-xs text-gray-500">Hwa Chong 지역</span>
+                </div>
+              )}
             </div>
             
-            {/* 독립적인 새로고침 버튼 */}
+            {/* 오른쪽: 새로고침 버튼 */}
             <RefreshButton
               onRefresh={refetchWeather}
               onForceRefresh={refetchWebcam}

@@ -453,14 +453,7 @@ const SystemStatus = React.memo(({
           {/* Top row on mobile - System status */}
           <div className="flex items-center justify-between sm:justify-start animate-slide-in-left">
             <div className="flex items-center text-xs text-neutral-600">
-              <Clock className={`
-                w-4 h-4 sm:w-3 sm:h-3 mr-2 sm:mr-1 transition-all duration-200
-                ${isRefreshing ? 'animate-spin-smooth' : ''}
-              `} />
-              <span className="hidden xs:inline text-sm sm:text-xs">Last update:</span>
-              <span className="font-mono ml-1 text-sm sm:text-xs font-semibold animate-fade-in delay-100">
-                {timeSinceUpdate}
-              </span>
+              <span className="text-sm font-medium text-gray-700">시스템 상태</span>
             </div>
 
             {/* Enhanced error indicator - mobile optimized */}
