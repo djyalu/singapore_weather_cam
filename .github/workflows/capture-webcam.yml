@@ -1,41 +1,61 @@
-name: Traffic Camera Monitor (Disabled)
+name: Traffic Camera AI Analysis
 
-# Webcam functionality has been replaced with real-time traffic camera system
-# This workflow is disabled but kept for reference
+# Cohere AI analysis for Singapore traffic cameras
+# Generates AI analysis data for real-time traffic conditions
 
 on:
-  # Disabled scheduled runs - webcam functionality replaced with real-time traffic cameras
-  # schedule:
-  #   - cron: '15 */3 * * *'
+  schedule:
+    - cron: '15 */3 * * *'  # Every 3 hours at 15 minutes past the hour
   workflow_dispatch:
     inputs:
-      notice:
-        description: 'This workflow has been disabled'
-        type: choice
-        options: [disabled]
-        default: disabled
+      force_analysis:
+        description: 'Force AI analysis even if daily limit reached'
+        type: boolean
+        default: false
 
 env:
   NODE_ENV: production
-  WORKFLOW_DISABLED: 'true'
 
 jobs:
-  disabled-notice:
+  cohere-ai-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 10
     permissions:
-      contents: read
+      contents: write
 
     steps:
-      - name: Webcam functionality disabled
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cohere AI Analysis
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          FORCE_ANALYSIS: ${{ inputs.force_analysis || 'false' }}
         run: |
-          echo "🚗 Webcam functionality has been replaced with real-time traffic camera system"
-          echo "📱 Traffic cameras provide better real-time monitoring via data.gov.sg API"
-          echo "✅ 90 traffic cameras are available through the web interface"
-          echo "🔄 No webcam capture needed - real-time API provides live images"
-          echo ""
-          echo "This workflow has been disabled to prevent unnecessary resource usage."
-          echo "The Singapore Weather Cam application now uses:"
-          echo "  - Real-time LTA traffic camera API (90 cameras)"
-          echo "  - Live weather data from NEA Singapore"
-          echo "  - Interactive map with real-time updates"
+          echo "🤖 Starting Cohere AI traffic analysis..."
+          node scripts/cohere-ai-analysis.js
+
+      - name: Commit AI analysis results
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if [ -f "data/ai-analysis/latest.json" ]; then
+            git add data/ai-analysis/
+            git commit -m "feat: Update Cohere AI traffic analysis data" || exit 0
+            git push
+            echo "✅ AI analysis data committed successfully"
+          else
+            echo "⚠️ No AI analysis data generated"
+          fi
