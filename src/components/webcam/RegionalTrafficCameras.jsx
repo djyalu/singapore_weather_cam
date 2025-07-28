@@ -35,7 +35,17 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
       
       if (response.ok) {
         const analysisData = await response.json();
-        const cameraAnalysis = analysisData.cameras?.[camera.id];
+        console.log(`🔍 Checking analysis data for camera ${camera.id}:`, analysisData);
+        console.log(`📊 Available camera analyses:`, Object.keys(analysisData.cameras || {}));
+        
+        // 카메라 ID를 문자열과 숫자 모두로 확인
+        const cameraAnalysis = analysisData.cameras?.[camera.id] || 
+                              analysisData.cameras?.[String(camera.id)] ||
+                              analysisData.cameras?.[camera.camera_id];
+        
+        // API 사용량 정보 확인
+        const isApiLimitReached = analysisData.api_limit_reached === true;
+        const analysisMethod = analysisData.analysis_method || 'Unknown';
         
         if (cameraAnalysis) {
           console.log(`✅ Found Cohere analysis for camera ${camera.id}`);
@@ -48,7 +58,10 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
             confidence: cameraAnalysis.confidence,
             details: cameraAnalysis.details,
             aiModel: cameraAnalysis.ai_model,
-            timestamp: cameraAnalysis.analysis_timestamp
+            timestamp: cameraAnalysis.analysis_timestamp,
+            analysisMethod: analysisMethod,
+            apiStatus: isApiLimitReached ? 'Daily limit reached' : 'Active',
+            apiCallsRemaining: analysisData.api_calls_remaining || 0
           };
           
           setAiAnalysis(transformedAnalysis);
@@ -531,11 +544,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         </h3>
         <div className="space-y-1">
           <p className="text-sm text-gray-600">
-            실시간 교통 카메라 + Claude AI 분석
+            실시간 교통 카메라 + Cohere AI 분석
           </p>
           {error && (
             <p className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full inline-block">
-              ⚠️ API 연결 문제로 시뮬레이션 데이터 사용 중
+              ⚠️ 교통카메라 API 연결 문제 (시뮬레이션 사용)
             </p>
           )}
         </div>
