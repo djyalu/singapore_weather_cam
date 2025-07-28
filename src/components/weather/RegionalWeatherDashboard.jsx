@@ -58,9 +58,33 @@ const RegionalWeatherDashboard = React.memo(({
   // 지역별 날씨 데이터 가져오기 (변환된 데이터 구조에 맞춤)
   const getRegionalWeatherData = useMemo(() => {
     console.log('RegionalWeatherDashboard - weatherData:', weatherData);
+    console.log('RegionalWeatherDashboard - weatherData structure:', {
+      hasLocations: !!weatherData?.locations,
+      locationsLength: weatherData?.locations?.length,
+      hasCurrent: !!weatherData?.current,
+      currentTemp: weatherData?.current?.temperature
+    });
+
     if (!weatherData?.locations || !weatherData?.current) {
-      console.log('RegionalWeatherDashboard - No weatherData.locations found');
-      return {};
+      console.log('RegionalWeatherDashboard - No weatherData.locations found, using fallback');
+      // 기본 데이터가 없을 때 기본값 반환
+      const fallbackData = {};
+      selectedRegions.forEach(regionId => {
+        const region = AVAILABLE_REGIONS.find(r => r.id === regionId);
+        if (region) {
+          fallbackData[regionId] = {
+            region: region.name,
+            temperature: weatherData?.current?.temperature || 29,
+            humidity: weatherData?.current?.humidity || 75,
+            rainfall: 0,
+            windDirection: '--',
+            stationName: '데이터 로딩 중...',
+            stationCount: 0,
+            lastUpdate: weatherData?.timestamp || new Date().toISOString()
+          };
+        }
+      });
+      return fallbackData;
     }
 
     const regionalData = {};
@@ -158,7 +182,7 @@ const RegionalWeatherDashboard = React.memo(({
           🌏 선택된 지역 날씨
         </h2>
         <p className="text-sm text-gray-600 mb-4">
-          실시간 기상 관측 데이터 (3개 지역 선택)
+          실시간 기상 관측 데이터 - 지역 버튼을 클릭하여 3개 지역을 선택하세요
         </p>
         
         {/* 지역 선택 버튼들 */}
@@ -167,27 +191,17 @@ const RegionalWeatherDashboard = React.memo(({
             <button
               key={region.id}
               onClick={() => {
-                if (selectedRegions.includes(region.id)) {
-                  // 이미 선택된 지역이면 제거 (최소 1개는 유지)
-                  if (selectedRegions.length > 1) {
-                    setSelectedRegions(prev => prev.filter(id => id !== region.id));
-                  }
-                } else {
-                  // 새 지역 선택 (최대 3개)
-                  if (selectedRegions.length < 3) {
-                    setSelectedRegions(prev => [...prev, region.id]);
-                  } else {
-                    // 3개가 꽉 찬 경우 첫 번째를 제거하고 새것 추가
-                    setSelectedRegions(prev => [...prev.slice(1), region.id]);
-                  }
+                if (!selectedRegions.includes(region.id)) {
+                  // 새 지역 선택 - 항상 3개 유지, 가장 오래된 것 교체
+                  setSelectedRegions(prev => [...prev.slice(1), region.id]);
                 }
               }}
               className={`
                 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                flex items-center gap-2
+                flex items-center gap-2 cursor-pointer
                 ${selectedRegions.includes(region.id)
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-500 text-white shadow-md ring-2 ring-blue-300'
+                  : 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700'
                 }
               `}
             >
@@ -203,20 +217,30 @@ const RegionalWeatherDashboard = React.memo(({
         {selectedRegionConfigs.map(region => {
           const data = getRegionalWeatherData[region.id];
           
-          if (!data) return null;
+          // 데이터가 없어도 기본 카드 표시
+          const cardData = data || {
+            region: region.name,
+            temperature: 29,
+            humidity: 75,
+            rainfall: 0,
+            windDirection: '--',
+            stationName: '데이터 로딩 중...',
+            stationCount: 0,
+            lastUpdate: new Date().toISOString()
+          };
 
           return (
             <RegionalWeatherCard
               key={region.id}
-              region={data.region}
-              temperature={data.temperature}
-              humidity={data.humidity}
-              rainfall={data.rainfall}
-              windDirection={data.windDirection}
-              stationName={data.stationName}
+              region={cardData.region}
+              temperature={cardData.temperature}
+              humidity={cardData.humidity}
+              rainfall={cardData.rainfall}
+              windDirection={cardData.windDirection}
+              stationName={cardData.stationName}
               isActive={activeRegion === region.id}
               onClick={() => handleRegionClick(region.id)}
-              lastUpdate={formatLastUpdate(data.lastUpdate)}
+              lastUpdate={formatLastUpdate(cardData.lastUpdate)}
               className={`min-h-[200px] ${activeRegion === region.id ? 'lg:col-span-2' : ''}`}
             />
           );
