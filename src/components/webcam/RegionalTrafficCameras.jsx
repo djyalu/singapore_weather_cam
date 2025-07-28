@@ -396,10 +396,10 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         id: '4712', 
         image: 'https://images.data.gov.sg/api/traffic-images/2025/07/e7ca3b45-ee47-46dc-9fe6-379cd60fcffb.jpg',
         location: {
-          latitude: 1.3138,
-          longitude: 103.8420,
-          name: 'Newton Circus',
-          description: 'Newton MRT Station 인근'
+          latitude: 1.341244001,
+          longitude: 103.6439134,
+          name: 'PIE Jurong West',
+          description: 'Jurong West 지역 (PIE 고속도로)'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
@@ -408,10 +408,10 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         id: '1701',
         image: 'https://images.data.gov.sg/api/traffic-images/2025/07/5671f037-0042-4732-84d3-5059e7f6cfa6.jpg',
         location: {
-          latitude: 1.3644,
-          longitude: 103.9915,
-          name: 'Changi Airport Terminal 2', 
-          description: 'Changi Airport 터미널 2 지역'
+          latitude: 1.323604823,
+          longitude: 103.8587802,
+          name: 'Changi Airport Area', 
+          description: 'Changi Airport 지역'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'
@@ -449,6 +449,19 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
           longitude: 103.770278,
           name: 'PIE Jurong',
           description: 'Jurong West 산업단지'
+        },
+        timestamp: currentTimestamp,
+        quality: 'HD 1920x1080'
+      },
+      // Newton 지역을 위한 카메라 추가
+      {
+        id: '6704',
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
+        location: {
+          latitude: 1.32657403632366,
+          longitude: 103.826857295633,
+          name: 'PIE Kim Keat',
+          description: 'Newton MRT 인근 (PIE 고속도로)'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'

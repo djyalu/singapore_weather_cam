@@ -8,24 +8,13 @@ import { Thermometer, Droplets, Cloud, Clock, RefreshCw } from 'lucide-react';
 const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // 디버깅용 로그
-  console.log('🌏 SingaporeOverallWeather rendering:', {
-    hasWeatherData: !!weatherData,
-    weatherDataKeys: weatherData ? Object.keys(weatherData) : null,
-    className
-  });
-
   // 1초마다 현재 시간 업데이트
   useEffect(() => {
-    console.log('🌏 SingaporeOverallWeather mounted');
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
-    return () => {
-      console.log('🌏 SingaporeOverallWeather unmounted');
-      clearInterval(timer);
-    };
+    return () => clearInterval(timer);
   }, []);
 
   // 날씨 데이터에서 전체 평균값 추출

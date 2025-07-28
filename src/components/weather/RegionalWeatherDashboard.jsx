@@ -53,7 +53,7 @@ const RegionalWeatherDashboard = React.memo(({
     {
       id: 'hwa-chong',
       name: 'Hwa Chong',
-      stationIds: ['S50', 'S115'], // Clementi & West 지역 (Bukit Timah 인근)
+      stationIds: ['S109', 'S104'], // Ang Mo Kio & Woodlands (사용 가능한 스테이션)
       description: 'Hwa Chong International School 지역',
       emoji: '🏫'
     },
