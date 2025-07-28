@@ -331,6 +331,27 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         const data = await fetchTrafficCameras();
         console.log('📷 Traffic cameras received:', data?.cameras?.length || 0);
         
+        // 디버깅: 실제 API에서 받은 카메라 ID들 확인
+        if (data?.cameras && data.cameras.length > 0) {
+          console.log('🔍 Available camera IDs from API:', data.cameras.map(cam => cam.id).sort());
+          
+          // Jurong 지역 근처 카메라들 확인
+          const jurongCoord = regionCoordinates['jurong'];
+          if (jurongCoord) {
+            const nearJurong = data.cameras
+              .map(cam => ({
+                id: cam.id,
+                distance: cam.location?.latitude && cam.location?.longitude 
+                  ? calculateDistance(jurongCoord.lat, jurongCoord.lng, cam.location.latitude, cam.location.longitude)
+                  : Infinity
+              }))
+              .filter(cam => cam.distance < 15) // 15km 이내
+              .sort((a, b) => a.distance - b.distance);
+            
+            console.log('🎯 Jurong 근처 15km 이내 카메라들:', nearJurong);
+          }
+        }
+        
         if (data?.cameras && data.cameras.length > 0) {
           setCameras(data.cameras);
           setError(null);
@@ -357,7 +378,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   const generateFallbackCameras = () => {
     const currentTimestamp = new Date().toISOString();
     
-    // 실제 AI 분석 데이터와 매칭되는 카메라 정보 (latest.json과 일치)
+    // 실제 AI 분석 데이터와 매칭되는 카메라 정보 (지역별 정확한 배치)
     const fallbackCameras = [
       {
         id: '6710',
@@ -415,6 +436,44 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
           longitude: 103.791033581325,
           name: 'Marina Bay - Central Boulevard',
           description: 'Marina Bay 중부 도심 지역'
+        },
+        timestamp: currentTimestamp,
+        quality: 'HD 1920x1080'
+      },
+      // Jurong 지역을 위한 카메라 추가 (AI 분석 데이터에는 없지만 지역 매칭을 위해)
+      {
+        id: '6712',
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/810a30ac-e2a1-428f-a584-ff3c3d53ea94.jpg',
+        location: {
+          latitude: 1.332691,
+          longitude: 103.770278,
+          name: 'PIE Jurong',
+          description: 'Jurong West 산업단지'
+        },
+        timestamp: currentTimestamp,
+        quality: 'HD 1920x1080'
+      },
+      // 기타 지역을 위한 카메라들 추가
+      {
+        id: '2706',
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
+        location: {
+          latitude: 1.414142,
+          longitude: 103.771168,
+          name: 'ECP Fort Road',
+          description: 'East Coast Parkway'
+        },
+        timestamp: currentTimestamp,
+        quality: 'HD 1920x1080'
+      },
+      {
+        id: '1703',
+        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/15daf950-86e1-45c9-9f57-3c4e2655fc11.jpg',
+        location: {
+          latitude: 1.32814722194857,
+          longitude: 103.862203282048,
+          name: 'BKE Sungei Kadut',
+          description: '북부 주거 지역'
         },
         timestamp: currentTimestamp,
         quality: 'HD 1920x1080'

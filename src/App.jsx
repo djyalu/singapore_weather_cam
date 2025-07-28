@@ -5,6 +5,7 @@ import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
+import SingaporeOverallWeatherTest from './components/weather/SingaporeOverallWeatherTest';
 import { useWeatherData, useAppData } from './contexts/AppDataContextSimple';
 import { INTERVALS, UI_CONFIG } from './config/constants';
 import { getLocalizedString, UI_STRINGS } from './config/localization';
@@ -88,6 +89,9 @@ const App = () => {
 
     return (
       <div className="space-y-6">
+        {/* 테스트 컴포넌트 */}
+        <SingaporeOverallWeatherTest />
+        
         {/* 싱가포르 전체 평균 날씨 정보 */}
         <SingaporeOverallWeather 
           weatherData={weatherData}
