@@ -35,67 +35,50 @@ const RegionalWeatherDashboard = React.memo(({
     }
   ];
 
-  // 지역별 날씨 데이터 가져오기 (NEA 데이터 구조에 맞춤)
+  // 지역별 날씨 데이터 가져오기 (변환된 데이터 구조에 맞춤)
   const getRegionalWeatherData = useMemo(() => {
-    if (!weatherData?.data) return {};
+    console.log('RegionalWeatherDashboard - weatherData:', weatherData);
+    if (!weatherData?.locations || !weatherData?.current) {
+      console.log('RegionalWeatherDashboard - No weatherData.locations found');
+      return {};
+    }
 
     const regionalData = {};
-    const tempReadings = weatherData.data.temperature?.readings || [];
-    const humidityReadings = weatherData.data.humidity?.readings || [];
-    const rainfallReadings = weatherData.data.rainfall?.readings || [];
 
     PRIORITY_REGIONS.forEach(region => {
-      // 해당 지역의 스테이션 온도 데이터 찾기
-      const stationTemps = region.stationIds
-        .map(stationId => tempReadings.find(reading => reading.station === stationId))
-        .filter(Boolean);
-      
-      // 해당 지역의 스테이션 습도 데이터 찾기
-      const stationHumidity = region.stationIds
-        .map(stationId => humidityReadings.find(reading => reading.station === stationId))
+      // 해당 지역의 스테이션 데이터 찾기
+      const stationData = region.stationIds
+        .map(stationId => weatherData.locations.find(loc => loc.station_id === stationId))
         .filter(Boolean);
 
-      // 해당 지역의 스테이션 강우량 데이터 찾기
-      const stationRainfall = region.stationIds
-        .map(stationId => rainfallReadings.find(reading => reading.station === stationId))
-        .filter(Boolean);
-
-      if (stationTemps.length > 0 || stationHumidity.length > 0) {
+      if (stationData.length > 0) {
         // 여러 스테이션의 평균값 계산
-        const avgTemperature = stationTemps.length > 0 
-          ? stationTemps.reduce((sum, reading) => sum + (reading.value || 0), 0) / stationTemps.length
-          : weatherData.data.temperature?.average || null;
-
-        const avgHumidity = stationHumidity.length > 0
-          ? stationHumidity.reduce((sum, reading) => sum + (reading.value || 0), 0) / stationHumidity.length
-          : weatherData.data.humidity?.average || null;
-
-        const totalRainfall = stationRainfall.length > 0
-          ? stationRainfall.reduce((sum, reading) => sum + (reading.value || 0), 0)
-          : 0;
+        const avgTemperature = stationData.reduce((sum, station) => sum + (station.temperature || 0), 0) / stationData.length;
+        const avgHumidity = stationData.reduce((sum, station) => sum + (station.humidity || 0), 0) / stationData.length;
+        const totalRainfall = stationData.reduce((sum, station) => sum + (station.rainfall || 0), 0);
 
         // 대표 스테이션 정보
-        const primaryStationId = stationTemps.length > 0 ? stationTemps[0].station : region.stationIds[0];
-        const stationInfo = getStationInfo(primaryStationId);
+        const primaryStation = stationData[0];
+        const stationInfo = getStationInfo(primaryStation.station_id);
 
         regionalData[region.id] = {
           region: region.name,
           temperature: avgTemperature,
           humidity: avgHumidity,
           rainfall: totalRainfall,
-          windDirection: weatherData.data.forecast?.general?.wind?.direction || '--',
-          stationName: stationInfo?.name || `Station ${primaryStationId}`,
-          stationCount: Math.max(stationTemps.length, stationHumidity.length),
+          windDirection: weatherData.current?.windDirection || '--',
+          stationName: stationInfo?.name || primaryStation.name,
+          stationCount: stationData.length,
           lastUpdate: weatherData.timestamp
         };
       } else {
         // 데이터가 없는 경우 전체 평균 데이터 사용
         regionalData[region.id] = {
           region: region.name,
-          temperature: weatherData.data.temperature?.average || null,
-          humidity: weatherData.data.humidity?.average || null,
-          rainfall: weatherData.data.rainfall?.total || 0,
-          windDirection: weatherData.data.forecast?.general?.wind?.direction || '--',
+          temperature: weatherData.current?.temperature || null,
+          humidity: weatherData.current?.humidity || null,
+          rainfall: weatherData.current?.rainfall || 0,
+          windDirection: weatherData.current?.windDirection || '--',
           stationName: '평균 데이터',
           stationCount: 0,
           lastUpdate: weatherData.timestamp
