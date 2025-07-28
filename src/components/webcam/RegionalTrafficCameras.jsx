@@ -240,6 +240,13 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     selectedRegionsLength: selectedRegions?.length,
     onCameraClick: typeof onCameraClick
   });
+  
+  // 추가 디버깅: 날씨 지역 선택과 교통 카메라 연동 확인
+  console.log('🌍 Weather-Traffic Region Sync Check:', {
+    receivedRegions: selectedRegions,
+    regionCoordinatesKeys: Object.keys(regionCoordinates),
+    expectedRegions: ['hwa-chong', 'newton', 'changi', 'jurong']
+  });
 
   // 지역별 중심 좌표 (날씨 스테이션 기준)
   const regionCoordinates = {
@@ -569,8 +576,16 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     console.log('📊 Final selected cameras:', result.map(item => ({
       region: item.regionId,
       cameraId: item.camera.id,
+      cameraName: item.camera.location?.name || item.camera.name,
+      cameraDescription: item.camera.location?.description,
       distance: item.distance ? `${item.distance.toFixed(2)}km` : 'fallback'
     })));
+    
+    // 🚨 중요: 날씨 지역 vs 교통 카메라 매칭 결과
+    console.log('🎯 Weather-Traffic Region Matching Results:');
+    result.forEach(item => {
+      console.log(`  • ${item.regionId} 지역 → ${item.camera.location?.description || item.camera.location?.name} (${item.camera.id})`);
+    });
 
     // 결과가 비어있으면 안 되므로 최소 1개 보장
     if (result.length === 0 && cameras.length > 0) {
