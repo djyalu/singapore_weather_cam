@@ -52,7 +52,7 @@ function extractCurrentWeather(data) {
     humidity: humidity ? Math.round(humidity) : null,
     rainfall: rainfall ? Math.round(rainfall * 10) / 10 : 0,
     windSpeed: windSpeed ? Math.round(windSpeed * 10) / 10 : null,
-    windDirection: getAverageWindDirection(data.wind_direction?.readings) || data.forecast?.general?.wind?.direction || '다양함',
+    windDirection: formatWindDirection(getAverageWindDirection(data.wind_direction?.readings) || data.forecast?.general?.wind?.direction) || '🌪️ 다양함',
     feelsLike: temperature ? Math.round((temperature + 2) * 10) / 10 : null, // 간단한 체감온도 계산
     uvIndex: '--', // NEA에서 제공하지 않음
     visibility: '--', // NEA에서 제공하지 않음
@@ -166,6 +166,32 @@ function getAverageWindDirection(readings) {
 
   return Object.entries(directionCounts)
     .sort(([,a], [,b]) => b - a)[0][0];
+}
+
+// 바람 방향을 화살표와 한글로 변환하는 함수
+function formatWindDirection(direction) {
+  if (!direction) return null;
+  
+  const windDirections = {
+    'N': '↓ 북풍',
+    'NNE': '↙ 북북동풍', 
+    'NE': '↙ 북동풍',
+    'ENE': '↙ 동북동풍',
+    'E': '← 동풍',
+    'ESE': '↖ 동남동풍',
+    'SE': '↖ 남동풍', 
+    'SSE': '↖ 남남동풍',
+    'S': '↑ 남풍',
+    'SSW': '↗ 남남서풍',
+    'SW': '↗ 남서풍',
+    'WSW': '↗ 서남서풍', 
+    'W': '→ 서풍',
+    'WNW': '↘ 서북서풍',
+    'NW': '↘ 북서풍',
+    'NNW': '↘ 북북서풍'
+  };
+
+  return windDirections[direction.toUpperCase()] || `🧭 ${direction}`;
 }
 
 function getWeatherDescription(temperature, rainfall) {
