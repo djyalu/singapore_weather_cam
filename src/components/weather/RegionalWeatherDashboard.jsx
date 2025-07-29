@@ -60,7 +60,7 @@ const RegionalWeatherDashboard = React.memo(({
     {
       id: 'newton',
       name: 'Newton',
-      stationIds: ['S109', 'S102'], // Newton & Central 지역
+      stationIds: ['S109', 'S107'], // Newton & East Coast (S102 없어서 S107로 대체)
       description: 'Newton MRT 및 Central 지역',
       emoji: '🏙️'
     },
@@ -81,7 +81,7 @@ const RegionalWeatherDashboard = React.memo(({
     {
       id: 'central',
       name: 'Central',
-      stationIds: ['S109', 'S102'], // Newton & Central 지역
+      stationIds: ['S109', 'S106'], // Newton & Tai Seng (S102 없어서 S106으로 대체)
       description: 'Newton MRT 및 중부 도심 지역',
       emoji: '🌆'
     },

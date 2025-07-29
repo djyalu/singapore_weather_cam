@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Thermometer, Droplets, Cloud, Clock, RefreshCw } from 'lucide-react';
+import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles } from 'lucide-react';
 
 /**
- * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트
+ * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
  */
 const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [aiSummary, setAiSummary] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // 1초마다 현재 시간 업데이트
   useEffect(() => {
@@ -16,6 +18,67 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
 
     return () => clearInterval(timer);
   }, []);
+
+  // AI 날씨 요약 데이터 로드
+  useEffect(() => {
+    const loadAiWeatherSummary = async () => {
+      if (!weatherData) return;
+      
+      setAiLoading(true);
+      try {
+        console.log('🤖 Loading AI weather summary...');
+        
+        // GitHub Actions에서 생성된 AI 날씨 요약 데이터 로드
+        const basePath = import.meta.env.BASE_URL || '/';
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${basePath}data/weather-summary/latest.json?t=${timestamp}`);
+        
+        if (response.ok) {
+          const summaryData = await response.json();
+          console.log('✅ AI weather summary loaded:', summaryData);
+          
+          setAiSummary({
+            summary: summaryData.summary || '날씨 요약을 불러오는 중입니다...',
+            highlights: summaryData.highlights || [],
+            recommendation: summaryData.recommendation || '현재 날씨에 적합한 활동을 줊아하세요.',
+            confidence: summaryData.confidence || 0.85,
+            aiModel: summaryData.ai_model || 'Cohere Command API',
+            timestamp: summaryData.timestamp,
+            isRealAnalysis: true
+          });
+        } else {
+          throw new Error(`Weather summary not found: ${response.status}`);
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to load AI weather summary:', error);
+        
+        // 폴백: 기본 요약 생성
+        const overallData = getOverallWeatherData();
+        let fallbackSummary = '싱가포르는 현재 ';
+        
+        if (overallData.temperature >= 30) {
+          fallbackSummary += '더운 날씨입니다. 수분 섭취와 실내 활동을 추천합니다.';
+        } else if (overallData.rainfall > 0) {
+          fallbackSummary += '비가 오고 있습니다. 우산을 챙겨주세요.';
+        } else {
+          fallbackSummary += '쾌적한 날씨입니다. 야외 활동을 즐겨보세요.';
+        }
+        
+        setAiSummary({
+          summary: fallbackSummary,
+          highlights: ['실시간 날씨 데이터 기반'],
+          recommendation: '날씨 변화를 주의 깊게 보세요.',
+          confidence: 0.7,
+          aiModel: '기본 분석',
+          isRealAnalysis: false
+        });
+      } finally {
+        setAiLoading(false);
+      }
+    };
+
+    loadAiWeatherSummary();
+  }, [weatherData]);
 
   // 날씨 데이터에서 전체 평균값 추출
   const getOverallWeatherData = () => {
@@ -205,6 +268,63 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
             강수량: {overallData.rainfall.toFixed(1)}mm
           </div>
         </div>
+      </div>
+
+      {/* AI 날씨 요약 섹션 */}
+      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="bg-white/20 p-2 rounded-full">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h4 className="text-lg font-semibold text-white">AI 날씨 요약</h4>
+            <p className="text-xs text-white/70">Cohere AI 기반 실시간 분석</p>
+          </div>
+        </div>
+        
+        {aiLoading ? (
+          <div className="flex items-center gap-3 text-white/80">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
+            <span className="text-sm">날씨 상황 분석 중...</span>
+          </div>
+        ) : aiSummary ? (
+          <div className="space-y-3">
+            <div className="text-white text-sm leading-relaxed">
+              {aiSummary.summary}
+            </div>
+            
+            {aiSummary.highlights && aiSummary.highlights.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {aiSummary.highlights.map((highlight, index) => (
+                  <span key={index} className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
+                    • {highlight}
+                  </span>
+                ))}
+              </div>
+            )}
+            
+            {aiSummary.recommendation && (
+              <div className="bg-white/10 rounded-lg p-3 border-l-4 border-white/30">
+                <p className="text-white/90 text-sm">
+                  <span className="font-medium">💡 추천:</span> {aiSummary.recommendation}
+                </p>
+              </div>
+            )}
+            
+            <div className="flex items-center justify-between text-xs text-white/60">
+              <span className={aiSummary.isRealAnalysis ? 'text-green-200' : 'text-orange-200'}>
+                {aiSummary.isRealAnalysis ? '🤖 실제 AI 분석' : '🔄 기본 분석'} • {aiSummary.aiModel}
+              </span>
+              <span>
+                신뢰도: {Math.round(aiSummary.confidence * 100)}%
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-white/60 text-sm text-center py-2">
+            AI 날씨 요약을 불러오는 중...
+          </div>
+        )}
       </div>
 
       {/* 업데이트 정보 */}

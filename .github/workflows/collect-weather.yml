@@ -90,6 +90,23 @@ jobs:
         run: |
           cp -r data/weather/* public/data/weather/ 2>/dev/null || true
 
+      - name: Generate AI Weather Summary
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+        run: |
+          echo "🤖 Generating AI weather summary..."
+          mkdir -p data/weather-summary
+          timeout 2m node scripts/ai-weather-summary.js || {
+            echo "⚠️ AI summary generation failed, continuing without it"
+          }
+          
+          # Copy AI summary to public directory if generated
+          if [ -f "data/weather-summary/latest.json" ]; then
+            mkdir -p public/data/weather-summary
+            cp data/weather-summary/* public/data/weather-summary/ 2>/dev/null || true
+            echo "✅ AI weather summary generated and copied"
+          fi
+
       - name: Configure Git
         run: |
           git config --local user.email "action@github.com"
@@ -98,6 +115,8 @@ jobs:
       - name: Commit and push weather data
         run: |
           git add data/weather/ public/data/weather/
+          # Also add AI summary data if it exists
+          git add data/weather-summary/ public/data/weather-summary/ 2>/dev/null || true
           
           if ! git diff --staged --quiet; then
             TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
@@ -117,12 +136,23 @@ jobs:
               " 2>/dev/null || echo "N/A")
             fi
             
-            git commit -m "chore(weather): Update weather data - ${TIMESTAMP}
+            # Check if AI summary was generated
+            AI_SUMMARY_INFO=""
+            if [ -f "data/weather-summary/latest.json" ]; then
+              AI_SUMMARY_INFO=$(node -pe "
+                try {
+                  const data = JSON.parse(require('fs').readFileSync('data/weather-summary/latest.json', 'utf8'));
+                  '\\n- AI Summary: ' + (data.summary ? data.summary.substring(0, 60) + '...' : 'Generated');
+                } catch(e) { ''; }
+              " 2>/dev/null || echo "")
+            fi
+            
+            git commit -m "chore(weather): Update weather data + AI summary - ${TIMESTAMP}
 
 Bukit Timah area weather update:
 - Temperature: ${TEMP_INFO}
-- Source: NEA Singapore API
-- Schedule: Every 6 hours (30% budget optimized)
+- Source: NEA Singapore API${AI_SUMMARY_INFO}
+- Schedule: Every 6 hours with AI summaries
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 

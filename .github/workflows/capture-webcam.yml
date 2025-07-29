@@ -1,63 +1,31 @@
-name: Traffic Camera AI Analysis
+name: Legacy Traffic Camera Analysis (DISABLED)
 
-# Cohere AI analysis for Singapore traffic cameras
-# Generates AI analysis data for real-time traffic conditions
+# ⚠️ DEPRECATED: This workflow has been disabled
+# AI analysis now focuses on weather summaries instead of traffic cameras
+# See: ai-weather-summary.yml for the new AI functionality
 
 on:
+  # Disabled - no triggers
   workflow_dispatch:
     inputs:
-      camera_ids:
-        description: 'Comma-separated camera IDs to analyze (e.g., 6710,2701,2703)'
+      disabled:
+        description: 'This workflow is disabled. Use ai-weather-summary.yml instead.'
         required: false
-        default: '6710,2701,2703,1701,4712'
-      force_analysis:
-        description: 'Force AI analysis even if daily limit reached'
-        type: boolean
-        default: false
+        default: 'true'
 
 env:
   NODE_ENV: production
 
 jobs:
-  cohere-ai-analysis:
+  disabled-workflow:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
-
+    timeout-minutes: 1
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Cohere AI Analysis
-        env:
-          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-          FORCE_ANALYSIS: ${{ inputs.force_analysis || 'false' }}
+      - name: Workflow Disabled Notice
         run: |
-          echo "🤖 Starting Cohere AI traffic analysis..."
-          node scripts/cohere-ai-analysis.js
-
-      - name: Commit AI analysis results
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          
-          if [ -f "data/ai-analysis/latest.json" ]; then
-            git add data/ai-analysis/
-            git commit -m "feat: Update Cohere AI traffic analysis data" || exit 0
-            git push
-            echo "✅ AI analysis data committed successfully"
-          else
-            echo "⚠️ No AI analysis data generated"
-          fi
+          echo "⚠️ This workflow has been disabled and replaced."
+          echo "🔄 Traffic camera AI analysis has been moved to weather summaries."
+          echo "🎆 New workflow: ai-weather-summary.yml"
+          echo "🔗 AI analysis now focuses on weather data instead of traffic cameras."
+          exit 0

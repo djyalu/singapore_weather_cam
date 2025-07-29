@@ -29,13 +29,11 @@ const formatTime = (timestamp) => {
 };
 
 /**
- * AI 분석이 포함된 개별 교통 카메라 카드
+ * 단순화된 개별 교통 카메라 카드 (AI 분석 제거)
  */
 const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const [aiAnalysis, setAiAnalysis] = useState(null);
-  const [analysisLoading, setAnalysisLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [currentImageUrl, setCurrentImageUrl] = useState(camera.image?.url || camera.image);
 
@@ -44,8 +42,6 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
     setImageLoading(false);
     setImageError(false);
     setRetryCount(0);
-    // AI 분석 시작 (실제 구현에서는 API 호출)
-    performAIAnalysis();
   };
 
   const handleImageError = () => {
@@ -68,123 +64,6 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
     }
   };
 
-  // 실제 Cohere API 분석 데이터 가져오기
-  const performAIAnalysis = async () => {
-    setAnalysisLoading(true);
-    
-    try {
-      console.log(`🤖 Loading Cohere AI analysis for camera ${camera.id}...`);
-      
-      // GitHub Actions에서 생성된 실제 Cohere AI 분석 데이터 로드
-      const basePath = import.meta.env.BASE_URL || '/';
-      const timestamp = new Date().getTime();
-      const response = await fetch(`${basePath}data/ai-analysis/latest.json?t=${timestamp}`);
-      
-      if (response.ok) {
-        const analysisData = await response.json();
-        console.log(`🔍 AI Analysis Data Response:`, {
-          timestamp: analysisData.timestamp,
-          method: analysisData.analysis_method,
-          totalAnalyzed: analysisData.total_analyzed,
-          availableCameras: Object.keys(analysisData.cameras || {}),
-          requestedCamera: camera.id
-        });
-        
-        // 카메라 ID를 문자열과 숫자 모두로 확인
-        const cameraAnalysis = analysisData.cameras?.[camera.id] || 
-                              analysisData.cameras?.[String(camera.id)] ||
-                              analysisData.cameras?.[camera.camera_id];
-        
-        // API 사용량 정보 확인
-        const isApiLimitReached = analysisData.api_limit_reached === true;
-        const analysisMethod = analysisData.analysis_method || 'Unknown';
-        
-        if (cameraAnalysis) {
-          console.log(`✅ Real Cohere analysis found for camera ${camera.id}:`, cameraAnalysis);
-          
-          // Cohere 데이터를 카드 UI 형식으로 변환 (실제 데이터 확인)
-          const transformedAnalysis = {
-            traffic: cameraAnalysis.traffic_status || '데이터 없음',
-            weather: cameraAnalysis.weather_condition || '확인중',
-            visibility: cameraAnalysis.visibility || '보통',
-            confidence: cameraAnalysis.confidence || 0.85,
-            details: cameraAnalysis.details || 'AI 분석 완료',
-            aiModel: `${cameraAnalysis.ai_model || 'Cohere Command API'} (실제 분석)`,
-            timestamp: cameraAnalysis.analysis_timestamp,
-            analysisMethod: analysisMethod,
-            apiStatus: isApiLimitReached ? 'Daily limit reached' : 'Active',
-            apiCallsRemaining: analysisData.api_calls_remaining || 0,
-            isRealAnalysis: true // 실제 분석 표시를 위한 플래그
-          };
-          
-          setAiAnalysis(transformedAnalysis);
-          console.log(`🎯 Real Cohere analysis successfully loaded:`, transformedAnalysis);
-          return; // 실제 데이터 로드 성공 시 여기서 종료
-        } else {
-          console.log(`⚠️ No Cohere analysis found for camera ${camera.id}`);
-          console.log(`📋 Available cameras in analysis data:`, Object.keys(analysisData.cameras || {}));
-          
-          // 분석 데이터가 있지만 해당 카메라가 없는 경우
-          setAiAnalysis({
-            traffic: '분석 대기중',
-            weather: '확인중', 
-            visibility: '대기중',
-            confidence: 0,
-            aiModel: 'Cohere Command API (해당 카메라 분석 없음)',
-            note: `카메라 ${camera.id}의 분석 데이터가 없습니다`,
-            isRealAnalysis: false
-          });
-          return;
-        }
-      } else {
-        console.log(`⚠️ Analysis data file not found (${response.status}), using enhanced simulation`);
-        throw new Error(`HTTP ${response.status}: Analysis data not available`);
-      }
-    } catch (error) {
-      console.error(`❌ Failed to load Cohere analysis for camera ${camera.id}:`, error);
-      
-      // API 실패 시 결정론적 시뮬레이션 (동일 카메라는 동일 결과)
-      const cameraId = parseInt(camera.id) || 1;
-      const hour = new Date().getHours();
-      const isRushHour = (hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19);
-      
-      // 카메라별 고유 시뮬레이션 결과 생성
-      const analysisOptions = [
-        { traffic: '교통 원활', weather: '맑음', visibility: '양호' },
-        { traffic: '교통 혼잡', weather: '흐림', visibility: '보통' },
-        { traffic: '교통 정체중', weather: '맑음', visibility: '양호' },
-        { traffic: '교통량 적음', weather: '부분적으로 흐림', visibility: '양호' }
-      ];
-      
-      // 결정론적 선택 (카메라 ID + 시간 기반)
-      const seed = (cameraId * 7 + hour * 3) % analysisOptions.length;
-      const selectedResult = analysisOptions[seed];
-      
-      // 러시아워 시간대에는 혼잡도 증가
-      if (isRushHour && selectedResult.traffic === '교통 원활') {
-        selectedResult.traffic = '교통 혼잡';
-      }
-      
-      setAiAnalysis({
-        ...selectedResult,
-        confidence: 0.75,
-        aiModel: 'Enhanced Simulation (실제 AI 분석 일시 불가)',
-        note: `Cohere API 연결 실패: ${error.message}`,
-        isRealAnalysis: false
-      });
-    } finally {
-      setAnalysisLoading(false);
-    }
-  };
-
-  const getTrafficColor = (traffic) => {
-    switch (traffic) {
-      case '원활': return 'text-green-600 bg-green-50';
-      case '보통': return 'text-yellow-600 bg-yellow-50';
-      case '혼잡': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
-  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
@@ -226,9 +105,9 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
         </div>
       </div>
 
-      {/* AI 분석 결과 섹션 */}
+      {/* 카메라 정보 섹션 */}
       <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-gray-800 truncate">
             {camera.location?.description || camera.location?.name || '교통 카메라'}
           </h3>
@@ -236,39 +115,22 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
             {camera.timestamp ? formatTime(camera.timestamp) : '실시간'}
           </span>
         </div>
-
-        {/* AI 분석 로딩 또는 결과 */}
-        {analysisLoading ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-blue-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-              <span>AI 분석 중...</span>
-            </div>
+        
+        {/* 기본 카메라 정보 */}
+        <div className="text-sm text-gray-600">
+          <div className="flex items-center gap-2">
+            <span className="text-green-600">📹</span>
+            <span>실시간 교통 상황</span>
           </div>
-        ) : aiAnalysis ? (
-          <div className="space-y-2">
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className={`px-2 py-1 rounded-lg text-center font-medium ${getTrafficColor(aiAnalysis.traffic)}`}>
-                🚗 {aiAnalysis.traffic}
-              </div>
-              <div className="px-2 py-1 rounded-lg text-center font-medium text-blue-600 bg-blue-50">
-                🌤️ {aiAnalysis.weather}
-              </div>
-              <div className="px-2 py-1 rounded-lg text-center font-medium text-purple-600 bg-purple-50">
-                👁️ {aiAnalysis.visibility}
-              </div>
+          {camera.location?.latitude && camera.location?.longitude && (
+            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+              <span>📍</span>
+              <span>
+                {camera.location.latitude.toFixed(4)}, {camera.location.longitude.toFixed(4)}
+              </span>
             </div>
-            <div className={`text-xs text-center ${
-              aiAnalysis.isRealAnalysis ? 'text-green-600' : 'text-orange-600'
-            }`}>
-              {aiAnalysis.isRealAnalysis ? '🤖 실제 Cohere AI 분석' : '🔄 시뮬레이션 데이터'}
-            </div>
-          </div>
-        ) : (
-          <div className="text-xs text-gray-400 text-center py-2">
-            이미지 로드 후 AI 분석 시작
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
@@ -277,13 +139,12 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
 RegionalCameraCard.displayName = 'RegionalCameraCard';
 
 /**
- * 선택된 지역에 맞는 교통 카메라 3개를 표시하는 컴포넌트
+ * 선택된 지역에 맞는 교통 카메라 3개를 표시하는 컴포넌트 (단순화됨)
  */
 const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) => {
   const [cameras, setCameras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [apiUsageInfo, setApiUsageInfo] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // 디버깅: props 확인
@@ -351,38 +212,6 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     return nearestCamera ? { camera: nearestCamera, distance: minDistance } : null;
   };
 
-  // API 사용량 정보 가져오기
-  useEffect(() => {
-    const fetchApiUsageInfo = async () => {
-      try {
-        const basePath = import.meta.env.BASE_URL || '/';
-        const timestamp = new Date().getTime();
-        const response = await fetch(`${basePath}data/ai-analysis/latest.json?t=${timestamp}`);
-        if (response.ok) {
-          const analysisData = await response.json();
-          setApiUsageInfo({
-            remaining: analysisData.api_calls_remaining || 0,
-            limit: analysisData.api_calls_limit || 20,
-            today: analysisData.api_calls_today || 0,
-            limitReached: analysisData.api_limit_reached || false,
-            analysisMethod: analysisData.analysis_method || 'Unknown'
-          });
-        }
-      } catch (error) {
-        console.log('⚠️ Could not load API usage info:', error);
-        // 기본 API 사용량 정보 설정
-        setApiUsageInfo({
-          remaining: 17,
-          limit: 20,
-          today: 3,
-          limitReached: false,
-          analysisMethod: 'Cohere Command API (캐시된 정보)'
-        });
-      }
-    };
-
-    fetchApiUsageInfo();
-  }, [selectedRegions]); // 지역 변경 시마다 업데이트
 
   // 교통 카메라 데이터 가져오기 함수 분리
   const fetchCameras = async (isManualRefresh = false) => {
@@ -830,27 +659,8 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         </h3>
         <div className="space-y-2">
           <p className="text-sm text-gray-600">
-            실시간 교통 카메라 + Cohere AI 분석
+            실시간 교통 카메라 이미지
           </p>
-          
-          {/* API 사용량 정보 표시 */}
-          {apiUsageInfo && (
-            <div className="flex justify-center">
-              <div className={`text-xs px-3 py-1 rounded-full inline-flex items-center gap-1 ${
-                apiUsageInfo.limitReached 
-                  ? 'text-red-600 bg-red-50' 
-                  : apiUsageInfo.remaining <= 5 
-                    ? 'text-orange-600 bg-orange-50'
-                    : 'text-blue-600 bg-blue-50'
-              }`}>
-                <span>🤖</span>
-                <span>
-                  Cohere API: {apiUsageInfo.remaining}/{apiUsageInfo.limit} 남음
-                  {apiUsageInfo.limitReached && ' (제한 도달)'}
-                </span>
-              </div>
-            </div>
-          )}
           
           {error && (
             <div className="flex items-center justify-center gap-2">

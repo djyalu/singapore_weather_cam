@@ -95,7 +95,10 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '', selectedCamera = n
       
       // GitHub Actions로 생성된 실제 AI 분석 데이터 확인
       try {
-        const analysisResponse = await fetch('/data/ai-analysis/latest.json');
+        // basePath 추가 및 cache busting
+        const basePath = import.meta.env.BASE_URL || '/';
+        const timestamp = new Date().getTime();
+        const analysisResponse = await fetch(`${basePath}data/ai-analysis/latest.json?t=${timestamp}`);
         if (analysisResponse.ok) {
           const analysisData = await analysisResponse.json();
           const targetCameraId = cameraInfo?.id || CLOSEST_CAMERA_ID;
@@ -375,16 +378,36 @@ const HwaChongWeatherAnalysis = React.memo(({ className = '', selectedCamera = n
                 <>🏫 Hwa Chong CCTV 실시간 분석</>
               )}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Claude AI 기반 시각적 날씨 분석 
-              {cameraData?.area && <> • 위치: {cameraData.area}</>}
-              {cameraData?.distance && <> • 거리: {cameraData.distance}km</>}
-              {selectedCamera && (
-                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                  지도에서 선택됨
-                </span>
-              )}
-            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-sm text-gray-600">
+                Claude AI 기반 시각적 날씨 분석 
+                {cameraData?.area && <> • 위치: {cameraData.area}</>}
+                {cameraData?.distance && <> • 거리: {cameraData.distance}km</>}
+                {selectedCamera && (
+                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                    지도에서 선택됨
+                  </span>
+                )}
+              </p>
+              {/* 실시간 재시도 버튼 */}
+              <button
+                onClick={() => loadCameraData(selectedCamera ? true : false)}
+                disabled={loading}
+                className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>분석 중...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🔄</span>
+                    <span>실시간 재시도</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
           <div className="text-right">
             {aiAnalysis && (

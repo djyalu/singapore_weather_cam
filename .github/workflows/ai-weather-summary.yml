@@ -1,0 +1,67 @@
+name: AI Weather Summary Generation
+
+# Cohere AI weather analysis for Singapore weather data
+# Generates AI summaries for overall weather conditions
+
+on:
+  schedule:
+    # Run every 3 hours at 0, 3, 6, 9, 12, 15, 18, 21 UTC
+    - cron: '0 */3 * * *'
+  
+  workflow_dispatch:
+    inputs:
+      force_analysis:
+        description: 'Force AI analysis even if daily limit reached'
+        type: boolean
+        default: false
+
+env:
+  NODE_ENV: production
+
+jobs:
+  weather-summary-generation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run AI Weather Summary Generation
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          FORCE_ANALYSIS: ${{ inputs.force_analysis || 'false' }}
+        run: |
+          echo "🤖 Starting Cohere AI weather summary generation..."
+          node scripts/ai-weather-summary.js
+
+      - name: Commit AI weather summary results
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if [ -f "data/weather-summary/latest.json" ]; then
+            git add data/weather-summary/
+            git commit -m "feat: Update AI weather summary data
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>" || exit 0
+            git push
+            echo "✅ AI weather summary data committed successfully"
+          else
+            echo "⚠️ No AI weather summary data generated"
+          fi
