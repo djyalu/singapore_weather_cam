@@ -375,18 +375,372 @@
           ]
         }
       }
+    },
+    {
+      "timestamp": "2025-07-29T14:06:16.537Z",
+      "source": "NEA Singapore (Enhanced)",
+      "collection_time_ms": 4713,
+      "api_calls": 4,
+      "successful_calls": 4,
+      "failed_calls": 0,
+      "data": {
+        "temperature": {
+          "readings": [
+            {
+              "station": "S107",
+              "value": 29.8
+            },
+            {
+              "station": "S60",
+              "value": 29.4
+            },
+            {
+              "station": "S24",
+              "value": 29.5
+            },
+            {
+              "station": "S104",
+              "value": 29.7
+            }
+          ],
+          "average": 29.6
+        },
+        "humidity": {
+          "readings": [
+            {
+              "station": "S107",
+              "value": 75.9
+            },
+            {
+              "station": "S60",
+              "value": 78.4
+            },
+            {
+              "station": "S24",
+              "value": 72.7
+            },
+            {
+              "station": "S104",
+              "value": 78
+            }
+          ],
+          "average": 76.25
+        },
+        "rainfall": {
+          "readings": [
+            {
+              "station": "S224",
+              "value": 0
+            },
+            {
+              "station": "S77",
+              "value": 0
+            },
+            {
+              "station": "S216",
+              "value": 0
+            },
+            {
+              "station": "S109",
+              "value": 0
+            },
+            {
+              "station": "S117",
+              "value": 0
+            },
+            {
+              "station": "S217",
+              "value": 0
+            },
+            {
+              "station": "S64",
+              "value": 0
+            },
+            {
+              "station": "S90",
+              "value": 0
+            },
+            {
+              "station": "S208",
+              "value": 0
+            },
+            {
+              "station": "S201",
+              "value": 0
+            },
+            {
+              "station": "S50",
+              "value": 0
+            },
+            {
+              "station": "S220",
+              "value": 0
+            },
+            {
+              "station": "S213",
+              "value": 0
+            },
+            {
+              "station": "S107",
+              "value": 0
+            },
+            {
+              "station": "S215",
+              "value": 0
+            },
+            {
+              "station": "S222",
+              "value": 0
+            },
+            {
+              "station": "S221",
+              "value": 0
+            },
+            {
+              "station": "S33",
+              "value": 0
+            },
+            {
+              "station": "S229",
+              "value": 0
+            },
+            {
+              "station": "S228",
+              "value": 0
+            },
+            {
+              "station": "S71",
+              "value": 0
+            },
+            {
+              "station": "S43",
+              "value": 0
+            },
+            {
+              "station": "S211",
+              "value": 0
+            },
+            {
+              "station": "S66",
+              "value": 0
+            },
+            {
+              "station": "S112",
+              "value": 0
+            },
+            {
+              "station": "S07",
+              "value": 0
+            },
+            {
+              "station": "S226",
+              "value": 0
+            },
+            {
+              "station": "S40",
+              "value": 0
+            },
+            {
+              "station": "S223",
+              "value": 0
+            },
+            {
+              "station": "S108",
+              "value": 0
+            },
+            {
+              "station": "S113",
+              "value": 0
+            },
+            {
+              "station": "S44",
+              "value": 0
+            },
+            {
+              "station": "S119",
+              "value": 0
+            },
+            {
+              "station": "S203",
+              "value": 0
+            },
+            {
+              "station": "S29",
+              "value": 0
+            },
+            {
+              "station": "S94",
+              "value": 0
+            },
+            {
+              "station": "S78",
+              "value": 0
+            },
+            {
+              "station": "S106",
+              "value": 0
+            },
+            {
+              "station": "S81",
+              "value": 0
+            },
+            {
+              "station": "S111",
+              "value": 0
+            },
+            {
+              "station": "S900",
+              "value": 0
+            },
+            {
+              "station": "S102",
+              "value": 0
+            },
+            {
+              "station": "S60",
+              "value": 0
+            },
+            {
+              "station": "S84",
+              "value": 0
+            },
+            {
+              "station": "S79",
+              "value": 0
+            },
+            {
+              "station": "S92",
+              "value": 0
+            },
+            {
+              "station": "S214",
+              "value": 0
+            },
+            {
+              "station": "S88",
+              "value": 0
+            },
+            {
+              "station": "S123",
+              "value": 0
+            },
+            {
+              "station": "S115",
+              "value": 0
+            },
+            {
+              "station": "S24",
+              "value": 0
+            },
+            {
+              "station": "S69",
+              "value": 0
+            },
+            {
+              "station": "S08",
+              "value": 0
+            },
+            {
+              "station": "S230",
+              "value": 0
+            },
+            {
+              "station": "S104",
+              "value": 0
+            },
+            {
+              "station": "S210",
+              "value": 0
+            },
+            {
+              "station": "S227",
+              "value": 0
+            },
+            {
+              "station": "S219",
+              "value": 0
+            },
+            {
+              "station": "S209",
+              "value": 0
+            }
+          ],
+          "total": 0
+        },
+        "forecast": {
+          "general": {
+            "forecast": "Thundery Showers",
+            "relative_humidity": {
+              "low": 60,
+              "high": 95
+            },
+            "temperature": {
+              "low": 25,
+              "high": 33
+            },
+            "wind": {
+              "speed": {
+                "low": 10,
+                "high": 25
+              },
+              "direction": "SSE"
+            }
+          },
+          "periods": [
+            {
+              "time": {
+                "start": "2025-07-29T18:00:00+08:00",
+                "end": "2025-07-30T06:00:00+08:00"
+              },
+              "regions": {
+                "west": "Partly Cloudy (Night)",
+                "east": "Partly Cloudy (Night)",
+                "central": "Partly Cloudy (Night)",
+                "south": "Partly Cloudy (Night)",
+                "north": "Partly Cloudy (Night)"
+              }
+            },
+            {
+              "time": {
+                "start": "2025-07-30T06:00:00+08:00",
+                "end": "2025-07-30T12:00:00+08:00"
+              },
+              "regions": {
+                "west": "Thundery Showers",
+                "east": "Thundery Showers",
+                "central": "Partly Cloudy (Day)",
+                "south": "Partly Cloudy (Day)",
+                "north": "Thundery Showers"
+              }
+            },
+            {
+              "time": {
+                "start": "2025-07-30T12:00:00+08:00",
+                "end": "2025-07-30T18:00:00+08:00"
+              },
+              "regions": {
+                "west": "Thundery Showers",
+                "east": "Thundery Showers",
+                "central": "Partly Cloudy (Day)",
+                "south": "Partly Cloudy (Day)",
+                "north": "Thundery Showers"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "statistics": {
     "temperature": {
       "min": 28.98,
-      "max": 28.98,
-      "average": 28.98
+      "max": 29.6,
+      "average": 29.29
     },
     "humidity": {
-      "min": 84.42,
+      "min": 76.25,
       "max": 84.42,
-      "average": 84.42
+      "average": 80.33500000000001
     }
   }
 }

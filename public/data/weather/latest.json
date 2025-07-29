@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-07-28T13:33:57.360Z",
+  "timestamp": "2025-07-29T14:06:16.537Z",
   "source": "NEA Singapore (Enhanced)",
-  "collection_time_ms": 4772,
+  "collection_time_ms": 4713,
   "api_calls": 4,
   "successful_calls": 4,
   "failed_calls": 0,
@@ -9,84 +9,44 @@
     "temperature": {
       "readings": [
         {
-          "station": "S109",
-          "value": 29.8
-        },
-        {
-          "station": "S50",
-          "value": 29.2
-        },
-        {
           "station": "S107",
-          "value": 30
-        },
-        {
-          "station": "S43",
-          "value": 29.9
-        },
-        {
-          "station": "S102",
-          "value": 29.5
+          "value": 29.8
         },
         {
           "station": "S60",
           "value": 29.4
         },
         {
-          "station": "S115",
-          "value": 29.6
-        },
-        {
           "station": "S24",
-          "value": 29.6
+          "value": 29.5
         },
         {
           "station": "S104",
           "value": 29.7
         }
       ],
-      "average": 29.633333333333333
+      "average": 29.6
     },
     "humidity": {
       "readings": [
         {
-          "station": "S109",
-          "value": 77.3
-        },
-        {
-          "station": "S50",
-          "value": 84
-        },
-        {
           "station": "S107",
-          "value": 81.7
-        },
-        {
-          "station": "S43",
-          "value": 79.3
-        },
-        {
-          "station": "S102",
-          "value": 84.7
+          "value": 75.9
         },
         {
           "station": "S60",
-          "value": 85.8
-        },
-        {
-          "station": "S115",
-          "value": 82.7
+          "value": 78.4
         },
         {
           "station": "S24",
-          "value": 77.3
+          "value": 72.7
         },
         {
           "station": "S104",
-          "value": 87.7
+          "value": 78
         }
       ],
-      "average": 82.27777777777777
+      "average": 76.25
     },
     "rainfall": {
       "readings": [
@@ -331,14 +291,14 @@
     },
     "forecast": {
       "general": {
-        "forecast": "Partly Cloudy (Day)",
+        "forecast": "Thundery Showers",
         "relative_humidity": {
-          "low": 55,
-          "high": 90
+          "low": 60,
+          "high": 95
         },
         "temperature": {
-          "low": 26,
-          "high": 34
+          "low": 25,
+          "high": 33
         },
         "wind": {
           "speed": {
@@ -351,8 +311,8 @@
       "periods": [
         {
           "time": {
-            "start": "2025-07-28T18:00:00+08:00",
-            "end": "2025-07-29T06:00:00+08:00"
+            "start": "2025-07-29T18:00:00+08:00",
+            "end": "2025-07-30T06:00:00+08:00"
           },
           "regions": {
             "west": "Partly Cloudy (Night)",
@@ -364,28 +324,28 @@
         },
         {
           "time": {
-            "start": "2025-07-29T06:00:00+08:00",
-            "end": "2025-07-29T12:00:00+08:00"
+            "start": "2025-07-30T06:00:00+08:00",
+            "end": "2025-07-30T12:00:00+08:00"
           },
           "regions": {
-            "west": "Partly Cloudy (Day)",
-            "east": "Partly Cloudy (Day)",
+            "west": "Thundery Showers",
+            "east": "Thundery Showers",
             "central": "Partly Cloudy (Day)",
             "south": "Partly Cloudy (Day)",
-            "north": "Partly Cloudy (Day)"
+            "north": "Thundery Showers"
           }
         },
         {
           "time": {
-            "start": "2025-07-29T12:00:00+08:00",
-            "end": "2025-07-29T18:00:00+08:00"
+            "start": "2025-07-30T12:00:00+08:00",
+            "end": "2025-07-30T18:00:00+08:00"
           },
           "regions": {
-            "west": "Partly Cloudy (Day)",
-            "east": "Partly Cloudy (Day)",
+            "west": "Thundery Showers",
+            "east": "Thundery Showers",
             "central": "Partly Cloudy (Day)",
             "south": "Partly Cloudy (Day)",
-            "north": "Partly Cloudy (Day)"
+            "north": "Thundery Showers"
           }
         }
       ]

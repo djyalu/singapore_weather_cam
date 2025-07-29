@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { COORDINATES } from '../../config/constants';
+import WeatherOverlay from './WeatherOverlay';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -45,6 +46,11 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
   const [trafficCameras, setTrafficCameras] = useState([]);
   const [isLoadingTraffic, setIsLoadingTraffic] = useState(true);
   const [trafficError, setTrafficError] = useState(null);
+  
+  // 날씨 레이어 표시 상태
+  const [showWeatherOverlay, setShowWeatherOverlay] = useState(true);
+  const [showTemperatureLayer, setShowTemperatureLayer] = useState(true);
+  const [showWeatherIcons, setShowWeatherIcons] = useState(true);
 
   const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
 
@@ -208,8 +214,18 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+
+          {/* 날씨 오버레이 레이어 */}
+          {showWeatherOverlay && (
+            <WeatherOverlay
+              weatherData={weatherData}
+              showTemperatureLayer={showTemperatureLayer}
+              showWeatherIcons={showWeatherIcons}
+            />
+          )}
           
-          {weatherData?.locations?.map((location) => (
+          {/* 기존 개별 날씨 스테이션 마커들 (옵션) */}
+          {!showWeatherOverlay && weatherData?.locations?.map((location) => (
             location.coordinates && (
               <Marker
                 key={location.id}
@@ -347,16 +363,96 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
 
       <div className="p-4 border-t bg-gray-50">
         <div className="space-y-3">
+          {/* 레이어 컨트롤 패널 */}
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-medium text-gray-800 flex items-center gap-2">
+                <span>🗺️</span>
+                <span>지도 레이어 설정</span>
+              </h4>
+              <div className="text-xs text-gray-500">
+                클릭하여 레이어 표시/숨김
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* 날씨 오버레이 토글 */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowWeatherOverlay(!showWeatherOverlay)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    showWeatherOverlay 
+                      ? 'bg-blue-100 text-blue-800 border border-blue-300' 
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <span className="text-lg">🌡️</span>
+                  <span>지역별 날씨</span>
+                  <span className={`w-2 h-2 rounded-full ${showWeatherOverlay ? 'bg-blue-500' : 'bg-gray-400'}`} />
+                </button>
+              </div>
+
+              {/* 온도 히트맵 토글 */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowTemperatureLayer(!showTemperatureLayer)}
+                  disabled={!showWeatherOverlay}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    showTemperatureLayer && showWeatherOverlay
+                      ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                      : showWeatherOverlay
+                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <span className="text-lg">🌡️</span>
+                  <span>온도 히트맵</span>
+                  <span className={`w-2 h-2 rounded-full ${
+                    showTemperatureLayer && showWeatherOverlay ? 'bg-orange-500' : 'bg-gray-400'
+                  }`} />
+                </button>
+              </div>
+
+              {/* 날씨 아이콘 토글 */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowWeatherIcons(!showWeatherIcons)}
+                  disabled={!showWeatherOverlay}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    showWeatherIcons && showWeatherOverlay
+                      ? 'bg-green-100 text-green-800 border border-green-300'
+                      : showWeatherOverlay
+                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <span className="text-lg">🌤️</span>
+                  <span>날씨 아이콘</span>
+                  <span className={`w-2 h-2 rounded-full ${
+                    showWeatherIcons && showWeatherOverlay ? 'bg-green-500' : 'bg-gray-400'
+                  }`} />
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 text-sm flex-wrap">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-purple-600 rounded-sm border border-white shadow-sm"></div>
                 <span className="font-medium">🏫 Hwa Chong School</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                <span>Weather Stations ({weatherData?.locations?.length || 0})</span>
-              </div>
+              {showWeatherOverlay ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-100 border-2 border-blue-500 rounded-full"></div>
+                  <span>지역별 날씨 ({showTemperatureLayer ? '온도+' : ''}{showWeatherIcons ? '아이콘' : ''})</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                  <span>개별 관측소 ({weatherData?.locations?.length || 0})</span>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-600 rounded-full"></div>
                 <span>⭐ 주요 교통 카메라</span>
