@@ -11,7 +11,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-  const [currentImageUrl, setCurrentImageUrl] = useState(camera.image);
+  const [currentImageUrl, setCurrentImageUrl] = useState(camera.image?.url || camera.image);
 
   // 이미지 로드 핸들러
   const handleImageLoad = () => {
@@ -33,7 +33,8 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
         setImageLoading(true);
         setImageError(false);
         // 캐시 버스터를 추가해서 재시도
-        setCurrentImageUrl(`${camera.image}${camera.image.includes('?') ? '&' : '?'}retry=${retryCount + 1}&t=${Date.now()}`);
+        const baseImageUrl = camera.image?.url || camera.image;
+        setCurrentImageUrl(`${baseImageUrl}${baseImageUrl.includes('?') ? '&' : '?'}retry=${retryCount + 1}&t=${Date.now()}`);
       }, 1000 * (retryCount + 1)); // 1초, 2초 지연
     } else {
       console.error(`❌ Image load failed for camera ${camera.id} after ${retryCount + 1} attempts`);
@@ -352,32 +353,16 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     fetchApiUsageInfo();
   }, [selectedRegions]); // 지역 변경 시마다 업데이트
 
-  // 교통 카메라 데이터 가져오기 (실시간 우선, 폴백 지원)
+  // 교통 카메라 데이터 가져오기 (TrafficCameraGallery와 동일한 로직 사용)
   useEffect(() => {
     const fetchCameras = async () => {
       try {
         setLoading(true);
-        console.log('🚗 Fetching traffic cameras...');
+        console.log('🚗 Fetching real-time traffic cameras...');
         
-        // 1차 시도: 실시간 GitHub Actions 데이터
-        try {
-          const realtimeResponse = await fetch('/data/traffic-cameras/latest.json?t=' + Date.now());
-          if (realtimeResponse.ok) {
-            const realtimeData = await realtimeResponse.json();
-            if (realtimeData.cameras && realtimeData.cameras.length > 0) {
-              console.log('✅ Using real-time traffic data:', realtimeData.cameras.length, 'cameras');
-              setCameras(realtimeData.cameras);
-              setError(null);
-              return;
-            }
-          }
-        } catch (realtimeError) {
-          console.log('⚠️ Real-time data not available, trying API...');
-        }
-        
-        // 2차 시도: 직접 API 호출
+        // TrafficCameraGallery와 동일한 실시간 API 호출
         const data = await fetchTrafficCameras();
-        console.log('📷 Traffic cameras received:', data?.cameras?.length || 0);
+        console.log('✅ Real-time traffic cameras received:', data?.cameras?.length || 0);
         
         // 디버깅: 실제 API에서 받은 카메라 ID들 확인
         if (data?.cameras && data.cameras.length > 0) {
@@ -430,7 +415,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     const fallbackCameras = [
       {
         id: '6710',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/c08fc5ad-f86e-40bb-a833-b5ef49e54fb0.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/c08fc5ad-f86e-40bb-a833-b5ef49e54fb0.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.344205,
           longitude: 103.78577,
@@ -442,7 +431,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '4712', 
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/e7ca3b45-ee47-46dc-9fe6-379cd60fcffb.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/e7ca3b45-ee47-46dc-9fe6-379cd60fcffb.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.341244001,
           longitude: 103.6439134,
@@ -454,7 +447,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '1701',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/5671f037-0042-4732-84d3-5059e7f6cfa6.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/5671f037-0042-4732-84d3-5059e7f6cfa6.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.3644, // Changi Airport에 더 정확한 좌표
           longitude: 103.9915, // Changi Airport에 더 정확한 좌표
@@ -466,7 +463,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '2701',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/235bfe61-0102-4cfe-94bb-83124f41440f.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/235bfe61-0102-4cfe-94bb-83124f41440f.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.447023728,
           longitude: 103.7716543,
@@ -478,7 +479,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '2703',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/e0463016-e443-430e-848c-4cdeb5bfb0bc.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/e0463016-e443-430e-848c-4cdeb5bfb0bc.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.35047790791386,
           longitude: 103.791033581325,
@@ -491,7 +496,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       // Bukit Timah/Hwa Chong 지역을 위한 카메라 추가 (실제 위치 기준)
       {
         id: '6712',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/810a30ac-e2a1-428f-a584-ff3c3d53ea94.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/810a30ac-e2a1-428f-a584-ff3c3d53ea94.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.332691,
           longitude: 103.770278,
@@ -504,7 +513,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       // Newton 지역을 위한 카메라 추가 (Newton MRT에 더 가까운 위치로 수정)
       {
         id: '6704',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.3140, // Newton MRT에 더 가깝게 수정
           longitude: 103.8380, // Newton MRT에 더 가깝게 수정
@@ -517,7 +530,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       // 기타 지역을 위한 카메라들 추가
       {
         id: '2706',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.414142,
           longitude: 103.771168,
@@ -529,7 +546,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       },
       {
         id: '1703',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/15daf950-86e1-45c9-9f57-3c4e2655fc11.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/15daf950-86e1-45c9-9f57-3c4e2655fc11.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.4382, // 더 북쪽으로 이동 (Woodlands 지역)
           longitude: 103.7880, // 더 북쪽으로 이동
@@ -542,7 +563,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       // Changi 지역을 위한 추가 카메라 (더 정확한 위치)
       {
         id: '7797',
-        image: 'https://images.data.gov.sg/api/traffic-images/2025/07/0c11ae6e-8c12-4978-89b8-0d36de8d5bc8.jpg',
+        image: {
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/0c11ae6e-8c12-4978-89b8-0d36de8d5bc8.jpg',
+          width: 1920,
+          height: 1080
+        },
         location: {
           latitude: 1.3500, // ECP Changi 지역
           longitude: 103.9800, // ECP Changi 지역

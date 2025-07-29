@@ -358,13 +358,25 @@ export class APIService {
     try {
       const response = await circuitBreaker.execute(async () => {
         const fetchOptions = this.buildFetchOptions(options);
-        const response = await fetch(url, fetchOptions);
+        
+        // Implement proper timeout for fetch
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), options.timeout || 10000);
+        
+        try {
+          const response = await fetch(url, {
+            ...fetchOptions,
+            signal: controller.signal
+          });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          return response.json();
+        } finally {
+          clearTimeout(timeoutId);
         }
-
-        return response.json();
       });
 
       const duration = Date.now() - startTime;
@@ -455,7 +467,7 @@ export class APIService {
         'Pragma': 'no-cache',
         ...options.headers,
       },
-      timeout: options.timeout || 10000,
+      mode: 'cors', // Enable CORS
       ...options,
     };
   }
