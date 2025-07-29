@@ -478,13 +478,6 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
         </div>
       </div>
 
-      {/* 추가 정보 */}
-      <div className="mt-4 text-center">
-        <div className="text-xs text-white/60">
-          데이터 출처: NEA Singapore (National Environment Agency) • 
-          {overallData.stationCount}개 기상관측소 실시간 데이터
-        </div>
-      </div>
     </div>
   );
 });

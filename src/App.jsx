@@ -127,7 +127,7 @@ const App = () => {
                   날씨 스테이션과 교통 카메라 위치 통합 보기
                 </p>
               </div>
-              <div className="h-96 lg:h-[500px]">
+              <div className="h-[500px] lg:h-[700px]">
                 <MapView
                   weatherData={weatherData}
                   selectedRegion={activeRegion}
