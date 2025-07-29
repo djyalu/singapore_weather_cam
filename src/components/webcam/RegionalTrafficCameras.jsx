@@ -256,6 +256,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [apiUsageInfo, setApiUsageInfo] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // 디버깅: props 확인
   console.log('🔍 RegionalTrafficCameras props check:', {
@@ -353,58 +354,96 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     fetchApiUsageInfo();
   }, [selectedRegions]); // 지역 변경 시마다 업데이트
 
-  // 교통 카메라 데이터 가져오기 (TrafficCameraGallery와 동일한 로직 사용)
-  useEffect(() => {
-    const fetchCameras = async () => {
-      try {
+  // 교통 카메라 데이터 가져오기 함수 분리
+  const fetchCameras = async (isManualRefresh = false) => {
+    try {
+      if (isManualRefresh) {
+        setIsRefreshing(true);
+      } else {
         setLoading(true);
-        console.log('🚗 Fetching real-time traffic cameras...');
+      }
+      console.log('🚗 Attempting direct API call to Singapore data.gov.sg...');
         
-        // TrafficCameraGallery와 동일한 실시간 API 호출
-        const data = await fetchTrafficCameras();
-        console.log('✅ Real-time traffic cameras received:', data?.cameras?.length || 0);
+        // 직접 Singapore API 호출 (CORS 우회)
+        const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+          mode: 'cors'
+        });
         
-        // 디버깅: 실제 API에서 받은 카메라 ID들 확인
-        if (data?.cameras && data.cameras.length > 0) {
-          console.log('🔍 Available camera IDs from API:', data.cameras.map(cam => cam.id).sort());
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Direct API call successful:', data?.items?.[0]?.cameras?.length || 0, 'cameras');
           
-          // Jurong 지역 근처 카메라들 확인
-          const jurongCoord = regionCoordinates['jurong'];
-          if (jurongCoord) {
-            const nearJurong = data.cameras
-              .map(cam => ({
-                id: cam.id,
-                distance: cam.location?.latitude && cam.location?.longitude 
-                  ? calculateDistance(jurongCoord.lat, jurongCoord.lng, cam.location.latitude, cam.location.longitude)
-                  : Infinity
-              }))
-              .filter(cam => cam.distance < 15) // 15km 이내
-              .sort((a, b) => a.distance - b.distance);
+          if (data?.items?.[0]?.cameras) {
+            const apiCameras = data.items[0].cameras.map(camera => ({
+              id: camera.camera_id,
+              name: `Camera ${camera.camera_id}`,
+              area: 'Traffic',
+              location: {
+                latitude: parseFloat(camera.location.latitude),
+                longitude: parseFloat(camera.location.longitude),
+                description: `Traffic Camera ${camera.camera_id}`
+              },
+              image: {
+                url: camera.image,
+                width: camera.image_metadata?.width || 1920,
+                height: camera.image_metadata?.height || 1080
+              },
+              timestamp: camera.timestamp
+            }));
             
-            console.log('🎯 Jurong 근처 15km 이내 카메라들:', nearJurong);
+            setCameras(apiCameras);
+            setError(null);
+            console.log('🎯 Real-time cameras loaded successfully');
+            return;
           }
         }
         
-        if (data?.cameras && data.cameras.length > 0) {
-          setCameras(data.cameras);
-          setError(null);
-        } else {
-          throw new Error('No cameras in API response');
-        }
-      } catch (err) {
-        console.error('❌ Traffic camera fetch error:', err);
+        throw new Error(`API response failed: ${response.status}`);
         
-        // 폴백: 가상의 교통 카메라 데이터 생성
+      } catch (err) {
+        console.warn('⚠️ Direct API call failed, trying enhanced service...', err.message);
+        
+        // 두 번째 시도: TrafficCameraGallery와 동일한 서비스 사용
+        try {
+          const data = await fetchTrafficCameras();
+          if (data?.cameras && data.cameras.length > 0) {
+            setCameras(data.cameras);
+            setError(null);
+            console.log('✅ Service call successful:', data.cameras.length, 'cameras');
+            return;
+          }
+        } catch (serviceErr) {
+          console.warn('⚠️ Service call also failed:', serviceErr.message);
+        }
+        
+        // 최종 폴백: 정적 데이터 사용
+        console.log('🔄 Using static fallback data...');
         const fallbackCameras = generateFallbackCameras();
         setCameras(fallbackCameras);
-        setError('브라우저 보안 정책으로 인해 캐시된 데이터 사용 중');
-        console.log('🔄 Using fallback cameras:', fallbackCameras.length);
-      } finally {
-        setLoading(false);
-      }
-    };
+        setError('실시간 데이터 연결 실패 - 캐시된 데이터 사용 중');
+        
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
+  // 수동 새로고침 핸들러
+  const handleManualRefresh = () => {
+    fetchCameras(true);
+  };
+
+  // 교통 카메라 데이터 가져오기 - 실시간 API 우선, 실패시 정적 데이터
+  useEffect(() => {
     fetchCameras();
+    
+    // 5분마다 자동 새로고침 시도
+    const interval = setInterval(() => fetchCameras(false), 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   // 폴백 카메라 데이터 생성 (실제 AI 분석 데이터와 일치하도록 수정)
@@ -782,9 +821,28 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
           )}
           
           {error && (
-            <p className="text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">
-              ℹ️ {error}
-            </p>
+            <div className="flex items-center justify-center gap-2">
+              <p className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full inline-block">
+                ⚠️ {error}
+              </p>
+              <button
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                {isRefreshing ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>새로고침 중...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🔄</span>
+                    <span>실시간 재시도</span>
+                  </>
+                )}
+              </button>
+            </div>
           )}
         </div>
       </div>
