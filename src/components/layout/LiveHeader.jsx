@@ -85,7 +85,7 @@ const LiveHeader = React.memo(({ systemStats = {} }) => {
                 <h1 className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Singapore Weather Cams
                 </h1>
-                <p className="text-xl text-gray-600 mt-1">🤖 AI-powered Real-time Weather Analysis</p>
+                <p className="text-xl text-gray-600 mt-1">🌡️ Real-time Weather & Traffic Monitoring</p>
                 <div className="flex items-center space-x-4 mt-2">
                   <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
                     <CheckCircle className="w-4 h-4" />
@@ -108,11 +108,8 @@ const LiveHeader = React.memo(({ systemStats = {} }) => {
                   <span>마지막 업데이트: {systemStats.lastUpdate || '정보 없음'}</span>
                 </div>
                 <div className="text-xs text-gray-500 space-y-1">
-                  <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🤖 Cohere AI 분석</div>
+                  <div>📹 {systemStats.totalWebcams || 0}개 웹캠 • 🌡️ 실시간 날씨 데이터</div>
                   <div>⚡ 처리시간: {systemStats.totalProcessingTime || '0초'} • 🔄 5분마다 업데이트</div>
-                  {systemStats.averageConfidence > 0 && (
-                    <div>🎯 평균 신뢰도: {systemStats.averageConfidence}%</div>
-                  )}
                 </div>
               </div>
             </div>
