@@ -14,7 +14,6 @@ import './utils/notifications'; // 알림 시스템 초기화
 const WeatherDashboard = lazy(() => import('./components/weather/WeatherDashboard'));
 const MapView = lazy(() => import('./components/map/MapView'));
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
-const HwaChongWeatherAnalysis = lazy(() => import('./components/weather/HwaChongWeatherAnalysis'));
 
 /**
  * Singapore Weather Cam Application
@@ -24,7 +23,7 @@ const App = () => {
   const [activeView, setActiveView] = useState('weather');
   const [showAdmin, setShowAdmin] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [selectedCamera, setSelectedCamera] = useState(null); // Camera selected from map
+  const [selectedCamera, setSelectedCamera] = useState(null); // Camera selected from map (AI 분석 제거 후 사용안함)
   const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']); // 선택된 지역들
 
   // Data hooks from context
@@ -57,14 +56,10 @@ const App = () => {
     setSelectedRegions(newSelectedRegions);
   };
 
-  // 카메라 선택 핸들러 (지도에서 클릭 시)
+  // 카메라 선택 핸들러 (지도에서 클릭 시) - AI 분석 제거로 단순화
   const handleCameraSelect = (camera) => {
     setSelectedCamera(camera);
-    // Smooth scroll to analysis section
-    const analysisElement = document.getElementById('cctv-analysis');
-    if (analysisElement) {
-      analysisElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    // AI 분석 제거로 스크롤 기능 비활성화
   };
 
   // Use the consolidated manual refresh function
@@ -120,15 +115,6 @@ const App = () => {
             />
           </div>
 
-          {/* CCTV 기반 실시간 날씨 분석 - 지도 상단으로 이동 */}
-          <Suspense fallback={<LoadingFallback message="Loading CCTV analysis..." />}>
-            <div id="cctv-analysis">
-              <HwaChongWeatherAnalysis 
-                className="mb-6" 
-                selectedCamera={selectedCamera}
-              />
-            </div>
-          </Suspense>
 
           {/* 지도 뷰 - 크기 확대 */}
           <Suspense fallback={<LoadingFallback message="Loading map..." />}>
