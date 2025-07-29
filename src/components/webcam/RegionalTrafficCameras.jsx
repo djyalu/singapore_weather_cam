@@ -3,6 +3,32 @@ import PropTypes from 'prop-types';
 import { fetchTrafficCameras } from '../../services/trafficCameraService';
 
 /**
+ * 시간 포맷팅 함수
+ */
+const formatTime = (timestamp) => {
+  try {
+    const updateTime = new Date(timestamp);
+    const now = new Date();
+    const diffMinutes = Math.floor((now - updateTime) / (1000 * 60));
+    
+    if (diffMinutes < 1) return '방금 전';
+    if (diffMinutes < 60) return `${diffMinutes}분 전`;
+    
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    
+    return updateTime.toLocaleDateString('ko-KR', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    return '실시간';
+  }
+};
+
+/**
  * AI 분석이 포함된 개별 교통 카메라 카드
  */
 const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
@@ -50,7 +76,9 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
       console.log(`🤖 Loading Cohere AI analysis for camera ${camera.id}...`);
       
       // GitHub Actions에서 생성된 실제 Cohere AI 분석 데이터 로드
-      const response = await fetch('/data/ai-analysis/latest.json');
+      const basePath = import.meta.env.BASE_URL || '/';
+      const timestamp = new Date().getTime();
+      const response = await fetch(`${basePath}data/ai-analysis/latest.json?t=${timestamp}`);
       
       if (response.ok) {
         const analysisData = await response.json();
@@ -205,7 +233,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
             {camera.location?.description || camera.location?.name || '교통 카메라'}
           </h3>
           <span className="text-xs text-gray-500">
-            실시간
+            {camera.timestamp ? formatTime(camera.timestamp) : '실시간'}
           </span>
         </div>
 
@@ -327,7 +355,9 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   useEffect(() => {
     const fetchApiUsageInfo = async () => {
       try {
-        const response = await fetch('/data/ai-analysis/latest.json');
+        const basePath = import.meta.env.BASE_URL || '/';
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${basePath}data/ai-analysis/latest.json?t=${timestamp}`);
         if (response.ok) {
           const analysisData = await response.json();
           setApiUsageInfo({
@@ -362,9 +392,23 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       } else {
         setLoading(true);
       }
-      console.log('🚗 Attempting direct API call to Singapore data.gov.sg...');
+      console.log('🚗 Attempting real-time traffic camera data fetch...');
         
-        // 직접 Singapore API 호출 (CORS 우회)
+        // 1차 시도: TrafficCameraGallery와 동일한 서비스 사용
+        try {
+          const data = await fetchTrafficCameras();
+          if (data?.cameras && data.cameras.length > 0) {
+            setCameras(data.cameras);
+            setError(null);
+            console.log('✅ Service call successful:', data.cameras.length, 'cameras');
+            return;
+          }
+          throw new Error('No cameras in service response');
+        } catch (serviceErr) {
+          console.warn('⚠️ Service call failed, trying direct API...', serviceErr.message);
+        }
+
+        // 2차 시도: 직접 Singapore API 호출 (CORS 우회)
         const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
           method: 'GET',
           headers: {
@@ -402,23 +446,10 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
           }
         }
         
-        throw new Error(`API response failed: ${response.status}`);
+        throw new Error(`Direct API response failed: ${response.status}`);
         
       } catch (err) {
-        console.warn('⚠️ Direct API call failed, trying enhanced service...', err.message);
-        
-        // 두 번째 시도: TrafficCameraGallery와 동일한 서비스 사용
-        try {
-          const data = await fetchTrafficCameras();
-          if (data?.cameras && data.cameras.length > 0) {
-            setCameras(data.cameras);
-            setError(null);
-            console.log('✅ Service call successful:', data.cameras.length, 'cameras');
-            return;
-          }
-        } catch (serviceErr) {
-          console.warn('⚠️ Service call also failed:', serviceErr.message);
-        }
+        console.warn('⚠️ All API attempts failed:', err.message);
         
         // 최종 폴백: 정적 데이터 사용
         console.log('🔄 Using static fallback data...');
@@ -446,16 +477,17 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     return () => clearInterval(interval);
   }, []);
 
-  // 폴백 카메라 데이터 생성 (실제 AI 분석 데이터와 일치하도록 수정)
+  // 폴백 카메라 데이터 생성 - 현재 시간으로 최신화
   const generateFallbackCameras = () => {
     const currentTimestamp = new Date().toISOString();
+    console.log('📅 Generating fallback cameras with current timestamp:', currentTimestamp);
     
     // 실제 AI 분석 데이터와 매칭되는 카메라 정보 (지역별 정확한 배치)
     const fallbackCameras = [
       {
         id: '6710',
         image: {
-          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/c08fc5ad-f86e-40bb-a833-b5ef49e54fb0.jpg',
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/be259922-9e85-444a-8ffa-db841590f6a4.jpg', // 실제 6710 카메라 이미지
           width: 1920,
           height: 1080
         },
@@ -471,7 +503,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       {
         id: '4712', 
         image: {
-          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/e7ca3b45-ee47-46dc-9fe6-379cd60fcffb.jpg',
+          url: 'https://images.data.gov.sg/api/traffic-images/2025/07/d07c7a9c-f576-4057-9826-86f36054bc08.jpg', // 실제 4712 카메라 이미지
           width: 1920,
           height: 1080
         },
