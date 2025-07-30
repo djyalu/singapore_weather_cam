@@ -11,6 +11,13 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) 
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [mapError, setMapError] = useState(null);
 
+  // 디버깅을 위한 로그
+  console.log('🗺️ SimpleMapView rendering:', {
+    hasWeatherData: !!weatherData,
+    selectedRegion,
+    weatherDataStructure: weatherData ? Object.keys(weatherData) : null
+  });
+
   // 싱가포르 주요 지역 데이터
   const regions = [
     {
@@ -127,6 +134,15 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) 
   const handleLocationClick = (region) => {
     setSelectedLocation(selectedLocation?.id === region.id ? null : region);
   };
+
+  // 컴포넌트가 렌더링되는지 확인
+  if (!regions || regions.length === 0) {
+    return (
+      <div className={`bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded ${className}`}>
+        <strong>Error:</strong> 지역 데이터를 로드할 수 없습니다.
+      </div>
+    );
+  }
 
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>

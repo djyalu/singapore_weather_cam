@@ -6,12 +6,12 @@ import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
+import SimpleMapView from './components/map/SimpleMapView'; // Direct import instead of lazy
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
 import './utils/notifications'; // 알림 시스템 초기화
 
-// Lazy load heavy components for better performance
-const SimpleMapView = lazy(() => import('./components/map/SimpleMapView'));
+// Only AdminPanels remains lazy loaded
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
 
 /**
@@ -114,27 +114,25 @@ const App = () => {
 
 
           {/* 지도 뷰 - 크기 확대 */}
-          <Suspense fallback={<LoadingFallback message="Loading map..." />}>
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
-                  🗺️ 실시간 날씨 및 교통 지도
-                </h2>
-                <p className="text-sm text-gray-600">
-                  날씨 스테이션과 교통 카메라 위치 통합 보기
-                </p>
-              </div>
-              <div className="min-h-[500px]">
-                <MapErrorBoundary>
-                  <SimpleMapView
-                    weatherData={weatherData}
-                    selectedRegion={activeRegion}
-                    className="w-full"
-                  />
-                </MapErrorBoundary>
-              </div>
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                🗺️ 실시간 날씨 및 교통 지도
+              </h2>
+              <p className="text-sm text-gray-600">
+                날씨 스테이션과 교통 카메라 위치 통합 보기
+              </p>
             </div>
-          </Suspense>
+            <div className="min-h-[500px]">
+              <MapErrorBoundary>
+                <SimpleMapView
+                  weatherData={weatherData}
+                  selectedRegion={activeRegion}
+                  className="w-full"
+                />
+              </MapErrorBoundary>
+            </div>
+          </div>
         </div>
       </div>
     );
