@@ -140,18 +140,41 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
     return '🌤️';
   };
 
-  // 날씨 아이콘용 마커 생성
+  // 날씨 아이콘용 마커 생성 (CSS 안전 버전)
   const createWeatherIconMarker = (region) => {
     return L.divIcon({
-      html: `<div class="weather-icon-marker bg-white rounded-full w-12 h-12 flex items-center justify-center text-2xl shadow-lg border-2 border-white" style="background-color: ${region.color}20;">
-               <span class="drop-shadow-sm">${region.icon}</span>
-               <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+      html: `<div style="
+               width: 48px; 
+               height: 48px; 
+               background-color: rgba(255,255,255,0.9); 
+               border: 2px solid ${region.color}; 
+               border-radius: 50%; 
+               display: flex; 
+               align-items: center; 
+               justify-content: center; 
+               font-size: 20px; 
+               box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+               position: relative;
+             ">
+               <span>${region.icon}</span>
+               <div style="
+                 position: absolute; 
+                 bottom: -20px; 
+                 left: 50%; 
+                 transform: translateX(-50%); 
+                 background: rgba(0,0,0,0.8); 
+                 color: white; 
+                 font-size: 10px; 
+                 padding: 2px 6px; 
+                 border-radius: 3px; 
+                 white-space: nowrap;
+               ">
                  ${region.temperature}°C
                </div>
              </div>`,
       className: 'weather-icon-div-icon',
-      iconSize: [48, 48],
-      iconAnchor: [24, 24],
+      iconSize: [48, 60], // 높이 증가 (온도 라벨 공간)
+      iconAnchor: [24, 30],
     });
   };
 
