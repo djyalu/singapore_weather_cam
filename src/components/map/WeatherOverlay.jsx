@@ -99,7 +99,8 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
           icon: weatherIcon,
           stationCount: stationData.length,
           color: getTemperatureColor(avgTemperature),
-          radius: getRegionRadius(avgTemperature)
+          radius: region.radius || getRegionRadius(avgTemperature),
+          intensity: getTemperatureIntensity(avgTemperature)
         };
       }
 
@@ -113,26 +114,39 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         icon: '❓',
         stationCount: 0,
         color: '#9CA3AF',
-        radius: 1500
+        radius: region.radius || 1500,
+        intensity: 0.1
       };
     });
   }, [weatherData]);
 
-  // 온도별 색상 반환
+  // 온도별 색상 반환 - 더 생동감 있는 색상
   const getTemperatureColor = (temp) => {
-    if (temp >= 32) return '#DC2626'; // 빨간색 (매우 뜨거움)
-    if (temp >= 30) return '#EA580C'; // 주황색 (뜨거움)
-    if (temp >= 28) return '#D97706'; // 노란색 (따뜻함)
-    if (temp >= 26) return '#059669'; // 초록색 (쾌적함)
-    return '#0284C7'; // 파란색 (시원함)
+    if (temp >= 32) return '#EF4444'; // 선명한 빨간색 (매우 뜨거움)
+    if (temp >= 30) return '#F97316'; // 활기찬 주황색 (뜨거움)
+    if (temp >= 28) return '#EAB308'; // 따뜻한 노란색 (따뜻함)
+    if (temp >= 26) return '#22C55E'; // 상쾌한 초록색 (쾌적함)
+    return '#3B82F6'; // 시원한 파란색 (시원함)
+  };
+
+  // 온도별 투명도 반환 - 온도가 극단적일수록 더 진하게
+  const getTemperatureIntensity = (temp) => {
+    const normalTemp = 28; // 기준 온도
+    const deviation = Math.abs(temp - normalTemp);
+    const baseIntensity = 0.2;
+    const maxIntensity = 0.4;
+    
+    // 편차가 클수록 더 진한 색상
+    const intensity = baseIntensity + (deviation / 6) * (maxIntensity - baseIntensity);
+    return Math.min(Math.max(intensity, 0.15), maxIntensity);
   };
 
   // 온도별 영역 크기 반환
   const getRegionRadius = (temp) => {
     // 온도가 높을수록 큰 원
-    const baseRadius = 1500;
-    const tempFactor = (temp - 26) * 100; // 26도 기준으로 조정
-    return Math.max(baseRadius + tempFactor, 800);
+    const baseRadius = 2000;
+    const tempFactor = (temp - 26) * 150; // 26도 기준으로 조정
+    return Math.max(baseRadius + tempFactor, 1000);
   };
 
   // 날씨 설명 생성
@@ -198,7 +212,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
 
   return (
     <>
-      {/* 온도 기반 히트맵 레이어 */}
+      {/* 온도 기반 히트맵 레이어 - 권역별 색상 표현 */}
       {showTemperatureLayer && weatherRegions.map(region => (
         <Circle
           key={`temp-circle-${region.id}`}
@@ -206,10 +220,11 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
           radius={region.radius}
           pathOptions={{
             fillColor: region.color,
-            fillOpacity: 0.15,
+            fillOpacity: region.intensity || 0.25, // 동적 투명도
             color: region.color,
-            weight: 2,
-            opacity: 0.8,
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '5, 5', // 점선 테두리로 부드러운 느낌
           }}
         >
           <Popup>
