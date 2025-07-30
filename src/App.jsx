@@ -7,6 +7,7 @@ import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashbo
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
 import SimpleMapView from './components/map/SimpleMapView'; // Direct import instead of lazy
+import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
 import './utils/notifications'; // 알림 시스템 초기화
@@ -53,10 +54,14 @@ const App = () => {
     setSelectedRegions(newSelectedRegions);
   };
 
-  // 카메라 선택 핸들러 (지도에서 클릭 시) - AI 분석 제거로 단순화
+  // 카메라 선택 핸들러 (지도에서 클릭 시) - 모달로 확대 보기
   const handleCameraSelect = (camera) => {
     setSelectedCamera(camera);
-    // AI 분석 제거로 스크롤 기능 비활성화
+  };
+
+  // 카메라 모달 닫기
+  const handleCameraModalClose = () => {
+    setSelectedCamera(null);
   };
 
   // Use the consolidated manual refresh function
@@ -140,10 +145,16 @@ const App = () => {
 
   return (
     <EnhancedErrorBoundary maxRetries={3}>
-      
       <AppLayout>
         {renderContent()}
       </AppLayout>
+
+      {/* 교통 카메라 모달 */}
+      <CameraModal
+        camera={selectedCamera}
+        isOpen={!!selectedCamera}
+        onClose={handleCameraModalClose}
+      />
     </EnhancedErrorBoundary>
   );
 };
