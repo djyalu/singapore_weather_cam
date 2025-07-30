@@ -629,9 +629,32 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             </div>
           )}
 
+          {/* 날씨 스테이션 정보 카드 */}
+          {showWeatherStations && weatherData?.locations && (
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-blue-500" />
+                활성 날씨 스테이션 ({weatherData.locations.length}개)
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
+                {weatherData.locations.slice(0, 12).map((station, index) => (
+                  <div key={station.station_id || index} className="bg-gray-50 p-2 rounded flex justify-between">
+                    <span className="font-medium">{station.station_id || station.id || `S${index}`}</span>
+                    <span className="text-blue-600">{station.temperature || '--'}°C</span>
+                  </div>
+                ))}
+                {weatherData.locations.length > 12 && (
+                  <div className="bg-gray-100 p-2 rounded text-gray-600 text-center">
+                    +{weatherData.locations.length - 12} more
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* 기능 설명 */}
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-4 text-sm">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
                 <span>중심점 (Hwa Chong)</span>
@@ -645,11 +668,17 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
               {showWeatherStations && (
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-red-500 rounded-full"></div>
-                  <span>권역별 히트맵 ({weatherRegions.length}개 권역)</span>
+                  <span>권역별 히트맵 ({weatherRegions.length}개)</span>
+                </div>
+              )}
+              {weatherData?.locations && (
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span>스테이션 ({weatherData.locations.length}개)</span>
                 </div>
               )}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 text-center">
               히트맵 클릭 → 상세 날씨 정보 | 카메라 클릭 → 실시간 영상
             </div>
           </div>
