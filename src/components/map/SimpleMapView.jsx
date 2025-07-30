@@ -180,26 +180,63 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     loadCameras();
   }, [showTrafficCameras]);
 
-  // 권역별 날씨 데이터 매칭 - WeatherOverlay와 동일한 로직
+  // 권역별 날씨 데이터 매칭 - 개선된 로직
   const getWeatherForRegion = (region) => {
     if (!weatherData?.locations || !Array.isArray(weatherData.locations)) {
+      console.log(`❌ ${region.name}: 날씨 데이터 없음`);
       return { temperature: 29.0, humidity: 80, rainfall: 0, stationCount: 0 };
     }
 
+    console.log(`🔍 ${region.name} 분석 시작:`, region.stationIds);
+
     // 해당 지역의 스테이션 데이터 찾기
-    const stationData = region.stationIds
-      .map(stationId => weatherData.locations.find(loc => 
-        loc.station_id === stationId || 
-        loc.id === stationId ||
-        loc.name?.includes(stationId)
-      ))
+    const foundStations = region.stationIds
+      .map(stationId => {
+        const station = weatherData.locations.find(loc => 
+          loc.station_id === stationId || 
+          loc.id === stationId ||
+          loc.name?.includes(stationId)
+        );
+        if (station) {
+          console.log(`📍 ${stationId} 매칭됨:`, {
+            id: station.station_id || station.id,
+            temp: station.temperature,
+            name: station.name
+          });
+        } else {
+          console.log(`❌ ${stationId} 매칭 실패`);
+        }
+        return station;
+      })
       .filter(Boolean);
 
+    // 온도 유효성 검사 (더 관대한 범위: 15-40도)
+    const stationData = foundStations.filter(station => {
+      const temp = parseFloat(station.temperature);
+      
+      // null, undefined, 0 체크
+      if (station.temperature === null || station.temperature === undefined || temp === 0) {
+        console.warn(`🚫 ${station.station_id || station.id}: null/undefined/0 온도값 제외`);
+        return false;
+      }
+
+      // 극단적으로 비정상적인 값만 제외 (15-40도 범위)
+      const isValidTemp = temp >= 15 && temp <= 40;
+      
+      if (!isValidTemp) {
+        console.warn(`🌡️ ${station.station_id || station.id}: 비정상 온도값 제외 ${station.temperature}°C`);
+      }
+      
+      return isValidTemp;
+    });
+
+    console.log(`📊 ${region.name}: ${stationData.length}개 유효한 스테이션 (총 ${region.stationIds.length}개 중)`);
+
     if (stationData.length > 0) {
-      // 여러 스테이션의 평균값 계산
-      const avgTemperature = stationData.reduce((sum, station) => sum + (station.temperature || 0), 0) / stationData.length;
-      const avgHumidity = stationData.reduce((sum, station) => sum + (station.humidity || 0), 0) / stationData.length;
-      const totalRainfall = stationData.reduce((sum, station) => sum + (station.rainfall || 0), 0);
+      // 여러 스테이션의 평균값 계산 (유효한 값들만)
+      const avgTemperature = stationData.reduce((sum, station) => sum + parseFloat(station.temperature), 0) / stationData.length;
+      const avgHumidity = stationData.reduce((sum, station) => sum + (parseFloat(station.humidity) || 80), 0) / stationData.length;
+      const totalRainfall = stationData.reduce((sum, station) => sum + (parseFloat(station.rainfall) || 0), 0);
 
       return {
         temperature: Math.round(avgTemperature * 10) / 10,
@@ -209,6 +246,45 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       };
     }
 
+    // 매칭된 스테이션이 없으면 전체 데이터에서 유효한 값 찾기
+    console.log(`⚠️ ${region.name}: 매칭된 스테이션 없음, 전체 데이터에서 유효한 값 검색`);
+    
+    const validLocations = weatherData.locations.filter(loc => {
+      const temp = parseFloat(loc.temperature);
+      return temp >= 15 && temp <= 40 && temp !== 0; // 더 관대한 범위
+    });
+
+    console.log(`🔍 전체 데이터 검색 결과: ${validLocations.length}개 유효 스테이션`);
+
+    if (validLocations.length > 0) {
+      const avgTemp = validLocations.reduce((sum, loc) => sum + parseFloat(loc.temperature), 0) / validLocations.length;
+      console.log(`✅ ${region.name}: 전체 ${validLocations.length}개 유효 스테이션 평균 ${avgTemp.toFixed(1)}°C 사용`);
+      
+      return {
+        temperature: Math.round(avgTemp * 10) / 10,
+        humidity: 80,
+        rainfall: 0,
+        stationCount: 0
+      };
+    }
+
+    // 마지막 대안: 전체 데이터 중 0이 아닌 값 아무거나
+    const anyValidLocation = weatherData.locations.find(loc => {
+      const temp = parseFloat(loc.temperature);
+      return temp > 0 && !isNaN(temp);
+    });
+
+    if (anyValidLocation) {
+      console.log(`🆘 ${region.name}: 임시값 사용 ${anyValidLocation.temperature}°C (스테이션: ${anyValidLocation.station_id || anyValidLocation.id})`);
+      return {
+        temperature: parseFloat(anyValidLocation.temperature),
+        humidity: 80,
+        rainfall: 0,
+        stationCount: 0
+      };
+    }
+
+    console.log(`🔄 ${region.name}: 기본값 29.0°C 사용`);
     return { temperature: 29.0, humidity: 80, rainfall: 0, stationCount: 0 };
   };
 
