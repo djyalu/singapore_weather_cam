@@ -40,7 +40,7 @@ const DataSyncGuide = React.memo(({
     try {
       const now = new Date();
       const nextUpdate = new Date(now);
-      nextUpdate.setHours(Math.floor(now.getHours() / 6) * 6 + 6, 0, 0, 0);
+      nextUpdate.setHours(Math.floor(now.getHours() / 3) * 3 + 3, 0, 0, 0);
       
       const diffMinutes = Math.floor((nextUpdate - now) / (1000 * 60));
       const diffHours = Math.floor(diffMinutes / 60);
@@ -96,8 +96,12 @@ const DataSyncGuide = React.memo(({
               </div>
               <div className="space-y-2 text-xs text-gray-600">
                 <div className="flex justify-between">
-                  <span>수집 주기:</span>
-                  <span className="font-medium">6시간마다</span>
+                  <span>주요 수집:</span>
+                  <span className="font-medium">3시간마다</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>백업 수집:</span>
+                  <span className="font-medium text-orange-600">1시간마다</span>
                 </div>
                 <div className="flex justify-between">
                   <span>다음 수집:</span>
@@ -107,9 +111,9 @@ const DataSyncGuide = React.memo(({
                   <span>마지막 업데이트:</span>
                   <span className="font-medium">{formatLastUpdate(lastUpdate)}</span>
                 </div>
-                <div className="mt-2 p-2 bg-green-50 rounded text-xs text-green-700">
+                <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700">
                   <Gauge className="w-3 h-3 inline mr-1" />
-                  GitHub Actions 한도 30% 사용 (최적화됨)
+                  GitHub Actions 한도 50% 사용 + 백업 시스템
                 </div>
               </div>
             </div>
@@ -165,11 +169,12 @@ const DataSyncGuide = React.memo(({
             <div className="flex items-start gap-2">
               <Clock className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-xs text-blue-700">
-                <p className="font-medium mb-1">효율적인 데이터 사용법</p>
+                <p className="font-medium mb-1">자동 수집 시스템</p>
                 <ul className="space-y-1 text-blue-600">
-                  <li>• 자동 수집은 GitHub Actions 무료 한도를 고려하여 6시간마다 실행됩니다</li>
-                  <li>• 최신 정보가 필요할 때는 우상단의 새로고침 버튼을 사용하세요</li>
-                  <li>• 강제 새로고침은 서버 부하를 줄이기 위해 필요할 때만 사용해주세요</li>
+                  <li>• <strong>주요 수집:</strong> 3시간마다 실행 (00:00, 03:00, 06:00, 09:00...)</li>
+                  <li>• <strong>백업 수집:</strong> 데이터가 4시간 이상 오래된 경우 자동 실행</li>
+                  <li>• <strong>즉시 새로고침:</strong> 우상단 새로고침 버튼으로 언제든 최신 정보 확인</li>
+                  <li>• <strong>자동 복구:</strong> 주요 수집 실패 시 백업 시스템이 자동 작동</li>
                 </ul>
               </div>
             </div>

@@ -473,7 +473,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
         <div className="flex items-center gap-2">
           <RefreshCw className="w-4 h-4 text-white/70" />
           <span className="text-xs text-white/70">
-            자동 수집: 6시간마다
+            자동 수집: 3시간마다
           </span>
         </div>
       </div>

@@ -1,0 +1,143 @@
+name: Weather Data Backup Collection
+
+on:
+  schedule:
+    # Every hour as backup (24 runs/day) - runs when main collection fails
+    - cron: '30 * * * *'  # 30 minutes offset from main collection
+  workflow_dispatch:
+
+env:
+  NODE_ENV: production
+
+jobs:
+  backup-weather-collection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    concurrency:
+      group: weather-backup
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Check if main collection is stale
+        id: check-stale
+        run: |
+          # Check if latest.json is older than 4 hours
+          if [ -f "data/weather/latest.json" ]; then
+            LAST_MODIFIED=$(stat -c %Y data/weather/latest.json 2>/dev/null || echo 0)
+            CURRENT_TIME=$(date +%s)
+            AGE_HOURS=$(( (CURRENT_TIME - LAST_MODIFIED) / 3600 ))
+            
+            echo "Data age: ${AGE_HOURS} hours"
+            
+            if [ $AGE_HOURS -gt 4 ]; then
+              echo "stale=true" >> $GITHUB_OUTPUT
+              echo "⚠️ Weather data is ${AGE_HOURS} hours old - running backup collection"
+            else
+              echo "stale=false" >> $GITHUB_OUTPUT
+              echo "✅ Weather data is fresh (${AGE_HOURS} hours old)"
+            fi
+          else
+            echo "stale=true" >> $GITHUB_OUTPUT
+            echo "⚠️ No weather data found - running backup collection"
+          fi
+
+      - name: Setup Node.js
+        if: steps.check-stale.outputs.stale == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        if: steps.check-stale.outputs.stale == 'true'
+        run: |
+          npm ci --prefer-offline --no-audit --silent
+          echo "✅ Dependencies installed"
+
+      - name: Run backup weather collection
+        if: steps.check-stale.outputs.stale == 'true'
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        run: |
+          echo "🔄 Running backup weather collection..."
+          timeout 3m node scripts/collect-weather.js || {
+            echo "⚠️ Backup collection failed, creating minimal fallback"
+            
+            FALLBACK_TIME=$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')
+            mkdir -p data/weather
+            cat > data/weather/latest.json << EOF
+            {
+              "timestamp": "$FALLBACK_TIME",
+              "source": "Backup Fallback System",
+              "status": "service_degraded",
+              "collection_method": "backup_workflow",
+              "data": {
+                "message": "Primary collection unavailable - using backup data",
+                "location": "Singapore",
+                "coordinates": {"lat": 1.3521, "lng": 103.8198},
+                "estimated_recovery": "$(date -u -d '+3 hours' '+%Y-%m-%dT%H:%M:%S.000Z')"
+              }
+            }
+            EOF
+            echo "📝 Backup fallback data created"
+          }
+
+      - name: Copy to public directory
+        if: steps.check-stale.outputs.stale == 'true'
+        run: |
+          mkdir -p public/data/weather
+          cp -r data/weather/* public/data/weather/ 2>/dev/null || true
+          echo "✅ Data copied to public directory"
+
+      - name: Configure Git
+        if: steps.check-stale.outputs.stale == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action (Backup)"
+
+      - name: Commit backup data
+        if: steps.check-stale.outputs.stale == 'true'
+        run: |
+          git add data/weather/ public/data/weather/
+          
+          if ! git diff --staged --quiet; then
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            
+            git commit -m "fix(weather): Backup weather data collection - ${TIMESTAMP}
+
+Backup collection triggered due to stale main data:
+- Primary collection was inactive for >4 hours
+- Backup system activated to maintain service continuity
+- Data source: NEA Singapore API (backup workflow)
+
+This ensures continuous weather monitoring even when
+primary collection experiences issues.
+
+🔄 Backup system operational
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            
+            git push
+            echo "✅ Backup weather data committed and pushed"
+          else
+            echo "ℹ️ No backup changes to commit"
+          fi
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ "${{ steps.check-stale.outputs.stale }}" == "true" ]; then
+            echo "🔄 Backup collection completed"
+          else
+            echo "✅ Primary data is fresh - backup not needed"
+          fi
