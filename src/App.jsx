@@ -129,6 +129,7 @@ const App = () => {
                   weatherData={weatherData}
                   selectedRegion={activeRegion}
                   className="w-full"
+                  onCameraSelect={handleCameraSelect}
                 />
               </MapErrorBoundary>
             </div>

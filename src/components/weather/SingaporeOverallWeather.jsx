@@ -313,12 +313,12 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     return 'text-blue-500';
   };
 
-  // 습도에 따른 색상
+  // 습도에 따른 색상 - 어두운 배경에서 잘 보이도록 수정
   const getHumidityColor = (humidity) => {
-    if (humidity >= 85) return 'text-blue-600';
-    if (humidity >= 70) return 'text-blue-500';
-    if (humidity >= 50) return 'text-green-500';
-    return 'text-yellow-500';
+    if (humidity >= 85) return 'text-cyan-300';
+    if (humidity >= 70) return 'text-blue-300';
+    if (humidity >= 50) return 'text-green-300';
+    return 'text-yellow-300';
   };
 
   return (
@@ -331,7 +331,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
             <Cloud className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">🇸🇬 Singapore Weather</h2>
+            <h2 className="text-2xl font-bold">Singapore Weather</h2>
             <p className="text-blue-100 text-sm">실시간 전국 평균 기상 정보</p>
           </div>
         </div>

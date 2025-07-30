@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { MapPin, Navigation, Zap, AlertTriangle } from 'lucide-react';
+import { MapPin, Navigation, Zap, AlertTriangle, Camera } from 'lucide-react';
 import { COORDINATES } from '../../config/constants';
+import { fetchTrafficCameras } from '../../services/trafficCameraService';
 
 /**
  * 간단하고 안정적인 지도 대체 컴포넌트
  * Leaflet 라이브러리 없이 순수 HTML/CSS로 구현
  */
-const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) => {
+const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', onCameraSelect }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [mapError, setMapError] = useState(null);
+  const [trafficCameras, setTrafficCameras] = useState([]);
+  const [showTrafficCameras, setShowTrafficCameras] = useState(true);
+  const [isLoadingCameras, setIsLoadingCameras] = useState(false);
 
   // 디버깅을 위한 로그
   console.log('🗺️ SimpleMapView rendering:', {
     hasWeatherData: !!weatherData,
     selectedRegion,
-    weatherDataStructure: weatherData ? Object.keys(weatherData) : null
+    weatherDataStructure: weatherData ? Object.keys(weatherData) : null,
+    camerasCount: trafficCameras.length
   });
 
   // 싱가포르 주요 지역 데이터
@@ -69,6 +74,34 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) 
       description: 'Resort Island'
     }
   ];
+
+  // 교통 카메라 데이터 로드
+  useEffect(() => {
+    const loadCameras = async () => {
+      setIsLoadingCameras(true);
+      try {
+        const cameras = await fetchTrafficCameras();
+        
+        // 지도에 표시할 주요 카메라만 필터링 (화면 과부하 방지)
+        const filteredCameras = cameras.slice(0, 20).map(camera => ({
+          ...camera,
+          position: {
+            top: `${45 + (Math.random() - 0.5) * 30}%`,
+            left: `${45 + (Math.random() - 0.5) * 30}%`
+          }
+        }));
+        
+        setTrafficCameras(filteredCameras);
+      } catch (error) {
+        console.error('교통 카메라 로드 실패:', error);
+        setMapError('교통 카메라 데이터를 불러올 수 없습니다.');
+      } finally {
+        setIsLoadingCameras(false);
+      }
+    };
+
+    loadCameras();
+  }, []);
 
   // 날씨 데이터와 지역 매칭
   const getWeatherForRegion = (regionId) => {
@@ -135,6 +168,13 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) 
     setSelectedLocation(selectedLocation?.id === region.id ? null : region);
   };
 
+  const handleCameraClick = (camera) => {
+    if (onCameraSelect) {
+      onCameraSelect(camera);
+    }
+    console.log('교통 카메라 선택:', camera.name);
+  };
+
   // 컴포넌트가 렌더링되는지 확인
   if (!regions || regions.length === 0) {
     return (
@@ -162,6 +202,23 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) 
               {new Date().toLocaleTimeString('ko-KR')}
             </div>
           </div>
+        </div>
+        
+        {/* 교통 카메라 토글 */}
+        <div className="flex items-center gap-4 mt-3">
+          <label className="flex items-center gap-2 text-sm text-white/90">
+            <input
+              type="checkbox"
+              checked={showTrafficCameras}
+              onChange={(e) => setShowTrafficCameras(e.target.checked)}
+              className="rounded"
+            />
+            <Camera className="w-4 h-4" />
+            교통 카메라 표시 ({trafficCameras.length})
+          </label>
+          {isLoadingCameras && (
+            <div className="text-xs text-white/70">카메라 로딩 중...</div>
+          )}
         </div>
       </div>
 
@@ -228,6 +285,32 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) 
             </div>
           );
         })}
+
+        {/* 교통 카메라 마커들 */}
+        {showTrafficCameras && trafficCameras.map((camera) => (
+          <div
+            key={camera.id}
+            className={`
+              absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer
+              transition-all duration-300 hover:scale-110 z-15
+            `}
+            style={camera.position}
+            onClick={() => handleCameraClick(camera)}
+            title={`${camera.name} - 클릭하여 상세 보기`}
+          >
+            {/* 교통 카메라 아이콘 */}
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 border-white shadow-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors">
+              📹
+            </div>
+            
+            {/* 카메라 이름 라벨 */}
+            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2">
+              <div className="bg-orange-600/90 text-white text-xs px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
+                {camera.name}
+              </div>
+            </div>
+          </div>
+        ))}
 
         {/* 중심점 표시 (Hwa Chong) */}
         <div 
@@ -331,12 +414,18 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) 
 
       {/* 범례 */}
       <div className="p-4 bg-gray-50 border-t">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-4 text-sm flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-red-600 rounded-full"></div>
               <span>중심점 (Hwa Chong)</span>
             </div>
+            {showTrafficCameras && (
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span>교통 카메라 ({trafficCameras.length})</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
               <span>26°C 이하</span>
@@ -359,7 +448,7 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '' }) 
             </div>
           </div>
           <div className="text-xs text-gray-500">
-            클릭하여 지역별 상세 날씨 확인
+            클릭하여 지역별 날씨 또는 교통 카메라 확인
           </div>
         </div>
       </div>
@@ -378,6 +467,7 @@ SimpleMapView.propTypes = {
   }),
   selectedRegion: PropTypes.string,
   className: PropTypes.string,
+  onCameraSelect: PropTypes.func,
 };
 
 SimpleMapView.displayName = 'SimpleMapView';
