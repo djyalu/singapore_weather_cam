@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Traffic Camera Test</title>
+</head>
+<body>
+    <h1>Singapore Traffic Camera API Test</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testCameras() {
+            try {
+                console.log('🚗 Testing Singapore Traffic Camera API...');
+                
+                const apiUrl = `https://api.data.gov.sg/v1/transport/traffic-images?_=${Date.now()}`;
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'Singapore-Weather-Cam/1.0'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const cameras = data.items[0].cameras;
+                
+                document.getElementById('result').innerHTML = `
+                    <h2>✅ API Test Results</h2>
+                    <p><strong>Total Cameras Found:</strong> ${cameras.length}</p>
+                    <p><strong>Expected:</strong> ~90 cameras</p>
+                    <p><strong>Status:</strong> ${cameras.length >= 80 ? '✅ SUCCESS' : '❌ INSUFFICIENT'}</p>
+                    <h3>First 5 Camera IDs:</h3>
+                    <ul>${cameras.slice(0, 5).map(c => `<li>${c.camera_id}</li>`).join('')}</ul>
+                    <h3>Last 5 Camera IDs:</h3>
+                    <ul>${cameras.slice(-5).map(c => `<li>${c.camera_id}</li>`).join('')}</ul>
+                `;
+                
+                console.log(`📊 Total cameras: ${cameras.length}`);
+                console.log('🎯 First 5:', cameras.slice(0, 5).map(c => c.camera_id));
+                console.log('🎯 Last 5:', cameras.slice(-5).map(c => c.camera_id));
+                
+            } catch (error) {
+                console.error('❌ Test failed:', error);
+                document.getElementById('result').innerHTML = `
+                    <h2>❌ API Test Failed</h2>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+        
+        // Run test when page loads
+        testCameras();
+    </script>
+</body>
+</html>
