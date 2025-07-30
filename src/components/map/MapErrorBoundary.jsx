@@ -58,7 +58,9 @@ class MapErrorBoundary extends React.Component {
                 <li>• 브라우저 새로고침 시도 (Ctrl+F5)</li>
                 <li>• 네트워크 연결 상태 확인</li>
                 <li>• 브라우저 JavaScript 활성화 확인</li>
-                <li>• 광고 차단기 해제 시도</li>
+                <li>• 광고 차단기에서 사이트 허용</li>
+                <li>• 다른 브라우저에서 접속 시도</li>
+                <li>• VPN 사용 시 일시 해제</li>
               </ul>
             </div>
 

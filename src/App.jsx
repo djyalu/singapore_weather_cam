@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import MapErrorBoundary from './components/map/MapErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
@@ -6,13 +6,11 @@ import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
-import { useWeatherData, useAppData } from './contexts/AppDataContextSimple';
-import { INTERVALS, UI_CONFIG } from './config/constants';
-import { getLocalizedString, UI_STRINGS } from './config/localization';
+import { useWeatherData } from './contexts/AppDataContextSimple';
+import { getLocalizedString } from './config/localization';
 import './utils/notifications'; // 알림 시스템 초기화
 
 // Lazy load heavy components for better performance
-const WeatherDashboard = lazy(() => import('./components/weather/WeatherDashboard'));
 const MapView = lazy(() => import('./components/map/MapView'));
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
 
@@ -21,7 +19,6 @@ const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
  */
 const App = () => {
   const [activeRegion, setActiveRegion] = useState('hwa-chong');
-  const [activeView, setActiveView] = useState('weather');
   const [showAdmin, setShowAdmin] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [selectedCamera, setSelectedCamera] = useState(null); // Camera selected from map (AI 분석 제거 후 사용안함)
@@ -29,7 +26,6 @@ const App = () => {
 
   // Data hooks from context
   const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather, forceRefresh: forceRefetchWeather } = useWeatherData();
-  // const appData = useAppData(); // Reserved for future use
 
   // Manual refresh only - Context handles auto-refresh
   const handleManualRefresh = () => {

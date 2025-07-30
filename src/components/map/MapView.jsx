@@ -7,13 +7,28 @@ import '../../styles/leaflet-fixes.css';
 import { COORDINATES } from '../../config/constants';
 import WeatherOverlay from './WeatherOverlay';
 
-// Fix for Leaflet default markers in webpack
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href,
-  iconUrl: new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href,
-  shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
-});
+// Leaflet 초기화 에러 처리
+let leafletInitialized = false;
+const initializeLeaflet = () => {
+  if (leafletInitialized) return true;
+  
+  try {
+    // Fix for Leaflet default markers in webpack
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href,
+      iconUrl: new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href,
+      shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
+    });
+    
+    leafletInitialized = true;
+    return true;
+  } catch (error) {
+    console.error('Leaflet 초기화 실패:', error);
+    return false;
+  }
+};
+
 
 const weatherIcon = L.divIcon({
   html: '<div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">🌡️</div>',
@@ -48,11 +63,19 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
   const [trafficCameras, setTrafficCameras] = useState([]);
   const [isLoadingTraffic, setIsLoadingTraffic] = useState(true);
   const [trafficError, setTrafficError] = useState(null);
+  const [mapInitError, setMapInitError] = useState(null);
   
   // 날씨 레이어 표시 상태
   const [showWeatherOverlay, setShowWeatherOverlay] = useState(true);
   const [showTemperatureLayer, setShowTemperatureLayer] = useState(true);
   const [showWeatherIcons, setShowWeatherIcons] = useState(true);
+
+  // Leaflet 초기화 체크
+  useEffect(() => {
+    if (!initializeLeaflet()) {
+      setMapInitError('Leaflet 라이브러리 초기화에 실패했습니다.');
+    }
+  }, []);
 
   const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
 
@@ -203,6 +226,40 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
   }, []);
 
 
+  // 지도 초기화 에러가 있으면 폴백 UI 표시
+  if (mapInitError) {
+    return (
+      <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
+        <div className="h-96 w-full flex items-center justify-center bg-gray-50">
+          <div className="text-center p-8">
+            <div className="text-6xl mb-4">🗺️</div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              지도 서비스 일시 중단
+            </h3>
+            <p className="text-gray-600 mb-4">
+              지도 라이브러리를 불러오는 중 문제가 발생했습니다.
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-left">
+              <h4 className="font-medium text-blue-800 mb-2">대안 방법:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• 페이지 새로고침 시도</li>
+                <li>• 브라우저 캐시 삭제</li>
+                <li>• 다른 브라우저에서 접속</li>
+                <li>• 네트워크 연결 확인</li>
+              </ul>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              페이지 새로고침
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
       <div className="h-96 w-full">
@@ -211,6 +268,10 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
           zoom={COORDINATES.DEFAULT_ZOOM}
           style={{ height: '100%', width: '100%' }}
           className="rounded-lg"
+          whenCreated={(mapInstance) => {
+            // 지도 생성 성공 시 로그
+            console.log('🗺️ Leaflet 지도가 성공적으로 로드되었습니다');
+          }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

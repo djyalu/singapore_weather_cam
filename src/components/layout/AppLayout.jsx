@@ -111,20 +111,6 @@ const AppLayout = React.memo(({ children }) => {
           showRefreshControls={false}
         />
 
-        {/* 간소화된 데이터 동기화 안내 - 핵심 정보만 */}
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 pt-2">
-          <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-3 mb-4">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-blue-700">
-                <span>🔄</span>
-                <span className="font-medium">자동 수집: 6시간마다</span>
-              </div>
-              <div className="text-blue-600 text-xs">
-                GitHub Actions 30% 사용률
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Main content area with mobile-optimized spacing */}
         <main

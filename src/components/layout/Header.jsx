@@ -64,9 +64,8 @@ const Header = React.memo(({
               </div>
               <div>
                 <h1 className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Singapore Weather Cams
+                  Singapore Weather Cam
                 </h1>
-                <p className="text-xl text-gray-600 mt-1">실시간 날씨 모니터링</p>
                 <div className="flex items-center mt-2">
                   <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
                     <CheckCircle className="w-4 h-4" />

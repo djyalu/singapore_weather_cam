@@ -2,14 +2,19 @@ name: Collect Weather Data
 
 on:
   schedule:
-    # Every 6 hours (4 runs/day = 120 runs/month) - 30% GitHub Actions budget optimized
-    - cron: '0 */6 * * *'
+    # Every 3 hours (8 runs/day = 240 runs/month) - 50% GitHub Actions budget
+    - cron: '0 */3 * * *'
   workflow_dispatch:
     inputs:
       force_run:
         description: 'Force run even if no changes needed'
         type: boolean
         default: false
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/collect-weather.yml'
+      - 'scripts/collect-weather.js'
 
 env:
   NODE_ENV: production
