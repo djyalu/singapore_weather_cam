@@ -15,71 +15,77 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
   const [isLoadingCameras, setIsLoadingCameras] = useState(false);
   const [mapError, setMapError] = useState(null);
 
-  // Singapore 주요 지역 데이터 (실제 좌표)
-  const regions = [
+  // Singapore 권역별 히트맵 데이터 (WeatherOverlay와 동일)
+  const weatherRegions = [
     {
-      id: 'hwa-chong',
-      name: 'Hwa Chong',
-      emoji: '🏫',
-      coordinates: { lat: 1.3437, lng: 103.7640 },
-      position: { top: '45%', left: '35%' },
-      description: 'International School'
-    },
-    {
-      id: 'newton',
-      name: 'Newton',
-      emoji: '🏢',
-      coordinates: { lat: 1.3138, lng: 103.8200 },
-      position: { top: '50%', left: '42%' },
-      description: 'Business District'
-    },
-    {
-      id: 'orchard',
-      name: 'Orchard',
-      emoji: '🛍️',
-      coordinates: { lat: 1.3048, lng: 103.8318 },
-      position: { top: '52%', left: '45%' },
-      description: 'Shopping District'
-    },
-    {
-      id: 'marina-bay',
-      name: 'Marina Bay',
-      emoji: '🏙️',
-      coordinates: { lat: 1.2859, lng: 103.8594 },
-      position: { top: '55%', left: '50%' },
-      description: 'Financial District'
-    },
-    {
-      id: 'changi',
-      name: 'Changi',
-      emoji: '✈️',
-      coordinates: { lat: 1.3644, lng: 103.9915 },
-      position: { top: '40%', left: '75%' },
-      description: 'Airport Area'
-    },
-    {
-      id: 'jurong',
-      name: 'Jurong',
-      emoji: '🏭',
-      coordinates: { lat: 1.3329, lng: 103.7436 },
-      position: { top: '47%', left: '25%' },
-      description: 'Industrial Area'
-    },
-    {
-      id: 'woodlands',
-      name: 'Woodlands',
+      id: 'north',
+      name: 'Northern Singapore',
+      stationIds: ['S121', 'S118', 'S104'],
+      coordinates: { lat: 1.4200, lng: 103.7900 },
+      position: { top: '20%', left: '38%' },
       emoji: '🌳',
-      coordinates: { lat: 1.4382, lng: 103.7890 },
-      position: { top: '25%', left: '38%' },
-      description: 'Northern Region'
+      radius: '25%',
+      description: 'Woodlands, North'
     },
     {
-      id: 'tampines',
-      name: 'Tampines',
+      id: 'northwest',
+      name: 'Northwest',
+      stationIds: ['S104', 'S116', 'S109'],
+      coordinates: { lat: 1.3500, lng: 103.7600 },
+      position: { top: '40%', left: '28%' },
+      emoji: '🏫',
+      radius: '22%',
+      description: 'Bukit Timah, Hwa Chong'
+    },
+    {
+      id: 'central',
+      name: 'Central Singapore',
+      stationIds: ['S109', 'S106', 'S107'],
+      coordinates: { lat: 1.3100, lng: 103.8300 },
+      position: { top: '48%', left: '45%' },
+      emoji: '🏙️',
+      radius: '20%',
+      description: 'Orchard, Newton, CBD'
+    },
+    {
+      id: 'west',
+      name: 'Western Singapore',
+      stationIds: ['S104', 'S60', 'S50'],
+      coordinates: { lat: 1.3300, lng: 103.7000 },
+      position: { top: '45%', left: '15%' },
+      emoji: '🏭',
+      radius: '28%',
+      description: 'Jurong, Tuas'
+    },
+    {
+      id: 'east',
+      name: 'Eastern Singapore',
+      stationIds: ['S24', 'S107', 'S43'],
+      coordinates: { lat: 1.3600, lng: 103.9600 },
+      position: { top: '38%', left: '75%' },
+      emoji: '✈️',
+      radius: '25%',
+      description: 'Changi, East Coast'
+    },
+    {
+      id: 'southeast',
+      name: 'Southeast',
+      stationIds: ['S24', 'S43', 'S107'],
+      coordinates: { lat: 1.3200, lng: 103.9200 },
+      position: { top: '50%', left: '70%' },
       emoji: '🏘️',
-      coordinates: { lat: 1.3496, lng: 103.9568 },
-      position: { top: '43%', left: '70%' },
-      description: 'Residential Hub'
+      radius: '22%',
+      description: 'Bedok, Tampines'
+    },
+    {
+      id: 'south',
+      name: 'Southern Singapore',
+      stationIds: ['S109', 'S106', 'S24'],
+      coordinates: { lat: 1.2700, lng: 103.8500 },
+      position: { top: '62%', left: '48%' },
+      emoji: '🌊',
+      radius: '20%',
+      description: 'Marina Bay, Sentosa'
     }
   ];
 

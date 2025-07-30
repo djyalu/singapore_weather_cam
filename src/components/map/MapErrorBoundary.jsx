@@ -55,12 +55,24 @@ class MapErrorBoundary extends React.Component {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-left">
               <h4 className="font-medium text-blue-800 mb-2">해결 방법:</h4>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• 브라우저 새로고침 시도 (Ctrl+F5)</li>
-                <li>• 네트워크 연결 상태 확인</li>
-                <li>• 브라우저 JavaScript 활성화 확인</li>
-                <li>• 광고 차단기에서 사이트 허용</li>
-                <li>• 다른 브라우저에서 접속 시도</li>
-                <li>• VPN 사용 시 일시 해제</li>
+                <li>• <strong>Hard Refresh:</strong> Ctrl+F5 또는 Cmd+Shift+R</li>
+                <li>• <strong>브라우저 캐시 삭제:</strong> 개발자 도구 &gt; 네트워크 탭 &gt; Disable cache</li>
+                <li>• <strong>JavaScript 확인:</strong> 브라우저 설정에서 JavaScript 활성화</li>
+                <li>• <strong>광고 차단기:</strong> 이 사이트에서 광고 차단기 비활성화</li>
+                <li>• <strong>CORS 이슈:</strong> 다른 브라우저(Chrome, Firefox, Safari) 시도</li>
+                <li>• <strong>네트워크:</strong> VPN/프록시 일시 해제, WiFi 재연결</li>
+                <li>• <strong>브라우저 업데이트:</strong> 최신 버전 확인</li>
+              </ul>
+            </div>
+
+            {/* 추가적인 기술적 정보 */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4 text-left">
+              <h4 className="font-medium text-yellow-800 mb-2">기술적 원인:</h4>
+              <ul className="text-sm text-yellow-700 space-y-1">
+                <li>• Leaflet 라이브러리 로딩 실패</li>
+                <li>• 타일 서버 (OpenStreetMap) 접근 차단</li>
+                <li>• 브라우저 CORS 정책 충돌</li>
+                <li>• 메모리 부족 또는 리소스 제한</li>
               </ul>
             </div>
 

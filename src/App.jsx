@@ -6,7 +6,7 @@ import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
-import MapView from './components/map/MapView'; // Leaflet 지도 (확대/축소 가능)
+import MapView from './components/map/MapView'; // Leaflet 지도 복원
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';

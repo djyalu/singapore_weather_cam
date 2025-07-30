@@ -7,24 +7,58 @@ import '../../styles/leaflet-fixes.css';
 import { COORDINATES } from '../../config/constants';
 import WeatherOverlay from './WeatherOverlay';
 
-// Leaflet 초기화 에러 처리
+// 개선된 Leaflet 초기화 에러 처리
 let leafletInitialized = false;
-const initializeLeaflet = () => {
+let initializationAttempts = 0;
+const MAX_INIT_ATTEMPTS = 3;
+
+const initializeLeaflet = async () => {
   if (leafletInitialized) return true;
   
+  initializationAttempts++;
+  console.log(`🗺️ Leaflet 초기화 시도 ${initializationAttempts}/${MAX_INIT_ATTEMPTS}`);
+  
   try {
-    // Fix for Leaflet default markers in webpack
-    delete L.Icon.Default.prototype._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href,
-      iconUrl: new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href,
-      shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
-    });
+    // Leaflet이 로드될 때까지 대기
+    if (typeof L === 'undefined') {
+      console.log('🔄 Leaflet 라이브러리 로딩 대기 중...');
+      
+      // Leaflet 로딩을 위한 지연
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (typeof L === 'undefined') {
+        throw new Error('Leaflet 라이브러리를 찾을 수 없습니다');
+      }
+    }
+
+    // Leaflet 아이콘 경로 수정 (더 안전한 방법)
+    if (L.Icon && L.Icon.Default) {
+      try {
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href,
+          iconUrl: new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href,
+          shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
+        });
+      } catch (iconError) {
+        console.warn('⚠️ Leaflet 아이콘 설정 실패, 기본 아이콘 사용:', iconError);
+        // 아이콘 설정 실패해도 지도는 로드되도록 허용
+      }
+    }
     
     leafletInitialized = true;
+    console.log('✅ Leaflet 초기화 성공');
     return true;
+    
   } catch (error) {
-    console.error('Leaflet 초기화 실패:', error);
+    console.error(`❌ Leaflet 초기화 실패 (시도 ${initializationAttempts}):`, error);
+    
+    if (initializationAttempts < MAX_INIT_ATTEMPTS) {
+      console.log(`🔄 ${1000 * initializationAttempts}ms 후 재시도...`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * initializationAttempts));
+      return initializeLeaflet();
+    }
+    
     return false;
   }
 };
@@ -70,11 +104,21 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
   const [showTemperatureLayer, setShowTemperatureLayer] = useState(true);
   const [showWeatherIcons, setShowWeatherIcons] = useState(true);
 
-  // Leaflet 초기화 체크
+  // 개선된 Leaflet 초기화 체크
   useEffect(() => {
-    if (!initializeLeaflet()) {
-      setMapInitError('Leaflet 라이브러리 초기화에 실패했습니다.');
-    }
+    const initMap = async () => {
+      try {
+        const success = await initializeLeaflet();
+        if (!success) {
+          setMapInitError(`Leaflet 라이브러리 초기화에 실패했습니다. (${initializationAttempts}회 시도)`);
+        }
+      } catch (error) {
+        console.error('지도 초기화 중 오류:', error);
+        setMapInitError(`지도 초기화 오류: ${error.message}`);
+      }
+    };
+
+    initMap();
   }, []);
 
   const featuredCameraIds = ['6710', '2703', '2704', '1701', '4712', '2701', '1709', '4710'];
