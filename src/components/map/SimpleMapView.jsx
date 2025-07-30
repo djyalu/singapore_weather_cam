@@ -131,37 +131,60 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         const cameras = latestItem.cameras;
         console.log(`📊 총 ${cameras.length}개 카메라 발견`);
         
-        // ✅ 전체 90개 카메라를 지도 위치로 변환 (제한 없음)
-        console.log(`🎯 처리 시작: 전체 ${cameras.length}개 카메라 매핑 (제한 없음)`);
+        // ✅ 안전한 카메라 데이터 처리
+        console.log(`🎯 처리 시작: 전체 ${cameras.length}개 카메라 매핑`);
         
-        const mappedCameras = cameras.map((camera, index) => {
-          const latRange = [1.2, 1.47];
-          const lngRange = [103.6, 104.0];
-          
-          let top, left;
-          
-          if (camera.location?.latitude && camera.location?.longitude) {
-            const lat = camera.location.latitude;
-            const lng = camera.location.longitude;
-            
-            // 좌표를 지도 위치로 변환
-            top = `${20 + (latRange[1] - lat) / (latRange[1] - latRange[0]) * 60}%`;
-            left = `${15 + (lng - lngRange[0]) / (lngRange[1] - lngRange[0]) * 70}%`;
-          } else {
-            // 랜덤 위치
-            top = `${30 + Math.random() * 40}%`;
-            left = `${25 + Math.random() * 50}%`;
-          }
-          
-          return {
-            id: camera.camera_id,
-            name: `Camera ${camera.camera_id}`,
-            image_url: camera.image,
-            location: camera.location,
-            timestamp: camera.timestamp,
-            position: { top, left }
-          };
-        });
+        const mappedCameras = cameras
+          .filter((camera, index) => {
+            // 안전한 카메라 데이터 검증
+            if (!camera || !camera.camera_id) {
+              console.warn(`⚠️ Invalid camera data at index ${index}:`, camera);
+              return false;
+            }
+            return true;
+          })
+          .map((camera, index) => {
+            try {
+              const latRange = [1.2, 1.47];
+              const lngRange = [103.6, 104.0];
+              
+              let top, left;
+              
+              if (camera.location?.latitude && camera.location?.longitude && 
+                  !isNaN(camera.location.latitude) && !isNaN(camera.location.longitude)) {
+                const lat = parseFloat(camera.location.latitude);
+                const lng = parseFloat(camera.location.longitude);
+                
+                // 좌표를 지도 위치로 변환
+                top = `${Math.max(20, Math.min(80, 20 + (latRange[1] - lat) / (latRange[1] - latRange[0]) * 60))}%`;
+                left = `${Math.max(15, Math.min(85, 15 + (lng - lngRange[0]) / (lngRange[1] - lngRange[0]) * 70))}%`;
+              } else {
+                // 안전한 랜덤 위치
+                top = `${30 + Math.random() * 40}%`;
+                left = `${25 + Math.random() * 50}%`;
+              }
+              
+              return {
+                id: camera.camera_id || `camera_${index}`,
+                name: `Camera ${camera.camera_id || index}`,
+                image_url: camera.image || '',
+                location: camera.location || null,
+                timestamp: camera.timestamp || new Date().toISOString(),
+                position: { top, left }
+              };
+            } catch (cameraError) {
+              console.error(`🚨 Error processing camera ${camera.camera_id}:`, cameraError);
+              // 에러 발생 시 기본 카메라 객체 반환
+              return {
+                id: `error_camera_${index}`,
+                name: `Camera ${index}`,
+                image_url: '',
+                location: null,
+                timestamp: new Date().toISOString(),
+                position: { top: '50%', left: '50%' }
+              };
+            }
+          });
         
         console.log(`✅ 매핑 성공: ${mappedCameras.length}개 카메라 매핑 완료 (전체 ${cameras.length}개 중)`);
         console.log('🎉 첫 5개 카메라 샘플:', mappedCameras.slice(0, 5).map(c => c.id));
@@ -180,11 +203,20 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     loadCameras();
   }, [showTrafficCameras]);
 
-  // 권역별 날씨 데이터 매칭 - 개선된 로직
+  // 권역별 날씨 데이터 매칭 - 안전한 로직
   const getWeatherForRegion = (region) => {
+    // 안전한 기본값 설정
+    const defaultWeather = { temperature: 29.0, humidity: 80, rainfall: 0, stationCount: 0 };
+    
+    // 기본 검증
+    if (!region || !region.stationIds || !Array.isArray(region.stationIds)) {
+      console.warn('⚠️ Invalid region data:', region);
+      return defaultWeather;
+    }
+    
     if (!weatherData?.locations || !Array.isArray(weatherData.locations)) {
-      console.log(`❌ ${region.name}: 날씨 데이터 없음`);
-      return { temperature: 29.0, humidity: 80, rainfall: 0, stationCount: 0 };
+      console.log(`❌ ${region.name || 'Unknown'}: 날씨 데이터 없음`);
+      return defaultWeather;
     }
 
     console.log(`🔍 ${region.name} 분석 시작:`, region.stationIds);
@@ -412,13 +444,14 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         </div>
 
         {/* 권역별 히트맵 레이어 */}
-        {showWeatherStations && weatherRegions.map((region) => {
-          const weather = getWeatherForRegion(region);
-          const color = getTemperatureColor(weather.temperature);
-          const intensity = getTemperatureIntensity(weather.temperature);
-          const description = getWeatherDescription(weather.temperature, weather.rainfall);
-          const icon = getWeatherIcon(weather.temperature, weather.rainfall);
-          const isSelected = selectedLocation?.id === region.id;
+        {showWeatherStations && weatherRegions.filter(region => region && region.id && region.position).map((region) => {
+          try {
+            const weather = getWeatherForRegion(region);
+            const color = getTemperatureColor(weather.temperature);
+            const intensity = getTemperatureIntensity(weather.temperature);
+            const description = getWeatherDescription(weather.temperature, weather.rainfall);
+            const icon = getWeatherIcon(weather.temperature, weather.rainfall);
+            const isSelected = selectedLocation?.id === region.id;
           
           return (
             <div key={region.id}>
@@ -509,11 +542,15 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
                 )}
               </div>
             </div>
-          );
+            );
+          } catch (regionError) {
+            console.error(`🚨 Error rendering region ${region.id}:`, regionError);
+            return null;
+          }
         })}
 
-        {/* 교통 카메라 마커들 - 90개 모두 표시 */}
-        {showTrafficCameras && trafficCameras.map((camera) => (
+        {/* 교통 카메라 마커들 - 안전한 렌더링 */}
+        {showTrafficCameras && trafficCameras.filter(camera => camera && camera.id && camera.position).map((camera) => (
           <div
             key={camera.id}
             className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 hover:scale-125 z-15"
