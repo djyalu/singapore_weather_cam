@@ -6,7 +6,7 @@ import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
-import SimpleMapView from './components/map/SimpleMapView'; // Direct import instead of lazy
+import MapView from './components/map/MapView'; // React Leaflet 지도로 변경
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -129,13 +129,14 @@ const App = () => {
               </p>
             </div>
             <div className="min-h-[500px]">
-              {/* MapErrorBoundary 임시 제거 */}
-              <SimpleMapView
-                weatherData={weatherData}
-                selectedRegion={activeRegion}
-                className="w-full"
-                onCameraSelect={handleCameraSelect}
-              />
+              <MapErrorBoundary>
+                <MapView
+                  weatherData={weatherData}
+                  selectedRegion={activeRegion}
+                  className="w-full"
+                  onCameraSelect={handleCameraSelect}
+                />
+              </MapErrorBoundary>
             </div>
           </div>
         </div>

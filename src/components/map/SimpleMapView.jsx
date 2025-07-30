@@ -94,8 +94,11 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       try {
         console.log('🚗 교통 카메라 데이터 로딩 시작...');
         
-        // 직접 API 호출로 단순화
-        const apiUrl = 'https://api.data.gov.sg/v1/transport/traffic-images';
+        // 직접 API 호출로 단순화 + 캐시 무효화
+        const cacheBuster = Date.now();
+        const apiUrl = `https://api.data.gov.sg/v1/transport/traffic-images?_=${cacheBuster}`;
+        console.log('🌐 API 요청 URL:', apiUrl);
+        
         const response = await fetch(apiUrl, {
           headers: {
             'Accept': 'application/json',
@@ -122,7 +125,9 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         const cameras = latestItem.cameras;
         console.log(`📊 총 ${cameras.length}개 카메라 발견`);
         
-        // 모든 90개 카메라를 지도 위치로 변환
+        // ✅ 전체 90개 카메라를 지도 위치로 변환 (제한 없음)
+        console.log(`🎯 처리 시작: 전체 ${cameras.length}개 카메라 매핑 (제한 없음)`);
+        
         const mappedCameras = cameras.map((camera, index) => {
           const latRange = [1.2, 1.47];
           const lngRange = [103.6, 104.0];
@@ -152,7 +157,10 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           };
         });
         
-        console.log(`✅ ${mappedCameras.length}개 카메라 매핑 완료 (전체 ${cameras.length}개 중)`);
+        console.log(`✅ 매핑 성공: ${mappedCameras.length}개 카메라 매핑 완료 (전체 ${cameras.length}개 중)`);
+        console.log('🎉 첫 5개 카메라 샘플:', mappedCameras.slice(0, 5).map(c => c.id));
+        console.log('🎉 마지막 5개 카메라 샘플:', mappedCameras.slice(-5).map(c => c.id));
+        
         setTrafficCameras(mappedCameras);
         
       } catch (error) {
