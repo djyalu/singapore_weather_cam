@@ -1,6 +1,5 @@
 import { useState, lazy, Suspense } from 'react';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
-import MapErrorBoundary from './components/map/MapErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
