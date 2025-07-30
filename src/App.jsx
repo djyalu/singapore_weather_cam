@@ -124,14 +124,13 @@ const App = () => {
               </p>
             </div>
             <div className="min-h-[500px]">
-              <MapErrorBoundary>
-                <SimpleMapView
-                  weatherData={weatherData}
-                  selectedRegion={activeRegion}
-                  className="w-full"
-                  onCameraSelect={handleCameraSelect}
-                />
-              </MapErrorBoundary>
+              {/* MapErrorBoundary 임시 제거 */}
+              <SimpleMapView
+                weatherData={weatherData}
+                selectedRegion={activeRegion}
+                className="w-full"
+                onCameraSelect={handleCameraSelect}
+              />
             </div>
           </div>
         </div>
