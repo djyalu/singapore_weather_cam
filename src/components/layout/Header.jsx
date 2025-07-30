@@ -77,11 +77,10 @@ const Header = React.memo(({
 
 
             <div className="flex items-center gap-4">
-              {/* 새로고침 버튼 */}
-              {onRefresh && (
+              {/* 실시간 새로고침 버튼 */}
+              {onForceRefresh && (
                 <RefreshButton
-                  onRefresh={onRefresh}
-                  onForceRefresh={onForceRefresh}
+                  onRefresh={onForceRefresh}
                   isRefreshing={isRefreshing}
                   isOnline={isOnline}
                   lastUpdate={lastUpdate}

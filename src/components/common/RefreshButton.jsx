@@ -5,11 +5,11 @@ import { announceToScreenReader } from '../../utils/accessibility.js';
 
 /**
  * 독립적인 새로고침 버튼 컴포넌트
- * 일반/강제 새로고침 기능과 상태 표시를 포함
+ * 실시간 데이터 새로고침 기능과 상태 표시를 포함
  */
 const RefreshButton = React.memo(({
-  onRefresh,
-  onForceRefresh,
+  onRefresh, // 이제 실시간 새로고침으로 사용
+  onForceRefresh, // 호환성을 위해 유지하지만 사용 안 함
   isRefreshing = false,
   isOnline = true,
   lastUpdate = null,
@@ -31,35 +31,20 @@ const RefreshButton = React.memo(({
     }
   }, [isRefreshing, refreshCount]);
 
-  // 일반 새로고침 핸들러
+  // 실시간 새로고침 핸들러 (기존 강제 새로고침 로직 사용)
   const handleRefresh = useCallback(async () => {
     if (!onRefresh || isRefreshing || disabled || !isOnline) return;
 
     try {
       setRefreshCount(prev => prev + 1);
-      announceToScreenReader('데이터 새로고침 시작', 'polite');
+      announceToScreenReader('실시간 데이터 새로고침 시작', 'polite');
       await onRefresh();
-      announceToScreenReader('데이터 새로고침 완료', 'polite');
+      announceToScreenReader('실시간 데이터 새로고침 완료', 'polite');
     } catch (error) {
       announceToScreenReader('새로고침 실패', 'assertive');
       console.error('Refresh failed:', error);
     }
   }, [onRefresh, isRefreshing, disabled, isOnline]);
-
-  // 강제 새로고침 핸들러
-  const handleForceRefresh = useCallback(async () => {
-    if (!onForceRefresh || isRefreshing || disabled || !isOnline) return;
-
-    try {
-      setRefreshCount(prev => prev + 1);
-      announceToScreenReader('강제 새로고침 시작', 'polite');
-      await onForceRefresh();
-      announceToScreenReader('강제 새로고침 완료', 'polite');
-    } catch (error) {
-      announceToScreenReader('강제 새로고침 실패', 'assertive');
-      console.error('Force refresh failed:', error);
-    }
-  }, [onForceRefresh, isRefreshing, disabled, isOnline]);
 
   // 마지막 업데이트 시간 포맷팅
   const formatLastUpdate = useCallback((date) => {
@@ -88,34 +73,17 @@ const RefreshButton = React.memo(({
   }, []);
 
   // 키보드 내비게이션
-  const handleKeyDown = useCallback((event, isForceButton = false) => {
+  const handleKeyDown = useCallback((event) => {
     switch (event.key) {
-      case 'ArrowRight':
-      case 'Tab':
-        if (!isForceButton && forceRefreshButtonRef.current) {
-          event.preventDefault();
-          forceRefreshButtonRef.current.focus();
-        }
-        break;
-      case 'ArrowLeft':
-        if (isForceButton && refreshButtonRef.current) {
-          event.preventDefault();
-          refreshButtonRef.current.focus();
-        }
-        break;
       case 'Enter':
       case ' ':
         event.preventDefault();
-        if (isForceButton) {
-          handleForceRefresh();
-        } else {
-          handleRefresh();
-        }
+        handleRefresh();
         break;
       default:
         break;
     }
-  }, [handleRefresh, handleForceRefresh]);
+  }, [handleRefresh]);
 
   // variant별 스타일 정의
   const getVariantStyles = () => {
@@ -136,7 +104,7 @@ const RefreshButton = React.memo(({
         };
       default:
         return {
-          container: 'flex items-center gap-3',
+          container: 'flex items-center gap-2',
           button: 'px-4 py-3 text-sm font-semibold min-h-[48px] min-w-[48px] rounded-2xl backdrop-blur-md border shadow-lg hover:shadow-xl transition-all duration-300',
           icon: 'w-5 h-5 sm:w-4 sm:h-4',
           text: 'hidden sm:inline'
@@ -167,40 +135,40 @@ const RefreshButton = React.memo(({
         </div>
       )}
 
-      {/* 일반 새로고침 버튼 */}
+      {/* 실시간 새로고침 버튼 (단일 버튼) */}
       {onRefresh && (
         <button
           ref={refreshButtonRef}
           onClick={handleRefresh}
-          onKeyDown={(e) => handleKeyDown(e, false)}
+          onKeyDown={handleKeyDown}
           disabled={!canRefresh}
           className={`
             flex items-center justify-center ${styles.button}
-            text-blue-600 bg-blue-50/80 hover:bg-blue-100/90 border-blue-200/50
+            text-green-600 bg-green-50/80 hover:bg-green-100/90 border-green-200/50
             disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-300
             hover:scale-105 active:scale-95 touch-manipulation
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+            focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
             disabled:focus:ring-0 disabled:hover:scale-100
           `}
           title={
             !isOnline 
               ? '오프라인 상태에서는 새로고침할 수 없습니다'
               : isRefreshing 
-                ? '새로고침 중...' 
-                : '데이터 새로고침 (캐시 활용)'
+                ? '실시간 데이터 새로고침 중...' 
+                : '실시간 데이터 새로고침 (NEA API 직접 호출)'
           }
           aria-label={
             isRefreshing 
-              ? '데이터 새로고침 중' 
-              : '데이터 새로고침'
+              ? '실시간 데이터 새로고침 중' 
+              : '실시간 데이터 새로고침'
           }
           aria-describedby="refresh-help"
         >
-          <RefreshCw
+          <Zap
             className={`
               ${styles.icon} transition-transform duration-200
-              ${isRefreshing ? 'animate-spin' : ''}
+              ${isRefreshing ? 'animate-pulse' : ''}
             `}
             aria-hidden="true"
           />
@@ -211,59 +179,8 @@ const RefreshButton = React.memo(({
             {!isOnline 
               ? '오프라인 상태에서는 새로고침할 수 없습니다'
               : isRefreshing 
-                ? '현재 데이터를 새로고침하고 있습니다' 
-                : '캐시된 데이터를 활용하여 빠르게 새로고침합니다'
-            }
-          </span>
-        </button>
-      )}
-
-      {/* 강제 새로고침 버튼 */}
-      {onForceRefresh && (
-        <button
-          ref={forceRefreshButtonRef}
-          onClick={handleForceRefresh}
-          onKeyDown={(e) => handleKeyDown(e, true)}
-          disabled={!canRefresh}
-          className={`
-            flex items-center justify-center ${styles.button}
-            text-orange-600 bg-orange-50/80 hover:bg-orange-100/90 border-orange-200/50
-            disabled:opacity-50 disabled:cursor-not-allowed
-            transition-all duration-300
-            hover:scale-105 active:scale-95 touch-manipulation
-            focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
-            disabled:focus:ring-0 disabled:hover:scale-100
-          `}
-          title={
-            !isOnline 
-              ? '오프라인 상태에서는 강제 새로고침할 수 없습니다'
-              : isRefreshing 
-                ? '강제 새로고침 중...' 
-                : '강제 새로고침 (서버에서 최신 데이터)'
-          }
-          aria-label={
-            isRefreshing 
-              ? '강제 새로고침 중' 
-              : '강제 새로고침'
-          }
-          aria-describedby="force-refresh-help"
-        >
-          <Zap
-            className={`
-              ${styles.icon} transition-transform duration-200
-              ${isRefreshing ? 'animate-pulse' : ''}
-            `}
-            aria-hidden="true"
-          />
-          <span className={styles.text}>강제</span>
-          
-          {/* 스크린 리더용 설명 */}
-          <span id="force-refresh-help" className="sr-only">
-            {!isOnline 
-              ? '오프라인 상태에서는 강제 새로고침할 수 없습니다'
-              : isRefreshing 
-                ? '현재 서버에서 최신 데이터를 가져오고 있습니다' 
-                : '캐시를 무시하고 서버에서 최신 데이터를 가져옵니다'
+                ? '현재 실시간 데이터를 새로고침하고 있습니다' 
+                : 'NEA Singapore API에서 실시간 최신 데이터를 가져옵니다'
             }
           </span>
         </button>
@@ -271,9 +188,9 @@ const RefreshButton = React.memo(({
 
       {/* 새로고침 피드백 (variant에 따라) */}
       {isRefreshing && variant === 'hero' && (
-        <div className="flex items-center gap-2 text-sm text-blue-600 animate-fade-in">
-          <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
-          <span>데이터 업데이트 중...</span>
+        <div className="flex items-center gap-2 text-sm text-green-600 animate-fade-in">
+          <Zap className="w-4 h-4 animate-pulse" aria-hidden="true" />
+          <span>실시간 데이터 업데이트 중...</span>
         </div>
       )}
 
@@ -284,7 +201,7 @@ const RefreshButton = React.memo(({
         aria-atomic="true" 
         className="sr-only"
       >
-        {isRefreshing && '데이터를 새로고침하고 있습니다'}
+        {isRefreshing && '실시간 데이터를 새로고침하고 있습니다'}
       </div>
     </div>
   );

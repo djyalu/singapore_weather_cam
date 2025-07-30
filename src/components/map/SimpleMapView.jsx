@@ -20,7 +20,10 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     hasWeatherData: !!weatherData,
     selectedRegion,
     weatherDataStructure: weatherData ? Object.keys(weatherData) : null,
-    camerasCount: trafficCameras.length
+    camerasCount: trafficCameras.length,
+    isLoadingCameras,
+    mapError,
+    regionsLength: regions.length
   });
 
   // 싱가포르 주요 지역 데이터
@@ -82,14 +85,40 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       try {
         const cameras = await fetchTrafficCameras();
         
-        // 지도에 표시할 주요 카메라만 필터링 (화면 과부하 방지)
-        const filteredCameras = cameras.slice(0, 20).map(camera => ({
-          ...camera,
-          position: {
-            top: `${45 + (Math.random() - 0.5) * 30}%`,
-            left: `${45 + (Math.random() - 0.5) * 30}%`
+        // 모든 90개 교통 카메라 표시 - 실제 좌표 기반 위치 계산
+        const filteredCameras = cameras.map((camera, index) => {
+          // 싱가포르 실제 좌표 범위를 지도 비율로 변환
+          // 위도: 1.2 ~ 1.47, 경도: 103.6 ~ 104.0
+          const latRange = [1.2, 1.47];
+          const lngRange = [103.6, 104.0];
+          
+          let top, left;
+          
+          if (camera.location?.latitude && camera.location?.longitude) {
+            // 실제 좌표가 있는 경우 비례 계산
+            const lat = camera.location.latitude;
+            const lng = camera.location.longitude;
+            
+            // 위도를 top 위치로 변환 (위도가 높을수록 북쪽이므로 top은 작아짐)
+            top = `${20 + (latRange[1] - lat) / (latRange[1] - latRange[0]) * 60}%`;
+            // 경도를 left 위치로 변환
+            left = `${15 + (lng - lngRange[0]) / (lngRange[1] - lngRange[0]) * 70}%`;
+          } else {
+            // 좌표가 없는 경우 그리드 기반 배치
+            const cols = 10;
+            const rows = Math.ceil(cameras.length / cols);
+            const row = Math.floor(index / cols);
+            const col = index % cols;
+            
+            top = `${25 + (row / rows) * 50}%`;
+            left = `${20 + (col / cols) * 60}%`;
           }
-        }));
+          
+          return {
+            ...camera,
+            position: { top, left }
+          };
+        });
         
         setTrafficCameras(filteredCameras);
       } catch (error) {
@@ -176,16 +205,43 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
   };
 
   // 컴포넌트가 렌더링되는지 확인
+  console.log('🔍 SimpleMapView 상태 체크:', {
+    regionsExists: !!regions,
+    regionsLength: regions?.length,
+    isArray: Array.isArray(regions)
+  });
+
   if (!regions || regions.length === 0) {
     return (
       <div className={`bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded ${className}`}>
         <strong>Error:</strong> 지역 데이터를 로드할 수 없습니다.
+        <div className="text-sm mt-2">
+          regions: {JSON.stringify(regions)} (length: {regions?.length})
+        </div>
       </div>
     );
   }
 
+  // 강제로 기본 렌더링 테스트
+  if (mapError) {
+    return (
+      <div className={`bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded ${className}`}>
+        <strong>Map Error:</strong> {mapError}
+      </div>
+    );
+  }
+
+  // 컴포넌트가 렌더링되는지 확인하기 위한 간단한 테스트
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
+      {/* 테스트 헤더 */}
+      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-4">
+        <h2 className="text-xl font-bold">🗺️ SimpleMapView 테스트</h2>
+        <p className="text-sm">
+          지역: {regions.length}개 | 카메라: {trafficCameras.length}개 | 로딩: {isLoadingCameras ? 'Y' : 'N'}
+        </p>
+      </div>
+      
       {/* 헤더 */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4">
         <div className="flex items-center justify-between">
