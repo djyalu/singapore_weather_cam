@@ -89,11 +89,41 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       if (!showTrafficCameras) return;
       
       setIsLoadingCameras(true);
+      setMapError(null);
+      
       try {
-        const cameras = await fetchTrafficCameras();
+        console.log('🚗 교통 카메라 데이터 로딩 시작...');
+        
+        // 직접 API 호출로 단순화
+        const apiUrl = 'https://api.data.gov.sg/v1/transport/traffic-images';
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Singapore-Weather-Cam/1.0'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API 응답 오류: ${response.status} - ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('🔍 API 응답 데이터:', data);
+        
+        if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+          throw new Error('교통 카메라 데이터가 없습니다');
+        }
+        
+        const latestItem = data.items[0];
+        if (!latestItem.cameras || !Array.isArray(latestItem.cameras)) {
+          throw new Error('유효하지 않은 카메라 데이터 구조');
+        }
+        
+        const cameras = latestItem.cameras;
+        console.log(`📊 총 ${cameras.length}개 카메라 발견`);
         
         // 실제 좌표를 지도 위치로 변환
-        const mappedCameras = cameras.slice(0, 25).map((camera) => {
+        const mappedCameras = cameras.slice(0, 25).map((camera, index) => {
           const latRange = [1.2, 1.47];
           const lngRange = [103.6, 104.0];
           
@@ -113,15 +143,21 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           }
           
           return {
-            ...camera,
+            id: camera.camera_id,
+            name: `Camera ${camera.camera_id}`,
+            image_url: camera.image,
+            location: camera.location,
+            timestamp: camera.timestamp,
             position: { top, left }
           };
         });
         
+        console.log(`✅ ${mappedCameras.length}개 카메라 매핑 완료`);
         setTrafficCameras(mappedCameras);
+        
       } catch (error) {
-        console.error('교통 카메라 로드 실패:', error);
-        setMapError('교통 카메라 데이터를 불러올 수 없습니다.');
+        console.error('🚨 교통 카메라 로드 실패:', error);
+        setMapError(`교통 카메라 데이터 로드 실패: ${error.message}`);
       } finally {
         setIsLoadingCameras(false);
       }
