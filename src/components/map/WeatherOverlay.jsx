@@ -15,49 +15,63 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
   const weatherRegions = useMemo(() => {
     if (!weatherData?.locations) return [];
 
-    // 주요 지역 정의 (RegionalWeatherDashboard와 동일)
+    // 싱가포르 권역별 온도 히트맵 정의 - 더 큰 영역으로 세분화
     const regions = [
       {
-        id: 'hwa-chong',
-        name: 'Hwa Chong',
-        stationIds: ['S109', 'S104'],
-        coordinates: { lat: 1.3437, lng: 103.7640 },
-        emoji: '🏫'
+        id: 'north',
+        name: 'Northern Singapore',
+        stationIds: ['S121', 'S118', 'S104'], // Woodlands, North
+        coordinates: { lat: 1.4200, lng: 103.7900 },
+        emoji: '🌳',
+        radius: 4000
       },
       {
-        id: 'newton',
-        name: 'Newton',
-        stationIds: ['S109', 'S107'],
-        coordinates: { lat: 1.3138, lng: 103.8420 },
-        emoji: '🏙️'
-      },
-      {
-        id: 'changi',
-        name: 'Changi',
-        stationIds: ['S24', 'S107'],
-        coordinates: { lat: 1.3644, lng: 103.9915 },
-        emoji: '✈️'
-      },
-      {
-        id: 'jurong',
-        name: 'Jurong',
-        stationIds: ['S104', 'S60'],
-        coordinates: { lat: 1.3496, lng: 103.7063 },
-        emoji: '🏭'
+        id: 'northwest',
+        name: 'Northwest',
+        stationIds: ['S104', 'S116', 'S109'], // Bukit Timah, Hwa Chong 지역
+        coordinates: { lat: 1.3500, lng: 103.7600 },
+        emoji: '🏫',
+        radius: 3500
       },
       {
         id: 'central',
-        name: 'Central',
-        stationIds: ['S109', 'S106'],
-        coordinates: { lat: 1.3048, lng: 103.8318 },
-        emoji: '🌆'
+        name: 'Central Singapore',
+        stationIds: ['S109', 'S106', 'S107'], // Orchard, Newton, CBD
+        coordinates: { lat: 1.3100, lng: 103.8300 },
+        emoji: '🏙️',
+        radius: 3000
+      },
+      {
+        id: 'west',
+        name: 'Western Singapore',
+        stationIds: ['S104', 'S60', 'S50'], // Jurong, Tuas
+        coordinates: { lat: 1.3300, lng: 103.7000 },
+        emoji: '🏭',
+        radius: 4500
       },
       {
         id: 'east',
-        name: 'East',
-        stationIds: ['S107', 'S43'],
-        coordinates: { lat: 1.3048, lng: 103.9318 },
-        emoji: '🏖️'
+        name: 'Eastern Singapore',
+        stationIds: ['S24', 'S107', 'S43'], // Changi, East Coast
+        coordinates: { lat: 1.3600, lng: 103.9600 },
+        emoji: '✈️',
+        radius: 4000
+      },
+      {
+        id: 'southeast',
+        name: 'Southeast',
+        stationIds: ['S24', 'S43', 'S107'], // Bedok, Tampines
+        coordinates: { lat: 1.3200, lng: 103.9200 },
+        emoji: '🏘️',
+        radius: 3500
+      },
+      {
+        id: 'south',
+        name: 'Southern Singapore',
+        stationIds: ['S109', 'S106', 'S24'], // Marina Bay, CBD, Sentosa
+        coordinates: { lat: 1.2700, lng: 103.8500 },
+        emoji: '🌊',
+        radius: 3000
       }
     ];
 

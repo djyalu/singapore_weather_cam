@@ -1,11 +1,12 @@
 import { useState, lazy, Suspense } from 'react';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
+import MapErrorBoundary from './components/map/MapErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
-import SimpleMapView from './components/map/SimpleMapView'; // 안정적인 SimpleMapView 사용
+import MapView from './components/map/MapView'; // Leaflet 지도 (확대/축소 가능)
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -128,12 +129,14 @@ const App = () => {
               </p>
             </div>
             <div className="min-h-[500px]">
-              <SimpleMapView
-                weatherData={weatherData}
-                selectedRegion={activeRegion}
-                className="w-full"
-                onCameraSelect={handleCameraSelect}
-              />
+              <MapErrorBoundary>
+                <MapView
+                  weatherData={weatherData}
+                  selectedRegion={activeRegion}
+                  className="w-full"
+                  onCameraSelect={handleCameraSelect}
+                />
+              </MapErrorBoundary>
             </div>
           </div>
         </div>

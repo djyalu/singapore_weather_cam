@@ -152,6 +152,8 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
         
         // 하드코딩된 카메라 이름 제거하고 좌표 기반 동적 생성 사용
 
+        console.log(`🚗 총 ${latestItem.cameras.length}개 카메라 데이터 수신`);
+        
         const processedCameras = latestItem.cameras
           .filter(camera => 
             camera.camera_id &&
@@ -182,6 +184,7 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
             };
           });
         
+        console.log(`✅ 처리 완료: ${processedCameras.length}개 카메라 지도에 표시`);
         setTrafficCameras(processedCameras);
       } catch (error) {
         if (error.name !== 'AbortError') {
