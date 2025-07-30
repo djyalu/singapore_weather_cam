@@ -11,7 +11,7 @@ import { getLocalizedString } from './config/localization';
 import './utils/notifications'; // 알림 시스템 초기화
 
 // Lazy load heavy components for better performance
-const MapView = lazy(() => import('./components/map/MapView'));
+const SimpleMapView = lazy(() => import('./components/map/SimpleMapView'));
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
 
 /**
@@ -124,14 +124,12 @@ const App = () => {
                   날씨 스테이션과 교통 카메라 위치 통합 보기
                 </p>
               </div>
-              <div className="h-[500px] lg:h-[700px]">
+              <div className="min-h-[500px]">
                 <MapErrorBoundary>
-                  <MapView
+                  <SimpleMapView
                     weatherData={weatherData}
                     selectedRegion={activeRegion}
-                    regionConfig={null}
-                    onCameraSelect={handleCameraSelect}
-                    className="h-full"
+                    className="w-full"
                   />
                 </MapErrorBoundary>
               </div>
