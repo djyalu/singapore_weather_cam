@@ -20,19 +20,10 @@ const SystemFooter = React.memo(({ systemStats = {} }) => {
       <div className="relative max-w-7xl mx-auto px-6 py-12">
         {/* Enhanced footer content */}
         <div className="text-center">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm">
-              Singapore Weather Cam
-            </h2>
-            <div className="mt-2 w-24 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mx-auto rounded-full"></div>
-          </div>
+          {/* 간소화된 푸터 - 제목과 부제목 제거 */}
           
-          <p className="text-slate-600 font-medium text-base">
-            실시간 날씨 모니터링 시스템
-          </p>
-          
-          {/* Decorative elements */}
-          <div className="mt-8 flex justify-center space-x-4">
+          {/* 장식적 요소들 - 심플하게 유지 */}
+          <div className="flex justify-center space-x-4">
             <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
             <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-75"></div>
             <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse delay-150"></div>
