@@ -180,84 +180,75 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     loadCameras();
   }, [showTrafficCameras]);
 
-  // 날씨 데이터와 지역 매칭 - 개선된 로직
-  const getWeatherForRegion = (regionId) => {
-    console.log('🌡️ 날씨 데이터 매칭:', { regionId, hasWeatherData: !!weatherData, locationsCount: weatherData?.locations?.length });
-    
+  // 권역별 날씨 데이터 매칭 - WeatherOverlay와 동일한 로직
+  const getWeatherForRegion = (region) => {
     if (!weatherData?.locations || !Array.isArray(weatherData.locations)) {
-      console.log('날씨 데이터 없음, 기본값 사용');
-      return { temperature: 29.0, humidity: 80, rainfall: 0 };
+      return { temperature: 29.0, humidity: 80, rainfall: 0, stationCount: 0 };
     }
 
-    // 지역별 기상 관측소 매핑 (실제 NEA 스테이션 ID)
-    const stationMapping = {
-      'hwa-chong': ['S109', 'S104', 'S116'], // Bukit Timah 지역
-      'newton': ['S109', 'S106', 'S107'],    // Central 지역  
-      'orchard': ['S109', 'S106', 'S107'],   // Central 지역
-      'marina-bay': ['S109', 'S106', 'S24'], // Central/East 지역
-      'changi': ['S24', 'S107', 'S43'],      // East 지역
-      'jurong': ['S104', 'S60', 'S50'],      // West 지역
-      'woodlands': ['S121', 'S118', 'S104'], // North 지역
-      'tampines': ['S24', 'S43', 'S107']     // East 지역
-    };
-
-    const stationIds = stationMapping[regionId] || [];
-    console.log(`${regionId} 지역의 스테이션 ID:`, stationIds);
-
-    // 매핑된 스테이션 중에서 데이터 찾기
-    for (const stationId of stationIds) {
-      const station = weatherData.locations.find(loc => 
+    // 해당 지역의 스테이션 데이터 찾기
+    const stationData = region.stationIds
+      .map(stationId => weatherData.locations.find(loc => 
         loc.station_id === stationId || 
         loc.id === stationId ||
         loc.name?.includes(stationId)
-      );
-      
-      if (station && station.temperature !== undefined && station.temperature !== null && station.temperature !== 0) {
-        console.log(`${regionId} 매칭 성공:`, station);
-        return {
-          temperature: parseFloat(station.temperature) || 29.0,
-          humidity: parseFloat(station.humidity) || 80,
-          rainfall: parseFloat(station.rainfall) || 0
-        };
-      }
-    }
+      ))
+      .filter(Boolean);
 
-    // 매칭 실패 시 전체 평균 사용
-    if (weatherData.current && weatherData.current.temperature && weatherData.current.temperature !== 0) {
-      console.log(`${regionId} 전체 평균 사용:`, weatherData.current);
+    if (stationData.length > 0) {
+      // 여러 스테이션의 평균값 계산
+      const avgTemperature = stationData.reduce((sum, station) => sum + (station.temperature || 0), 0) / stationData.length;
+      const avgHumidity = stationData.reduce((sum, station) => sum + (station.humidity || 0), 0) / stationData.length;
+      const totalRainfall = stationData.reduce((sum, station) => sum + (station.rainfall || 0), 0);
+
       return {
-        temperature: parseFloat(weatherData.current.temperature) || 29.0,
-        humidity: parseFloat(weatherData.current.humidity) || 80,
-        rainfall: parseFloat(weatherData.current.rainfall) || 0
+        temperature: Math.round(avgTemperature * 10) / 10,
+        humidity: Math.round(avgHumidity),
+        rainfall: Math.round(totalRainfall * 10) / 10,
+        stationCount: stationData.length
       };
     }
 
-    // 사용 가능한 첫 번째 위치 데이터 사용 (0이 아닌 값)
-    const validLocation = weatherData.locations.find(loc => 
-      loc.temperature && loc.temperature !== 0
-    );
-    
-    if (validLocation) {
-      console.log(`${regionId} 첫 번째 유효한 데이터 사용:`, validLocation);
-      return {
-        temperature: parseFloat(validLocation.temperature) || 29.0,
-        humidity: parseFloat(validLocation.humidity) || 80,
-        rainfall: parseFloat(validLocation.rainfall) || 0
-      };
-    }
-
-    // 최종 기본값
-    console.log(`${regionId} 기본값 사용`);
-    return { temperature: 29.0, humidity: 80, rainfall: 0 };
+    return { temperature: 29.0, humidity: 80, rainfall: 0, stationCount: 0 };
   };
 
-  // 온도에 따른 색상
+  // 온도별 색상 - WeatherOverlay와 동일
   const getTemperatureColor = (temp) => {
-    if (temp >= 32) return 'bg-red-500 border-red-600';
-    if (temp >= 30) return 'bg-orange-500 border-orange-600';
-    if (temp >= 28) return 'bg-yellow-500 border-yellow-600';
-    if (temp >= 26) return 'bg-green-500 border-green-600';
-    return 'bg-blue-500 border-blue-600';
+    if (temp >= 32) return '#EF4444'; // 선명한 빨간색
+    if (temp >= 30) return '#F97316'; // 활기찬 주황색
+    if (temp >= 28) return '#EAB308'; // 따뜻한 노란색
+    if (temp >= 26) return '#22C55E'; // 상쾌한 초록색
+    return '#3B82F6'; // 시원한 파란색
+  };
+
+  // 온도별 투명도
+  const getTemperatureIntensity = (temp) => {
+    const normalTemp = 28;
+    const deviation = Math.abs(temp - normalTemp);
+    const baseIntensity = 0.2;
+    const maxIntensity = 0.4;
+    
+    const intensity = baseIntensity + (deviation / 6) * (maxIntensity - baseIntensity);
+    return Math.min(Math.max(intensity, 0.15), maxIntensity);
+  };
+
+  // 날씨 설명
+  const getWeatherDescription = (temperature, rainfall) => {
+    if (rainfall > 5) return 'Rainy';
+    if (rainfall > 0.5) return 'Light Rain';
+    if (temperature > 32) return 'Hot';
+    if (temperature > 28) return 'Warm';
+    if (temperature > 24) return 'Pleasant';
+    return 'Cool';
+  };
+
+  // 날씨 아이콘
+  const getWeatherIcon = (temperature, rainfall) => {
+    if (rainfall > 5) return '🌧️';
+    if (rainfall > 0.5) return '🌦️';
+    if (temperature > 32) return '☀️';
+    if (temperature > 28) return '⛅';
+    return '🌤️';
   };
 
   const handleLocationClick = (region) => {
@@ -300,7 +291,7 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
               className="rounded"
             />
             <Thermometer className="w-4 h-4" />
-            날씨 스테이션 ({regions.length})
+            권역별 히트맵 ({weatherRegions.length}개 권역)
           </label>
           <label className="flex items-center gap-2 text-sm text-white/90">
             <input
@@ -310,7 +301,7 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
               className="rounded"
             />
             <Camera className="w-4 h-4" />
-            교통 카메라 ({trafficCameras.length})
+            교통 카메라 ({trafficCameras.length}개)
           </label>
           {isLoadingCameras && (
             <div className="text-xs text-white/70">카메라 로딩 중...</div>
@@ -344,58 +335,103 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           }}></div>
         </div>
 
-        {/* 날씨 스테이션 마커들 */}
-        {showWeatherStations && regions.map((region) => {
-          const weather = getWeatherForRegion(region.id);
+        {/* 권역별 히트맵 레이어 */}
+        {showWeatherStations && weatherRegions.map((region) => {
+          const weather = getWeatherForRegion(region);
+          const color = getTemperatureColor(weather.temperature);
+          const intensity = getTemperatureIntensity(weather.temperature);
+          const description = getWeatherDescription(weather.temperature, weather.rainfall);
+          const icon = getWeatherIcon(weather.temperature, weather.rainfall);
           const isSelected = selectedLocation?.id === region.id;
           
           return (
-            <div
-              key={region.id}
-              className={`
-                absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer
-                transition-all duration-300 hover:scale-110 z-20
-                ${isSelected ? 'scale-125 z-30' : ''}
-              `}
-              style={region.position}
-              onClick={() => handleLocationClick(region)}
-              title={`${region.name} - ${weather.temperature}°C`}
-            >
-              {/* 날씨 스테이션 마커 */}
-              <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                text-white border-2 shadow-lg hover:shadow-xl transition-all
-                ${getTemperatureColor(weather.temperature)}
-              `}>
-                {Math.round(weather.temperature)}°
-              </div>
+            <div key={region.id}>
+              {/* 히트맵 원형 레이어 */}
+              <div
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-all duration-300 hover:scale-105"
+                style={{
+                  ...region.position,
+                  width: region.radius,
+                  height: region.radius,
+                  backgroundColor: color,
+                  opacity: intensity,
+                  borderColor: color,
+                  borderStyle: 'dashed',
+                  zIndex: 10
+                }}
+              />
               
-              {/* 지역 이름 라벨 */}
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-                <div className="bg-white/90 backdrop-blur-sm text-gray-800 text-xs px-2 py-1 rounded shadow-md whitespace-nowrap">
-                  {region.emoji} {region.name}
+              {/* 중심 온도 표시 아이콘 */}
+              <div
+                className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 hover:scale-110 z-20 ${isSelected ? 'scale-125 z-30' : ''}`}
+                style={region.position}
+                onClick={() => handleLocationClick(region)}
+                title={`${region.name} - ${weather.temperature}°C`}
+              >
+                {/* 날씨 아이콘과 온도 */}
+                <div 
+                  className="w-12 h-12 rounded-full flex flex-col items-center justify-center text-white border-2 shadow-lg hover:shadow-xl transition-all"
+                  style={{ backgroundColor: color, borderColor: color }}
+                >
+                  <span className="text-lg">{icon}</span>
+                  <span className="text-xs font-bold">{Math.round(weather.temperature)}°</span>
                 </div>
-              </div>
-              
-              {/* 선택 시 상세 정보 */}
-              {isSelected && (
-                <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-40">
-                  <div className="bg-white rounded-lg shadow-xl p-3 border border-gray-200 min-w-[200px]">
-                    <div className="font-semibold text-gray-800 mb-2">{region.name}</div>
-                    <div className="space-y-1 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <Thermometer className="w-4 h-4 text-red-500" />
-                        <span>{weather.temperature.toFixed(1)}°C</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Droplets className="w-4 h-4 text-blue-500" />
-                        <span>{Math.round(weather.humidity)}%</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-2">{region.description}</div>
+                
+                {/* 지역 이름 라벨 */}
+                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-white/90 backdrop-blur-sm text-gray-800 text-xs px-2 py-1 rounded shadow-md whitespace-nowrap">
+                    {region.emoji} {region.name}
                   </div>
                 </div>
-              )}
+                
+                {/* 선택 시 상세 정보 */}
+                {isSelected && (
+                  <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 z-40">
+                    <div className="bg-white rounded-lg shadow-xl p-4 border border-gray-200 min-w-[240px]">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xl">{region.emoji}</span>
+                        <div className="font-semibold text-gray-800">{region.name}</div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div className="bg-gray-50 p-2 rounded">
+                          <div className="font-medium text-gray-600 text-xs">Temperature</div>
+                          <div className="text-lg font-bold" style={{ color }}>
+                            {weather.temperature}°C
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded">
+                          <div className="font-medium text-gray-600 text-xs">Humidity</div>
+                          <div className="text-lg font-bold text-blue-600">
+                            {weather.humidity}%
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-2 rounded mb-2">
+                        <div className="font-medium text-gray-600 text-xs">Weather</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-lg">{icon}</span>
+                          <span className="font-medium">{description}</span>
+                        </div>
+                      </div>
+
+                      {weather.rainfall > 0 && (
+                        <div className="bg-blue-50 p-2 rounded mb-2">
+                          <div className="font-medium text-blue-600 text-xs">Rainfall</div>
+                          <div className="text-lg font-bold text-blue-700">
+                            {weather.rainfall}mm
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-gray-500 pt-2 border-t">
+                        📡 {weather.stationCount} weather station{weather.stationCount !== 1 ? 's' : ''} • {region.description}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
@@ -445,37 +481,64 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         )}
       </div>
 
-      {/* 범례 */}
+      {/* 범례 및 컨트롤 */}
       <div className="p-4 bg-gray-50 border-t">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-4 text-sm flex-wrap">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-600 rounded-full"></div>
-              <span>중심점 (Hwa Chong)</span>
+        <div className="space-y-3">
+          {/* 온도 범례 */}
+          {showWeatherStations && (
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
+                <Thermometer className="w-4 h-4 text-red-500" />
+                온도별 색상 범례
+              </h4>
+              <div className="flex items-center gap-4 text-sm flex-wrap">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#3B82F6' }}></div>
+                  <span>26°C 이하 (시원함)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#22C55E' }}></div>
+                  <span>26-28°C (쾌적함)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#EAB308' }}></div>
+                  <span>28-30°C (따뜻함)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#F97316' }}></div>
+                  <span>30-32°C (뜨거움)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#EF4444' }}></div>
+                  <span>32°C+ (매우 뜨거움)</span>
+                </div>
+              </div>
             </div>
-            {showWeatherStations && (
+          )}
+
+          {/* 기능 설명 */}
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span>26°C 이하</span>
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>26-28°C</span>
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span>28-30°C</span>
-                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                <span>30-32°C</span>
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span>32°C+</span>
+                <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
+                <span>중심점 (Hwa Chong)</span>
               </div>
-            )}
-            {showTrafficCameras && (
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                <span>교통 카메라 ({trafficCameras.length})</span>
-              </div>
-            )}
-          </div>
-          <div className="text-xs text-gray-500">
-            클릭하여 날씨 상세 정보 또는 교통 카메라 확인
+              {showTrafficCameras && (
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                  <span>교통 카메라 ({trafficCameras.length}개)</span>
+                </div>
+              )}
+              {showWeatherStations && (
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-red-500 rounded-full"></div>
+                  <span>권역별 히트맵 ({weatherRegions.length}개 권역)</span>
+                </div>
+              )}
+            </div>
+            <div className="text-xs text-gray-500">
+              히트맵 클릭 → 상세 날씨 정보 | 카메라 클릭 → 실시간 영상
+            </div>
           </div>
         </div>
       </div>

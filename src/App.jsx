@@ -6,7 +6,7 @@ import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
-import MapView from './components/map/MapView'; // Leaflet 지도 복원
+import SimpleMapView from './components/map/SimpleMapView'; // 안정적인 지도 (권역별 히트맵 + 90개 카메라)
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -122,21 +122,19 @@ const App = () => {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800 mb-2">
-                🗺️ 실시간 날씨 및 교통 지도
+                🗺️ Singapore 날씨 히트맵 & 교통 카메라
               </h2>
               <p className="text-sm text-gray-600">
-                날씨 스테이션과 교통 카메라 위치 통합 보기
+                권역별 날씨 히트맵 + 90개 실시간 교통 카메라 (확대/축소 지원 없음)
               </p>
             </div>
             <div className="min-h-[500px]">
-              <MapErrorBoundary>
-                <MapView
-                  weatherData={weatherData}
-                  selectedRegion={activeRegion}
-                  className="w-full"
-                  onCameraSelect={handleCameraSelect}
-                />
-              </MapErrorBoundary>
+              <SimpleMapView
+                weatherData={weatherData}
+                selectedRegion={activeRegion}
+                className="w-full"
+                onCameraSelect={handleCameraSelect}
+              />
             </div>
           </div>
         </div>
