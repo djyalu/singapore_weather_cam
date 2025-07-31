@@ -339,12 +339,12 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
           {/* 핵심 온도 정보를 헤더에 배치 */}
           <div className="text-right">
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-white drop-shadow-lg">
+              <span className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
                 {overallData.temperature.toFixed(1)}
               </span>
-              <span className="text-lg text-blue-100">°C</span>
+              <span className="text-base sm:text-lg text-blue-100">°C</span>
             </div>
-            <div className="text-xs text-blue-100">
+            <div className="text-xs text-blue-100 hidden sm:block">
               {overallData.stationCount}개 관측소 평균
             </div>
           </div>
@@ -353,14 +353,14 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
 
       {/* 핵심 정보만 간결하게 표시 */}
       <div className="p-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4">
           {/* 습도 */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Droplets className="w-4 h-4 text-blue-500" />
               <span className="text-xs text-gray-600 font-medium">습도</span>
             </div>
-            <div className="text-xl font-bold text-gray-800">
+            <div className="text-lg sm:text-xl font-bold text-gray-800">
               {Math.round(overallData.humidity)}%
             </div>
             <div className="text-xs text-gray-500">
@@ -374,7 +374,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
               <Cloud className="w-4 h-4 text-gray-500" />
               <span className="text-xs text-gray-600 font-medium">강수량</span>
             </div>
-            <div className="text-xl font-bold text-gray-800">
+            <div className="text-lg sm:text-xl font-bold text-gray-800">
               {overallData.rainfall.toFixed(1)}
             </div>
             <div className="text-xs text-gray-500">mm</div>

@@ -90,10 +90,10 @@ const App = () => {
 
     return (
       <div className="space-y-6">
-        {/* 싱가포르 전체 평균 날씨 정보 */}
+        {/* 싱가포르 전체 평균 날씨 정보 - 개선된 컴팩트한 디자인 */}
         <SingaporeOverallWeather 
           weatherData={weatherData}
-          className="mb-8"
+          className=""
         />
 
         {/* 지역별 날씨 카드 대시보드 */}
@@ -102,11 +102,11 @@ const App = () => {
           onRegionSelect={handleRegionSelect}
           activeRegion={activeRegion}
           onSelectedRegionsChange={handleSelectedRegionsChange}
-          className="mb-8"
+          className=""
         />
 
         {/* 선택된 지역의 상세 정보는 상단 카드에서 표시 */}
-        <div className="space-y-8">
+        <div className="space-y-6">
 
           {/* 지역별 교통 카메라 - 선택된 날씨 지역과 연동 */}
           <div className="bg-white rounded-xl shadow-lg p-6">
