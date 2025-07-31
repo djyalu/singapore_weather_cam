@@ -354,7 +354,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           : 0;
         
         const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
-        const intensity = 0.7; // 고정된 불투명도로 더 잘 보이게
+        const intensity = 0.35; // 투명도 2배 높임 (0.7 → 0.35)
         
         console.log(`🎯 히트맵 원형 생성 시도: ${region.name}`, {
           temperature: avgTemp.toFixed(1),
