@@ -31,6 +31,8 @@ export function transformWeatherData(rawData) {
         lastUpdate: rawData.timestamp,
         dataQuality: assessDataQuality(data),
       },
+      // 원본 NEA API 데이터도 포함 (DirectMapView 히트맵용)
+      data: rawData.data,
     };
 
 
@@ -276,6 +278,12 @@ function createFallbackData() {
       stations: 0,
       lastUpdate: new Date().toISOString(),
       dataQuality: 'unavailable',
+    },
+    // 빈 원본 데이터 구조
+    data: {
+      temperature: { readings: [] },
+      humidity: { readings: [] },
+      rainfall: { readings: [] }
     },
   };
 }

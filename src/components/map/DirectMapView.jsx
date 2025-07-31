@@ -271,18 +271,31 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
   // 날씨 데이터 변경 시 레이어만 업데이트
   useEffect(() => {
-    if (!leafletMapRef.current || !weatherData?.data?.temperature?.readings) {
-      console.log('⚠️ 날씨 히트맵 업데이트 실패: 지도 또는 데이터 없음', {
-        hasMap: !!leafletMapRef.current,
-        hasWeatherData: !!weatherData,
-        hasTemperatureData: !!weatherData?.data?.temperature,
-        hasReadings: !!weatherData?.data?.temperature?.readings,
-        readingsLength: weatherData?.data?.temperature?.readings?.length
+    console.log('🔍 날씨 히트맵 업데이트 시도:', {
+      hasMap: !!leafletMapRef.current,
+      hasWeatherData: !!weatherData,
+      hasTemperatureData: !!weatherData?.data?.temperature,
+      hasReadings: !!weatherData?.data?.temperature?.readings,
+      readingsLength: weatherData?.data?.temperature?.readings?.length,
+      weatherDataStructure: weatherData ? Object.keys(weatherData) : 'no weatherData'
+    });
+
+    if (!leafletMapRef.current) {
+      console.log('❌ 지도가 아직 준비되지 않음');
+      return;
+    }
+
+    if (!weatherData || !weatherData.data || !weatherData.data.temperature || !weatherData.data.temperature.readings) {
+      console.log('❌ 날씨 데이터 구조 문제:', {
+        weatherData: !!weatherData,
+        hasData: !!weatherData?.data,
+        hasTemperature: !!weatherData?.data?.temperature,
+        hasReadings: !!weatherData?.data?.temperature?.readings
       });
       return;
     }
 
-    console.log('🔄 날씨 히트맵 레이어 업데이트 중...', {
+    console.log('✅ 조건 통과! 날씨 히트맵 레이어 업데이트 시작...', {
       tempReadings: weatherData.data.temperature.readings.length,
       stations: weatherData.data.temperature.readings.map(r => r.station)
     });
@@ -294,15 +307,13 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       }
     });
 
-    // 새로운 날씨 레이어 추가
+    // 새로운 날씨 레이어 추가 (실제 데이터 기반으로 수정)
     const weatherRegions = [
       { id: 'north', name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, stationIds: ['S104'], emoji: '🌳' },
-      { id: 'northwest', name: 'Northwest (Hwa Chong)', lat: 1.3500, lng: 103.7600, stationIds: ['S104', 'S60'], emoji: '🏫' },
+      { id: 'northwest', name: 'Northwest (Hwa Chong)', lat: 1.3500, lng: 103.7600, stationIds: ['S60'], emoji: '🏫' },
       { id: 'central', name: 'Central Singapore', lat: 1.3100, lng: 103.8300, stationIds: ['S107'], emoji: '🏙️' },
-      { id: 'west', name: 'Western Singapore', lat: 1.3300, lng: 103.7000, stationIds: ['S60'], emoji: '🏭' },
-      { id: 'east', name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, stationIds: ['S24', 'S107'], emoji: '✈️' },
-      { id: 'southeast', name: 'Southeast', lat: 1.3200, lng: 103.9200, stationIds: ['S24'], emoji: '🏘️' },
-      { id: 'south', name: 'Southern Singapore', lat: 1.2700, lng: 103.8500, stationIds: ['S24'], emoji: '🌊' }
+      { id: 'east', name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, stationIds: ['S24'], emoji: '✈️' },
+      { id: 'combined', name: 'All Stations Average', lat: 1.3400, lng: 103.8200, stationIds: ['S107', 'S60', 'S24', 'S104'], emoji: '🌡️' }
     ];
 
     const tempReadings = weatherData.data.temperature.readings || [];
@@ -310,6 +321,11 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     const rainfallReadings = weatherData.data.rainfall.readings || [];
 
     weatherRegions.forEach(region => {
+      console.log(`🔍 지역 ${region.name} 처리 중:`, {
+        stationIds: region.stationIds,
+        position: [region.lat, region.lng]
+      });
+
       const stationTemps = region.stationIds
         .map(id => tempReadings.find(reading => reading.station === id))
         .filter(Boolean);
@@ -322,6 +338,12 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         .map(id => rainfallReadings.find(reading => reading.station === id))
         .filter(Boolean);
 
+      console.log(`📊 ${region.name} 데이터 매칭 결과:`, {
+        stationTemps: stationTemps.map(s => ({ station: s.station, value: s.value })),
+        stationHumidity: stationHumidity.length,
+        stationRainfall: stationRainfall.length
+      });
+
       if (stationTemps.length > 0) {
         const avgTemp = stationTemps.reduce((sum, s) => sum + (s.value || 0), 0) / stationTemps.length;
         const avgHumidity = stationHumidity.length > 0 
@@ -332,78 +354,44 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           : 0;
         
         const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
-        const intensity = 0.4 + Math.abs(avgTemp - 28) / 6 * 0.3;
+        const intensity = 0.7; // 고정된 불투명도로 더 잘 보이게
         
-        // 권역별 원형 히트맵
-        const circle = window.L.circle([region.lat, region.lng], {
-          color: tempColor,
-          fillColor: tempColor,
-          fillOpacity: Math.min(intensity, 0.6),
-          radius: 8000,
-          weight: 2,
-          interactive: true,
-          pane: 'overlayPane',
-          className: 'weather-layer'
-        }).addTo(leafletMapRef.current);
-        
-        console.log(`🌡️ 히트맵 원형 생성: ${region.name}`, {
+        console.log(`🎯 히트맵 원형 생성 시도: ${region.name}`, {
           temperature: avgTemp.toFixed(1),
           color: tempColor,
-          opacity: Math.min(intensity, 0.6),
-          position: [region.lat, region.lng]
-        });
-        
-        // 히트맵 원형에 팝업 추가
-        circle.bindPopup(`
-          <div style="text-align: center; padding: 12px; min-width: 200px;">
-            <strong style="color: ${tempColor}; font-size: 16px;">${region.emoji} ${region.name}</strong><br>
-            <div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 6px;">
-              <div style="color: #495057; font-size: 14px; font-weight: 600;">🌡️ ${avgTemp.toFixed(1)}°C</div>
-              ${avgHumidity > 0 ? `<div style="color: #6c757d; font-size: 12px;">💧 습도 ${avgHumidity.toFixed(0)}%</div>` : ''}
-              ${totalRainfall > 0 ? `<div style="color: #0d6efd; font-size: 12px;">🌧️ 강수 ${totalRainfall.toFixed(1)}mm</div>` : ''}
-            </div>
-            <div style="font-size: 10px; color: #6c757d;">
-              기반 스테이션: ${region.stationIds.join(', ')}
-            </div>
-          </div>
-        `, {
-          maxWidth: 250,
-          className: 'weather-heatmap-popup'
+          position: [region.lat, region.lng],
+          leafletAvailable: !!window.L,
+          mapAvailable: !!leafletMapRef.current
         });
 
-        // 날씨 아이콘 마커
-        const weatherIcon = window.L.divIcon({
-          html: `<div style="
-            width: 40px; height: 40px; 
-            background: rgba(255,255,255,0.9); 
-            border: 2px solid ${tempColor}; 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-          ">${region.emoji}</div>`,
-          className: 'weather-icon',
-          iconSize: [40, 40],
-          iconAnchor: [20, 20]
-        });
+        try {
+          // 권역별 원형 히트맵 - 더 큰 반지름으로 잘 보이게
+          const circle = window.L.circle([region.lat, region.lng], {
+            color: tempColor,
+            fillColor: tempColor,
+            fillOpacity: intensity,
+            radius: 12000, // 더 큰 반지름
+            weight: 3,     // 더 두꺼운 테두리
+            interactive: true,
+            pane: 'overlayPane',
+            className: 'weather-layer'
+          }).addTo(leafletMapRef.current);
+          
+          console.log(`✅ 히트맵 원형 생성 성공: ${region.name}`);
+          
+          // 간단한 팝업
+          circle.bindPopup(`
+            <div style="text-align: center; padding: 12px;">
+              <strong>${region.emoji} ${region.name}</strong><br>
+              <div style="color: ${tempColor}; font-size: 16px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
+            </div>
+          `);
 
-        const marker = window.L.marker([region.lat, region.lng], { 
-          icon: weatherIcon,
-          className: 'weather-icon'
-        }).addTo(leafletMapRef.current);
-        
-        marker.bindPopup(`
-          <div style="padding: 12px; min-width: 200px;">
-            <strong>${region.emoji} ${region.name}</strong><br>
-            <div style="margin: 8px 0;">
-              <div style="color: ${tempColor}; font-size: 18px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
-              <div style="color: #0891b2;">💧 습도: ${Math.round(avgHumidity)}%</div>
-              ${totalRainfall > 0 ? `<div style="color: #059669;">🌧️ 강수: ${totalRainfall.toFixed(1)}mm</div>` : ''}
-            </div>
-            <div style="font-size: 11px; color: #666; margin-top: 8px;">
-              📡 ${stationTemps.length}개 기상관측소 평균
-            </div>
-          </div>
-        `);
+        } catch (error) {
+          console.error(`❌ 히트맵 원형 생성 실패: ${region.name}`, error);
+        }
+      } else {
+        console.log(`⚠️ ${region.name}: 매칭되는 온도 데이터 없음`);
       }
     });
 

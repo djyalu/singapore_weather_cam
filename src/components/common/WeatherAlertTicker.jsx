@@ -58,32 +58,32 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     };
   }, [refreshInterval]);
 
-  // 경보 우선순위에 따른 스타일 결정
+  // 경보 우선순위에 따른 스타일 결정 - 배경과 조화되도록 수정
   const getAlertStyle = (alert) => {
     const baseClasses = "flex items-center gap-3 px-4 py-2 whitespace-nowrap";
     
     switch (alert.priority) {
       case 'critical':
-        return `${baseClasses} bg-red-600 text-white border border-red-500`;
+        return `${baseClasses} text-red-800 font-semibold`;
       case 'high':
-        return `${baseClasses} bg-orange-500 text-white border border-orange-400`;
+        return `${baseClasses} text-orange-800 font-semibold`;
       case 'medium':
-        return `${baseClasses} bg-yellow-500 text-black border border-yellow-400`;
+        return `${baseClasses} text-amber-800 font-medium`;
       case 'low':
-        return `${baseClasses} bg-blue-500 text-white border border-blue-400`;
+        return `${baseClasses} text-gray-800 font-normal`;
       case 'error':
-        return `${baseClasses} bg-gray-500 text-white border border-gray-400`;
+        return `${baseClasses} text-red-700 font-medium`;
       default:
-        return `${baseClasses} bg-blue-500 text-white border border-blue-400`;
+        return `${baseClasses} text-gray-800 font-normal`;
     }
   };
 
   // 경보 아이콘 결정
   const getAlertIcon = (alert) => {
     if (alert.type === 'critical' || alert.type === 'warning') {
-      return <AlertTriangle className="w-4 h-4 animate-pulse" />;
+      return <AlertTriangle className="w-4 h-4 animate-pulse text-red-600" />;
     }
-    return <Info className="w-4 h-4" />;
+    return <Info className="w-4 h-4 text-blue-600" />;
   };
 
   // 티커 숨기기/보이기
@@ -112,19 +112,18 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     .slice(0, 5);
 
   return (
-    <div className={`bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 border-b border-blue-400/30 shadow-lg ${className}`}>
+    <div className={`bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-b border-gray-200/50 ${className}`}>
       <div className="relative overflow-hidden">
-        {/* 배경 패턴 */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+        {/* 배경 패턴 제거 - 깔끔한 배경 */}
         
         {/* 티커 헤더 */}
-        <div className="flex items-center justify-between px-4 py-2 bg-black/20 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-2 bg-white/10 border-b border-gray-300/20">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-white font-semibold text-sm">🚨 기상 경보</span>
+              <span className="text-gray-800 font-semibold text-sm">🚨 기상 경보</span>
             </div>
-            <span className="text-blue-200 text-xs">
+            <span className="text-gray-600 text-xs">
               {loading ? 'Loading...' : `${displayAlerts.length}건 • NEA Singapore`}
             </span>
           </div>
@@ -133,21 +132,21 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="text-white/70 hover:text-white transition-colors p-1 rounded"
+              className="text-gray-600 hover:text-gray-800 transition-colors p-1 rounded"
               title="새로고침"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={togglePause}
-              className="text-white/70 hover:text-white transition-colors px-2 py-1 text-xs rounded bg-white/10"
+              className="text-gray-600 hover:text-gray-800 transition-colors px-2 py-1 text-xs rounded bg-white/20"
               title={isPaused ? "재생" : "일시정지"}
             >
               {isPaused ? '▶️' : '⏸️'}
             </button>
             <button
               onClick={toggleVisibility}
-              className="text-white/70 hover:text-white transition-colors p-1 rounded"
+              className="text-gray-600 hover:text-gray-800 transition-colors p-1 rounded"
               title="닫기"
             >
               <X className="w-4 h-4" />
@@ -159,7 +158,7 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
         <div className="relative h-12 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="flex items-center gap-2 text-white">
+              <div className="flex items-center gap-2 text-gray-700">
                 <RefreshCw className="w-4 h-4 animate-spin" />
                 <span className="text-sm">기상 정보 업데이트 중...</span>
               </div>
