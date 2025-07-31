@@ -32,6 +32,16 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: true,
+    proxy: {
+      '/api/nea': {
+        target: 'https://api.data.gov.sg/v1',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/nea/, ''),
+        headers: {
+          'User-Agent': 'Singapore Weather Monitor/1.0'
+        }
+      }
+    }
   }
 })

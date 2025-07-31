@@ -410,29 +410,6 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         </div>
       )}
       
-      {/* 지도 정보 */}
-      {isMapReady && (
-        <div className="absolute bottom-4 left-4 bg-white bg-opacity-95 rounded-lg p-3 shadow-lg border border-gray-200">
-          <div className="text-sm font-medium text-gray-800 mb-2">🗺️ 실시간 지도 정보</div>
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-orange-500 rounded-full border border-white"></div>
-              <span>교통 카메라 ({trafficCameras.length}개)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full border border-white"></div>
-              <span>권역별 날씨</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-yellow-400 rounded-full border border-orange-400" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px'}}>⭐</div>
-              <span>⭐ Hwa Chong School</span>
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
-            OpenStreetMap • 확대/축소/드래그 가능
-          </div>
-        </div>
-      )}
     </div>
   );
 };

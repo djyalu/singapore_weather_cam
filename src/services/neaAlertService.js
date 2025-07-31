@@ -5,7 +5,8 @@
 
 class NEAAlertService {
   constructor() {
-    this.baseURL = 'https://api.data.gov.sg/v1';
+    // 개발 환경에서는 프록시 사용, 프로덕션에서는 직접 호출 시도
+    this.baseURL = import.meta.env.DEV ? '/api/nea' : 'https://api.data.gov.sg/v1';
     this.endpoints = {
       weather: '/environment/2-hour-weather-forecast',
       psi: '/environment/psi',
@@ -24,8 +25,9 @@ class NEAAlertService {
   async getWeatherAlerts() {
     try {
       console.log('🚨 NEA Singapore API 기상 경보 정보 수집 시작...');
+      console.log('📡 Using base URL:', this.baseURL);
       
-      // 병렬로 여러 NEA API 호출 (가장 중요한 것들만)
+      // 병렬로 여러 NEA API 호출
       const [weatherResult, tempResult, psiResult] = await Promise.allSettled([
         this.fetchWeatherForecast(),
         this.fetchTemperature(), 
@@ -37,7 +39,7 @@ class NEAAlertService {
 
       // 2시간 날씨 예보 분석
       if (weatherResult.status === 'fulfilled' && weatherResult.value) {
-        console.log('📡 Weather forecast data received:', weatherResult.value);
+        console.log('📡 Weather forecast data received');
         const weatherAlerts = this.analyzeWeatherForecast(weatherResult.value);
         alerts.push(...weatherAlerts);
       } else {
@@ -46,7 +48,7 @@ class NEAAlertService {
 
       // 온도 데이터 분석  
       if (tempResult.status === 'fulfilled' && tempResult.value) {
-        console.log('🌡️ Temperature data received:', tempResult.value);
+        console.log('🌡️ Temperature data received');
         const tempAlerts = this.analyzeTemperature(tempResult.value);
         alerts.push(...tempAlerts);
       } else {
@@ -55,14 +57,14 @@ class NEAAlertService {
 
       // PSI 대기질 분석
       if (psiResult.status === 'fulfilled' && psiResult.value) {
-        console.log('🍃 PSI data received:', psiResult.value);
+        console.log('🍃 PSI data received');
         const psiAlerts = this.analyzePSI(psiResult.value);
         alerts.push(...psiAlerts);
       } else {
         console.warn('⚠️ PSI API failed:', psiResult.reason?.message);
       }
 
-      // API 호출이 모두 실패한 경우 기본 메시지
+      // API 호출 결과에 따른 적절한 메시지
       if (alerts.length === 0) {
         const hasAnyData = [weatherResult, tempResult, psiResult].some(r => r.status === 'fulfilled');
         
@@ -76,15 +78,41 @@ class NEAAlertService {
             source: 'NEA Singapore'
           });
         } else {
-          // 모든 API가 실패한 경우
-          alerts.push({
-            type: 'warning',
-            priority: 'medium',
-            icon: '⚠️',
-            message: 'NEA API 서버 일시 장애. 직접 NEA 웹사이트에서 최신 정보를 확인하세요',
-            timestamp: now.toISOString(),
-            source: 'System Monitor'
-          });
+          // 모든 API가 실패한 경우 - 수집된 데이터로 대체
+          console.log('🔄 Falling back to collected weather data...');
+          const fallbackData = await this.getCollectedWeatherData();
+          if (fallbackData && fallbackData.current) {
+            const { temperature, humidity, rainfall } = fallbackData.current;
+            
+            if (temperature >= 32) {
+              alerts.push({
+                type: 'warning',
+                priority: 'high',
+                icon: '🌡️',
+                message: `고온 주의! 현재 ${temperature.toFixed(1)}°C (수집된 데이터 기준)`,
+                timestamp: now.toISOString(),
+                source: 'Collected Data'
+              });
+            } else {
+              alerts.push({
+                type: 'info',
+                priority: 'low',
+                icon: '🌤️',
+                message: `현재 ${temperature.toFixed(1)}°C, 습도 ${humidity.toFixed(0)}% (수집된 데이터 기준)`,
+                timestamp: now.toISOString(),
+                source: 'Collected Data'
+              });
+            }
+          } else {
+            alerts.push({
+              type: 'warning',
+              priority: 'medium',
+              icon: '⚠️',
+              message: 'NEA API 일시 장애. 직접 NEA 웹사이트에서 최신 정보를 확인하세요',
+              timestamp: now.toISOString(),
+              source: 'System Monitor'
+            });
+          }
         }
       }
 
@@ -108,6 +136,31 @@ class NEAAlertService {
         source: 'Error Handler'
       }];
     }
+  }
+
+  /**
+   * 애플리케이션에서 이미 수집된 날씨 데이터 가져오기
+   */
+  async getCollectedWeatherData() {
+    try {
+      // 전역 상태나 로컬 스토리지에서 수집된 데이터 확인
+      if (window.weatherData) {
+        console.log('📊 Using global weather data');
+        return window.weatherData;
+      }
+
+      // GitHub Actions에서 수집된 파일 시도
+      const response = await fetch('/singapore_weather_cam/data/weather/latest.json?' + Date.now());
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 Loaded weather data from file');
+        return data;
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not load collected weather data:', error);
+    }
+    
+    return null;
   }
 
   /**
