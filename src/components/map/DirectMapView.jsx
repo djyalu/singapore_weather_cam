@@ -271,9 +271,16 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
   // 날씨 데이터 변경 시 레이어만 업데이트
   useEffect(() => {
-    console.log('🔍 === 히트맵 업데이트 시작 ===');
+    // 강제로 로그 출력하여 useEffect 실행 확인
+    console.log('🔍 === 히트맵 useEffect 실행됨 ===');
     console.log('🗺️ 지도 상태:', !!leafletMapRef.current);
     console.log('📊 날씨 데이터 전체:', weatherData);
+    
+    // 타이머를 사용하여 지연 후 다시 시도
+    const timer = setTimeout(() => {
+      console.log('⏰ 3초 후 재시도 - 지도 상태:', !!leafletMapRef.current);
+      console.log('⏰ 3초 후 재시도 - 날씨 데이터:', !!weatherData);
+    }, 3000);
     
     if (weatherData) {
       console.log('📈 날씨 데이터 상세:', {
@@ -425,6 +432,35 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         className="w-full h-[600px] border border-gray-300 rounded-lg"
         style={{ background: '#f0f0f0' }}
       />
+      
+      {/* 온도 범례 */}
+      <div className="absolute bottom-4 left-4 bg-white bg-opacity-95 rounded-lg shadow-lg p-3 border border-gray-200">
+        <div className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+          🌡️ 온도 범례
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#3B82F6', opacity: 0.6 }}></div>
+            <span className="text-xs text-gray-600">25°C 이하</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#22C55E', opacity: 0.6 }}></div>
+            <span className="text-xs text-gray-600">26-27°C</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#EAB308', opacity: 0.6 }}></div>
+            <span className="text-xs text-gray-600">28-29°C</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#F97316', opacity: 0.6 }}></div>
+            <span className="text-xs text-gray-600">30-31°C</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#EF4444', opacity: 0.6 }}></div>
+            <span className="text-xs text-gray-600">32°C 이상</span>
+          </div>
+        </div>
+      </div>
       
       {/* 로딩 오버레이 */}
       {!isMapReady && (
