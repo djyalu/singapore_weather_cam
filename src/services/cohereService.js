@@ -8,6 +8,14 @@ class CohereService {
     this.baseURL = 'https://api.cohere.ai/v1';
     this.apiKey = import.meta.env.VITE_COHERE_API_KEY;
     this.model = 'command-light'; // 빠른 응답을 위한 경량 모델
+    
+    // 디버깅 정보
+    console.log('🔑 Cohere API 키 상태:', {
+      hasKey: !!this.apiKey,
+      keyLength: this.apiKey ? this.apiKey.length : 0,
+      keyPrefix: this.apiKey ? this.apiKey.substring(0, 8) + '...' : 'NOT_SET',
+      envVars: Object.keys(import.meta.env).filter(key => key.includes('COHERE'))
+    });
   }
 
   /**

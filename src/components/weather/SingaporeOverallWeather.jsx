@@ -143,12 +143,46 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     const humidity = data.humidity;
     const rainfall = data.rainfall;
     
-    // 간결한 요약 - 한 문장으로
-    let tempDesc = temp >= 32 ? '매우 더움' : temp >= 28 ? '따뜻함' : '쾌적함';
-    let humidityDesc = humidity >= 80 ? ', 습도 높음' : '';
-    let rainDesc = rainfall > 0 ? `, ${rainfall}mm 비` : '';
+    // 온도 평가
+    let tempDesc, tempAdvice;
+    if (temp >= 32) {
+      tempDesc = '매우 더움';
+      tempAdvice = '외출 시 충분한 수분 섭취와 그늘 이용을 권장';
+    } else if (temp >= 30) {
+      tempDesc = '덥고 습함';
+      tempAdvice = '야외활동 시 자주 휴식을 취하세요';
+    } else if (temp >= 28) {
+      tempDesc = '따뜻함';
+      tempAdvice = '가벼운 옷차림으로 야외활동 적합';
+    } else if (temp >= 25) {
+      tempDesc = '쾌적함';
+      tempAdvice = '야외활동하기 좋은 날씨';
+    } else {
+      tempDesc = '선선함';
+      tempAdvice = '얇은 겉옷 준비를 권장';
+    }
     
-    return `현재 ${tempDesc} ${temp}°C${humidityDesc}${rainDesc}`;
+    // 습도 평가
+    let humidityDesc = '';
+    if (humidity >= 85) {
+      humidityDesc = ', 매우 습하여 체감온도가 높음';
+    } else if (humidity >= 75) {
+      humidityDesc = ', 습도가 높아 끈적한 느낌';
+    } else if (humidity >= 60) {
+      humidityDesc = ', 적당한 습도';
+    } else {
+      humidityDesc = ', 건조한 편';
+    }
+    
+    // 강수 상황
+    let rainDesc = '';
+    if (rainfall > 5) {
+      rainDesc = `. ${rainfall}mm의 비로 우산 필수`;
+    } else if (rainfall > 0) {
+      rainDesc = `. 약한 비 (${rainfall}mm) 주의`;
+    }
+    
+    return `싱가포르 현재 ${temp}°C로 ${tempDesc}${humidityDesc}${rainDesc}. ${tempAdvice}`;
   };
 
   const generateHighlights = (data, forecast) => {
@@ -157,13 +191,37 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     const humidity = data.humidity;
     const rainfall = data.rainfall;
     
-    // 중요한 것만 1-2개
-    if (temp >= 32) highlights.push('고온 주의');
-    else if (humidity >= 85) highlights.push('높은 습도');
-    else if (rainfall > 0) highlights.push('비 내림');
-    else highlights.push('쾌적함');
+    // 온도 기반 하이라이트
+    if (temp >= 32) {
+      highlights.push('🌡️ 고온주의');
+      highlights.push('💧 수분섭취');
+    } else if (temp >= 30) {
+      highlights.push('🌞 더운날씨');
+      highlights.push('🏖️ 야외주의');
+    } else if (temp >= 28) {
+      highlights.push('☀️ 따뜻함');
+      highlights.push('👕 가벼운옷');
+    } else {
+      highlights.push('😌 쾌적함');
+      highlights.push('🚶 야외활동');
+    }
     
-    return highlights;
+    // 습도 기반 하이라이트
+    if (humidity >= 85) {
+      highlights[1] = '💦 높은습도';
+    } else if (humidity <= 50) {
+      highlights[1] = '🏜️ 건조함';
+    }
+    
+    // 강수 우선 표시
+    if (rainfall > 5) {
+      highlights[0] = '☔ 강한비';
+      highlights[1] = '🌂 우산필수';
+    } else if (rainfall > 0) {
+      highlights[1] = '💧 약한비';
+    }
+    
+    return highlights.slice(0, 2); // 최대 2개만
   };
 
 
