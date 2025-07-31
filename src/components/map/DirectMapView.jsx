@@ -117,6 +117,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     }
   };
 
+  // 지도 초기화 (한 번만 실행)
   useEffect(() => {
     let timeoutId;
     let attemptCount = 0;
@@ -383,6 +384,112 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         leafletMapRef.current = null;
       }
     };
+  }, []); // 빈 의존성 배열로 한 번만 실행
+
+  // 날씨 데이터 변경 시 레이어만 업데이트
+  useEffect(() => {
+    if (!leafletMapRef.current || !weatherData?.data?.temperature?.readings?.length) {
+      return;
+    }
+
+    console.log('🔄 날씨 레이어 업데이트 중...');
+    
+    // 기존 날씨 레이어 제거
+    leafletMapRef.current.eachLayer(layer => {
+      if (layer.options && (layer.options.className === 'weather-layer' || layer.options.className === 'weather-icon')) {
+        leafletMapRef.current.removeLayer(layer);
+      }
+    });
+
+    // 새로운 날씨 레이어 추가
+    const weatherRegions = [
+      { id: 'north', name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, stationIds: ['S104'], emoji: '🌳' },
+      { id: 'northwest', name: 'Northwest (Hwa Chong)', lat: 1.3500, lng: 103.7600, stationIds: ['S104', 'S60'], emoji: '🏫' },
+      { id: 'central', name: 'Central Singapore', lat: 1.3100, lng: 103.8300, stationIds: ['S107'], emoji: '🏙️' },
+      { id: 'west', name: 'Western Singapore', lat: 1.3300, lng: 103.7000, stationIds: ['S60'], emoji: '🏭' },
+      { id: 'east', name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, stationIds: ['S24', 'S107'], emoji: '✈️' },
+      { id: 'southeast', name: 'Southeast', lat: 1.3200, lng: 103.9200, stationIds: ['S24'], emoji: '🏘️' },
+      { id: 'south', name: 'Southern Singapore', lat: 1.2700, lng: 103.8500, stationIds: ['S24'], emoji: '🌊' }
+    ];
+
+    const tempReadings = weatherData.data.temperature.readings || [];
+    const humidityReadings = weatherData.data.humidity.readings || [];
+    const rainfallReadings = weatherData.data.rainfall.readings || [];
+
+    weatherRegions.forEach(region => {
+      const stationTemps = region.stationIds
+        .map(id => tempReadings.find(reading => reading.station === id))
+        .filter(Boolean);
+        
+      const stationHumidity = region.stationIds
+        .map(id => humidityReadings.find(reading => reading.station === id))
+        .filter(Boolean);
+        
+      const stationRainfall = region.stationIds
+        .map(id => rainfallReadings.find(reading => reading.station === id))
+        .filter(Boolean);
+
+      if (stationTemps.length > 0) {
+        const avgTemp = stationTemps.reduce((sum, s) => sum + (s.value || 0), 0) / stationTemps.length;
+        const avgHumidity = stationHumidity.length > 0 
+          ? stationHumidity.reduce((sum, s) => sum + (s.value || 0), 0) / stationHumidity.length 
+          : 0;
+        const totalRainfall = stationRainfall.length > 0 
+          ? stationRainfall.reduce((sum, s) => sum + (s.value || 0), 0) 
+          : 0;
+        
+        const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
+        const intensity = 0.4 + Math.abs(avgTemp - 28) / 6 * 0.3;
+        
+        // 권역별 원형 히트맵
+        const circle = window.L.circle([region.lat, region.lng], {
+          color: tempColor,
+          fillColor: tempColor,
+          fillOpacity: Math.min(intensity, 0.8),
+          radius: 8000,
+          weight: 3,
+          interactive: false,
+          pane: 'overlayPane',
+          className: 'weather-layer'
+        }).addTo(leafletMapRef.current);
+
+        // 날씨 아이콘 마커
+        const weatherIcon = window.L.divIcon({
+          html: `<div style="
+            width: 40px; height: 40px; 
+            background: rgba(255,255,255,0.9); 
+            border: 2px solid ${tempColor}; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          ">${region.emoji}</div>`,
+          className: 'weather-icon',
+          iconSize: [40, 40],
+          iconAnchor: [20, 20]
+        });
+
+        const marker = window.L.marker([region.lat, region.lng], { 
+          icon: weatherIcon,
+          className: 'weather-icon'
+        }).addTo(leafletMapRef.current);
+        
+        marker.bindPopup(`
+          <div style="padding: 12px; min-width: 200px;">
+            <strong>${region.emoji} ${region.name}</strong><br>
+            <div style="margin: 8px 0;">
+              <div style="color: ${tempColor}; font-size: 18px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
+              <div style="color: #0891b2;">💧 습도: ${Math.round(avgHumidity)}%</div>
+              ${totalRainfall > 0 ? `<div style="color: #059669;">🌧️ 강수: ${totalRainfall.toFixed(1)}mm</div>` : ''}
+            </div>
+            <div style="font-size: 11px; color: #666; margin-top: 8px;">
+              📡 ${stationTemps.length}개 기상관측소 평균
+            </div>
+          </div>
+        `);
+      }
+    });
+
+    console.log('✅ 날씨 레이어 업데이트 완료');
   }, [weatherData]);
 
   if (mapError) {

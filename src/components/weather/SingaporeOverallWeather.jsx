@@ -275,7 +275,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
 
       {/* 핵심 정보만 간결하게 표시 */}
       <div className="p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-4">
           {/* 습도 */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
@@ -328,17 +328,53 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
             </div>
             <div className="text-xs text-gray-500">자동 수집</div>
           </div>
+
+          {/* AI 분석 버튼 */}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Brain className="w-4 h-4 text-purple-500" />
+              <span className="text-xs text-gray-600 font-medium">AI 분석</span>
+            </div>
+            <button
+              onClick={handleRealAIAnalysis}
+              disabled={cohereLoading || !weatherData}
+              className={`text-sm font-semibold px-3 py-1 rounded-full transition-all ${
+                cohereLoading 
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : cohereService.isConfigured()
+                  ? 'bg-purple-100 text-purple-800 hover:bg-purple-200 active:scale-95'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {cohereLoading ? (
+                <div className="flex items-center gap-1">
+                  <div className="animate-spin rounded-full h-3 w-3 border border-purple-300 border-t-purple-600"></div>
+                  <span>분석중</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Zap className="w-3 h-3" />
+                  <span>실행</span>
+                </div>
+              )}
+            </button>
+            <div className="text-xs text-gray-500 mt-0.5">
+              {cohereService.isConfigured() ? 'Cohere AI' : 'API 미설정'}
+            </div>
+          </div>
         </div>
 
-        {/* 간결한 날씨 요약 */}
-        {aiSummary && !aiLoading && (
+        {/* 로컬 데이터 분석 */}
+        {!showRealAI && aiSummary && !aiLoading && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">데이터 기반 요약</span>
+            </div>
             <div className="text-sm text-gray-800 leading-relaxed">
-              {/* 핵심 정보만 간단하게 */}
               {aiSummary.summary.split('.')[0]}.
             </div>
             
-            {/* 하이라이트 중 가장 중요한 것만 1-2개 */}
             {aiSummary.highlights && aiSummary.highlights.length > 0 && (
               <div className="flex gap-1 mt-2">
                 {aiSummary.highlights.slice(0, 2).filter(h => !h.includes('NEA')).map((highlight, index) => (
@@ -348,6 +384,55 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Cohere AI 실시간 분석 결과 */}
+        {showRealAI && cohereAnalysis && (
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-purple-600" />
+                <span className="font-semibold text-purple-800">🤖 Cohere AI 실시간 분석</span>
+              </div>
+              <button
+                onClick={() => setShowRealAI(false)}
+                className="text-purple-600 hover:text-purple-800 text-sm px-2 py-1 rounded hover:bg-purple-100"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+              {cohereAnalysis.analysis}
+            </div>
+            
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-purple-200">
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-purple-700 font-medium">
+                  ✨ {cohereAnalysis.model}
+                </span>
+                <span className="text-xs text-purple-600">
+                  신뢰도 {Math.round(cohereAnalysis.confidence * 100)}%
+                </span>
+              </div>
+              <span className="text-xs text-purple-500">
+                {new Date(cohereAnalysis.timestamp).toLocaleTimeString('ko-KR')}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* AI 분석 로딩 */}
+        {cohereLoading && (
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-300 border-t-purple-600"></div>
+              <div>
+                <div className="text-sm font-medium text-purple-800">🤖 Cohere AI 분석 중...</div>
+                <div className="text-xs text-purple-600">실시간 날씨 데이터를 분석하고 있습니다</div>
+              </div>
+            </div>
           </div>
         )}
       </div>
