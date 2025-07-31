@@ -91,21 +91,8 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       });
       setShowRealAI(true);
 
-      // 2단계: 실시간 고급 분석 실행
-      try {
-        console.log('🚀 실시간 고급 AI 분석 시작');
-        const realTimeResult = await executeAdvancedRealTimeAnalysis();
-        
-        setCohereAnalysis(realTimeResult);
-        setShowRealAI(true);
-        return; // 성공하면 여기서 종료
-        
-      } catch (analysisError) {
-        console.warn('⚠️ 실시간 분석 실패, 기본 분석으로 전환:', analysisError);
-      }
-
-      // 3단계: GitHub Actions 최신 데이터 확인
-      console.log('🔄 GitHub Actions 최신 분석 데이터 확인 중...');
+      // 2단계: GitHub Actions 최신 Cohere 데이터 우선 확인
+      console.log('🔄 GitHub Actions 최신 Cohere 분석 데이터 확인 중...');
       const basePath = import.meta.env.BASE_URL || '/';
       const timestamp = new Date().getTime();
       
@@ -119,9 +106,9 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
           // 실제 Cohere 데이터인지 확인
           if (aiData.ai_model === 'Cohere Command API' && aiData.raw_analysis) {
             setCohereAnalysis({
-              analysis: aiData.summary || aiData.raw_analysis || '분석 데이터가 없습니다.',
+              analysis: `🤖 **실제 Cohere AI 분석 결과**\n\n${aiData.raw_analysis}\n\n📊 **분석 메타데이터**\n• 모델: ${aiData.ai_model}\n• 신뢰도: ${Math.round((aiData.confidence || 0.85) * 100)}%\n• 분석 시간: ${new Date(aiData.timestamp).toLocaleString('ko-KR')}\n• API 호출: ${aiData.api_calls_today}/${aiData.api_calls_limit}회`,
               confidence: aiData.confidence || 0.85,
-              model: 'GitHub Actions + Cohere AI',
+              model: 'GitHub Actions + Cohere Command API',
               timestamp: aiData.timestamp || new Date().toISOString(),
               isRealAnalysis: true
             });
@@ -130,6 +117,19 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
         }
       } catch (fetchError) {
         console.warn('⚠️ GitHub Actions AI 데이터 로드 실패:', fetchError);
+      }
+
+      // 3단계: 실시간 고급 분석 실행 (Cohere 데이터가 없는 경우)
+      try {
+        console.log('🚀 실시간 고급 AI 분석 시작 (Cohere 데이터 없음)');
+        const realTimeResult = await executeAdvancedRealTimeAnalysis();
+        
+        setCohereAnalysis(realTimeResult);
+        setShowRealAI(true);
+        return; // 성공하면 여기서 종료
+        
+      } catch (analysisError) {
+        console.warn('⚠️ 실시간 분석 실패, 기본 분석으로 전환:', analysisError);
       }
       
       // 백업: 로컬 심화 분석
