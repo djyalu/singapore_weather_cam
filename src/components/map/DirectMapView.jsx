@@ -57,46 +57,53 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           }).addTo(map);
 
           marker.bindPopup(`
-            <div style="padding: 12px; min-width: 250px;">
-              <strong>🚗 Traffic Camera ${camera.camera_id}</strong><br>
-              <div style="margin: 8px 0;">
+            <div style="padding: 16px; min-width: 320px; max-width: 400px;">
+              <div style="text-align: center; margin-bottom: 12px;">
+                <strong style="font-size: 16px; color: #1f2937;">🚗 Traffic Camera ${camera.camera_id}</strong>
+              </div>
+              
+              <div style="margin-bottom: 12px;">
                 <img src="${camera.image}" 
-                     alt="Traffic Camera" 
-                     style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;" 
+                     alt="Traffic Camera ${camera.camera_id}" 
+                     style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; border: 2px solid #e5e7eb;" 
                      loading="lazy" />
               </div>
-              <div style="font-size: 12px; color: #666;">
-                📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}
+              
+              <div style="background: #f9fafb; padding: 8px; border-radius: 6px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12px; color: #6b7280; font-weight: 500;">카메라 ID:</span>
+                  <span style="font-size: 12px; color: #1f2937; font-weight: 600;">${camera.camera_id}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12px; color: #6b7280; font-weight: 500;">위치:</span>
+                  <span style="font-size: 11px; color: #4b5563;">${latitude.toFixed(4)}, ${longitude.toFixed(4)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="font-size: 12px; color: #6b7280; font-weight: 500;">상태:</span>
+                  <span style="font-size: 12px; color: #059669; font-weight: 600;">🔴 LIVE</span>
+                </div>
               </div>
-              <button onclick="if(window.cameraSelectHandler) window.cameraSelectHandler({
-                id: '${camera.camera_id}',
-                name: 'Traffic Camera ${camera.camera_id}',
-                location: { latitude: ${latitude}, longitude: ${longitude} },
-                image: { url: '${camera.image}' }
-              })" style="
-                margin-top: 8px; 
-                width: 100%; 
-                background: #2563eb; 
-                color: white; 
-                border: none; 
-                padding: 6px 12px; 
-                border-radius: 4px; 
-                cursor: pointer;
-              ">📹 상세 보기</button>
+              
+              <div style="text-align: center; font-size: 11px; color: #9ca3af; margin-top: 8px;">
+                🕒 실시간 업데이트 • Singapore LTA
+              </div>
             </div>
-          `);
-
-          // 마커 클릭 시 카메라 선택
-          marker.on('click', () => {
-            if (onCameraSelect) {
-              onCameraSelect({
-                id: camera.camera_id,
-                name: `Traffic Camera ${camera.camera_id}`,
-                location: { latitude, longitude },
-                image: { url: camera.image }
-              });
-            }
+          `, {
+            maxWidth: 400,
+            className: 'custom-popup'
           });
+
+          // 마커 클릭 시 팝업만 표시 (추가 모달 비활성화)
+          // marker.on('click', () => {
+          //   if (onCameraSelect) {
+          //     onCameraSelect({
+          //       id: camera.camera_id,
+          //       name: `Traffic Camera ${camera.camera_id}`,
+          //       location: { latitude, longitude },
+          //       image: { url: camera.image }
+          //     });
+          //   }
+          // });
         }
       });
       
