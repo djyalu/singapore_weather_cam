@@ -15,7 +15,6 @@ on:
         description: 'Force AI analysis even if daily limit reached'
         type: boolean
         default: true
-      
   push:
     branches: 
       - main
