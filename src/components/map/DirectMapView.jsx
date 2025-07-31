@@ -10,10 +10,105 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
   const leafletMapRef = useRef(null);
   const [mapError, setMapError] = useState(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [trafficCameras, setTrafficCameras] = useState([]);
+  const [isLoadingTraffic, setIsLoadingTraffic] = useState(true);
 
   // Singapore 중심 좌표 (Hwa Chong International School)
   const SINGAPORE_CENTER = [1.3437, 103.7640];
   const DEFAULT_ZOOM = 12;
+
+  // 교통 카메라 로딩 함수
+  const loadTrafficCameras = async (map) => {
+    try {
+      setIsLoadingTraffic(true);
+      const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const cameras = data.items?.[0]?.cameras || [];
+      
+      cameras.forEach((camera) => {
+        if (camera.location && camera.image) {
+          const { latitude, longitude } = camera.location;
+          
+          // 교통 카메라 아이콘
+          const cameraIcon = window.L.divIcon({
+            html: `<div style="
+              width: 24px; height: 24px; 
+              background: #f97316; 
+              border: 2px solid white; 
+              border-radius: 50%; 
+              display: flex; align-items: center; justify-content: center; 
+              font-size: 12px; color: white; font-weight: bold;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              cursor: pointer;
+            ">🚗</div>`,
+            className: 'traffic-camera-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+
+          const marker = window.L.marker([latitude, longitude], { 
+            icon: cameraIcon,
+            zIndexOffset: 1000 
+          }).addTo(map);
+
+          marker.bindPopup(`
+            <div style="padding: 12px; min-width: 250px;">
+              <strong>🚗 Traffic Camera ${camera.camera_id}</strong><br>
+              <div style="margin: 8px 0;">
+                <img src="${camera.image}" 
+                     alt="Traffic Camera" 
+                     style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;" 
+                     loading="lazy" />
+              </div>
+              <div style="font-size: 12px; color: #666;">
+                📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}
+              </div>
+              <button onclick="if(window.cameraSelectHandler) window.cameraSelectHandler({
+                id: '${camera.camera_id}',
+                name: 'Traffic Camera ${camera.camera_id}',
+                location: { latitude: ${latitude}, longitude: ${longitude} },
+                image: { url: '${camera.image}' }
+              })" style="
+                margin-top: 8px; 
+                width: 100%; 
+                background: #2563eb; 
+                color: white; 
+                border: none; 
+                padding: 6px 12px; 
+                border-radius: 4px; 
+                cursor: pointer;
+              ">📹 상세 보기</button>
+            </div>
+          `);
+
+          // 마커 클릭 시 카메라 선택
+          marker.on('click', () => {
+            if (onCameraSelect) {
+              onCameraSelect({
+                id: camera.camera_id,
+                name: `Traffic Camera ${camera.camera_id}`,
+                location: { latitude, longitude },
+                image: { url: camera.image }
+              });
+            }
+          });
+        }
+      });
+      
+      setTrafficCameras(cameras);
+      console.log(`✅ ${cameras.length}개 교통 카메라 로드 완료`);
+      
+    } catch (error) {
+      console.error('교통 카메라 로딩 실패:', error);
+    } finally {
+      setIsLoadingTraffic(false);
+    }
+  };
 
   useEffect(() => {
     let timeoutId;
@@ -118,29 +213,70 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           console.warn('마커 생성 오류:', markerError);
         }
 
-        // 날씨 데이터 마커 추가
+        // 권역별 날씨 히트맵 추가
         if (weatherData?.locations?.length) {
-          weatherData.locations.slice(0, 8).forEach((station, index) => {
-            if (station.temperature && parseFloat(station.temperature) > 0) {
-              try {
-                // Singapore 범위 내 랜덤 좌표
-                const lat = SINGAPORE_CENTER[0] + (Math.random() - 0.5) * 0.15;
-                const lng = SINGAPORE_CENTER[1] + (Math.random() - 0.5) * 0.15;
-                
-                const marker = window.L.marker([lat, lng]).addTo(map);
-                marker.bindPopup(`
-                  <div style="padding: 8px; min-width: 200px;">
-                    <strong>🌡️ ${station.station_id || `Station ${index + 1}`}</strong><br>
-                    <div style="margin: 4px 0;">
-                      <span style="color: #2563eb;">🌡️ 온도: ${station.temperature}°C</span><br>
-                      <span style="color: #16a34a;">💧 습도: ${station.humidity || '--'}%</span><br>
-                      ${station.rainfall ? `<span style="color: #0891b2;">🌧️ 강수: ${station.rainfall}mm</span>` : ''}
-                    </div>
+          const weatherRegions = [
+            { id: 'north', name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, stationIds: ['S121', 'S118', 'S104'], emoji: '🌳' },
+            { id: 'northwest', name: 'Northwest (Hwa Chong)', lat: 1.3500, lng: 103.7600, stationIds: ['S104', 'S116', 'S109'], emoji: '🏫' },
+            { id: 'central', name: 'Central Singapore', lat: 1.3100, lng: 103.8300, stationIds: ['S109', 'S106', 'S107'], emoji: '🏙️' },
+            { id: 'west', name: 'Western Singapore', lat: 1.3300, lng: 103.7000, stationIds: ['S104', 'S60', 'S50'], emoji: '🏭' },
+            { id: 'east', name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, stationIds: ['S24', 'S107', 'S43'], emoji: '✈️' },
+            { id: 'southeast', name: 'Southeast', lat: 1.3200, lng: 103.9200, stationIds: ['S24', 'S43', 'S107'], emoji: '🏘️' },
+            { id: 'south', name: 'Southern Singapore', lat: 1.2700, lng: 103.8500, stationIds: ['S109', 'S106', 'S24'], emoji: '🌊' }
+          ];
+
+          weatherRegions.forEach(region => {
+            const stationData = region.stationIds
+              .map(id => weatherData.locations.find(loc => loc.station_id === id))
+              .filter(Boolean);
+
+            if (stationData.length > 0) {
+              const avgTemp = stationData.reduce((sum, s) => sum + (s.temperature || 0), 0) / stationData.length;
+              const avgHumidity = stationData.reduce((sum, s) => sum + (s.humidity || 0), 0) / stationData.length;
+              const totalRainfall = stationData.reduce((sum, s) => sum + (s.rainfall || 0), 0);
+              
+              const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
+              const intensity = 0.2 + Math.abs(avgTemp - 28) / 6 * 0.2;
+              
+              // 권역별 원형 히트맵
+              const circle = window.L.circle([region.lat, region.lng], {
+                color: tempColor,
+                fillColor: tempColor,
+                fillOpacity: intensity,
+                radius: 4000,
+                weight: 2,
+                interactive: false
+              }).addTo(map);
+
+              // 날씨 아이콘 마커
+              const weatherIcon = window.L.divIcon({
+                html: `<div style="
+                  width: 40px; height: 40px; 
+                  background: rgba(255,255,255,0.9); 
+                  border: 2px solid ${tempColor}; 
+                  border-radius: 50%; 
+                  display: flex; align-items: center; justify-content: center; 
+                  font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                ">${region.emoji}</div>`,
+                className: 'weather-icon',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+              });
+
+              const marker = window.L.marker([region.lat, region.lng], { icon: weatherIcon }).addTo(map);
+              marker.bindPopup(`
+                <div style="padding: 12px; min-width: 200px;">
+                  <strong>${region.emoji} ${region.name}</strong><br>
+                  <div style="margin: 8px 0;">
+                    <div style="color: ${tempColor}; font-size: 18px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
+                    <div style="color: #0891b2;">💧 습도: ${Math.round(avgHumidity)}%</div>
+                    ${totalRainfall > 0 ? `<div style="color: #059669;">🌧️ 강수: ${totalRainfall.toFixed(1)}mm</div>` : ''}
                   </div>
-                `);
-              } catch (stationError) {
-                console.warn(`스테이션 ${index} 마커 생성 오류:`, stationError);
-              }
+                  <div style="font-size: 11px; color: #666; margin-top: 8px;">
+                    📡 ${stationData.length}개 기상관측소 평균
+                  </div>
+                </div>
+              `);
             }
           });
         }
@@ -149,6 +285,9 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         setMapError(null);
         
         console.log('🎉 Leaflet 지도 초기화 완료!');
+        
+        // 교통 카메라 로딩
+        loadTrafficCameras(map);
         
       } catch (error) {
         console.error('🚨 Leaflet 지도 초기화 실패:', error);
@@ -212,10 +351,25 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       
       {/* 지도 정보 */}
       {isMapReady && (
-        <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-lg p-3 shadow-lg">
-          <div className="text-sm font-medium text-gray-800">🗺️ OpenStreetMap</div>
-          <div className="text-xs text-gray-600">실시간 Singapore 지도</div>
-          <div className="text-xs text-blue-600">확대/축소 지원</div>
+        <div className="absolute bottom-4 left-4 bg-white bg-opacity-95 rounded-lg p-3 shadow-lg border border-gray-200">
+          <div className="text-sm font-medium text-gray-800 mb-2">🗺️ 실시간 지도 정보</div>
+          <div className="space-y-1 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-orange-500 rounded-full border border-white"></div>
+              <span>교통 카메라 ({trafficCameras.length}개)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full border border-white"></div>
+              <span>권역별 날씨</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-purple-600 rounded-full border border-white"></div>
+              <span>🏫 Hwa Chong School</span>
+            </div>
+          </div>
+          <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
+            OpenStreetMap • 확대/축소/드래그 가능
+          </div>
         </div>
       )}
     </div>

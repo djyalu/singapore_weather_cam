@@ -5,7 +5,7 @@ import LoadingScreen from './components/common/LoadingScreen';
 import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashboard';
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
-import SimpleMapView from './components/map/SimpleMapView'; // 안정적인 지도 (권역별 히트맵 + 90개 카메라)
+import DirectMapView from './components/map/DirectMapView'; // 실제 OpenStreetMap 지도
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -117,18 +117,18 @@ const App = () => {
           </div>
 
 
-          {/* 안정적인 SimpleMapView - 무한스피닝 해결 */}
+          {/* 실제 OpenStreetMap 지도 */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800 mb-2">
-                🗺️ Singapore 실시간 지도 & 날씨
+                🗺️ Singapore 실제 지도 & 날씨
               </h2>
               <p className="text-sm text-gray-600">
-                안정적인 CSS 기반 지도 + 권역별 날씨 히트맵 + 90개 교통 카메라 (실시간 업데이트)
+                OpenStreetMap 타일 기반 실제 지도 + 실시간 날씨 데이터 + 교통 카메라 (확대/축소 가능)
               </p>
             </div>
             <div className="min-h-[600px]">
-              <SimpleMapView
+              <DirectMapView
                 weatherData={weatherData}
                 selectedRegion={activeRegion}
                 className="w-full h-full"
