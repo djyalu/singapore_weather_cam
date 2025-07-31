@@ -59,25 +59,22 @@ const RegionalWeatherCard = React.memo(({
   };
 
   const getRegionEmoji = (region) => {
-    switch (region?.toLowerCase()) {
-      case 'hwa chong':
-      case 'bukit timah':
-        return '🏫';
-      case 'newton':
-      case 'orchard':
-        return '🏙️';
-      case 'changi':
-      case 'east':
-        return '✈️';
-      case 'jurong':
-      case 'west':
-        return '🏭';
-      case 'woodlands':
-      case 'north':
-        return '🌳';
-      default:
-        return '📍';
+    // region이 이미 이모지를 포함하고 있으면 빈 문자열 반환
+    if (!region || typeof region !== 'string') return '📍';
+    
+    // 이미 이모지가 포함된 경우 처리
+    if (region.includes('🏫') || region.includes('🏙️') || region.includes('✈️') || 
+        region.includes('🏭') || region.includes('🌳') || region.includes('🏝️')) {
+      return ''; // 이미 이모지가 있으므로 추가하지 않음
     }
+    
+    const lowerRegion = region.toLowerCase();
+    if (lowerRegion.includes('hwa chong') || lowerRegion.includes('bukit timah')) return '🏫';
+    if (lowerRegion.includes('newton') || lowerRegion.includes('orchard')) return '🏙️';
+    if (lowerRegion.includes('changi') || lowerRegion.includes('east')) return '✈️';
+    if (lowerRegion.includes('jurong') || lowerRegion.includes('west')) return '🏭';
+    if (lowerRegion.includes('woodlands') || lowerRegion.includes('north')) return '🌳';
+    return '📍';
   };
 
   const cardBg = getTemperatureBackground(temperature);
@@ -114,12 +111,14 @@ const RegionalWeatherCard = React.memo(({
         {/* 헤더: 지역명과 날씨 아이콘 */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-xl" role="img" aria-label={region}>
-              {getRegionEmoji(region)}
-            </span>
+            {getRegionEmoji(region) && (
+              <span className="text-xl" role="img" aria-label={region || 'region'}>
+                {getRegionEmoji(region)}
+              </span>
+            )}
             <div>
               <h3 className="font-semibold text-gray-800 text-sm leading-tight">
-                {region}
+                {region || 'Unknown Region'}
               </h3>
             </div>
           </div>
@@ -133,12 +132,12 @@ const RegionalWeatherCard = React.memo(({
           <div className={`text-2xl font-bold ${tempColor} mb-1`}>
             {formatTemperature(temperature)}°C
           </div>
-          {feelsLike !== null && feelsLike !== undefined && (
+          {(feelsLike !== null && feelsLike !== undefined && !isNaN(feelsLike)) && (
             <div className="text-sm text-gray-500">
               체감 {formatTemperature(feelsLike)}°C
             </div>
           )}
-          {weatherDescription && (
+          {weatherDescription && typeof weatherDescription === 'string' && (
             <div className="text-xs text-gray-600 mt-1">
               {weatherDescription}
             </div>
@@ -159,12 +158,12 @@ const RegionalWeatherCard = React.memo(({
           <div className="flex items-center gap-1">
             <Wind className="w-3 h-3 text-green-500" />
             <span className="text-gray-700 font-medium">
-              {windDirection || '--'}
+              {(windDirection && typeof windDirection === 'string') ? windDirection : '--'}
             </span>
           </div>
 
           {/* 강우량 (있을 때만) */}
-          {rainfall > 0 && (
+          {(rainfall && typeof rainfall === 'number' && rainfall > 0) && (
             <div className="flex items-center gap-1">
               <span className="text-blue-600">💧</span>
               <span className="text-blue-700 font-medium">

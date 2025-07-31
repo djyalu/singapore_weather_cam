@@ -19,57 +19,73 @@ class NEAAlertService {
   }
 
   /**
-   * 종합적인 기상 경보 정보 수집
+   * 실제 NEA API를 통한 기상 경보 정보 수집
    */
   async getWeatherAlerts() {
     try {
-      console.log('🚨 NEA 기상 경보 정보 수집 시작...');
+      console.log('🚨 NEA Singapore API 기상 경보 정보 수집 시작...');
       
-      // 병렬로 여러 API 호출
-      const [weatherData, psiData, tempData, rainfallData] = await Promise.allSettled([
+      // 병렬로 여러 NEA API 호출 (가장 중요한 것들만)
+      const [weatherResult, tempResult, psiResult] = await Promise.allSettled([
         this.fetchWeatherForecast(),
-        this.fetchPSI(),
-        this.fetchTemperature(),
-        this.fetchRainfall()
+        this.fetchTemperature(), 
+        this.fetchPSI()
       ]);
 
       const alerts = [];
       const now = new Date();
 
-      // 날씨 경보 분석
-      if (weatherData.status === 'fulfilled' && weatherData.value) {
-        const weatherAlerts = this.analyzeWeatherForecast(weatherData.value);
+      // 2시간 날씨 예보 분석
+      if (weatherResult.status === 'fulfilled' && weatherResult.value) {
+        console.log('📡 Weather forecast data received:', weatherResult.value);
+        const weatherAlerts = this.analyzeWeatherForecast(weatherResult.value);
         alerts.push(...weatherAlerts);
+      } else {
+        console.warn('⚠️ Weather forecast API failed:', weatherResult.reason?.message);
       }
 
-      // 대기질 경보 분석
-      if (psiData.status === 'fulfilled' && psiData.value) {
-        const psiAlerts = this.analyzePSI(psiData.value);
-        alerts.push(...psiAlerts);
-      }
-
-      // 온도 경보 분석
-      if (tempData.status === 'fulfilled' && tempData.value) {
-        const tempAlerts = this.analyzeTemperature(tempData.value);
+      // 온도 데이터 분석  
+      if (tempResult.status === 'fulfilled' && tempResult.value) {
+        console.log('🌡️ Temperature data received:', tempResult.value);
+        const tempAlerts = this.analyzeTemperature(tempResult.value);
         alerts.push(...tempAlerts);
+      } else {
+        console.warn('⚠️ Temperature API failed:', tempResult.reason?.message);
       }
 
-      // 강수 경보 분석
-      if (rainfallData.status === 'fulfilled' && rainfallData.value) {
-        const rainAlerts = this.analyzeRainfall(rainfallData.value);
-        alerts.push(...rainAlerts);
+      // PSI 대기질 분석
+      if (psiResult.status === 'fulfilled' && psiResult.value) {
+        console.log('🍃 PSI data received:', psiResult.value);
+        const psiAlerts = this.analyzePSI(psiResult.value);
+        alerts.push(...psiAlerts);
+      } else {
+        console.warn('⚠️ PSI API failed:', psiResult.reason?.message);
       }
 
-      // 일반 정보 추가 (경보가 없을 때)
+      // API 호출이 모두 실패한 경우 기본 메시지
       if (alerts.length === 0) {
-        alerts.push({
-          type: 'info',
-          priority: 'low',
-          icon: '🌤️',
-          message: '현재 특별한 기상 경보는 없습니다. 쾌적한 날씨를 즐기세요!',
-          timestamp: now.toISOString(),
-          source: 'NEA Singapore'
-        });
+        const hasAnyData = [weatherResult, tempResult, psiResult].some(r => r.status === 'fulfilled');
+        
+        if (hasAnyData) {
+          alerts.push({
+            type: 'info',
+            priority: 'low',
+            icon: '🌤️',
+            message: '현재 특별한 기상 경보는 없습니다. 쾌적한 날씨를 즐기세요!',
+            timestamp: now.toISOString(),
+            source: 'NEA Singapore'
+          });
+        } else {
+          // 모든 API가 실패한 경우
+          alerts.push({
+            type: 'warning',
+            priority: 'medium',
+            icon: '⚠️',
+            message: 'NEA API 서버 일시 장애. 직접 NEA 웹사이트에서 최신 정보를 확인하세요',
+            timestamp: now.toISOString(),
+            source: 'System Monitor'
+          });
+        }
       }
 
       // 우선순위별 정렬
@@ -82,52 +98,136 @@ class NEAAlertService {
       return alerts;
 
     } catch (error) {
-      console.error('🚨 NEA 경보 정보 수집 실패:', error);
+      console.error('🚨 NEA 경보 정보 수집 중 오류:', error);
       return [{
         type: 'error',
-        priority: 'low',
-        icon: '⚠️',
-        message: '기상 경보 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.',
+        priority: 'medium',
+        icon: '❌',
+        message: '기상 경보 시스템 오류 발생. NEA 웹사이트에서 직접 확인해주세요',
         timestamp: new Date().toISOString(),
-        source: 'System'
+        source: 'Error Handler'
       }];
     }
   }
 
   /**
-   * 2시간 날씨 예보 데이터 가져오기
+   * 2시간 날씨 예보 데이터 가져오기 (CORS 처리)
    */
   async fetchWeatherForecast() {
-    const response = await fetch(`${this.baseURL}${this.endpoints.weather}`);
-    if (!response.ok) throw new Error(`Weather API Error: ${response.status}`);
-    return await response.json();
+    try {
+      const url = `${this.baseURL}${this.endpoints.weather}`;
+      console.log('📡 Fetching weather forecast from:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Singapore Weather Monitor/1.0'
+        },
+        mode: 'cors'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Weather API Error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Weather forecast data loaded successfully');
+      return data;
+    } catch (error) {
+      console.error('❌ Weather forecast fetch failed:', error);
+      throw error;
+    }
   }
 
   /**
-   * PSI (대기질 지수) 데이터 가져오기
+   * PSI (대기질 지수) 데이터 가져오기 (CORS 처리)
    */
   async fetchPSI() {
-    const response = await fetch(`${this.baseURL}${this.endpoints.psi}`);
-    if (!response.ok) throw new Error(`PSI API Error: ${response.status}`);
-    return await response.json();
+    try {
+      const url = `${this.baseURL}${this.endpoints.psi}`;
+      console.log('📡 Fetching PSI data from:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Singapore Weather Monitor/1.0'
+        },
+        mode: 'cors'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`PSI API Error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ PSI data loaded successfully');
+      return data;
+    } catch (error) {
+      console.error('❌ PSI fetch failed:', error);
+      throw error;
+    }
   }
 
   /**
-   * 온도 데이터 가져오기
+   * 온도 데이터 가져오기 (CORS 처리)
    */
   async fetchTemperature() {
-    const response = await fetch(`${this.baseURL}${this.endpoints.temperature}`);
-    if (!response.ok) throw new Error(`Temperature API Error: ${response.status}`);
-    return await response.json();
+    try {
+      const url = `${this.baseURL}${this.endpoints.temperature}`;
+      console.log('📡 Fetching temperature data from:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Singapore Weather Monitor/1.0'
+        },
+        mode: 'cors'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Temperature API Error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Temperature data loaded successfully');
+      return data;
+    } catch (error) {
+      console.error('❌ Temperature fetch failed:', error);
+      throw error;
+    }
   }
 
   /**
-   * 강수량 데이터 가져오기
+   * 강수량 데이터 가져오기 (CORS 처리)
    */
   async fetchRainfall() {
-    const response = await fetch(`${this.baseURL}${this.endpoints.rainfall}`);
-    if (!response.ok) throw new Error(`Rainfall API Error: ${response.status}`);
-    return await response.json();
+    try {
+      const url = `${this.baseURL}${this.endpoints.rainfall}`;
+      console.log('📡 Fetching rainfall data from:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Singapore Weather Monitor/1.0'
+        },
+        mode: 'cors'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Rainfall API Error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Rainfall data loaded successfully');
+      return data;
+    } catch (error) {
+      console.error('❌ Rainfall fetch failed:', error);
+      throw error;
+    }
   }
 
   /**
