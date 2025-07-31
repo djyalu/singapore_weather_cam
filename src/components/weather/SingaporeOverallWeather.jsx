@@ -408,46 +408,24 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
           </div>
         </div>
 
-        {/* 간결한 AI 요약 - 접을 수 있는 형태 */}
+        {/* 간결한 날씨 요약 */}
         {aiSummary && !aiLoading && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-start gap-2">
-              <Sparkles className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm text-gray-800 leading-relaxed">
-                  {aiSummary.summary.length > 150 
-                    ? `${aiSummary.summary.substring(0, 150)}...` 
-                    : aiSummary.summary}
-                </div>
-                
-                {/* 하이라이트 태그들 - 최대 3개만 표시 */}
-                {aiSummary.highlights && aiSummary.highlights.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {aiSummary.highlights.slice(0, 3).map((highlight, index) => (
-                      <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
-                        {highlight}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                  <span className={aiSummary.isRealAnalysis ? 'text-blue-600' : 'text-orange-600'}>
-                    {aiSummary.isRealAnalysis ? '🤖 AI 분석' : '📊 데이터 분석'}
+            <div className="text-sm text-gray-800 leading-relaxed">
+              {/* 핵심 정보만 간단하게 */}
+              {aiSummary.summary.split('.')[0]}.
+            </div>
+            
+            {/* 하이라이트 중 가장 중요한 것만 1-2개 */}
+            {aiSummary.highlights && aiSummary.highlights.length > 0 && (
+              <div className="flex gap-1 mt-2">
+                {aiSummary.highlights.slice(0, 2).filter(h => !h.includes('NEA')).map((highlight, index) => (
+                  <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                    {highlight}
                   </span>
-                  <span>신뢰도 {Math.round(aiSummary.confidence * 100)}%</span>
-                </div>
+                ))}
               </div>
-            </div>
-          </div>
-        )}
-
-        {aiLoading && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
-              <span className="text-sm text-gray-600">날씨 상황 분석 중...</span>
-            </div>
+            )}
           </div>
         )}
       </div>
