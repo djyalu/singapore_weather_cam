@@ -221,26 +221,50 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         }
 
         // 권역별 날씨 히트맵 추가
-        if (weatherData?.locations?.length) {
+        if (weatherData?.data?.temperature?.readings?.length) {
+          console.log('🌡️ 날씨 데이터 구조:', weatherData.data);
+          
+          // 실제 사용 가능한 스테이션: S107, S60, S24, S104
           const weatherRegions = [
-            { id: 'north', name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, stationIds: ['S121', 'S118', 'S104'], emoji: '🌳' },
-            { id: 'northwest', name: 'Northwest (Hwa Chong)', lat: 1.3500, lng: 103.7600, stationIds: ['S104', 'S116', 'S109'], emoji: '🏫' },
-            { id: 'central', name: 'Central Singapore', lat: 1.3100, lng: 103.8300, stationIds: ['S109', 'S106', 'S107'], emoji: '🏙️' },
-            { id: 'west', name: 'Western Singapore', lat: 1.3300, lng: 103.7000, stationIds: ['S104', 'S60', 'S50'], emoji: '🏭' },
-            { id: 'east', name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, stationIds: ['S24', 'S107', 'S43'], emoji: '✈️' },
-            { id: 'southeast', name: 'Southeast', lat: 1.3200, lng: 103.9200, stationIds: ['S24', 'S43', 'S107'], emoji: '🏘️' },
-            { id: 'south', name: 'Southern Singapore', lat: 1.2700, lng: 103.8500, stationIds: ['S109', 'S106', 'S24'], emoji: '🌊' }
+            { id: 'north', name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, stationIds: ['S104'], emoji: '🌳' },
+            { id: 'northwest', name: 'Northwest (Hwa Chong)', lat: 1.3500, lng: 103.7600, stationIds: ['S104', 'S60'], emoji: '🏫' },
+            { id: 'central', name: 'Central Singapore', lat: 1.3100, lng: 103.8300, stationIds: ['S107'], emoji: '🏙️' },
+            { id: 'west', name: 'Western Singapore', lat: 1.3300, lng: 103.7000, stationIds: ['S60'], emoji: '🏭' },
+            { id: 'east', name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, stationIds: ['S24', 'S107'], emoji: '✈️' },
+            { id: 'southeast', name: 'Southeast', lat: 1.3200, lng: 103.9200, stationIds: ['S24'], emoji: '🏘️' },
+            { id: 'south', name: 'Southern Singapore', lat: 1.2700, lng: 103.8500, stationIds: ['S24'], emoji: '🌊' }
           ];
 
+          const tempReadings = weatherData.data.temperature.readings || [];
+          const humidityReadings = weatherData.data.humidity.readings || [];
+          const rainfallReadings = weatherData.data.rainfall.readings || [];
+
           weatherRegions.forEach(region => {
-            const stationData = region.stationIds
-              .map(id => weatherData.locations.find(loc => loc.station_id === id))
+            // 온도 데이터 매칭
+            const stationTemps = region.stationIds
+              .map(id => tempReadings.find(reading => reading.station === id))
+              .filter(Boolean);
+              
+            // 습도 데이터 매칭  
+            const stationHumidity = region.stationIds
+              .map(id => humidityReadings.find(reading => reading.station === id))
+              .filter(Boolean);
+              
+            // 강수량 데이터 매칭
+            const stationRainfall = region.stationIds
+              .map(id => rainfallReadings.find(reading => reading.station === id))
               .filter(Boolean);
 
-            if (stationData.length > 0) {
-              const avgTemp = stationData.reduce((sum, s) => sum + (s.temperature || 0), 0) / stationData.length;
-              const avgHumidity = stationData.reduce((sum, s) => sum + (s.humidity || 0), 0) / stationData.length;
-              const totalRainfall = stationData.reduce((sum, s) => sum + (s.rainfall || 0), 0);
+            console.log(`📍 ${region.name}: 온도 ${stationTemps.length}개, 습도 ${stationHumidity.length}개, 강수 ${stationRainfall.length}개 스테이션`);
+
+            if (stationTemps.length > 0) {
+              const avgTemp = stationTemps.reduce((sum, s) => sum + (s.value || 0), 0) / stationTemps.length;
+              const avgHumidity = stationHumidity.length > 0 
+                ? stationHumidity.reduce((sum, s) => sum + (s.value || 0), 0) / stationHumidity.length 
+                : 0;
+              const totalRainfall = stationRainfall.length > 0 
+                ? stationRainfall.reduce((sum, s) => sum + (s.value || 0), 0) 
+                : 0;
               
               const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
               const intensity = 0.2 + Math.abs(avgTemp - 28) / 6 * 0.2;

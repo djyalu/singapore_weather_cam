@@ -322,162 +322,135 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
   };
 
   return (
-    <div className={`bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-xl shadow-xl p-6 ${className}`}
-         style={{ minHeight: '200px' }}>
-      {/* 헤더 */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-3 rounded-full">
-            <Cloud className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">Singapore Weather</h2>
-            <p className="text-blue-100 text-sm">실시간 전국 평균 기상 정보</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-white/90 text-sm">현재 시간</div>
-          <div className="text-lg font-mono bg-white/20 px-3 py-1 rounded-lg">
-            {formatCurrentTime()}
-          </div>
-        </div>
-      </div>
-
-      {/* 주요 날씨 정보 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {/* 온도 */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <Thermometer className="w-6 h-6 text-red-300" />
-            <span className="text-sm font-medium text-white/90">평균 온도</span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className={`text-3xl font-bold ${getTemperatureColor(overallData.temperature)}`}>
-              {overallData.temperature.toFixed(1)}
-            </span>
-            <span className="text-xl text-white/80">°C</span>
-          </div>
-          <div className="text-xs text-white/70 mt-1">
-            {overallData.stationCount}개 관측소 평균
-          </div>
-        </div>
-
-        {/* 습도 */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <Droplets className="w-6 h-6 text-blue-300" />
-            <span className="text-sm font-medium text-white/90">상대 습도</span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className={`text-3xl font-bold ${getHumidityColor(overallData.humidity)}`}>
-              {Math.round(overallData.humidity)}
-            </span>
-            <span className="text-xl text-white/80">%</span>
-          </div>
-          <div className="text-xs text-white/70 mt-1">
-            {overallData.humidity >= 80 ? '매우 습함' : overallData.humidity >= 60 ? '습함' : '보통'}
-          </div>
-        </div>
-
-        {/* 강수량 & 날씨 상태 */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-2xl">{getWeatherIcon(overallData.forecast)}</span>
-            <span className="text-sm font-medium text-white/90">날씨 상태</span>
-          </div>
-          <div className="text-lg font-semibold text-white mb-1">
-            {overallData.forecast === 'Partly Cloudy (Day)' ? '부분적으로 흐림' :
-             overallData.forecast === 'Partly Cloudy (Night)' ? '부분적으로 흐림 (밤)' :
-             overallData.forecast === 'Fair (Day)' ? '맑음' :
-             overallData.forecast === 'Fair (Night)' ? '맑음 (밤)' :
-             overallData.forecast}
-          </div>
-          <div className="text-xs text-white/70">
-            강수량: {overallData.rainfall.toFixed(1)}mm
-          </div>
-        </div>
-      </div>
-
-      {/* AI 날씨 요약 섹션 */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-6">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="bg-white/20 p-2 rounded-full">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold text-white">AI 날씨 요약</h4>
-            <p className="text-xs text-white/70">
-              {aiSummary?.aiModel === 'Smart Analysis Engine' 
-                ? 'NEA 데이터 기반 스마트 분석' 
-                : 'AI 기반 실시간 분석'
-              }
-            </p>
-          </div>
-        </div>
-        
-        {aiLoading ? (
-          <div className="flex items-center gap-3 text-white/80">
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
-            <span className="text-sm">날씨 상황 분석 중...</span>
-          </div>
-        ) : aiSummary ? (
-          <div className="space-y-3">
-            <div className="text-white text-sm leading-relaxed">
-              {aiSummary.summary}
+    <div className={`bg-white rounded-xl shadow-lg border border-gray-100 ${className}`}>
+      {/* 컴팩트한 헤더 - 그라데이션 배경 */}
+      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-xl p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{getWeatherIcon(overallData.forecast)}</span>
+              <div>
+                <h2 className="text-xl font-bold">Singapore Weather</h2>
+                <p className="text-blue-100 text-sm">실시간 전국 기상 정보</p>
+              </div>
             </div>
-            
-            {aiSummary.highlights && aiSummary.highlights.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {aiSummary.highlights.map((highlight, index) => (
-                  <span key={index} className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
-                    • {highlight}
+          </div>
+          
+          {/* 핵심 온도 정보를 헤더에 배치 */}
+          <div className="text-right">
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold text-white drop-shadow-lg">
+                {overallData.temperature.toFixed(1)}
+              </span>
+              <span className="text-lg text-blue-100">°C</span>
+            </div>
+            <div className="text-xs text-blue-100">
+              {overallData.stationCount}개 관측소 평균
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 핵심 정보만 간결하게 표시 */}
+      <div className="p-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          {/* 습도 */}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Droplets className="w-4 h-4 text-blue-500" />
+              <span className="text-xs text-gray-600 font-medium">습도</span>
+            </div>
+            <div className="text-xl font-bold text-gray-800">
+              {Math.round(overallData.humidity)}%
+            </div>
+            <div className="text-xs text-gray-500">
+              {overallData.humidity >= 80 ? '높음' : overallData.humidity >= 60 ? '보통' : '낮음'}
+            </div>
+          </div>
+
+          {/* 강수량 */}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Cloud className="w-4 h-4 text-gray-500" />
+              <span className="text-xs text-gray-600 font-medium">강수량</span>
+            </div>
+            <div className="text-xl font-bold text-gray-800">
+              {overallData.rainfall.toFixed(1)}
+            </div>
+            <div className="text-xs text-gray-500">mm</div>
+          </div>
+
+          {/* 날씨 상태 */}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <span className="text-sm">{getWeatherIcon(overallData.forecast)}</span>
+              <span className="text-xs text-gray-600 font-medium">상태</span>
+            </div>
+            <div className="text-sm font-semibold text-gray-800">
+              {overallData.forecast === 'Partly Cloudy (Day)' ? '부분흐림' :
+               overallData.forecast === 'Partly Cloudy (Night)' ? '부분흐림' :
+               overallData.forecast === 'Fair (Day)' ? '맑음' :
+               overallData.forecast === 'Fair (Night)' ? '맑음' :
+               overallData.forecast}
+            </div>
+          </div>
+
+          {/* 업데이트 시간 */}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Clock className="w-4 h-4 text-green-500" />
+              <span className="text-xs text-gray-600 font-medium">업데이트</span>
+            </div>
+            <div className="text-sm font-semibold text-gray-800">
+              {formatLastUpdate(overallData.lastUpdate)}
+            </div>
+            <div className="text-xs text-gray-500">자동 수집</div>
+          </div>
+        </div>
+
+        {/* 간결한 AI 요약 - 접을 수 있는 형태 */}
+        {aiSummary && !aiLoading && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <Sparkles className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-gray-800 leading-relaxed">
+                  {aiSummary.summary.length > 150 
+                    ? `${aiSummary.summary.substring(0, 150)}...` 
+                    : aiSummary.summary}
+                </div>
+                
+                {/* 하이라이트 태그들 - 최대 3개만 표시 */}
+                {aiSummary.highlights && aiSummary.highlights.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {aiSummary.highlights.slice(0, 3).map((highlight, index) => (
+                      <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                        {highlight}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                  <span className={aiSummary.isRealAnalysis ? 'text-blue-600' : 'text-orange-600'}>
+                    {aiSummary.isRealAnalysis ? '🤖 AI 분석' : '📊 데이터 분석'}
                   </span>
-                ))}
+                  <span>신뢰도 {Math.round(aiSummary.confidence * 100)}%</span>
+                </div>
               </div>
-            )}
-            
-            {aiSummary.recommendation && (
-              <div className="bg-white/10 rounded-lg p-3 border-l-4 border-white/30">
-                <p className="text-white/90 text-sm">
-                  <span className="font-medium">💡 추천:</span> {aiSummary.recommendation}
-                </p>
-              </div>
-            )}
-            
-            <div className="flex items-center justify-between text-xs text-white/60">
-              <span className={aiSummary.isRealAnalysis ? 'text-green-200' : 'text-orange-200'}>
-                {aiSummary.isRealAnalysis ? '🤖 AI 기반 분석' : '📊 데이터 기반 분석'} • {aiSummary.aiModel}
-              </span>
-              <span>
-                신뢰도: {Math.round(aiSummary.confidence * 100)}%
-              </span>
             </div>
           </div>
-        ) : (
-          <div className="text-white/60 text-sm text-center py-2">
-            AI 날씨 요약을 불러오는 중...
+        )}
+
+        {aiLoading && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+              <span className="text-sm text-gray-600">날씨 상황 분석 중...</span>
+            </div>
           </div>
         )}
       </div>
-
-      {/* 업데이트 정보 */}
-      <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3">
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-white/70" />
-          <span className="text-sm text-white/90">마지막 업데이트:</span>
-          <span className="text-sm font-medium text-white">
-            {formatLastUpdate(overallData.lastUpdate)}
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <RefreshCw className="w-4 h-4 text-white/70" />
-          <span className="text-xs text-white/70">
-            자동 수집: 3시간마다
-          </span>
-        </div>
-      </div>
-
     </div>
   );
 });
