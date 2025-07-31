@@ -14,7 +14,7 @@ import path from 'path';
 
 const COHERE_API_KEY = process.env.COHERE_API_KEY;
 const FORCE_ANALYSIS = process.env.FORCE_ANALYSIS === 'true';
-const MAX_DAILY_CALLS = 20;
+const MAX_DAILY_CALLS = 100; // Cohere Trial: 1000/month, 현재 사용량: ~250/month
 const OUTPUT_DIR = 'data/weather-summary';
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'latest.json');
 const WEATHER_DATA_FILE = 'data/weather/latest.json';
