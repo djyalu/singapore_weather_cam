@@ -433,84 +433,114 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         </div>
       </div>
 
-      {/* 지도 영역 - 선명한 Singapore 지도 배경 */}
-      <div className="h-[500px] relative overflow-hidden border-2 border-gray-300 rounded-lg" style={{
-        background: 'linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 50%, #81d4fa 100%)'
+      {/* 지도 영역 - 매우 선명한 Singapore 지도 배경 */}
+      <div className="h-[500px] relative overflow-hidden border-4 border-blue-400 rounded-lg shadow-lg" style={{
+        background: '#1976d2',
+        backgroundImage: 'linear-gradient(135deg, #42a5f5 0%, #1976d2 50%, #0d47a1 100%)'
       }}>
-        {/* Singapore 지형 배경 - 더 선명하고 실제적인 디자인 */}
+        {/* Singapore 지형 배경 - 매우 강한 대비 */}
         <div className="absolute inset-0">
-          {/* 바다 배경 (전체) */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-blue-300 to-blue-400"></div>
+          {/* 바다 배경 (전체) - 진한 파란색 */}
+          <div className="absolute inset-0" style={{
+            background: 'radial-gradient(ellipse at center, #1565c0 0%, #0d47a1 50%, #01579b 100%)'
+          }}></div>
           
-          {/* 조호르 해협 (북쪽 물) */}
-          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-400 via-blue-300 to-transparent"></div>
+          {/* 조호르 해협 (북쪽 물) - 더 진한 파란색 */}
+          <div className="absolute top-0 left-0 w-full h-32" style={{
+            background: 'linear-gradient(180deg, #1976d2 0%, #1565c0 50%, transparent 100%)'
+          }}></div>
           
-          {/* 싱가포르 해협 (남쪽 물) */}
-          <div className="absolute bottom-0 left-0 w-full h-28 bg-gradient-to-t from-blue-500 via-blue-400 to-transparent"></div>
+          {/* 싱가포르 해협 (남쪽 물) - 더 진한 파란색 */}
+          <div className="absolute bottom-0 left-0 w-full h-28" style={{
+            background: 'linear-gradient(0deg, #0d47a1 0%, #1565c0 50%, transparent 100%)'
+          }}></div>
           
-          {/* 말레이시아 본토 (북쪽) */}
-          <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-green-400 via-green-300 to-green-200 opacity-80"></div>
+          {/* 말레이시아 본토 (북쪽) - 매우 선명한 녹색 */}
+          <div className="absolute top-0 left-0 w-full h-20" style={{
+            background: 'linear-gradient(180deg, #2e7d32 0%, #388e3c 40%, #4caf50 80%, rgba(76,175,80,0.3) 100%)',
+            border: '2px solid #1b5e20'
+          }}></div>
           
-          {/* Singapore 본섬 - 메인 육지 */}
-          <div className="absolute" style={{
+          {/* Singapore 본섬 - 매우 선명한 메인 육지 */}
+          <div className="absolute shadow-2xl" style={{
             top: '25%',
             left: '20%',
             width: '60%',
             height: '50%',
-            background: 'linear-gradient(45deg, #c8e6c9 0%, #a5d6a7 30%, #81c784 60%, #66bb6a 100%)',
+            background: 'linear-gradient(45deg, #43a047 0%, #4caf50 30%, #66bb6a 60%, #81c784 100%)',
             borderRadius: '30% 70% 60% 40% / 40% 50% 60% 50%',
-            border: '2px solid #4caf50',
-            opacity: 0.9
+            border: '3px solid #2e7d32',
+            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.3)'
           }}></div>
           
-          {/* Jurong Island (서쪽) */}
-          <div className="absolute" style={{
+          {/* Jurong Island (서쪽) - 공업지역 회색톤 */}
+          <div className="absolute shadow-lg" style={{
             top: '45%',
             left: '8%',
             width: '12%',
             height: '15%',
-            background: '#a5d6a7',
+            background: 'linear-gradient(45deg, #8bc34a 0%, #9ccc65 50%, #aed581 100%)',
             borderRadius: '50%',
-            border: '1px solid #66bb6a'
+            border: '2px solid #689f38',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
           }}></div>
           
-          {/* Sentosa Island (남쪽) */}
-          <div className="absolute" style={{
+          {/* Sentosa Island (남쪽) - 관광지 밝은 녹색 */}
+          <div className="absolute shadow-lg" style={{
             bottom: '28%',
             left: '42%',
             width: '8%',
             height: '6%',
-            background: '#c8e6c9',
+            background: 'linear-gradient(60deg, #66bb6a 0%, #81c784 50%, #a5d6a7 100%)',
             borderRadius: '60% 40% 50% 50%',
-            border: '1px solid #81c784'
+            border: '2px solid #4caf50',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
           }}></div>
           
-          {/* Pulau Ubin (동북쪽) */}
-          <div className="absolute" style={{
+          {/* Pulau Ubin (동북쪽) - 자연보호구역 진한 녹색 */}
+          <div className="absolute shadow-lg" style={{
             top: '20%',
             right: '15%',
             width: '6%',
             height: '8%',
-            background: '#a5d6a7',
+            background: 'linear-gradient(30deg, #43a047 0%, #4caf50 50%, #66bb6a 100%)',
             borderRadius: '40% 60% 70% 30%',
-            border: '1px solid #66bb6a'
+            border: '2px solid #2e7d32',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
           }}></div>
           
-          {/* 도로/도시 패턴 오버레이 */}
-          <div className="absolute inset-0 opacity-15" style={{
+          {/* 도로/도시 패턴 오버레이 - 더 선명한 격자 */}
+          <div className="absolute inset-0 opacity-25" style={{
             backgroundImage: `
-              linear-gradient(90deg, rgba(100,100,100,0.3) 1px, transparent 1px),
-              linear-gradient(rgba(100,100,100,0.3) 1px, transparent 1px)
+              linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px),
+              linear-gradient(0deg, rgba(255,255,255,0.4) 1px, transparent 1px)
             `,
-            backgroundSize: '25px 25px'
+            backgroundSize: '20px 20px'
           }}></div>
           
-          {/* 물결 패턴 (바다 느낌) */}
-          <div className="absolute inset-0 opacity-20" style={{
-            backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.4) 2px, transparent 2px), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.4) 2px, transparent 2px)',
-            backgroundSize: '30px 30px',
-            animation: 'float 6s ease-in-out infinite'
+          {/* 물결 패턴 (바다 느낌) - 더 선명한 애니메이션 */}
+          <div className="absolute inset-0 opacity-30" style={{
+            backgroundImage: `
+              radial-gradient(circle at 25% 75%, rgba(255,255,255,0.6) 1px, transparent 2px),
+              radial-gradient(circle at 75% 25%, rgba(255,255,255,0.6) 1px, transparent 2px),
+              radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 1px, transparent 2px)
+            `,
+            backgroundSize: '40px 40px, 35px 35px, 25px 25px',
+            animation: 'float 8s ease-in-out infinite'
           }}></div>
+          
+          {/* 지명 라벨들 */}
+          <div className="absolute top-2 left-4 text-white text-xs font-bold bg-black/50 px-2 py-1 rounded">
+            🇲🇾 MALAYSIA
+          </div>
+          <div className="absolute bottom-2 right-4 text-white text-xs font-bold bg-black/50 px-2 py-1 rounded">
+            🇮🇩 INDONESIA
+          </div>
+          <div className="absolute" style={{top: '35%', left: '45%'}}>
+            <div className="text-white text-sm font-bold bg-green-800/80 px-3 py-1 rounded-full border border-white/50">
+              🇸🇬 SINGAPORE
+            </div>
+          </div>
         </div>
 
         {/* 권역별 히트맵 레이어 */}
