@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singapore OneMap 테스트</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .map-container {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .style-btn {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+        
+        .style-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .style-btn.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .search-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .search-input {
+            width: 250px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .info-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.95);
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 12px;
+            max-width: 300px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .api-info {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .feature-card {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ Singapore OneMap 테스트</h1>
+            <p>Singapore 정부 공식 지도 서비스 데모</p>
+        </div>
+        
+        <div class="map-container">
+            <!-- 검색 박스 -->
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="주소나 장소명 검색... (예: Marina Bay Sands)"
+                />
+            </div>
+            
+            <!-- 스타일 컨트롤 -->
+            <div class="controls">
+                <div style="font-weight: bold; margin-bottom: 8px; font-size: 12px;">지도 스타일</div>
+                <button class="style-btn active" data-style="Default">🗺️ 기본 지도</button>
+                <button class="style-btn" data-style="Satellite">🛰️ 위성 지도</button>
+                <button class="style-btn" data-style="Night">🌙 야간 모드</button>
+                <button class="style-btn" data-style="Grey">⚫ 회색 지도</button>
+                <button class="style-btn" data-style="Original">📍 오리지널</button>
+            </div>
+            
+            <!-- 지도 -->
+            <div id="map"></div>
+            
+            <!-- 정보 패널 -->
+            <div class="info-panel">
+                <div style="font-weight: bold; margin-bottom: 8px;">🇸🇬 Singapore OneMap</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #dc3545;"></div>
+                    <span>주요 랜드마크</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #007bff;"></div>
+                    <span>검색 결과</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #28a745;"></div>
+                    <span>관심 지점</span>
+                </div>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd; color: #666;">
+                    © Singapore Land Authority<br>
+                    확대/축소/드래그 가능
+                </div>
+            </div>
+        </div>
+        
+        <!-- API 정보 -->
+        <div class="api-info">
+            <h2>📊 OneMap API 기능</h2>
+            <p>Singapore 정부에서 제공하는 공식 지도 서비스의 주요 기능들입니다.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🗺️ 지도 타일</h3>
+                    <ul>
+                        <li>5가지 스타일 지원</li>
+                        <li>고해상도 타일</li>
+                        <li>빠른 로딩 속도</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🔍 주소 검색</h3>
+                    <ul>
+                        <li>정확한 Geocoding</li>
+                        <li>주소 자동완성</li>
+                        <li>POI 검색 지원</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🛣️ 경로 안내</h3>
+                    <ul>
+                        <li>실시간 경로 계산</li>
+                        <li>다양한 교통수단</li>
+                        <li>거리/시간 정보</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>📍 위치 서비스</h3>
+                    <ul>
+                        <li>역 지오코딩</li>
+                        <li>인근 시설 검색</li>
+                        <li>행정구역 정보</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Singapore 중심 좌표
+        const SINGAPORE_CENTER = [1.3521, 103.8198]; // CBD
+        let map;
+        let currentLayer;
+        let searchMarkers = [];
+
+        // 지도 초기화
+        function initMap() {
+            map = L.map('map').setView(SINGAPORE_CENTER, 12);
+
+            // 기본 OneMap 타일 레이어
+            currentLayer = L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.onemap.sg/">OneMap</a> © Singapore Land Authority',
+                subdomains: ['a', 'b', 'c', 'd'],
+                maxZoom: 19
+            }).addTo(map);
+
+            // 주요 랜드마크 마커 추가
+            addLandmarks();
+
+            console.log('✅ OneMap 초기화 완료');
+        }
+
+        // 주요 랜드마크 추가
+        function addLandmarks() {
+            const landmarks = [
+                { name: 'Marina Bay Sands', lat: 1.2834, lng: 103.8607, icon: '🏨' },
+                { name: 'Singapore Flyer', lat: 1.2893, lng: 103.8634, icon: '🎡' },
+                { name: 'Merlion Park', lat: 1.2868, lng: 103.8545, icon: '🦁' },
+                { name: 'Gardens by the Bay', lat: 1.2816, lng: 103.8636, icon: '🌳' },
+                { name: 'Sentosa Island', lat: 1.2494, lng: 103.8303, icon: '🏝️' },
+                { name: 'Orchard Road', lat: 1.3048, lng: 103.8318, icon: '🛍️' }
+            ];
+
+            landmarks.forEach(landmark => {
+                const customIcon = L.divIcon({
+                    html: `<div style="
+                        width: 32px; height: 32px; 
+                        background: #dc3545; 
+                        border: 2px solid white; 
+                        border-radius: 50%; 
+                        display: flex; align-items: center; justify-content: center; 
+                        font-size: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    ">${landmark.icon}</div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                L.marker([landmark.lat, landmark.lng], { icon: customIcon })
+                    .addTo(map)
+                    .bindPopup(`
+                        <div style="text-align: center; padding: 8px;">
+                            <strong>${landmark.icon} ${landmark.name}</strong><br>
+                            <small>📍 ${landmark.lat.toFixed(4)}, ${landmark.lng.toFixed(4)}</small>
+                        </div>
+                    `);
+            });
+        }
+
+        // 지도 스타일 변경
+        function changeMapStyle(styleName) {
+            if (currentLayer) {
+                map.removeLayer(currentLayer);
+            }
+
+            currentLayer = L.tileLayer(`https://maps-{s}.onemap.sg/v3/${styleName}/{z}/{x}/{y}.png`, {
+                attribution: '© <a href="https://www.onemap.sg/">OneMap</a> © Singapore Land Authority',
+                subdomains: ['a', 'b', 'c', 'd'],
+                maxZoom: 19
+            }).addTo(map);
+
+            // 활성 버튼 업데이트
+            document.querySelectorAll('.style-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.style === styleName) {
+                    btn.classList.add('active');
+                }
+            });
+
+            console.log(`✅ 지도 스타일 변경: ${styleName}`);
+        }
+
+        // 주소 검색
+        async function searchAddress(query) {
+            try {
+                // 기존 검색 마커 제거
+                searchMarkers.forEach(marker => map.removeLayer(marker));
+                searchMarkers = [];
+
+                const response = await fetch(
+                    `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${encodeURIComponent(query)}&returnGeom=Y&getAddrDetails=Y&pageNum=1`
+                );
+
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0) {
+                    const result = data.results[0];
+                    const lat = parseFloat(result.LATITUDE);
+                    const lng = parseFloat(result.LONGITUDE);
+
+                    // 지도 이동
+                    map.setView([lat, lng], 16);
+
+                    // 검색 결과 마커 추가
+                    const searchIcon = L.divIcon({
+                        html: `<div style="
+                            width: 28px; height: 28px; 
+                            background: #007bff; 
+                            border: 2px solid white; 
+                            border-radius: 50%; 
+                            display: flex; align-items: center; justify-content: center; 
+                            font-size: 14px; color: white; font-weight: bold;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                        ">📍</div>`,
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
+                    });
+
+                    const marker = L.marker([lat, lng], { icon: searchIcon })
+                        .addTo(map)
+                        .bindPopup(`
+                            <div style="padding: 10px; min-width: 200px;">
+                                <strong>🔍 ${result.SEARCHVAL}</strong><br>
+                                <div style="margin: 6px 0; font-size: 13px; color: #666;">
+                                    ${result.ADDRESS || '주소 정보 없음'}
+                                </div>
+                                <div style="font-size: 11px; color: #999;">
+                                    📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}
+                                </div>
+                            </div>
+                        `)
+                        .openPopup();
+
+                    searchMarkers.push(marker);
+                    
+                    console.log(`✅ 검색 완료: ${result.SEARCHVAL}`);
+                } else {
+                    alert('검색 결과가 없습니다.');
+                }
+            } catch (error) {
+                console.error('검색 실패:', error);
+                alert('검색 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 이벤트 리스너 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            // 지도 초기화
+            initMap();
+
+            // 스타일 버튼 이벤트
+            document.querySelectorAll('.style-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    changeMapStyle(button.dataset.style);
+                });
+            });
+
+            // 검색 이벤트
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                    searchAddress(e.target.value.trim());
+                }
+            });
+
+            // 샘플 검색어 자동 입력 (데모용)
+            setTimeout(() => {
+                searchInput.placeholder = "Try: Marina Bay Sands, Sentosa, Orchard Road";
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

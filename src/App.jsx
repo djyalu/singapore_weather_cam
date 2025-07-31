@@ -6,6 +6,7 @@ import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashbo
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
 import DirectMapView from './components/map/DirectMapView'; // 실제 OpenStreetMap 지도
+import OneMapTestComponent from './components/map/OneMapTestComponent'; // OneMap API 테스트
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -116,6 +117,9 @@ const App = () => {
             />
           </div>
 
+
+          {/* OneMap API 실제 테스트 */}
+          <OneMapTestComponent />
 
           {/* 실제 OpenStreetMap 지도 */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
