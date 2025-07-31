@@ -8,6 +8,22 @@ import { fetchTrafficCameras } from '../../services/trafficCameraService';
  * 실제 좌표 기반 교통 카메라와 날씨 스테이션 표시
  */
 const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', onCameraSelect }) => {
+  // CSS 애니메이션을 위한 스타일 추가
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-3px); }
+      }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [trafficCameras, setTrafficCameras] = useState([]);
   const [showTrafficCameras, setShowTrafficCameras] = useState(true);
@@ -417,29 +433,83 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         </div>
       </div>
 
-      {/* 지도 영역 - 더 큰 크기와 명확한 배경 */}
-      <div className="h-[500px] relative bg-gradient-to-br from-blue-100 to-green-100 overflow-hidden border-2 border-gray-200">
-        {/* 싱가포르 배경 스타일 - 더 명확한 시각화 */}
+      {/* 지도 영역 - 선명한 Singapore 지도 배경 */}
+      <div className="h-[500px] relative overflow-hidden border-2 border-gray-300 rounded-lg" style={{
+        background: 'linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 50%, #81d4fa 100%)'
+      }}>
+        {/* Singapore 지형 배경 - 더 선명하고 실제적인 디자인 */}
         <div className="absolute inset-0">
-          {/* 기본 배경 - 연한 회색 (육지) */}
-          <div className="absolute inset-0 bg-gray-100"></div>
+          {/* 바다 배경 (전체) */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-blue-300 to-blue-400"></div>
           
-          {/* 물 영역 (북쪽 - 조호르 해협) */}
-          <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-blue-300/60 to-blue-200/30"></div>
+          {/* 조호르 해협 (북쪽 물) */}
+          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-400 via-blue-300 to-transparent"></div>
           
-          {/* 물 영역 (남쪽 - 싱가포르 해협) */}
-          <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-blue-300/60 to-blue-200/30"></div>
+          {/* 싱가포르 해협 (남쪽 물) */}
+          <div className="absolute bottom-0 left-0 w-full h-28 bg-gradient-to-t from-blue-500 via-blue-400 to-transparent"></div>
           
-          {/* 말레이시아 (북쪽 경계) */}
-          <div className="absolute top-0 left-0 w-full h-12 bg-green-300/40"></div>
+          {/* 말레이시아 본토 (북쪽) */}
+          <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-green-400 via-green-300 to-green-200 opacity-80"></div>
           
-          {/* 싱가포르 본섬 강조 */}
-          <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-green-100/60 rounded-lg"></div>
+          {/* Singapore 본섬 - 메인 육지 */}
+          <div className="absolute" style={{
+            top: '25%',
+            left: '20%',
+            width: '60%',
+            height: '50%',
+            background: 'linear-gradient(45deg, #c8e6c9 0%, #a5d6a7 30%, #81c784 60%, #66bb6a 100%)',
+            borderRadius: '30% 70% 60% 40% / 40% 50% 60% 50%',
+            border: '2px solid #4caf50',
+            opacity: 0.9
+          }}></div>
           
-          {/* 격자 패턴으로 지도 느낌 추가 */}
-          <div className="absolute inset-0 opacity-10" style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.3) 1px, transparent 0)',
-            backgroundSize: '20px 20px'
+          {/* Jurong Island (서쪽) */}
+          <div className="absolute" style={{
+            top: '45%',
+            left: '8%',
+            width: '12%',
+            height: '15%',
+            background: '#a5d6a7',
+            borderRadius: '50%',
+            border: '1px solid #66bb6a'
+          }}></div>
+          
+          {/* Sentosa Island (남쪽) */}
+          <div className="absolute" style={{
+            bottom: '28%',
+            left: '42%',
+            width: '8%',
+            height: '6%',
+            background: '#c8e6c9',
+            borderRadius: '60% 40% 50% 50%',
+            border: '1px solid #81c784'
+          }}></div>
+          
+          {/* Pulau Ubin (동북쪽) */}
+          <div className="absolute" style={{
+            top: '20%',
+            right: '15%',
+            width: '6%',
+            height: '8%',
+            background: '#a5d6a7',
+            borderRadius: '40% 60% 70% 30%',
+            border: '1px solid #66bb6a'
+          }}></div>
+          
+          {/* 도로/도시 패턴 오버레이 */}
+          <div className="absolute inset-0 opacity-15" style={{
+            backgroundImage: `
+              linear-gradient(90deg, rgba(100,100,100,0.3) 1px, transparent 1px),
+              linear-gradient(rgba(100,100,100,0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: '25px 25px'
+          }}></div>
+          
+          {/* 물결 패턴 (바다 느낌) */}
+          <div className="absolute inset-0 opacity-20" style={{
+            backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.4) 2px, transparent 2px), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.4) 2px, transparent 2px)',
+            backgroundSize: '30px 30px',
+            animation: 'float 6s ease-in-out infinite'
           }}></div>
         </div>
 
