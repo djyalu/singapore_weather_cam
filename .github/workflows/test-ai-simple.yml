@@ -1,0 +1,47 @@
+name: Simple AI Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - main
+    paths:
+      - '.github/workflows/test-ai-simple.yml'
+
+jobs:
+  test-ai:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Test Cohere API
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+        run: |
+          echo "Testing Cohere API connection..."
+          echo "API Key length: ${#COHERE_API_KEY}"
+          node -e "
+            const key = process.env.COHERE_API_KEY;
+            console.log('API Key set:', !!key);
+            console.log('API Key length:', key ? key.length : 0);
+            if (key) {
+              console.log('First 10 chars:', key.substring(0, 10) + '...');
+            }
+          "
+          
+      - name: Run AI Script
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          FORCE_ANALYSIS: true
+        run: |
+          echo "Running AI weather summary script..."
+          node scripts/ai-weather-summary.js
