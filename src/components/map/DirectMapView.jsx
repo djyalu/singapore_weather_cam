@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 /**
  * 직접 Leaflet API를 사용하는 지도 컴포넌트
- * CDN Leaflet과 완벽 호환
+ * CDN Leaflet과 완벽 호환 - 깜빡임 문제 해결
  */
 const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', onCameraSelect }) => {
   const mapRef = useRef(null);
@@ -92,18 +92,6 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             maxWidth: 400,
             className: 'custom-popup'
           });
-
-          // 마커 클릭 시 팝업만 표시 (추가 모달 비활성화)
-          // marker.on('click', () => {
-          //   if (onCameraSelect) {
-          //     onCameraSelect({
-          //       id: camera.camera_id,
-          //       name: `Traffic Camera ${camera.camera_id}`,
-          //       location: { latitude, longitude },
-          //       image: { url: camera.image }
-          //     });
-          //   }
-          // });
         }
       });
       
@@ -162,7 +150,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         // 컨테이너 초기화
         mapRef.current.innerHTML = '';
 
-        // Leaflet 지도 생성 (더 관대한 설정)
+        // Leaflet 지도 생성
         const map = window.L.map(mapRef.current, {
           center: SINGAPORE_CENTER,
           zoom: DEFAULT_ZOOM,
@@ -180,13 +168,12 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           setIsMapReady(true);
         });
 
-        // 타일 레이어 로드 이벤트
+        // 타일 레이어
         const tileLayer = window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           maxZoom: 18,
           minZoom: 10,
           crossOrigin: true,
-          // 타일 로딩 개선
           keepBuffer: 2,
           updateWhenZooming: false,
           updateWhenIdle: true
@@ -247,110 +234,6 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           });
         } catch (markerError) {
           console.warn('학교 마커 생성 오류:', markerError);
-        }
-
-        // 권역별 날씨 히트맵 추가
-        console.log('🔍 날씨 데이터 확인:', {
-          hasWeatherData: !!weatherData,
-          hasData: !!weatherData?.data,
-          hasTemp: !!weatherData?.data?.temperature,
-          hasReadings: !!weatherData?.data?.temperature?.readings,
-          readingsLength: weatherData?.data?.temperature?.readings?.length,
-          fullWeatherData: weatherData
-        });
-        
-        if (weatherData?.data?.temperature?.readings?.length) {
-          console.log('✅ 날씨 히트맵 렌더링 시작');
-          
-          // 실제 사용 가능한 스테이션: S107, S60, S24, S104
-          const weatherRegions = [
-            { id: 'north', name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, stationIds: ['S104'], emoji: '🌳' },
-            { id: 'northwest', name: 'Northwest (Hwa Chong)', lat: 1.3500, lng: 103.7600, stationIds: ['S104', 'S60'], emoji: '🏫' },
-            { id: 'central', name: 'Central Singapore', lat: 1.3100, lng: 103.8300, stationIds: ['S107'], emoji: '🏙️' },
-            { id: 'west', name: 'Western Singapore', lat: 1.3300, lng: 103.7000, stationIds: ['S60'], emoji: '🏭' },
-            { id: 'east', name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, stationIds: ['S24', 'S107'], emoji: '✈️' },
-            { id: 'southeast', name: 'Southeast', lat: 1.3200, lng: 103.9200, stationIds: ['S24'], emoji: '🏘️' },
-            { id: 'south', name: 'Southern Singapore', lat: 1.2700, lng: 103.8500, stationIds: ['S24'], emoji: '🌊' }
-          ];
-
-          const tempReadings = weatherData.data.temperature.readings || [];
-          const humidityReadings = weatherData.data.humidity.readings || [];
-          const rainfallReadings = weatherData.data.rainfall.readings || [];
-
-          weatherRegions.forEach(region => {
-            // 온도 데이터 매칭
-            const stationTemps = region.stationIds
-              .map(id => tempReadings.find(reading => reading.station === id))
-              .filter(Boolean);
-              
-            // 습도 데이터 매칭  
-            const stationHumidity = region.stationIds
-              .map(id => humidityReadings.find(reading => reading.station === id))
-              .filter(Boolean);
-              
-            // 강수량 데이터 매칭
-            const stationRainfall = region.stationIds
-              .map(id => rainfallReadings.find(reading => reading.station === id))
-              .filter(Boolean);
-
-            console.log(`📍 ${region.name}: 온도 ${stationTemps.length}개, 습도 ${stationHumidity.length}개, 강수 ${stationRainfall.length}개 스테이션`);
-
-            if (stationTemps.length > 0) {
-              const avgTemp = stationTemps.reduce((sum, s) => sum + (s.value || 0), 0) / stationTemps.length;
-              const avgHumidity = stationHumidity.length > 0 
-                ? stationHumidity.reduce((sum, s) => sum + (s.value || 0), 0) / stationHumidity.length 
-                : 0;
-              const totalRainfall = stationRainfall.length > 0 
-                ? stationRainfall.reduce((sum, s) => sum + (s.value || 0), 0) 
-                : 0;
-              
-              const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
-              const intensity = 0.4 + Math.abs(avgTemp - 28) / 6 * 0.3; // 더 진하게
-              
-              console.log(`🎨 ${region.name}: ${avgTemp.toFixed(1)}°C → 색상: ${tempColor}, 투명도: ${intensity.toFixed(2)}`);
-              
-              // 권역별 원형 히트맵 (더 크고 진하게)
-              const circle = window.L.circle([region.lat, region.lng], {
-                color: tempColor,
-                fillColor: tempColor,
-                fillOpacity: Math.min(intensity, 0.8), // 최대 80% 투명도
-                radius: 8000, // 반지름 2배로 증가
-                weight: 3, // 테두리 굵게
-                interactive: false,
-                pane: 'overlayPane' // 교통 카메라보다 아래 레이어
-              }).addTo(map);
-
-              // 날씨 아이콘 마커
-              const weatherIcon = window.L.divIcon({
-                html: `<div style="
-                  width: 40px; height: 40px; 
-                  background: rgba(255,255,255,0.9); 
-                  border: 2px solid ${tempColor}; 
-                  border-radius: 50%; 
-                  display: flex; align-items: center; justify-content: center; 
-                  font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                ">${region.emoji}</div>`,
-                className: 'weather-icon',
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-              });
-
-              const marker = window.L.marker([region.lat, region.lng], { icon: weatherIcon }).addTo(map);
-              marker.bindPopup(`
-                <div style="padding: 12px; min-width: 200px;">
-                  <strong>${region.emoji} ${region.name}</strong><br>
-                  <div style="margin: 8px 0;">
-                    <div style="color: ${tempColor}; font-size: 18px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
-                    <div style="color: #0891b2;">💧 습도: ${Math.round(avgHumidity)}%</div>
-                    ${totalRainfall > 0 ? `<div style="color: #059669;">🌧️ 강수: ${totalRainfall.toFixed(1)}mm</div>` : ''}
-                  </div>
-                  <div style="font-size: 11px; color: #666; margin-top: 8px;">
-                    📡 ${stationData.length}개 기상관측소 평균
-                  </div>
-                </div>
-              `);
-            }
-          });
         }
 
         leafletMapRef.current = map;
@@ -541,7 +424,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
               <span>권역별 날씨</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-yellow-400 rounded-full border border-orange-400" style="display: flex; align-items: center; justify-content: center; font-size: 8px;">⭐</div>
+              <div className="w-3 h-3 bg-yellow-400 rounded-full border border-orange-400" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px'}}>⭐</div>
               <span>⭐ Hwa Chong School</span>
             </div>
           </div>
