@@ -169,12 +169,13 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               ref={tickerRef}
               className={`flex items-center h-full ${isPaused ? '' : 'animate-scroll-left'}`}
               style={{
-                animationDuration: `${Math.max(30, displayAlerts.length * 8)}s`,
+                animationDuration: `${Math.max(15, displayAlerts.length * 4)}s`, // 2배 속도로 변경
                 animationPlayState: isPaused ? 'paused' : 'running'
               }}
             >
+              {/* 원본 메시지들 */}
               {displayAlerts.map((alert, index) => (
-                <div key={`${alert.timestamp}-${index}`} className={getAlertStyle(alert)}>
+                <div key={`${alert.timestamp}-${index}`} className={`${getAlertStyle(alert)} mr-8`}>
                   <span className="text-lg">{alert.icon}</span>
                   {getAlertIcon(alert)}
                   <span className="font-medium">{alert.message}</span>
@@ -187,9 +188,9 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
                 </div>
               ))}
               
-              {/* 무한 스크롤을 위한 복제 */}
+              {/* 무한 스크롤을 위한 복제 - 간격 추가 */}
               {displayAlerts.map((alert, index) => (
-                <div key={`duplicate-${alert.timestamp}-${index}`} className={getAlertStyle(alert)}>
+                <div key={`duplicate-${alert.timestamp}-${index}`} className={`${getAlertStyle(alert)} mr-8`}>
                   <span className="text-lg">{alert.icon}</span>
                   {getAlertIcon(alert)}
                   <span className="font-medium">{alert.message}</span>
@@ -201,6 +202,9 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
                   </span>
                 </div>
               ))}
+              
+              {/* 추가 패딩으로 부드러운 전환 */}
+              <div className="w-32 flex-shrink-0"></div>
             </div>
           )}
         </div>

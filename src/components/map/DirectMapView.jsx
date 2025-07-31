@@ -271,11 +271,21 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
   // 날씨 데이터 변경 시 레이어만 업데이트
   useEffect(() => {
-    if (!leafletMapRef.current || !weatherData?.data?.temperature?.readings?.length) {
+    if (!leafletMapRef.current || !weatherData?.data?.temperature?.readings) {
+      console.log('⚠️ 날씨 히트맵 업데이트 실패: 지도 또는 데이터 없음', {
+        hasMap: !!leafletMapRef.current,
+        hasWeatherData: !!weatherData,
+        hasTemperatureData: !!weatherData?.data?.temperature,
+        hasReadings: !!weatherData?.data?.temperature?.readings,
+        readingsLength: weatherData?.data?.temperature?.readings?.length
+      });
       return;
     }
 
-    console.log('🔄 날씨 레이어 업데이트 중...');
+    console.log('🔄 날씨 히트맵 레이어 업데이트 중...', {
+      tempReadings: weatherData.data.temperature.readings.length,
+      stations: weatherData.data.temperature.readings.map(r => r.station)
+    });
     
     // 기존 날씨 레이어 제거
     leafletMapRef.current.eachLayer(layer => {
@@ -328,13 +338,38 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         const circle = window.L.circle([region.lat, region.lng], {
           color: tempColor,
           fillColor: tempColor,
-          fillOpacity: Math.min(intensity, 0.8),
+          fillOpacity: Math.min(intensity, 0.6),
           radius: 8000,
-          weight: 3,
-          interactive: false,
+          weight: 2,
+          interactive: true,
           pane: 'overlayPane',
           className: 'weather-layer'
         }).addTo(leafletMapRef.current);
+        
+        console.log(`🌡️ 히트맵 원형 생성: ${region.name}`, {
+          temperature: avgTemp.toFixed(1),
+          color: tempColor,
+          opacity: Math.min(intensity, 0.6),
+          position: [region.lat, region.lng]
+        });
+        
+        // 히트맵 원형에 팝업 추가
+        circle.bindPopup(`
+          <div style="text-align: center; padding: 12px; min-width: 200px;">
+            <strong style="color: ${tempColor}; font-size: 16px;">${region.emoji} ${region.name}</strong><br>
+            <div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+              <div style="color: #495057; font-size: 14px; font-weight: 600;">🌡️ ${avgTemp.toFixed(1)}°C</div>
+              ${avgHumidity > 0 ? `<div style="color: #6c757d; font-size: 12px;">💧 습도 ${avgHumidity.toFixed(0)}%</div>` : ''}
+              ${totalRainfall > 0 ? `<div style="color: #0d6efd; font-size: 12px;">🌧️ 강수 ${totalRainfall.toFixed(1)}mm</div>` : ''}
+            </div>
+            <div style="font-size: 10px; color: #6c757d;">
+              기반 스테이션: ${region.stationIds.join(', ')}
+            </div>
+          </div>
+        `, {
+          maxWidth: 250,
+          className: 'weather-heatmap-popup'
+        });
 
         // 날씨 아이콘 마커
         const weatherIcon = window.L.divIcon({
