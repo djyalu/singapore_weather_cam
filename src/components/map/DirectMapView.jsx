@@ -277,7 +277,8 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       hasTemperatureData: !!weatherData?.data?.temperature,
       hasReadings: !!weatherData?.data?.temperature?.readings,
       readingsLength: weatherData?.data?.temperature?.readings?.length,
-      weatherDataStructure: weatherData ? Object.keys(weatherData) : 'no weatherData'
+      weatherDataStructure: weatherData ? Object.keys(weatherData) : 'no weatherData',
+      fullWeatherData: weatherData // 전체 데이터 구조 출력
     });
 
     if (!leafletMapRef.current) {
