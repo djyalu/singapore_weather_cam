@@ -28,14 +28,14 @@ const App = () => {
   // Data hooks from context
   const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather, forceRefresh: forceRefetchWeather } = useWeatherData();
 
-  // Manual refresh only - Context handles auto-refresh
+  // Manual refresh - 이제 실시간 데이터를 우선 사용
   const handleManualRefresh = () => {
-    refetchWeather();
+    forceRefetchWeather(); // 실시간 NEA API 직접 호출로 변경
     setLastUpdate(new Date());
     setRefreshTrigger(prev => prev + 1); // 지도 히트맵 새로고침 트리거
   };
 
-  // Force refresh - 실시간 NEA API 호출
+  // Force refresh - 실시간 NEA API 호출 (동일하게 유지)
   const handleForceRefresh = () => {
     forceRefetchWeather();
     setLastUpdate(new Date());

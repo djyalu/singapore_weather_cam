@@ -22,39 +22,52 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     return () => clearInterval(timer);
   }, []);
 
-  // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트)
+  // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
     const generateSmartWeatherSummary = async () => {
       if (!weatherData) return;
       
       setAiLoading(true);
       try {
-        console.log('🤖 Generating smart weather summary...');
+        console.log('🤖 Generating smart weather summary with real-time data...');
+        
+        // 실시간 데이터 소스 확인 및 우선 처리
+        const isRealTimeData = weatherData.source?.includes('Real-time') || weatherData.source?.includes('NEA Singapore');
+        const dataAge = weatherData.timestamp ? (Date.now() - new Date(weatherData.timestamp).getTime()) / (1000 * 60) : 0; // 분 단위
+        
+        console.log('📊 Data source analysis:', {
+          source: weatherData.source,
+          isRealTime: isRealTimeData,
+          dataAgeMinutes: Math.round(dataAge),
+          timestamp: weatherData.timestamp
+        });
         
         const overallData = getOverallWeatherData();
         const forecast = weatherData?.data?.forecast?.general;
         
-        // 간결한 요약 생성
-        const summary = generateIntelligentSummary(overallData, forecast);
-        const highlights = generateHighlights(overallData, forecast);
+        // 실시간 데이터를 강조하는 요약 생성
+        const summary = generateIntelligentSummary(overallData, forecast, isRealTimeData);
+        const highlights = generateHighlights(overallData, forecast, isRealTimeData);
         
         setAiSummary({
           summary,
           highlights,
-          confidence: 0.85,
-          aiModel: 'Smart Data Engine',
-          timestamp: new Date().toISOString(),
-          isRealAnalysis: false  // 실제 AI API 사용하지 않음
+          confidence: isRealTimeData ? 0.95 : 0.85,
+          aiModel: isRealTimeData ? 'Real-time NEA Data Engine' : 'Smart Data Engine',
+          timestamp: weatherData.timestamp || new Date().toISOString(),
+          isRealAnalysis: false,
+          dataSource: weatherData.source || 'Unknown',
+          dataAge: Math.round(dataAge)
         });
         
-        console.log('✅ Smart weather summary generated');
+        console.log('✅ Smart weather summary generated with real-time priority');
       } catch (error) {
         console.warn('⚠️ Failed to generate smart summary:', error);
         
         // 간단한 폴백
         setAiSummary({
-          summary: '날씨 정보 분석 중',
-          highlights: ['기본 정보'],
+          summary: '실시간 날씨 정보 분석 중',
+          highlights: ['실시간 데이터 로딩'],
           confidence: 0.7,
           aiModel: '기본 분석',
           isRealAnalysis: false
@@ -496,37 +509,40 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
 
   const overallData = getOverallWeatherData();
 
-  // 스마트 요약 생성 함수들
-  const generateIntelligentSummary = (data, forecast) => {
+  // 스마트 요약 생성 함수들 - 실시간 데이터 우선 처리
+  const generateIntelligentSummary = (data, forecast, isRealTime = false) => {
     const temp = data.temperature;
     const humidity = data.humidity;
     const rainfall = data.rainfall;
+    
+    // 실시간 데이터 여부에 따른 프리픽스
+    const dataPrefix = isRealTime ? '🔴 실시간' : '📊 최신';
     
     // 온도 평가
     let tempDesc, tempAdvice;
     if (temp >= 32) {
       tempDesc = '매우 더움';
-      tempAdvice = '외출 시 충분한 수분 섭취와 그늘 이용을 권장';
+      tempAdvice = isRealTime ? '지금 외출 시 충분한 수분 섭취와 그늘 이용 필수' : '외출 시 충분한 수분 섭취와 그늘 이용을 권장';
     } else if (temp >= 30) {
       tempDesc = '덥고 습함';
-      tempAdvice = '야외활동 시 자주 휴식을 취하세요';
+      tempAdvice = isRealTime ? '현재 야외활동 시 10분마다 휴식 권장' : '야외활동 시 자주 휴식을 취하세요';
     } else if (temp >= 28) {
       tempDesc = '따뜻함';
-      tempAdvice = '가벼운 옷차림으로 야외활동 적합';
+      tempAdvice = isRealTime ? '지금 야외활동하기 좋은 온도' : '가벼운 옷차림으로 야외활동 적합';
     } else if (temp >= 25) {
       tempDesc = '쾌적함';
-      tempAdvice = '야외활동하기 좋은 날씨';
+      tempAdvice = isRealTime ? '현재 야외활동 최적 조건' : '야외활동하기 좋은 날씨';
     } else {
       tempDesc = '선선함';
-      tempAdvice = '얇은 겉옷 준비를 권장';
+      tempAdvice = isRealTime ? '지금 얇은 겉옷 착용 권장' : '얇은 겉옷 준비를 권장';
     }
     
     // 습도 평가
     let humidityDesc = '';
     if (humidity >= 85) {
-      humidityDesc = ', 매우 습하여 체감온도가 높음';
+      humidityDesc = isRealTime ? ', 지금 매우 습하여 체감온도 높음' : ', 매우 습하여 체감온도가 높음';
     } else if (humidity >= 75) {
-      humidityDesc = ', 습도가 높아 끈적한 느낌';
+      humidityDesc = isRealTime ? ', 현재 습도 높아 끈적함' : ', 습도가 높아 끈적한 느낌';
     } else if (humidity >= 60) {
       humidityDesc = ', 적당한 습도';
     } else {
@@ -536,48 +552,54 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
     // 강수 상황
     let rainDesc = '';
     if (rainfall > 5) {
-      rainDesc = `. ${rainfall}mm의 비로 우산 필수`;
+      rainDesc = isRealTime ? `. 지금 ${rainfall}mm 비 - 우산 필수` : `. ${rainfall}mm의 비로 우산 필수`;
     } else if (rainfall > 0) {
-      rainDesc = `. 약한 비 (${rainfall}mm) 주의`;
+      rainDesc = isRealTime ? `. 현재 약한 비 (${rainfall}mm)` : `. 약한 비 (${rainfall}mm) 주의`;
     }
     
-    return `싱가포르 현재 ${temp}°C로 ${tempDesc}${humidityDesc}${rainDesc}. ${tempAdvice}`;
+    // 실시간 시간 정보 추가
+    const timeInfo = isRealTime ? ` (${new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준)` : '';
+    
+    return `${dataPrefix} 싱가포르 ${temp}°C로 ${tempDesc}${humidityDesc}${rainDesc}. ${tempAdvice}${timeInfo}`;
   };
 
-  const generateHighlights = (data, forecast) => {
+  const generateHighlights = (data, forecast, isRealTime = false) => {
     const highlights = [];
     const temp = data.temperature;
     const humidity = data.humidity;
     const rainfall = data.rainfall;
     
+    // 실시간 데이터 여부에 따른 표현 변경
+    const prefix = isRealTime ? '🔴 ' : '';
+    
     // 온도 기반 하이라이트
     if (temp >= 32) {
-      highlights.push('🌡️ 고온주의');
-      highlights.push('💧 수분섭취');
+      highlights.push(`${prefix}🌡️ ${isRealTime ? '현재' : ''}고온주의`);
+      highlights.push(`💧 ${isRealTime ? '지금' : ''}수분섭취`);
     } else if (temp >= 30) {
-      highlights.push('🌞 더운날씨');
-      highlights.push('🏖️ 야외주의');
+      highlights.push(`${prefix}🌞 ${isRealTime ? '현재' : ''}더운날씨`);
+      highlights.push(`🏖️ ${isRealTime ? '지금' : ''}야외주의`);
     } else if (temp >= 28) {
-      highlights.push('☀️ 따뜻함');
-      highlights.push('👕 가벼운옷');
+      highlights.push(`${prefix}☀️ ${isRealTime ? '현재' : ''}따뜻함`);
+      highlights.push(`👕 ${isRealTime ? '지금' : ''}가벼운옷`);
     } else {
-      highlights.push('😌 쾌적함');
-      highlights.push('🚶 야외활동');
+      highlights.push(`${prefix}😌 ${isRealTime ? '현재' : ''}쾌적함`);
+      highlights.push(`🚶 ${isRealTime ? '지금' : ''}야외활동`);
     }
     
     // 습도 기반 하이라이트
     if (humidity >= 85) {
-      highlights[1] = '💦 높은습도';
+      highlights[1] = `💦 ${isRealTime ? '현재' : ''}높은습도`;
     } else if (humidity <= 50) {
-      highlights[1] = '🏜️ 건조함';
+      highlights[1] = `🏜️ ${isRealTime ? '현재' : ''}건조함`;
     }
     
     // 강수 우선 표시
     if (rainfall > 5) {
-      highlights[0] = '☔ 강한비';
-      highlights[1] = '🌂 우산필수';
+      highlights[0] = `${prefix}☔ ${isRealTime ? '지금' : ''}강한비`;
+      highlights[1] = `🌂 ${isRealTime ? '지금' : ''}우산필수`;
     } else if (rainfall > 0) {
-      highlights[1] = '💧 약한비';
+      highlights[1] = `💧 ${isRealTime ? '현재' : ''}약한비`;
     }
     
     return highlights.slice(0, 2); // 최대 2개만
@@ -669,7 +691,9 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             <span className="text-2xl">{getWeatherIcon(overallData.forecast)}</span>
             <div>
               <h2 className="text-lg font-bold">Singapore Weather</h2>
-              <p className="text-blue-100 text-xs">실시간 전국 기상 정보</p>
+              <p className="text-blue-100 text-xs">
+                {weatherData?.source?.includes('Real-time') ? '🔴 실시간 NEA API' : '📊 최신 수집'} • {overallData.stationCount}개 관측소
+              </p>
             </div>
           </div>
           
@@ -735,13 +759,15 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           {/* 업데이트 시간 */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <Clock className="w-4 h-4 text-green-500" />
+              <Clock className={`w-4 h-4 ${weatherData?.source?.includes('Real-time') ? 'text-red-500' : 'text-green-500'}`} />
               <span className="text-xs text-gray-600 font-medium">업데이트</span>
             </div>
             <div className="text-sm font-semibold text-gray-800">
               {formatLastUpdate(overallData.lastUpdate)}
             </div>
-            <div className="text-xs text-gray-500">자동 수집</div>
+            <div className="text-xs text-gray-500">
+              {weatherData?.source?.includes('Real-time') ? '🔴 실시간 API' : '📊 자동 수집'}
+            </div>
           </div>
 
           {/* AI 분석 버튼 */}
