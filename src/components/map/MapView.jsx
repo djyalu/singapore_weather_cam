@@ -77,27 +77,31 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
   const [showTemperatureLayer, setShowTemperatureLayer] = useState(true);
   const [showWeatherIcons, setShowWeatherIcons] = useState(true);
 
-  // 개선된 Leaflet 초기화 체크
+  // 간소화된 Leaflet 초기화 (무한 스피닝 방지)
   useEffect(() => {
-    const initMap = async () => {
+    const initMap = () => {
       try {
-        // 3번 재시도
-        for (let i = 0; i < 3; i++) {
-          const success = initializeLeaflet();
-          if (success) {
-            console.log('✅ Leaflet 초기화 성공');
-            return;
-          }
-          console.log(`⏳ 재시도 ${i + 1}/3`);
-          await new Promise(resolve => setTimeout(resolve, 500));
+        // 간단한 초기화만 수행
+        if (typeof window.L !== 'undefined' && window.L.Icon) {
+          // CDN 아이콘 설정
+          delete window.L.Icon.Default.prototype._getIconUrl;
+          window.L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+          });
+          console.log('✅ Leaflet 아이콘 설정 완료');
+        } else {
+          console.warn('⚠️ Leaflet 라이브러리 로딩 대기 중...');
+          // 실패해도 지도는 표시되도록 함
         }
-        setMapInitError('Leaflet 라이브러리 초기화에 실패했습니다. 페이지를 새로고침해주세요.');
       } catch (error) {
-        console.error('지도 초기화 중 오류:', error);
-        setMapInitError(`지도 초기화 오류: ${error.message}`);
+        console.error('🚨 Leaflet 초기화 오류:', error);
+        // 에러가 발생해도 지도는 표시되도록 함
       }
     };
 
+    // 즉시 실행 (비동기 처리 제거)
     initMap();
   }, []);
 
@@ -253,39 +257,7 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
   }, []);
 
 
-  // 지도 초기화 에러가 있으면 폴백 UI 표시
-  if (mapInitError) {
-    return (
-      <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
-        <div className="h-96 w-full flex items-center justify-center bg-gray-50">
-          <div className="text-center p-8">
-            <div className="text-6xl mb-4">🗺️</div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              지도 서비스 일시 중단
-            </h3>
-            <p className="text-gray-600 mb-4">
-              지도 라이브러리를 불러오는 중 문제가 발생했습니다.
-            </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-left">
-              <h4 className="font-medium text-blue-800 mb-2">대안 방법:</h4>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• 페이지 새로고침 시도</li>
-                <li>• 브라우저 캐시 삭제</li>
-                <li>• 다른 브라우저에서 접속</li>
-                <li>• 네트워크 연결 확인</li>
-              </ul>
-            </div>
-            <button 
-              onClick={() => window.location.reload()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              페이지 새로고침
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // 에러 처리 제거 - 항상 지도 표시
 
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
@@ -295,10 +267,6 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
           zoom={COORDINATES.DEFAULT_ZOOM}
           style={{ height: '100%', width: '100%' }}
           className="rounded-lg"
-          whenCreated={(mapInstance) => {
-            // 지도 생성 성공 시 로그
-            console.log('🗺️ Leaflet 지도가 성공적으로 로드되었습니다');
-          }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

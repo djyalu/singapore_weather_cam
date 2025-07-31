@@ -6,8 +6,6 @@ import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashbo
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
 import SimpleMapView from './components/map/SimpleMapView'; // 안정적인 지도 (권역별 히트맵 + 90개 카메라)
-import DirectMapView from './components/map/DirectMapView'; // 직접 Leaflet API 사용 지도
-import MapView from './components/map/MapView'; // 기존 React-Leaflet 지도
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -119,41 +117,21 @@ const App = () => {
           </div>
 
 
-          {/* 실제 지도 뷰 - Leaflet 기반 */}
+          {/* 안정적인 SimpleMapView - 무한스피닝 해결 */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800 mb-2">
-                🗺️ Singapore 인터랙티브 지도 & 날씨
+                🗺️ Singapore 실시간 지도 & 날씨
               </h2>
               <p className="text-sm text-gray-600">
-                OpenStreetMap 기반 실제 지도 + 권역별 날씨 히트맵 + 90개 교통 카메라 (3시간 주기 업데이트)
+                안정적인 CSS 기반 지도 + 권역별 날씨 히트맵 + 90개 교통 카메라 (실시간 업데이트)
               </p>
             </div>
             <div className="min-h-[600px]">
-              <MapView
-                weatherData={weatherData}
-                selectedRegion={activeRegion}
-                className="w-full h-full"
-                onCameraSelect={handleCameraSelect}
-              />
-            </div>
-          </div>
-
-          {/* CSS 지도 뷰 (백업용) */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
-                🎨 Singapore 스타일 지도 (백업)
-              </h2>
-              <p className="text-sm text-gray-600">
-                CSS 기반 스타일 지도 - Leaflet 로딩 실패시 대안
-              </p>
-            </div>
-            <div className="min-h-[500px]">
               <SimpleMapView
                 weatherData={weatherData}
                 selectedRegion={activeRegion}
-                className="w-full"
+                className="w-full h-full"
                 onCameraSelect={handleCameraSelect}
               />
             </div>
