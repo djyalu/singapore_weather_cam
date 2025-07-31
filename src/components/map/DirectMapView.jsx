@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
  * 직접 Leaflet API를 사용하는 지도 컴포넌트
  * CDN Leaflet과 완벽 호환 - 깜빡임 문제 해결
  */
-const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', onCameraSelect }) => {
+const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', onCameraSelect, refreshTrigger = 0 }) => {
   const mapRef = useRef(null);
   const leafletMapRef = useRef(null);
   const [mapError, setMapError] = useState(null);
@@ -269,42 +269,27 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     };
   }, []); // 빈 의존성 배열로 한 번만 실행
 
-  // 날씨 데이터 변경 시 레이어만 업데이트
+  // 히트맵 생성을 위한 별도 useEffect - 지도 준비 상태에 의존
   useEffect(() => {
     console.log('🔍 === 히트맵 useEffect 실행됨 ===');
     console.log('🗺️ 지도 상태:', !!leafletMapRef.current);
     console.log('🗺️ 지도 준비 상태:', isMapReady);
-    console.log('📊 날씨 데이터 존재:', !!weatherData);
     
-    // 강제 타이머로 지연 실행
-    const executeHeatmap = () => {
-      console.log('⏰ 지연 실행 - 지도 상태:', !!leafletMapRef.current);
-      console.log('⏰ 지연 실행 - 날씨 데이터:', !!weatherData);
-      
-      if (!leafletMapRef.current) {
-        console.log('❌ 지도가 아직 준비되지 않음');
-        return false;
-      }
-
-      // 무조건 히트맵 생성 (데이터 유무 관계없이)
-      console.log('🚀 무조건 히트맵 생성 시작!');
-      return true;
-    };
-
-    // 즉시 실행
-    if (executeHeatmap()) {
-      createHeatmapLayers();
-    } else {
-      // 3초 후 재시도
-      const timer = setTimeout(() => {
-        console.log('🔄 3초 후 재시도...');
-        if (executeHeatmap()) {
-          createHeatmapLayers();
-        }
-      }, 3000);
-      
-      return () => clearTimeout(timer);
+    // 지도가 준비되지 않았으면 대기
+    if (!isMapReady || !leafletMapRef.current) {
+      console.log('⏳ 지도 준비 대기 중...');
+      return;
     }
+
+    // 지도 준비 완료 후 히트맵 생성
+    console.log('✅ 지도 준비 완료! 히트맵 생성 시작...');
+    
+    // 약간의 지연으로 안정성 확보
+    const timer = setTimeout(() => {
+      createHeatmapLayers();
+    }, 500);
+    
+    return () => clearTimeout(timer);
 
     function createHeatmapLayers() {
       console.log('🎨 히트맵 레이어 생성 함수 시작');
@@ -382,7 +367,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
       console.log('🎉 강제 테스트 히트맵 생성 완료!');
     }
-  }, [weatherData]);
+  }, [isMapReady, refreshTrigger]); // 지도 준비 상태와 새로고침 트리거에 의존
 
   if (mapError) {
     return (
@@ -408,15 +393,17 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         style={{ background: '#f0f0f0' }}
       />
       
-      {/* 온도 범례 - 높은 z-index로 최상단에 표시 */}
-      <div 
-        className="absolute bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 border-2 border-gray-300"
-        style={{ 
-          zIndex: 9999,
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(4px)'
-        }}
-      >
+      {/* 온도 범례 - 항상 표시, 최상단 레이어 */}
+      {isMapReady && (
+        <div 
+          className="absolute bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 border-2 border-gray-300"
+          style={{ 
+            zIndex: 10000,
+            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(8px)',
+            pointerEvents: 'none' // 지도 조작에 방해되지 않도록
+          }}
+        >
         <div className="text-sm font-bold text-gray-800 mb-3 flex items-center">
           🌡️ 온도 범례
         </div>
@@ -457,7 +444,8 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             <span className="text-xs font-medium text-gray-700">32°C 이상</span>
           </div>
         </div>
-      </div>
+        </div>
+      )}
       
       {/* 로딩 오버레이 */}
       {!isMapReady && (
@@ -479,6 +467,7 @@ DirectMapView.propTypes = {
   selectedRegion: PropTypes.string,
   className: PropTypes.string,
   onCameraSelect: PropTypes.func,
+  refreshTrigger: PropTypes.number,
 };
 
 export default DirectMapView;

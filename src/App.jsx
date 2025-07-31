@@ -23,6 +23,7 @@ const App = () => {
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [selectedCamera, setSelectedCamera] = useState(null); // Camera selected from map (AI 분석 제거 후 사용안함)
   const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']); // 선택된 지역들
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // 지도 히트맵 새로고침 트리거
 
   // Data hooks from context
   const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather, forceRefresh: forceRefetchWeather } = useWeatherData();
@@ -31,12 +32,14 @@ const App = () => {
   const handleManualRefresh = () => {
     refetchWeather();
     setLastUpdate(new Date());
+    setRefreshTrigger(prev => prev + 1); // 지도 히트맵 새로고침 트리거
   };
 
   // Force refresh - 실시간 NEA API 호출
   const handleForceRefresh = () => {
     forceRefetchWeather();
     setLastUpdate(new Date());
+    setRefreshTrigger(prev => prev + 1); // 지도 히트맵 새로고침 트리거
   };
 
   // 더 스마트한 로딩 상태 관리
@@ -133,6 +136,7 @@ const App = () => {
                 selectedRegion={activeRegion}
                 className="w-full h-full"
                 onCameraSelect={handleCameraSelect}
+                refreshTrigger={refreshTrigger}
               />
             </div>
           </div>
