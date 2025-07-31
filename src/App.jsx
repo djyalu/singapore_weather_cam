@@ -6,7 +6,6 @@ import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashbo
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
 import DirectMapView from './components/map/DirectMapView'; // 실제 OpenStreetMap 지도
-import OneMapTestComponent from './components/map/OneMapTestComponent'; // OneMap API 테스트
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -118,17 +117,14 @@ const App = () => {
           </div>
 
 
-          {/* OneMap API 실제 테스트 */}
-          <OneMapTestComponent />
-
           {/* 실제 OpenStreetMap 지도 */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800 mb-2">
-                🗺️ Singapore 실제 지도 & 날씨
+                🗺️ Singapore 인터랙티브 지도
               </h2>
               <p className="text-sm text-gray-600">
-                OpenStreetMap 타일 기반 실제 지도 + 실시간 날씨 데이터 + 교통 카메라 (확대/축소 가능)
+                OpenStreetMap 기반 실제 지도 + 권역별 날씨 히트맵 + 90개 실시간 교통 카메라
               </p>
             </div>
             <div className="min-h-[600px]">
