@@ -354,7 +354,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           : 0;
         
         const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
-        const intensity = 0.07; // 색상 농도 20%로 대폭 감소 (0.35 → 0.07)
+        const intensity = 0.15; // 적절한 가시성과 투명도 균형 (0.07 → 0.15)
         
         console.log(`🎯 히트맵 원형 생성 시도: ${region.name}`, {
           temperature: avgTemp.toFixed(1),
@@ -365,13 +365,14 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         });
 
         try {
-          // 권역별 원형 히트맵 - 더 큰 반지름으로 잘 보이게
+          // 권역별 원형 히트맵 - 가시성 개선
           const circle = window.L.circle([region.lat, region.lng], {
             color: tempColor,
             fillColor: tempColor,
             fillOpacity: intensity,
+            opacity: 0.6, // 테두리 투명도 추가
             radius: 12000, // 더 큰 반지름
-            weight: 3,     // 더 두꺼운 테두리
+            weight: 2,     // 테두리 두께 조정
             interactive: true,
             pane: 'overlayPane',
             className: 'weather-layer'
