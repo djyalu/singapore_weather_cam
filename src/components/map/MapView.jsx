@@ -7,91 +7,57 @@ import '../../styles/leaflet-fixes.css';
 import { COORDINATES } from '../../config/constants';
 import WeatherOverlay from './WeatherOverlay';
 
-// 개선된 Leaflet 초기화 에러 처리
-let leafletInitialized = false;
-let initializationAttempts = 0;
-const MAX_INIT_ATTEMPTS = 3;
-
-const initializeLeaflet = async () => {
-  if (leafletInitialized) return true;
-  
-  initializationAttempts++;
-  console.log(`🗺️ Leaflet 초기화 시도 ${initializationAttempts}/${MAX_INIT_ATTEMPTS}`);
-  
+// 간단한 Leaflet 초기화 (CDN 기반)
+const initializeLeaflet = () => {
   try {
-    // Leaflet이 로드될 때까지 대기
-    if (typeof L === 'undefined') {
-      console.log('🔄 Leaflet 라이브러리 로딩 대기 중...');
-      
-      // Leaflet 로딩을 위한 지연
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (typeof L === 'undefined') {
-        throw new Error('Leaflet 라이브러리를 찾을 수 없습니다');
-      }
+    // Leaflet이 전역으로 로드되었는지 확인
+    if (typeof window.L !== 'undefined') {
+      console.log('✅ Leaflet CDN 로드 확인됨');
+      return true;
     }
-
-    // Leaflet 아이콘 경로 수정 (더 안전한 방법)
-    if (L.Icon && L.Icon.Default) {
-      try {
-        delete L.Icon.Default.prototype._getIconUrl;
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl: new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href,
-          iconUrl: new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href,
-          shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
-        });
-      } catch (iconError) {
-        console.warn('⚠️ Leaflet 아이콘 설정 실패, 기본 아이콘 사용:', iconError);
-        // 아이콘 설정 실패해도 지도는 로드되도록 허용
-      }
-    }
-    
-    leafletInitialized = true;
-    console.log('✅ Leaflet 초기화 성공');
-    return true;
-    
+    console.warn('⚠️ Leaflet CDN 로드 대기 중...');
+    return false;
   } catch (error) {
-    console.error(`❌ Leaflet 초기화 실패 (시도 ${initializationAttempts}):`, error);
-    
-    if (initializationAttempts < MAX_INIT_ATTEMPTS) {
-      console.log(`🔄 ${1000 * initializationAttempts}ms 후 재시도...`);
-      await new Promise(resolve => setTimeout(resolve, 1000 * initializationAttempts));
-      return initializeLeaflet();
-    }
-    
+    console.error('🚨 Leaflet 초기화 실패:', error);
     return false;
   }
 };
 
 
-const weatherIcon = L.divIcon({
-  html: '<div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">🌡️</div>',
-  className: 'custom-div-icon',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-});
-
-
-const trafficCameraIcon = L.divIcon({
-  html: '<div class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md border border-white">🚗</div>',
-  className: 'custom-div-icon',
-  iconSize: [24, 24],
-  iconAnchor: [12, 24],
-});
-
-const featuredTrafficIcon = L.divIcon({
-  html: '<div class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">🚗</div>',
-  className: 'custom-div-icon',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-});
-
-const schoolIcon = L.divIcon({
-  html: '<div class="bg-purple-600 text-white rounded-lg w-10 h-10 flex items-center justify-center text-lg font-bold shadow-lg border-2 border-white">🏫</div>',
-  className: 'custom-div-icon',
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-});
+// 아이콘 생성 함수들 (Leaflet 로드 후 생성)
+const createIcons = () => {
+  if (typeof window.L === 'undefined') return null;
+  
+  return {
+    weatherIcon: window.L.divIcon({
+      html: '<div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">🌡️</div>',
+      className: 'custom-div-icon',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+    }),
+    
+    trafficCameraIcon: window.L.divIcon({
+      html: '<div class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md border border-white">🚗</div>',
+      className: 'custom-div-icon',
+      iconSize: [24, 24],
+      iconAnchor: [12, 24],
+    }),
+    
+    featuredTrafficIcon: window.L.divIcon({
+      html: '<div class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">🚗</div>',
+      className: 'custom-div-icon',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+    }),
+    
+    schoolIcon: window.L.divIcon({
+      html: '<div class="bg-purple-600 text-white rounded-lg w-10 h-10 flex items-center justify-center text-lg font-bold shadow-lg border-2 border-white">🏫</div>',
+      className: 'custom-div-icon',
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+    })
+  };
+};
 
 const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig = null, onCameraSelect = null, className = '' }) => {
   const [trafficCameras, setTrafficCameras] = useState([]);

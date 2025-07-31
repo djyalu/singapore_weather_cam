@@ -6,6 +6,7 @@ import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashbo
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
 import SimpleMapView from './components/map/SimpleMapView'; // 안정적인 지도 (권역별 히트맵 + 90개 카메라)
+import MapView from './components/map/MapView'; // 실제 지도 타일 (Leaflet)
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -117,14 +118,34 @@ const App = () => {
           </div>
 
 
-          {/* 지도 뷰 - 크기 확대 */}
+          {/* 실제 지도 뷰 - Leaflet 기반 */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800 mb-2">
-                🗺️ Singapore 날씨 히트맵 & 교통 카메라
+                🗺️ Singapore 실시간 지도 & 날씨
               </h2>
               <p className="text-sm text-gray-600">
-                권역별 날씨 히트맵 + 90개 실시간 교통 카메라 (확대/축소 지원 없음)
+                OpenStreetMap 기반 실제 지도 + 권역별 날씨 히트맵 + 90개 실시간 교통 카메라
+              </p>
+            </div>
+            <div className="min-h-[600px]">
+              <MapView
+                weatherData={weatherData}
+                selectedRegion={activeRegion}
+                className="w-full h-full"
+                onLocationSelect={handleRegionSelect}
+              />
+            </div>
+          </div>
+
+          {/* CSS 지도 뷰 (백업용) */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                🎨 Singapore 스타일 지도 (백업)
+              </h2>
+              <p className="text-sm text-gray-600">
+                CSS 기반 스타일 지도 - Leaflet 로딩 실패시 대안
               </p>
             </div>
             <div className="min-h-[500px]">

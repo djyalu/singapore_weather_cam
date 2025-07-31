@@ -7,8 +7,8 @@
     <!-- Basic Security (GitHub Pages Compatible) -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com;
-      style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com;
+      style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com;
       img-src 'self' data: blob: https://*.data.gov.sg https://*.lta.gov.sg https://res.cloudinary.com https://*.tile.openstreetmap.org https://cdnjs.cloudflare.com;
       font-src 'self' https://fonts.gstatic.com;
       connect-src 'self' https://api.data.gov.sg https://datamall2.mytransport.sg https://*.openweathermap.org;
@@ -54,11 +54,17 @@
     <link rel="apple-touch-icon" href="/singapore_weather_cam/apple-touch-icon.png" />
     <link rel="manifest" href="/singapore_weather_cam/manifest.json" />
     
+    <!-- Leaflet CSS from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    
     <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://api.data.gov.sg" />
     <link rel="preconnect" href="https://res.cloudinary.com" />
     <link rel="preconnect" href="https://tile.openstreetmap.org" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    <link rel="preconnect" href="https://unpkg.com" />
     
     <!-- Performance -->
     <link rel="dns-prefetch" href="//api.data.gov.sg" />
@@ -68,6 +74,11 @@
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Leaflet JS from CDN -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
     
     <!-- Service Worker Registration -->
     <script>
