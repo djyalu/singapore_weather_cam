@@ -13,7 +13,13 @@ on:
       force_analysis:
         description: 'Force AI analysis even if daily limit reached'
         type: boolean
-        default: false
+        default: true
+      
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/ai-weather-summary.js'
+      - '.github/workflows/ai-weather-summary.yml'
 
 env:
   NODE_ENV: production

@@ -86,13 +86,16 @@ async function loadWeatherData() {
 }
 
 async function analyzeWeatherWithCohere(weatherData) {
-  if (!COHERE_API_KEY) {
-    console.warn('⚠️ COHERE_API_KEY not set, using simulation');
+  if (!COHERE_API_KEY || COHERE_API_KEY.trim() === '') {
+    console.warn('⚠️ COHERE_API_KEY not set or empty, using simulation');
+    console.log('💡 Set COHERE_API_KEY environment variable to use real AI analysis');
     return generateSimulatedSummary(weatherData);
   }
 
   try {
-    console.log('🤖 Generating AI weather summary...');
+    console.log('🤖 Calling Cohere AI API for weather analysis...');
+    console.log(`🔑 API Key Status: ${COHERE_API_KEY ? 'SET' : 'NOT_SET'} (length: ${COHERE_API_KEY?.length || 0})`);
+    console.log(`🚀 Force Analysis: ${FORCE_ANALYSIS}`);
     
     // Prepare weather data summary for AI
     const tempReadings = weatherData.data?.temperature?.readings || [];
@@ -125,33 +128,52 @@ async function analyzeWeatherWithCohere(weatherData) {
 
 응답은 자연스럽고 정보적이며 도움이 되도록 작성해주세요.`;
 
+    const requestBody = {
+      model: 'command',
+      prompt: prompt,
+      max_tokens: 300,
+      temperature: 0.4,
+      k: 0,
+      stop_sequences: [],
+      return_likelihoods: 'NONE'
+    };
+
+    console.log('📤 Sending request to Cohere API...');
+    console.log(`📊 Prompt length: ${prompt.length} characters`);
+    
     const response = await fetch('https://api.cohere.ai/v1/generate', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${COHERE_API_KEY}`,
         'Content-Type': 'application/json',
+        'User-Agent': 'Singapore-Weather-Cam/1.0'
       },
-      body: JSON.stringify({
-        model: 'command',
-        prompt: prompt,
-        max_tokens: 300,
-        temperature: 0.4,
-        k: 0,
-        stop_sequences: [],
-        return_likelihoods: 'NONE'
-      })
+      body: JSON.stringify(requestBody)
     });
 
+    console.log(`📥 Response status: ${response.status} ${response.statusText}`);
+
     if (!response.ok) {
-      throw new Error(`Cohere API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('❌ Cohere API Error Response:', errorText);
+      throw new Error(`Cohere API error: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
+    console.log('✅ Cohere API call successful');
+    console.log(`📝 Generated ${result.generations?.length || 0} response(s)`);
+    
     const summaryText = result.generations[0]?.text || '';
+    console.log(`📄 AI Response Preview: ${summaryText.substring(0, 150)}...`);
+    
+    if (!summaryText.trim()) {
+      console.warn('⚠️ Empty response from Cohere API, falling back to simulation');
+      return generateSimulatedSummary(weatherData);
+    }
     
     // Parse the AI response into structured data
     const summary = parseAISummary(summaryText, weatherData);
-    console.log('✅ AI weather summary generated successfully');
+    console.log('✅ AI weather summary parsed and structured successfully');
     
     return summary;
     
