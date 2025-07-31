@@ -318,25 +318,95 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         console.error('❌ 기존 레이어 제거 실패:', error);
       }
 
-      // 강제 테스트 데이터로 히트맵 생성
-      const testRegions = [
-        { name: 'Hwa Chong Area', lat: 1.3437, lng: 103.7640, temp: 29.5, color: '#EAB308' },
-        { name: 'Central Singapore', lat: 1.3100, lng: 103.8300, temp: 30.2, color: '#F97316' },
-        { name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, temp: 28.8, color: '#EAB308' },
-        { name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, temp: 27.5, color: '#22C55E' }
+      // 실제 날씨 데이터 기반 히트맵 생성
+      const getRegionalTemp = (stationIds) => {
+        if (!weatherData?.locations) return null;
+        
+        const temps = stationIds
+          .map(id => weatherData.locations.find(loc => loc.id === id))
+          .filter(Boolean)
+          .map(loc => loc.temperature)
+          .filter(temp => typeof temp === 'number');
+          
+        return temps.length > 0 ? temps.reduce((sum, temp) => sum + temp, 0) / temps.length : null;
+      };
+
+      const getColorForTemp = (temp) => {
+        if (temp >= 32) return '#EF4444'; // 빨간색
+        if (temp >= 30) return '#F97316'; // 주황색
+        if (temp >= 28) return '#EAB308'; // 노란색
+        if (temp >= 26) return '#22C55E'; // 초록색
+        return '#3B82F6'; // 파란색
+      };
+
+      // 실제 날씨 데이터 지역
+      const realRegions = [
+        { 
+          name: 'Hwa Chong Area', 
+          lat: 1.3437, 
+          lng: 103.7640, 
+          stationIds: ['S109', 'S104'], // Ang Mo Kio & Woodlands
+          emoji: '🏫'
+        },
+        { 
+          name: 'Central Singapore', 
+          lat: 1.3100, 
+          lng: 103.8300, 
+          stationIds: ['S109', 'S107'], // Newton & East Coast
+          emoji: '🏙️'
+        },
+        { 
+          name: 'Eastern Singapore', 
+          lat: 1.3600, 
+          lng: 103.9600, 
+          stationIds: ['S24', 'S107'], // Changi & East Coast
+          emoji: '✈️'
+        },
+        { 
+          name: 'Northern Singapore', 
+          lat: 1.4200, 
+          lng: 103.7900, 
+          stationIds: ['S24', 'S115'], // 북부 지역
+          emoji: '🌳'
+        }
       ];
 
-      testRegions.forEach((region, index) => {
-        console.log(`🔍 테스트 지역 ${index + 1}: ${region.name} 생성 중...`);
+      console.log('📊 현재 날씨 데이터 locations:', weatherData?.locations?.map(loc => ({ id: loc.id, temp: loc.temperature })));
+
+      realRegions.forEach((region, index) => {
+        console.log(`🔍 실제 지역 ${index + 1}: ${region.name} 온도 계산 중...`);
+        
+        let avgTemp = getRegionalTemp(region.stationIds);
+        
+        if (avgTemp === null) {
+          console.log(`⚠️ ${region.name}: 온도 데이터 없음, fallback 온도 사용`);
+          // Fallback 온도 값 (RegionalWeatherDashboard와 일치하도록)
+          const fallbackTemps = {
+            'Hwa Chong Area': 29.5,
+            'Central Singapore': 30.2,
+            'Eastern Singapore': 28.8,
+            'Northern Singapore': 30.1 // 주요 지역 날씨의 North와 일치
+          };
+          avgTemp = fallbackTemps[region.name] || 29.0;
+          console.log(`📊 ${region.name} fallback 온도: ${avgTemp}°C`);
+        }
+        
+        const tempColor = getColorForTemp(avgTemp);
+        
+        console.log(`📊 ${region.name} 온도 데이터:`, {
+          stationIds: region.stationIds,
+          avgTemp: avgTemp.toFixed(1),
+          color: tempColor
+        });
         
         try {
-          // 명시적으로 Leaflet circle 생성
+          // 실제 온도 데이터로 Leaflet circle 생성
           const circle = window.L.circle([region.lat, region.lng], {
-            color: region.color,
-            fillColor: region.color,
+            color: tempColor,
+            fillColor: tempColor,
             fillOpacity: 0.3,
             opacity: 0.8,
-            radius: 8000,
+            radius: 10000,
             weight: 3,
             interactive: true,
             className: 'weather-layer'
@@ -345,27 +415,30 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           // 지도에 추가
           circle.addTo(leafletMapRef.current);
           
-          console.log(`✅ 테스트 지역 ${index + 1} 원형 생성 성공:`, {
+          console.log(`✅ 실제 지역 ${index + 1} 원형 생성 성공:`, {
             name: region.name,
             position: [region.lat, region.lng],
-            color: region.color,
-            temp: region.temp
+            color: tempColor,
+            temp: avgTemp.toFixed(1)
           });
           
-          // 팝업 추가
+          // 실제 온도로 팝업 생성
           circle.bindPopup(`
             <div style="text-align: center; padding: 12px;">
-              <strong>🌡️ ${region.name}</strong><br>
-              <div style="color: ${region.color}; font-size: 16px; font-weight: bold;">${region.temp}°C</div>
+              <strong>${region.emoji} ${region.name}</strong><br>
+              <div style="color: ${tempColor}; font-size: 16px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
+              <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                Stations: ${region.stationIds.join(', ')}
+              </div>
             </div>
           `);
 
         } catch (error) {
-          console.error(`❌ 테스트 지역 ${index + 1} 생성 실패:`, error);
+          console.error(`❌ 실제 지역 ${index + 1} 생성 실패:`, error);
         }
       });
 
-      console.log('🎉 강제 테스트 히트맵 생성 완료!');
+      console.log('🎉 실제 날씨 데이터 히트맵 생성 완료!');
     }
   }, [isMapReady, refreshTrigger]); // 지도 준비 상태와 새로고침 트리거에 의존
 
