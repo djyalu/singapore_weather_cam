@@ -69,11 +69,13 @@ class NEAAlertService {
         const hasAnyData = [weatherResult, tempResult, psiResult].some(r => r.status === 'fulfilled');
         
         if (hasAnyData) {
+          // 실제 데이터 기반 현재 상황 요약 생성
+          let currentSummary = this.generateCurrentWeatherSummary(weatherResult.value, tempResult.value, psiResult.value);
           alerts.push({
             type: 'info',
             priority: 'low',
             icon: '🌤️',
-            message: '현재 특별한 기상 경보는 없습니다. 쾌적한 날씨를 즐기세요!',
+            message: currentSummary,
             timestamp: now.toISOString(),
             source: 'NEA Singapore'
           });
@@ -459,6 +461,50 @@ class NEAAlertService {
     });
 
     return alerts;
+  }
+
+  /**
+   * 실제 NEA 데이터 기반 현재 상황 요약 생성
+   */
+  generateCurrentWeatherSummary(weatherData, tempData, psiData) {
+    let summaryParts = [];
+    
+    // 온도 정보 추가
+    if (tempData && tempData.items && tempData.items[0]) {
+      const readings = tempData.items[0].readings;
+      const avgTemp = readings.reduce((sum, reading) => sum + reading.value, 0) / readings.length;
+      const tempIcon = avgTemp >= 30 ? '🌡️' : avgTemp >= 25 ? '☀️' : '🌤️';
+      summaryParts.push(`${tempIcon} ${avgTemp.toFixed(1)}°C`);
+    }
+    
+    // PSI 정보 추가
+    if (psiData && psiData.items && psiData.items[0]) {
+      const psiReadings = psiData.items[0].readings.psi_twenty_four_hourly;
+      const avgPSI = Math.round(Object.values(psiReadings).reduce((sum, val) => sum + val, 0) / Object.keys(psiReadings).length);
+      const psiStatus = avgPSI <= 50 ? '좋음' : avgPSI <= 100 ? '보통' : avgPSI <= 200 ? '나쁨' : '매우나쁨';
+      const psiIcon = avgPSI <= 50 ? '🍃' : avgPSI <= 100 ? '😊' : '😷';
+      summaryParts.push(`${psiIcon} 대기질 ${psiStatus} (PSI ${avgPSI})`);
+    }
+    
+    // 날씨 상태 추가
+    if (weatherData && weatherData.items && weatherData.items[0]) {
+      const forecasts = weatherData.items[0].forecasts;
+      const commonForecast = forecasts[0]?.forecast || '정보없음';
+      let weatherIcon = '🌤️';
+      if (commonForecast.includes('Rain') || commonForecast.includes('Shower')) weatherIcon = '🌧️';
+      else if (commonForecast.includes('Thundery')) weatherIcon = '⛈️';
+      else if (commonForecast.includes('Cloudy')) weatherIcon = '☁️';
+      else if (commonForecast.includes('Fair')) weatherIcon = '☀️';
+      
+      const cleanForecast = commonForecast.replace(' (Night)', '').replace(' (Day)', '');
+      summaryParts.push(`${weatherIcon} ${cleanForecast}`);
+    }
+    
+    if (summaryParts.length === 0) {
+      return '현재 싱가포르 날씨 정보를 확인 중입니다...';
+    }
+    
+    return `현재 싱가포르: ${summaryParts.join(' • ')} • 업데이트 ${new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`;
   }
 
   /**
