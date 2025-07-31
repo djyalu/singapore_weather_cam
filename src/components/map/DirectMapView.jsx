@@ -271,14 +271,22 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
   // 날씨 데이터 변경 시 레이어만 업데이트
   useEffect(() => {
-    console.log('🔍 날씨 히트맵 업데이트 시도:', {
-      hasMap: !!leafletMapRef.current,
-      hasWeatherData: !!weatherData,
-      hasTemperatureData: !!weatherData?.data?.temperature,
-      hasReadings: !!weatherData?.data?.temperature?.readings,
-      readingsLength: weatherData?.data?.temperature?.readings?.length,
-      weatherDataStructure: weatherData ? Object.keys(weatherData) : 'no weatherData'
-    });
+    console.log('🔍 === 히트맵 업데이트 시작 ===');
+    console.log('🗺️ 지도 상태:', !!leafletMapRef.current);
+    console.log('📊 날씨 데이터 전체:', weatherData);
+    
+    if (weatherData) {
+      console.log('📈 날씨 데이터 상세:', {
+        keys: Object.keys(weatherData),
+        hasData: !!weatherData.data,
+        dataKeys: weatherData.data ? Object.keys(weatherData.data) : 'no data',
+        hasTemp: !!weatherData?.data?.temperature,
+        tempKeys: weatherData?.data?.temperature ? Object.keys(weatherData.data.temperature) : 'no temp',
+        hasReadings: !!weatherData?.data?.temperature?.readings,
+        readingsCount: weatherData?.data?.temperature?.readings?.length || 0,
+        readings: weatherData?.data?.temperature?.readings || 'no readings'
+      });
+    }
 
     if (!leafletMapRef.current) {
       console.log('❌ 지도가 아직 준비되지 않음');
@@ -286,12 +294,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     }
 
     if (!weatherData || !weatherData.data || !weatherData.data.temperature || !weatherData.data.temperature.readings) {
-      console.log('❌ 날씨 데이터 구조 문제:', {
-        weatherData: !!weatherData,
-        hasData: !!weatherData?.data,
-        hasTemperature: !!weatherData?.data?.temperature,
-        hasReadings: !!weatherData?.data?.temperature?.readings
-      });
+      console.log('❌ 날씨 데이터 구조 문제 - 히트맵 생성 불가');
       return;
     }
 
