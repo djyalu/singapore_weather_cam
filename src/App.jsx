@@ -6,7 +6,7 @@ import RegionalWeatherDashboard from './components/weather/RegionalWeatherDashbo
 import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
 import SimpleMapView from './components/map/SimpleMapView'; // 안정적인 지도 (권역별 히트맵 + 90개 카메라)
-import MapView from './components/map/MapView'; // 실제 지도 타일 (Leaflet)
+import DirectMapView from './components/map/DirectMapView'; // 직접 Leaflet API 사용 지도
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -129,11 +129,11 @@ const App = () => {
               </p>
             </div>
             <div className="min-h-[600px]">
-              <MapView
+              <DirectMapView
                 weatherData={weatherData}
                 selectedRegion={activeRegion}
                 className="w-full h-full"
-                onLocationSelect={handleRegionSelect}
+                onCameraSelect={handleCameraSelect}
               />
             </div>
           </div>
