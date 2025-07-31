@@ -11,8 +11,15 @@ import WeatherOverlay from './WeatherOverlay';
 const initializeLeaflet = () => {
   try {
     // Leaflet이 전역으로 로드되었는지 확인
-    if (typeof window.L !== 'undefined') {
-      console.log('✅ Leaflet CDN 로드 확인됨');
+    if (typeof window.L !== 'undefined' && window.L.Icon) {
+      // 아이콘 경로 수정 (CDN 사용)
+      delete window.L.Icon.Default.prototype._getIconUrl;
+      window.L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+      });
+      console.log('✅ Leaflet CDN 로드 및 아이콘 설정 완료');
       return true;
     }
     console.warn('⚠️ Leaflet CDN 로드 대기 중...');
@@ -74,10 +81,17 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
   useEffect(() => {
     const initMap = async () => {
       try {
-        const success = await initializeLeaflet();
-        if (!success) {
-          setMapInitError(`Leaflet 라이브러리 초기화에 실패했습니다. (${initializationAttempts}회 시도)`);
+        // 3번 재시도
+        for (let i = 0; i < 3; i++) {
+          const success = initializeLeaflet();
+          if (success) {
+            console.log('✅ Leaflet 초기화 성공');
+            return;
+          }
+          console.log(`⏳ 재시도 ${i + 1}/3`);
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
+        setMapInitError('Leaflet 라이브러리 초기화에 실패했습니다. 페이지를 새로고침해주세요.');
       } catch (error) {
         console.error('지도 초기화 중 오류:', error);
         setMapInitError(`지도 초기화 오류: ${error.message}`);
@@ -291,12 +305,13 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* 날씨 오버레이 레이어 */}
+          {/* 날씨 오버레이 레이어 - z-index 100으로 설정 */}
           {showWeatherOverlay && (
             <WeatherOverlay
               weatherData={weatherData}
               showTemperatureLayer={showTemperatureLayer}
               showWeatherIcons={showWeatherIcons}
+              style={{ zIndex: 100 }}
             />
           )}
           
@@ -306,7 +321,8 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
               <Marker
                 key={location.id}
                 position={[location.coordinates.lat, location.coordinates.lng]}
-                icon={weatherIcon}
+                icon={createIcons()?.weatherIcon}
+                zIndexOffset={200}
               >
                 <Popup>
                   <div className="p-2">
@@ -323,11 +339,13 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
 
           {trafficCameras.map((camera) => {
             const isFeatured = featuredCameraIds.includes(camera.id);
+            const icons = createIcons();
             return (
               <Marker
                 key={`traffic-${camera.id}`}
                 position={[camera.location.latitude, camera.location.longitude]}
-                icon={isFeatured ? featuredTrafficIcon : trafficCameraIcon}
+                icon={isFeatured ? icons?.featuredTrafficIcon : icons?.trafficCameraIcon}
+                zIndexOffset={1000}
                 eventHandlers={{
                   click: () => {
                     if (onCameraSelect) {
@@ -425,7 +443,8 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
 
           <Marker
             position={[COORDINATES.HWA_CHONG_SCHOOL.lat, COORDINATES.HWA_CHONG_SCHOOL.lng]}
-            icon={schoolIcon}
+            icon={createIcons()?.schoolIcon}
+            zIndexOffset={500}
           >
             <Popup>
               <div className="p-2">

@@ -311,7 +311,7 @@ const WebcamModal = ({
             {/* AI Analysis (if available) */}
             {normalizedItem.analysis && (
               <div>
-                <h3 className="font-semibold mb-2">AI 분석 / AI Analysis</h3>
+                <h3 className="font-semibold mb-2">📊 이미지 분석 / Data Analysis</h3>
                 <p className="text-gray-700 mb-2 text-sm">{normalizedItem.analysis.description}</p>
                 {normalizedItem.analysis.tags && (
                   <div className="flex flex-wrap gap-2 mb-2">

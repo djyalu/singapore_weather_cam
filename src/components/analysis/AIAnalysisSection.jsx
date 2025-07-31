@@ -29,7 +29,7 @@ const AIAnalysisSection = React.memo(({ location }) => {
     <div className="bg-white bg-opacity-90 rounded-xl p-4 backdrop-blur-sm border-l-4 border-blue-500">
       <h4 className="font-semibold text-sm text-gray-700 mb-2 flex items-center">
         <Brain className="w-4 h-4 mr-2 text-blue-500" aria-hidden="true" />
-        🤖 AI Analysis
+        📊 Data Analysis
       </h4>
 
       <div className="space-y-2 text-xs text-gray-700">

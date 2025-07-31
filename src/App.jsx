@@ -7,6 +7,7 @@ import RegionalTrafficCameras from './components/webcam/RegionalTrafficCameras';
 import SingaporeOverallWeather from './components/weather/SingaporeOverallWeather';
 import SimpleMapView from './components/map/SimpleMapView'; // 안정적인 지도 (권역별 히트맵 + 90개 카메라)
 import DirectMapView from './components/map/DirectMapView'; // 직접 Leaflet API 사용 지도
+import MapView from './components/map/MapView'; // 기존 React-Leaflet 지도
 import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
@@ -122,14 +123,14 @@ const App = () => {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800 mb-2">
-                🗺️ Singapore 실시간 지도 & 날씨
+                🗺️ Singapore 인터랙티브 지도 & 날씨
               </h2>
               <p className="text-sm text-gray-600">
-                OpenStreetMap 기반 실제 지도 + 권역별 날씨 히트맵 + 90개 실시간 교통 카메라
+                OpenStreetMap 기반 실제 지도 + 권역별 날씨 히트맵 + 90개 교통 카메라 (3시간 주기 업데이트)
               </p>
             </div>
             <div className="min-h-[600px]">
-              <DirectMapView
+              <MapView
                 weatherData={weatherData}
                 selectedRegion={activeRegion}
                 className="w-full h-full"

@@ -225,6 +225,13 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
             weight: 3,
             opacity: 0.7,
             dashArray: '5, 5', // 점선 테두리로 부드러운 느낌
+            interactive: false, // 클릭 이벤트 비활성화
+          }}
+          eventHandlers={{
+            click: (e) => {
+              // 클릭 이벤트 전파 방지
+              e.originalEvent.stopPropagation();
+            }
           }}
         >
           <Popup>
@@ -282,7 +289,13 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
           key={`weather-icon-${region.id}`}
           position={[region.coordinates.lat, region.coordinates.lng]}
           icon={createWeatherIconMarker(region)}
-          zIndexOffset={1000} // 다른 마커들보다 위에 표시
+          zIndexOffset={150} // 교통 카메라보다 낮게 설정
+          eventHandlers={{
+            click: (e) => {
+              // 기본 클릭 이벤트 허용 (팝업 표시)
+              e.originalEvent.stopPropagation();
+            }
+          }}
         >
           <Popup>
             <div className="p-3 min-w-48">

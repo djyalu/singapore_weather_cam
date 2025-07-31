@@ -41,7 +41,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
           highlights,
           recommendation,
           confidence: 0.85,
-          aiModel: 'Smart Analysis Engine',
+          aiModel: 'Real-time Data Engine',
           timestamp: new Date().toISOString(),
           isRealAnalysis: true
         });
@@ -446,7 +446,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
             
             <div className="flex items-center justify-between text-xs text-white/60">
               <span className={aiSummary.isRealAnalysis ? 'text-green-200' : 'text-orange-200'}>
-                {aiSummary.isRealAnalysis ? '🤖 실제 AI 분석' : '🔄 기본 분석'} • {aiSummary.aiModel}
+                {aiSummary.isRealAnalysis ? '🤖 AI 기반 분석' : '📊 데이터 기반 분석'} • {aiSummary.aiModel}
               </span>
               <span>
                 신뢰도: {Math.round(aiSummary.confidence * 100)}%
