@@ -5,7 +5,7 @@ import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
  */
-const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => {
+const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, className = '' }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [aiSummary, setAiSummary] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -22,7 +22,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     return () => clearInterval(timer);
   }, []);
 
-  // AI 날씨 요약 데이터 생성
+  // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트)
   useEffect(() => {
     const generateSmartWeatherSummary = async () => {
       if (!weatherData) return;
@@ -65,7 +65,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     };
 
     generateSmartWeatherSummary();
-  }, [weatherData]);
+  }, [weatherData, refreshTrigger]);
 
   // 실시간 AI 분석 실행
   const handleRealAIAnalysis = async () => {
@@ -91,17 +91,17 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
       });
       setShowRealAI(true);
 
-      // 2단계: 실시간 AI 분석 실행 시도
+      // 2단계: 실시간 고급 분석 실행
       try {
-        const realTimeResult = await executeRealTimeAIAnalysis();
-        if (realTimeResult) {
-          console.log('✅ 실시간 AI 분석 성공:', realTimeResult);
-          setCohereAnalysis(realTimeResult);
-          return;
-        }
-      } catch (apiError) {
-        console.warn('⚠️ 실시간 API 호출 실패, 시뮬레이션으로 전환:', apiError);
-        await simulateRealTimeAnalysis();
+        console.log('🚀 실시간 고급 AI 분석 시작');
+        const realTimeResult = await executeAdvancedRealTimeAnalysis();
+        
+        setCohereAnalysis(realTimeResult);
+        setShowRealAI(true);
+        return; // 성공하면 여기서 종료
+        
+      } catch (analysisError) {
+        console.warn('⚠️ 실시간 분석 실패, 기본 분석으로 전환:', analysisError);
       }
 
       // 3단계: GitHub Actions 최신 데이터 확인
@@ -762,6 +762,7 @@ SingaporeOverallWeather.propTypes = {
       })
     })
   }),
+  refreshTrigger: PropTypes.number,
   className: PropTypes.string
 };
 

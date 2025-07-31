@@ -96,6 +96,7 @@ const App = () => {
         {/* 싱가포르 전체 평균 날씨 정보 - 개선된 컴팩트한 디자인 */}
         <SingaporeOverallWeather 
           weatherData={weatherData}
+          refreshTrigger={refreshTrigger}
           className=""
         />
 
@@ -105,6 +106,7 @@ const App = () => {
           onRegionSelect={handleRegionSelect}
           activeRegion={activeRegion}
           onSelectedRegionsChange={handleSelectedRegionsChange}
+          refreshTrigger={refreshTrigger}
           className=""
         />
 

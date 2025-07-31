@@ -269,22 +269,14 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     };
   }, []); // 빈 의존성 배열로 한 번만 실행
 
-  // 히트맵 생성을 위한 별도 useEffect - 지도 준비 상태에 의존
-  useEffect(() => {
-    console.log('🔍 === 히트맵 useEffect 실행됨 ===');
-    console.log('🗺️ 지도 상태:', !!leafletMapRef.current);
-    console.log('🗺️ 지도 준비 상태:', isMapReady);
-    
+  // 히트맵 생성 - 지도 준비 완료 후 실행
+  useEffect(() => {    
     // 지도가 준비되지 않았으면 대기
     if (!isMapReady || !leafletMapRef.current) {
-      console.log('⏳ 지도 준비 대기 중...');
       return;
     }
 
     // 지도 준비 완료 후 히트맵 생성
-    console.log('✅ 지도 준비 완료! 히트맵 생성 시작...');
-    
-    // 약간의 지연으로 안정성 확보
     const timer = setTimeout(() => {
       createHeatmapLayers();
     }, 500);
@@ -292,19 +284,9 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     return () => clearTimeout(timer);
 
     function createHeatmapLayers() {
-      console.log('🎨 히트맵 레이어 생성 함수 시작');
-      
-      if (!leafletMapRef.current) {
-        console.log('❌ 지도 참조 없음');
+      if (!leafletMapRef.current || !window.L) {
         return;
       }
-
-      if (!window.L) {
-        console.log('❌ Leaflet 라이브러리 없음');
-        return;
-      }
-
-      console.log('✅ 지도와 Leaflet 라이브러리 확인됨');
       
       // 기존 날씨 레이어 제거
       try {
@@ -313,43 +295,28 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             leafletMapRef.current.removeLayer(layer);
           }
         });
-        console.log('✅ 기존 레이어 제거 완료');
       } catch (error) {
-        console.error('❌ 기존 레이어 제거 실패:', error);
+        console.error('기존 레이어 제거 실패:', error);
       }
 
-      // 실제 날씨 데이터 기반 히트맵 생성
+      // 실제 날씨 데이터 기반 온도 계산
       const getRegionalTemp = (stationIds) => {
-        console.log(`🔍 온도 계산 시도: ${stationIds.join(', ')}`);
-        
         if (!weatherData?.locations) {
-          console.log('❌ weatherData.locations 없음');
           return null;
         }
         
-        console.log(`📊 사용 가능한 locations: ${weatherData.locations.map(loc => loc.id).join(', ')}`);
-        
         const matchedStations = stationIds
-          .map(id => {
-            const found = weatherData.locations.find(loc => loc.id === id);
-            console.log(`🔍 Station ${id}: ${found ? `온도 ${found.temperature}°C` : '찾을 수 없음'}`);
-            return found;
-          })
+          .map(id => weatherData.locations.find(loc => loc.id === id))
           .filter(Boolean);
           
         const temps = matchedStations
           .map(loc => loc.temperature)
           .filter(temp => typeof temp === 'number');
-          
-        console.log(`📊 최종 온도 배열: [${temps.join(', ')}]`);
         
         if (temps.length > 0) {
-          const avg = temps.reduce((sum, temp) => sum + temp, 0) / temps.length;
-          console.log(`📊 평균 온도: ${avg.toFixed(1)}°C`);
-          return avg;
+          return temps.reduce((sum, temp) => sum + temp, 0) / temps.length;
         }
         
-        console.log('❌ 유효한 온도 데이터 없음');
         return null;
       };
 
@@ -393,50 +360,29 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         }
       ];
 
-      console.log('📊 현재 날씨 데이터 전체 구조:', {
-        hasWeatherData: !!weatherData,
-        hasLocations: !!weatherData?.locations,
-        locationsCount: weatherData?.locations?.length || 0,
-        sampleLocation: weatherData?.locations?.[0],
-        allLocationIds: weatherData?.locations?.map(loc => loc.id) || []
-      });
-      
-      if (weatherData?.locations) {
-        console.log('📊 모든 locations 온도 데이터:', weatherData.locations.map(loc => ({ 
-          id: loc.id, 
-          temp: loc.temperature,
-          name: loc.name || 'Unknown'
-        })));
+      // 날씨 데이터 확인
+      if (!weatherData?.locations) {
+        console.log('날씨 데이터 없음 - fallback 온도 사용');
       }
 
-      realRegions.forEach((region, index) => {
-        console.log(`🔍 실제 지역 ${index + 1}: ${region.name} 온도 계산 중...`);
-        
+      realRegions.forEach((region, index) => {        
         let avgTemp = getRegionalTemp(region.stationIds);
         
+        // Fallback 온도 (실제 데이터 없을 때)
         if (avgTemp === null) {
-          console.log(`⚠️ ${region.name}: 온도 데이터 없음, fallback 온도 사용`);
-          // Fallback 온도 값 (RegionalWeatherDashboard와 일치하도록)
           const fallbackTemps = {
             'Hwa Chong Area': 29.5,
             'Central Singapore': 30.2,
             'Eastern Singapore': 28.8,
-            'Northern Singapore': 30.1 // 주요 지역 날씨의 North와 일치
+            'Northern Singapore': 30.1
           };
           avgTemp = fallbackTemps[region.name] || 29.0;
-          console.log(`📊 ${region.name} fallback 온도: ${avgTemp}°C`);
         }
         
         const tempColor = getColorForTemp(avgTemp);
         
-        console.log(`📊 ${region.name} 온도 데이터:`, {
-          stationIds: region.stationIds,
-          avgTemp: avgTemp.toFixed(1),
-          color: tempColor
-        });
-        
         try {
-          // 실제 온도 데이터로 Leaflet circle 생성
+          // 온도 기반 히트맵 원형 생성
           const circle = window.L.circle([region.lat, region.lng], {
             color: tempColor,
             fillColor: tempColor,
@@ -448,17 +394,9 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             className: 'weather-layer'
           });
 
-          // 지도에 추가
           circle.addTo(leafletMapRef.current);
           
-          console.log(`✅ 실제 지역 ${index + 1} 원형 생성 성공:`, {
-            name: region.name,
-            position: [region.lat, region.lng],
-            color: tempColor,
-            temp: avgTemp.toFixed(1)
-          });
-          
-          // 실제 온도로 팝업 생성
+          // 온도 정보 팝업
           circle.bindPopup(`
             <div style="text-align: center; padding: 12px;">
               <strong>${region.emoji} ${region.name}</strong><br>
@@ -470,11 +408,11 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           `);
 
         } catch (error) {
-          console.error(`❌ 실제 지역 ${index + 1} 생성 실패:`, error);
+          console.error(`히트맵 생성 실패: ${region.name}`, error);
         }
       });
 
-      console.log('🎉 실제 날씨 데이터 히트맵 생성 완료!');
+      // 히트맵 생성 완료
     }
   }, [isMapReady, refreshTrigger, weatherData]); // 지도 준비 상태, 새로고침 트리거, 날씨 데이터에 의존
 
