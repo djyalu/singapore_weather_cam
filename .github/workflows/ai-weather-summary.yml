@@ -16,7 +16,8 @@ on:
         default: true
       
   push:
-    branches: [ main ]
+    branches: 
+      - main
     paths:
       - 'scripts/ai-weather-summary.js'
       - '.github/workflows/ai-weather-summary.yml'
