@@ -68,15 +68,10 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     generateSmartWeatherSummary();
   }, [weatherData]);
 
-  // Cohere AI 실시간 분석
+  // Cohere AI 실시간 분석 - GitHub Actions에서 생성된 분석 데이터 사용
   const handleRealAIAnalysis = async () => {
     if (!weatherData) {
       alert('날씨 데이터를 먼저 로드해주세요.');
-      return;
-    }
-
-    if (!cohereService.isConfigured()) {
-      alert('Cohere API 키가 설정되지 않았습니다.\n.env.local 파일에 VITE_COHERE_API_KEY를 설정해주세요.');
       return;
     }
 
@@ -84,17 +79,53 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     setCohereAnalysis(null);
 
     try {
-      console.log('🤖 Cohere AI 실시간 날씨 분석 시작...');
+      console.log('🤖 GitHub Actions 생성 AI 분석 데이터 로딩...');
       
-      const result = await cohereService.analyzeWeatherData(weatherData);
+      // GitHub Actions에서 생성된 AI 분석 데이터 가져오기
+      const response = await fetch('/singapore_weather_cam/data/weather-summary/latest.json?' + Date.now());
+      
+      if (!response.ok) {
+        throw new Error('AI 분석 데이터를 찾을 수 없습니다. GitHub Actions 워크플로우가 실행되었는지 확인해주세요.');
+      }
+      
+      const summaryData = await response.json();
+      
+      if (!summaryData.summary) {
+        throw new Error('AI 분석 데이터가 올바르지 않습니다.');
+      }
+      
+      const result = {
+        analysis: summaryData.summary + '\n\n' + 
+                 (summaryData.recommendation || '') + '\n\n' +
+                 '📊 주요 포인트:\n' + 
+                 (summaryData.highlights?.map(h => `• ${h}`).join('\n') || ''),
+        confidence: summaryData.confidence || 0.85,
+        model: summaryData.ai_model || 'Cohere AI (GitHub Actions)',
+        timestamp: summaryData.timestamp || new Date().toISOString(),
+        isRealAnalysis: true
+      };
       
       setCohereAnalysis(result);
       setShowRealAI(true);
       
-      console.log('✅ Cohere AI 분석 완료:', result);
+      console.log('✅ GitHub Actions AI 분석 로드 완료:', result);
     } catch (error) {
-      console.error('🚨 Cohere AI 분석 실패:', error);
-      alert(`AI 분석 실패: ${error.message}`);
+      console.error('🚨 AI 분석 데이터 로딩 실패:', error);
+      
+      // 폴백: 기본 안내 메시지
+      const fallbackResult = {
+        analysis: `현재 AI 분석 데이터를 사용할 수 없습니다.\n\n` +
+                 `GitHub Actions 워크플로우(ai-weather-summary.yml)가 3시간마다 실행되어 ` +
+                 `Cohere AI 기반 날씨 분석을 생성합니다.\n\n` +
+                 `실시간 분석이 필요한 경우 GitHub Actions 워크플로우를 수동으로 실행해주세요.`,
+        confidence: 1.0,
+        model: 'GitHub Actions Info',
+        timestamp: new Date().toISOString(),
+        isRealAnalysis: false
+      };
+      
+      setCohereAnalysis(fallbackResult);
+      setShowRealAI(true);
     } finally {
       setCohereLoading(false);
     }

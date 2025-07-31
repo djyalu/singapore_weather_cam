@@ -363,6 +363,67 @@
 .loading-dots > span:nth-child(2) { animation-delay: -0.16s; }
 .loading-dots > span:nth-child(3) { animation-delay: 0s; }
 
+/* 티커 스크롤 애니메이션 */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left linear infinite;
+  will-change: transform;
+}
+
+/* 티커 페이드 효과 */
+@keyframes ticker-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-ticker-fade {
+  animation: ticker-fade 0.5s ease-out forwards;
+}
+
+/* 긴급 알림 깜박임 */
+@keyframes alert-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0.7;
+  }
+}
+
+.animate-alert-blink {
+  animation: alert-blink 1s ease-in-out infinite;
+}
+
+/* 티커 항목 등장 애니메이션 */
+@keyframes ticker-slide-in {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-ticker-slide-in {
+  animation: ticker-slide-in 0.3s ease-out forwards;
+}
+
 /* 다크모드 지원 */
 @media (prefers-color-scheme: dark) {
   .animate-shimmer {
