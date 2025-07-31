@@ -277,8 +277,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       hasTemperatureData: !!weatherData?.data?.temperature,
       hasReadings: !!weatherData?.data?.temperature?.readings,
       readingsLength: weatherData?.data?.temperature?.readings?.length,
-      weatherDataStructure: weatherData ? Object.keys(weatherData) : 'no weatherData',
-      fullWeatherData: weatherData // 전체 데이터 구조 출력
+      weatherDataStructure: weatherData ? Object.keys(weatherData) : 'no weatherData'
     });
 
     if (!leafletMapRef.current) {
@@ -355,7 +354,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           : 0;
         
         const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
-        const intensity = 0.35; // 투명도 2배 높임 (0.7 → 0.35)
+        const intensity = 0.07; // 색상 농도 20%로 대폭 감소 (0.35 → 0.07)
         
         console.log(`🎯 히트맵 원형 생성 시도: ${region.name}`, {
           temperature: avgTemp.toFixed(1),
