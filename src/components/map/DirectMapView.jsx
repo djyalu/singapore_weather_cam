@@ -320,15 +320,37 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
       // 실제 날씨 데이터 기반 히트맵 생성
       const getRegionalTemp = (stationIds) => {
-        if (!weatherData?.locations) return null;
+        console.log(`🔍 온도 계산 시도: ${stationIds.join(', ')}`);
         
-        const temps = stationIds
-          .map(id => weatherData.locations.find(loc => loc.id === id))
-          .filter(Boolean)
+        if (!weatherData?.locations) {
+          console.log('❌ weatherData.locations 없음');
+          return null;
+        }
+        
+        console.log(`📊 사용 가능한 locations: ${weatherData.locations.map(loc => loc.id).join(', ')}`);
+        
+        const matchedStations = stationIds
+          .map(id => {
+            const found = weatherData.locations.find(loc => loc.id === id);
+            console.log(`🔍 Station ${id}: ${found ? `온도 ${found.temperature}°C` : '찾을 수 없음'}`);
+            return found;
+          })
+          .filter(Boolean);
+          
+        const temps = matchedStations
           .map(loc => loc.temperature)
           .filter(temp => typeof temp === 'number');
           
-        return temps.length > 0 ? temps.reduce((sum, temp) => sum + temp, 0) / temps.length : null;
+        console.log(`📊 최종 온도 배열: [${temps.join(', ')}]`);
+        
+        if (temps.length > 0) {
+          const avg = temps.reduce((sum, temp) => sum + temp, 0) / temps.length;
+          console.log(`📊 평균 온도: ${avg.toFixed(1)}°C`);
+          return avg;
+        }
+        
+        console.log('❌ 유효한 온도 데이터 없음');
+        return null;
       };
 
       const getColorForTemp = (temp) => {
@@ -371,7 +393,21 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         }
       ];
 
-      console.log('📊 현재 날씨 데이터 locations:', weatherData?.locations?.map(loc => ({ id: loc.id, temp: loc.temperature })));
+      console.log('📊 현재 날씨 데이터 전체 구조:', {
+        hasWeatherData: !!weatherData,
+        hasLocations: !!weatherData?.locations,
+        locationsCount: weatherData?.locations?.length || 0,
+        sampleLocation: weatherData?.locations?.[0],
+        allLocationIds: weatherData?.locations?.map(loc => loc.id) || []
+      });
+      
+      if (weatherData?.locations) {
+        console.log('📊 모든 locations 온도 데이터:', weatherData.locations.map(loc => ({ 
+          id: loc.id, 
+          temp: loc.temperature,
+          name: loc.name || 'Unknown'
+        })));
+      }
 
       realRegions.forEach((region, index) => {
         console.log(`🔍 실제 지역 ${index + 1}: ${region.name} 온도 계산 중...`);
@@ -440,7 +476,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
       console.log('🎉 실제 날씨 데이터 히트맵 생성 완료!');
     }
-  }, [isMapReady, refreshTrigger]); // 지도 준비 상태와 새로고침 트리거에 의존
+  }, [isMapReady, refreshTrigger, weatherData]); // 지도 준비 상태, 새로고침 트리거, 날씨 데이터에 의존
 
   if (mapError) {
     return (
