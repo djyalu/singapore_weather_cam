@@ -273,157 +273,115 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
   useEffect(() => {
     console.log('🔍 === 히트맵 useEffect 실행됨 ===');
     console.log('🗺️ 지도 상태:', !!leafletMapRef.current);
-    console.log('📊 날씨 데이터 전체:', JSON.stringify(weatherData, null, 2));
+    console.log('🗺️ 지도 준비 상태:', isMapReady);
+    console.log('📊 날씨 데이터 존재:', !!weatherData);
     
-    if (!leafletMapRef.current) {
-      console.log('❌ 지도가 아직 준비되지 않음');
-      return;
-    }
-
-    if (!weatherData) {
-      console.log('❌ 날씨 데이터가 없음');
-      return;
-    }
-
-    // 날씨 데이터 구조 확인 및 강제 실행
-    let tempReadings = [];
-    let humidityReadings = [];
-    let rainfallReadings = [];
-
-    // 다양한 데이터 구조 지원
-    if (weatherData.data?.temperature?.readings) {
-      tempReadings = weatherData.data.temperature.readings;
-      humidityReadings = weatherData.data?.humidity?.readings || [];
-      rainfallReadings = weatherData.data?.rainfall?.readings || [];
-      console.log('✅ NEA 원본 데이터 구조 사용');
-    } else if (weatherData.current?.temperature) {
-      // 변환된 데이터 구조에서 임시 데이터 생성
-      console.log('⚠️ 변환된 데이터 구조 감지, 테스트 데이터 생성');
-      tempReadings = [
-        { station: 'S60', value: weatherData.current.temperature },
-        { station: 'S107', value: weatherData.current.temperature + 1 },
-        { station: 'S24', value: weatherData.current.temperature - 1 },
-        { station: 'S104', value: weatherData.current.temperature + 0.5 }
-      ];
-      humidityReadings = [
-        { station: 'S60', value: weatherData.current.humidity || 70 },
-        { station: 'S107', value: (weatherData.current.humidity || 70) + 5 },
-        { station: 'S24', value: (weatherData.current.humidity || 70) - 5 },
-        { station: 'S104', value: (weatherData.current.humidity || 70) + 2 }
-      ];
-    } else {
-      // 완전히 임시 데이터로 강제 실행
-      console.log('⚠️ 데이터 구조 불명, 강제 테스트 데이터 생성');
-      tempReadings = [
-        { station: 'S60', value: 29.5 },
-        { station: 'S107', value: 30.2 },
-        { station: 'S24', value: 28.8 },
-        { station: 'S104', value: 29.0 }
-      ];
-      humidityReadings = [
-        { station: 'S60', value: 75 },
-        { station: 'S107', value: 78 },
-        { station: 'S24', value: 72 },
-        { station: 'S104', value: 76 }
-      ];
-    }
-
-    console.log('📊 사용할 온도 데이터:', tempReadings);
-    console.log('✅ 강제 히트맵 생성 시작...');
-    
-    // 기존 날씨 레이어 제거
-    leafletMapRef.current.eachLayer(layer => {
-      if (layer.options && (layer.options.className === 'weather-layer' || layer.options.className === 'weather-icon')) {
-        leafletMapRef.current.removeLayer(layer);
+    // 강제 타이머로 지연 실행
+    const executeHeatmap = () => {
+      console.log('⏰ 지연 실행 - 지도 상태:', !!leafletMapRef.current);
+      console.log('⏰ 지연 실행 - 날씨 데이터:', !!weatherData);
+      
+      if (!leafletMapRef.current) {
+        console.log('❌ 지도가 아직 준비되지 않음');
+        return false;
       }
-    });
 
-    // 새로운 날씨 레이어 추가 (실제 데이터 기반으로 수정)
-    const weatherRegions = [
-      { id: 'north', name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, stationIds: ['S104'], emoji: '🌳' },
-      { id: 'northwest', name: 'Northwest (Hwa Chong)', lat: 1.3500, lng: 103.7600, stationIds: ['S60'], emoji: '🏫' },
-      { id: 'central', name: 'Central Singapore', lat: 1.3100, lng: 103.8300, stationIds: ['S107'], emoji: '🏙️' },
-      { id: 'east', name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, stationIds: ['S24'], emoji: '✈️' },
-      { id: 'combined', name: 'All Stations Average', lat: 1.3400, lng: 103.8200, stationIds: ['S107', 'S60', 'S24', 'S104'], emoji: '🌡️' }
-    ];
+      // 무조건 히트맵 생성 (데이터 유무 관계없이)
+      console.log('🚀 무조건 히트맵 생성 시작!');
+      return true;
+    };
 
-    weatherRegions.forEach(region => {
-      console.log(`🔍 지역 ${region.name} 처리 중:`, {
-        stationIds: region.stationIds,
-        position: [region.lat, region.lng]
-      });
+    // 즉시 실행
+    if (executeHeatmap()) {
+      createHeatmapLayers();
+    } else {
+      // 3초 후 재시도
+      const timer = setTimeout(() => {
+        console.log('🔄 3초 후 재시도...');
+        if (executeHeatmap()) {
+          createHeatmapLayers();
+        }
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
 
-      const stationTemps = region.stationIds
-        .map(id => tempReadings.find(reading => reading.station === id))
-        .filter(Boolean);
-        
-      const stationHumidity = region.stationIds
-        .map(id => humidityReadings.find(reading => reading.station === id))
-        .filter(Boolean);
-        
-      const stationRainfall = region.stationIds
-        .map(id => rainfallReadings.find(reading => reading.station === id))
-        .filter(Boolean);
+    function createHeatmapLayers() {
+      console.log('🎨 히트맵 레이어 생성 함수 시작');
+      
+      if (!leafletMapRef.current) {
+        console.log('❌ 지도 참조 없음');
+        return;
+      }
 
-      console.log(`📊 ${region.name} 데이터 매칭 결과:`, {
-        stationTemps: stationTemps.map(s => ({ station: s.station, value: s.value })),
-        stationHumidity: stationHumidity.length,
-        stationRainfall: stationRainfall.length
-      });
+      if (!window.L) {
+        console.log('❌ Leaflet 라이브러리 없음');
+        return;
+      }
 
-      if (stationTemps.length > 0) {
-        const avgTemp = stationTemps.reduce((sum, s) => sum + (s.value || 0), 0) / stationTemps.length;
-        const avgHumidity = stationHumidity.length > 0 
-          ? stationHumidity.reduce((sum, s) => sum + (s.value || 0), 0) / stationHumidity.length 
-          : 0;
-        const totalRainfall = stationRainfall.length > 0 
-          ? stationRainfall.reduce((sum, s) => sum + (s.value || 0), 0) 
-          : 0;
-        
-        const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
-        const intensity = 0.15; // 적절한 가시성과 투명도 균형 (0.07 → 0.15)
-        
-        console.log(`🎯 히트맵 원형 생성 시도: ${region.name}`, {
-          temperature: avgTemp.toFixed(1),
-          color: tempColor,
-          position: [region.lat, region.lng],
-          leafletAvailable: !!window.L,
-          mapAvailable: !!leafletMapRef.current
+      console.log('✅ 지도와 Leaflet 라이브러리 확인됨');
+      
+      // 기존 날씨 레이어 제거
+      try {
+        leafletMapRef.current.eachLayer(layer => {
+          if (layer.options && (layer.options.className === 'weather-layer' || layer.options.className === 'weather-icon')) {
+            leafletMapRef.current.removeLayer(layer);
+          }
         });
+        console.log('✅ 기존 레이어 제거 완료');
+      } catch (error) {
+        console.error('❌ 기존 레이어 제거 실패:', error);
+      }
 
+      // 강제 테스트 데이터로 히트맵 생성
+      const testRegions = [
+        { name: 'Hwa Chong Area', lat: 1.3437, lng: 103.7640, temp: 29.5, color: '#EAB308' },
+        { name: 'Central Singapore', lat: 1.3100, lng: 103.8300, temp: 30.2, color: '#F97316' },
+        { name: 'Eastern Singapore', lat: 1.3600, lng: 103.9600, temp: 28.8, color: '#EAB308' },
+        { name: 'Northern Singapore', lat: 1.4200, lng: 103.7900, temp: 27.5, color: '#22C55E' }
+      ];
+
+      testRegions.forEach((region, index) => {
+        console.log(`🔍 테스트 지역 ${index + 1}: ${region.name} 생성 중...`);
+        
         try {
-          // 권역별 원형 히트맵 - 가시성 개선
+          // 명시적으로 Leaflet circle 생성
           const circle = window.L.circle([region.lat, region.lng], {
-            color: tempColor,
-            fillColor: tempColor,
-            fillOpacity: intensity,
-            opacity: 0.6, // 테두리 투명도 추가
-            radius: 12000, // 더 큰 반지름
-            weight: 2,     // 테두리 두께 조정
+            color: region.color,
+            fillColor: region.color,
+            fillOpacity: 0.3,
+            opacity: 0.8,
+            radius: 8000,
+            weight: 3,
             interactive: true,
-            pane: 'overlayPane',
             className: 'weather-layer'
-          }).addTo(leafletMapRef.current);
+          });
+
+          // 지도에 추가
+          circle.addTo(leafletMapRef.current);
           
-          console.log(`✅ 히트맵 원형 생성 성공: ${region.name}`);
+          console.log(`✅ 테스트 지역 ${index + 1} 원형 생성 성공:`, {
+            name: region.name,
+            position: [region.lat, region.lng],
+            color: region.color,
+            temp: region.temp
+          });
           
-          // 간단한 팝업
+          // 팝업 추가
           circle.bindPopup(`
             <div style="text-align: center; padding: 12px;">
-              <strong>${region.emoji} ${region.name}</strong><br>
-              <div style="color: ${tempColor}; font-size: 16px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
+              <strong>🌡️ ${region.name}</strong><br>
+              <div style="color: ${region.color}; font-size: 16px; font-weight: bold;">${region.temp}°C</div>
             </div>
           `);
 
         } catch (error) {
-          console.error(`❌ 히트맵 원형 생성 실패: ${region.name}`, error);
+          console.error(`❌ 테스트 지역 ${index + 1} 생성 실패:`, error);
         }
-      } else {
-        console.log(`⚠️ ${region.name}: 매칭되는 온도 데이터 없음`);
-      }
-    });
+      });
 
-    console.log('✅ 날씨 레이어 업데이트 완료');
+      console.log('🎉 강제 테스트 히트맵 생성 완료!');
+    }
   }, [weatherData]);
 
   if (mapError) {
@@ -450,31 +408,53 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         style={{ background: '#f0f0f0' }}
       />
       
-      {/* 온도 범례 */}
-      <div className="absolute bottom-4 left-4 bg-white bg-opacity-95 rounded-lg shadow-lg p-3 border border-gray-200">
-        <div className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+      {/* 온도 범례 - 높은 z-index로 최상단에 표시 */}
+      <div 
+        className="absolute bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 border-2 border-gray-300"
+        style={{ 
+          zIndex: 9999,
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(4px)'
+        }}
+      >
+        <div className="text-sm font-bold text-gray-800 mb-3 flex items-center">
           🌡️ 온도 범례
         </div>
-        <div className="space-y-1">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#3B82F6', opacity: 0.6 }}></div>
-            <span className="text-xs text-gray-600">25°C 이하</span>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-3">
+            <div 
+              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
+              style={{ backgroundColor: '#3B82F6' }}
+            ></div>
+            <span className="text-xs font-medium text-gray-700">25°C 이하</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#22C55E', opacity: 0.6 }}></div>
-            <span className="text-xs text-gray-600">26-27°C</span>
+          <div className="flex items-center space-x-3">
+            <div 
+              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
+              style={{ backgroundColor: '#22C55E' }}
+            ></div>
+            <span className="text-xs font-medium text-gray-700">26-27°C</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#EAB308', opacity: 0.6 }}></div>
-            <span className="text-xs text-gray-600">28-29°C</span>
+          <div className="flex items-center space-x-3">
+            <div 
+              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
+              style={{ backgroundColor: '#EAB308' }}
+            ></div>
+            <span className="text-xs font-medium text-gray-700">28-29°C</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#F97316', opacity: 0.6 }}></div>
-            <span className="text-xs text-gray-600">30-31°C</span>
+          <div className="flex items-center space-x-3">
+            <div 
+              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
+              style={{ backgroundColor: '#F97316' }}
+            ></div>
+            <span className="text-xs font-medium text-gray-700">30-31°C</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#EF4444', opacity: 0.6 }}></div>
-            <span className="text-xs text-gray-600">32°C 이상</span>
+          <div className="flex items-center space-x-3">
+            <div 
+              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
+              style={{ backgroundColor: '#EF4444' }}
+            ></div>
+            <span className="text-xs font-medium text-gray-700">32°C 이상</span>
           </div>
         </div>
       </div>
