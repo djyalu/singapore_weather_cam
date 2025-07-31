@@ -399,7 +399,7 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
                       >
                         <span>🔍</span>
-                        <span>하단에서 AI 분석 보기</span>
+                        <span>확대해서 보기</span>
                       </button>
                     </div>
                   </div>

@@ -41,9 +41,9 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
           highlights,
           recommendation,
           confidence: 0.85,
-          aiModel: 'Real-time Data Engine',
+          aiModel: 'Smart Data Engine',
           timestamp: new Date().toISOString(),
-          isRealAnalysis: true
+          isRealAnalysis: false  // 실제 AI API 사용하지 않음
         });
         
         console.log('✅ Smart weather summary generated');

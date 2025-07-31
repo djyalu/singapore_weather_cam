@@ -221,8 +221,17 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         }
 
         // 권역별 날씨 히트맵 추가
+        console.log('🔍 날씨 데이터 확인:', {
+          hasWeatherData: !!weatherData,
+          hasData: !!weatherData?.data,
+          hasTemp: !!weatherData?.data?.temperature,
+          hasReadings: !!weatherData?.data?.temperature?.readings,
+          readingsLength: weatherData?.data?.temperature?.readings?.length,
+          fullWeatherData: weatherData
+        });
+        
         if (weatherData?.data?.temperature?.readings?.length) {
-          console.log('🌡️ 날씨 데이터 구조:', weatherData.data);
+          console.log('✅ 날씨 히트맵 렌더링 시작');
           
           // 실제 사용 가능한 스테이션: S107, S60, S24, S104
           const weatherRegions = [
@@ -267,16 +276,19 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
                 : 0;
               
               const tempColor = avgTemp >= 32 ? '#EF4444' : avgTemp >= 30 ? '#F97316' : avgTemp >= 28 ? '#EAB308' : avgTemp >= 26 ? '#22C55E' : '#3B82F6';
-              const intensity = 0.2 + Math.abs(avgTemp - 28) / 6 * 0.2;
+              const intensity = 0.4 + Math.abs(avgTemp - 28) / 6 * 0.3; // 더 진하게
               
-              // 권역별 원형 히트맵
+              console.log(`🎨 ${region.name}: ${avgTemp.toFixed(1)}°C → 색상: ${tempColor}, 투명도: ${intensity.toFixed(2)}`);
+              
+              // 권역별 원형 히트맵 (더 크고 진하게)
               const circle = window.L.circle([region.lat, region.lng], {
                 color: tempColor,
                 fillColor: tempColor,
-                fillOpacity: intensity,
-                radius: 4000,
-                weight: 2,
-                interactive: false
+                fillOpacity: Math.min(intensity, 0.8), // 최대 80% 투명도
+                radius: 8000, // 반지름 2배로 증가
+                weight: 3, // 테두리 굵게
+                interactive: false,
+                pane: 'overlayPane' // 교통 카메라보다 아래 레이어
               }).addTo(map);
 
               // 날씨 아이콘 마커
