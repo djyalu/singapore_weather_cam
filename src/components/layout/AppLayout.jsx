@@ -108,14 +108,11 @@ const AppLayout = React.memo(({ children }) => {
           className="animate-ticker-fade"
         />
 
-        {/* System Status - 시스템 상태만 표시 (새로고침 버튼 제거) */}
+        {/* 초간소화된 시스템 상태 */}
         <SystemStatus
           lastFetch={lastFetch}
-          weatherData={systemStats?.weatherData}
-          reliabilityMetrics={reliabilityMetrics}
           error={error}
           isRefreshing={isRefreshing || isPullRefreshing}
-          showRefreshControls={false}
         />
 
 

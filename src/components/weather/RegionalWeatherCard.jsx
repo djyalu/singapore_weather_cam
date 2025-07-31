@@ -86,11 +86,10 @@ const RegionalWeatherCard = React.memo(({
   return (
     <div
       className={`
-        relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl 
-        transition-all duration-300 cursor-pointer transform hover:scale-105
-        border border-white/20 backdrop-blur-sm
-        ${isActive ? 'ring-4 ring-blue-500 ring-offset-4 shadow-2xl scale-110' : ''}
-        bg-gradient-to-br ${cardBg}
+        relative overflow-hidden rounded-xl shadow-lg border border-gray-100
+        transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-xl
+        ${isActive ? 'ring-2 ring-blue-500 shadow-xl scale-[1.02]' : ''}
+        bg-white
         ${className}
       `}
       onClick={onClick}
@@ -104,112 +103,80 @@ const RegionalWeatherCard = React.memo(({
         }
       }}
     >
-      {/* 카드보드 텍스처 효과 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-black/5" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_50%)]" />
-      
       {/* Active 상태 표시 */}
       {isActive && (
-        <div className="absolute top-2 right-2">
-          <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse shadow-md" />
+        <div className="absolute top-3 right-3">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
         </div>
       )}
 
       <div className="relative p-4">
-        {/* 헤더: 지역명과 아이콘 */}
+        {/* 헤더: 지역명과 날씨 아이콘 */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-2xl" role="img" aria-label={region}>
+            <span className="text-xl" role="img" aria-label={region}>
               {getRegionEmoji(region)}
             </span>
             <div>
-              <h3 className="font-bold text-gray-800 text-sm leading-tight">
+              <h3 className="font-semibold text-gray-800 text-sm leading-tight">
                 {region}
               </h3>
-              {stationName && (
-                <p className="text-xs text-gray-600 truncate">
-                  {stationName}
-                </p>
-              )}
             </div>
           </div>
-          <MapPin className="w-4 h-4 text-gray-500" />
+          {weatherIcon && (
+            <span className="text-lg">{weatherIcon}</span>
+          )}
         </div>
 
-        {/* 날씨 상태 표시 */}
-        {(weatherIcon || weatherDescription) && (
-          <div className="flex items-center justify-center mb-2">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              {weatherIcon && <span className="text-lg">{weatherIcon}</span>}
-              {weatherDescription && <span className="font-medium">{weatherDescription}</span>}
-            </div>
+        {/* 온도 정보 - 컴팩트하게 */}
+        <div className="text-center mb-3">
+          <div className={`text-2xl font-bold ${tempColor} mb-1`}>
+            {formatTemperature(temperature)}°C
           </div>
-        )}
-
-        {/* 온도 정보 - 실제온도와 체감온도 구분 */}
-        <div className="flex items-center justify-center mb-3">
-          <div className="text-center">
-            <div className="mb-2">
-              <div className={`text-3xl font-bold ${tempColor} drop-shadow-sm`}>
-                {formatTemperature(temperature)}°C
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                실제온도
-              </div>
+          {feelsLike !== null && feelsLike !== undefined && (
+            <div className="text-sm text-gray-500">
+              체감 {formatTemperature(feelsLike)}°C
             </div>
-            {feelsLike !== null && feelsLike !== undefined && (
-              <div className="border-t border-gray-200 pt-1">
-                <div className={`text-lg font-semibold ${tempColor} opacity-80`}>
-                  {formatTemperature(feelsLike)}°C
-                </div>
-                <div className="text-xs text-gray-500">
-                  체감온도
-                </div>
-              </div>
-            )}
-          </div>
+          )}
+          {weatherDescription && (
+            <div className="text-xs text-gray-600 mt-1">
+              {weatherDescription}
+            </div>
+          )}
         </div>
 
-        {/* 추가 정보 그리드 */}
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        {/* 핵심 정보만 간결하게 */}
+        <div className="flex justify-between items-center text-xs">
           {/* 습도 */}
-          <div className="flex items-center gap-1 bg-white/40 rounded-lg p-2">
+          <div className="flex items-center gap-1">
             <Droplet className="w-3 h-3 text-blue-500" />
-            <div>
-              <div className="font-medium text-gray-700">
-                {formatHumidity(humidity)}%
-              </div>
-              <div className="text-gray-500 text-xs">습도</div>
-            </div>
+            <span className="text-gray-700 font-medium">
+              {formatHumidity(humidity)}%
+            </span>
           </div>
 
-          {/* 바람 정보 */}
-          <div className="flex items-center gap-1 bg-white/40 rounded-lg p-2">
+          {/* 바람 정보 (간결하게) */}
+          <div className="flex items-center gap-1">
             <Wind className="w-3 h-3 text-green-500" />
-            <div>
-              <div className="font-medium text-gray-700">
-                {windDirection || '--'}
-              </div>
-              <div className="text-gray-500 text-xs">바람</div>
-            </div>
+            <span className="text-gray-700 font-medium">
+              {windDirection || '--'}
+            </span>
           </div>
-        </div>
 
-        {/* 강우량 표시 (0이 아닐 때만) */}
-        {rainfall > 0 && (
-          <div className="mt-2 p-2 bg-blue-100/60 rounded-lg border border-blue-200/50">
-            <div className="flex items-center gap-1 text-xs">
+          {/* 강우량 (있을 때만) */}
+          {rainfall > 0 && (
+            <div className="flex items-center gap-1">
               <span className="text-blue-600">💧</span>
-              <span className="font-medium text-blue-800">
-                강우: {Math.round(rainfall * 10) / 10}mm
+              <span className="text-blue-700 font-medium">
+                {Math.round(rainfall * 10) / 10}mm
               </span>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* 업데이트 시간 */}
         {lastUpdate && (
-          <div className="mt-3 pt-2 border-t border-white/30">
+          <div className="mt-3 pt-2 border-t border-gray-100">
             <div className="flex items-center gap-1 text-xs text-gray-500">
               <Clock className="w-3 h-3" />
               <span>{lastUpdate}</span>
@@ -217,9 +184,6 @@ const RegionalWeatherCard = React.memo(({
           </div>
         )}
       </div>
-
-      {/* 호버 효과 */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 });

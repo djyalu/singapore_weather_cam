@@ -110,7 +110,6 @@ const RegionalWeatherDashboard = React.memo(({
 
   // 선택된 지역 상태 (기본값: Hwa Chong, Newton, Changi)
   const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']);
-  const [aiAnalysisInProgress, setAiAnalysisInProgress] = useState(false);
 
   // 컴포넌트 마운트 시 초기 선택된 지역들을 App.jsx에 알림
   useEffect(() => {
@@ -609,8 +608,8 @@ const RegionalWeatherDashboard = React.memo(({
         </div>
       </div>
 
-      {/* 지역별 날씨 카드 그리드 - 개선된 레이아웃 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* 지역별 날씨 카드 그리드 - 컴팩트하고 간격이 넓은 레이아웃 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {selectedRegionConfigs.map(region => {
           const data = getRegionalWeatherData[region.id];
           
@@ -655,7 +654,7 @@ const RegionalWeatherDashboard = React.memo(({
               isActive={activeRegion === region.id}
               onClick={() => handleRegionClick(region.id)}
               lastUpdate={formatLastUpdate(cardData.lastUpdate)}
-              className="min-h-[200px] transition-all duration-300 hover:shadow-lg"
+              className="transition-all duration-300"
             />
           );
         })}
