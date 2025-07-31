@@ -31,15 +31,13 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
         const overallData = getOverallWeatherData();
         const forecast = weatherData?.data?.forecast?.general;
         
-        // 스마트 요약 생성
+        // 간결한 요약 생성
         const summary = generateIntelligentSummary(overallData, forecast);
         const highlights = generateHighlights(overallData, forecast);
-        const recommendation = generateRecommendation(overallData, forecast);
         
         setAiSummary({
           summary,
           highlights,
-          recommendation,
           confidence: 0.85,
           aiModel: 'Smart Data Engine',
           timestamp: new Date().toISOString(),
@@ -50,11 +48,10 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
       } catch (error) {
         console.warn('⚠️ Failed to generate smart summary:', error);
         
-        // 최종 폴백
+        // 간단한 폴백
         setAiSummary({
-          summary: '실시간 날씨 데이터를 기반으로 현재 날씨 상황을 분석하고 있습니다.',
-          highlights: ['NEA Singapore 공식 데이터'],
-          recommendation: '날씨 변화에 주의하세요.',
+          summary: '날씨 정보 분석 중',
+          highlights: ['기본 정보'],
           confidence: 0.7,
           aiModel: '기본 분석',
           isRealAnalysis: false
@@ -109,54 +106,13 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     const temp = data.temperature;
     const humidity = data.humidity;
     const rainfall = data.rainfall;
-    const currentHour = new Date().getHours();
-    const forecastText = forecast?.forecast || '';
     
-    let summary = '싱가포르는 현재 ';
+    // 간결한 요약 - 한 문장으로
+    let tempDesc = temp >= 32 ? '매우 더움' : temp >= 28 ? '따뜻함' : '쾌적함';
+    let humidityDesc = humidity >= 80 ? ', 습도 높음' : '';
+    let rainDesc = rainfall > 0 ? `, ${rainfall}mm 비` : '';
     
-    // 온도 분석
-    if (temp >= 32) {
-      summary += `매우 더운 날씨(${temp}°C)로, `;
-    } else if (temp >= 30) {
-      summary += `더운 날씨(${temp}°C)로, `;
-    } else if (temp >= 28) {
-      summary += `따뜻한 날씨(${temp}°C)로, `;
-    } else {
-      summary += `쾌적한 날씨(${temp}°C)로, `;
-    }
-    
-    // 습도 및 체감 분석
-    if (humidity >= 85) {
-      summary += '높은 습도(85%+)로 인해 실제보다 더 덥게 느껴집니다. ';
-    } else if (humidity >= 75) {
-      summary += '다소 높은 습도로 �끈끈한 느낌이 있습니다. ';
-    } else {
-      summary += '적당한 습도로 비교적 쾌적합니다. ';
-    }
-    
-    // 강수 및 예보 분석
-    if (rainfall > 0) {
-      summary += `현재 ${rainfall}mm의 비가 내리고 있으며, `;
-    } else if (forecastText.includes('Thundery') || forecastText.includes('Shower')) {
-      summary += '소나기나 뇌우의 가능성이 있어 ';
-    } else if (forecastText.includes('Cloudy')) {
-      summary += '구름이 많은 하늘로 ';
-    } else {
-      summary += '맑은 하늘로 ';
-    }
-    
-    // 시간대별 조언
-    if (currentHour >= 6 && currentHour <= 11) {
-      summary += '아침 시간대로 야외 활동하기 좋은 시간입니다.';
-    } else if (currentHour >= 12 && currentHour <= 17) {
-      summary += '오후 시간대로 강한 햇볕에 주의하세요.';
-    } else if (currentHour >= 18 && currentHour <= 21) {
-      summary += '저녁 시간대로 산책하기 좋습니다.';
-    } else {
-      summary += '야간 시간대로 실내 활동을 권합니다.';
-    }
-    
-    return summary;
+    return `현재 ${tempDesc} ${temp}°C${humidityDesc}${rainDesc}`;
   };
 
   const generateHighlights = (data, forecast) => {
@@ -165,85 +121,15 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     const humidity = data.humidity;
     const rainfall = data.rainfall;
     
-    // 온도 하이라이트
-    if (temp >= 32) {
-      highlights.push('고온 주의보');
-    } else if (temp <= 24) {
-      highlights.push('선선한 날씨');
-    }
-    
-    // 습도 하이라이트
-    if (humidity >= 85) {
-      highlights.push('높은 습도');
-    } else if (humidity <= 60) {
-      highlights.push('낮은 습도');
-    }
-    
-    // 강수 하이라이트
-    if (rainfall > 5) {
-      highlights.push('강한 비');
-    } else if (rainfall > 0) {
-      highlights.push('약한 비');
-    } else {
-      highlights.push('강수 없음');
-    }
-    
-    // 예보 하이라이트
-    const forecastText = forecast?.forecast || '';
-    if (forecastText.includes('Thundery')) {
-      highlights.push('뇌우 가능성');
-    } else if (forecastText.includes('Shower')) {
-      highlights.push('소나기 예상');
-    } else if (forecastText.includes('Fair')) {
-      highlights.push('맑은 날씨');
-    }
-    
-    // 기본 하이라이트가 없으면 추가
-    if (highlights.length === 0) {
-      highlights.push('일반적인 열대 기후');
-    }
-    
-    highlights.push('실시간 NEA 데이터');
+    // 중요한 것만 1-2개
+    if (temp >= 32) highlights.push('고온 주의');
+    else if (humidity >= 85) highlights.push('높은 습도');
+    else if (rainfall > 0) highlights.push('비 내림');
+    else highlights.push('쾌적함');
     
     return highlights;
   };
 
-  const generateRecommendation = (data, forecast) => {
-    const temp = data.temperature;
-    const humidity = data.humidity;
-    const rainfall = data.rainfall;
-    const forecastText = forecast?.forecast || '';
-    
-    let recommendation = '';
-    
-    // 온도 기반 추천
-    if (temp >= 32) {
-      recommendation += '충분한 수분 섭취와 그늘에서 휴식을 취하세요. ';
-    } else if (temp <= 26) {
-      recommendation += '야외 활동하기 좋은 날씨입니다. ';
-    }
-    
-    // 습도 기반 추천
-    if (humidity >= 85) {
-      recommendation += '높은 습도로 인해 실내 활동을 권합니다. ';
-    }
-    
-    // 강수 기반 추천
-    if (rainfall > 0) {
-      recommendation += '우산이나 우비를 준비하세요. ';
-    } else if (forecastText.includes('Thundery') || forecastText.includes('Shower')) {
-      recommendation += '갑작스러운 소나기에 대비해 우산을 휴대하세요. ';
-    }
-    
-    // 기본 추천사항
-    if (!recommendation) {
-      recommendation = '현재 날씨 조건에서는 일반적인 야외 활동이 가능합니다. ';
-    }
-    
-    recommendation += '날씨 변화를 주기적으로 확인하세요.';
-    
-    return recommendation;
-  };
 
   // 마지막 업데이트 시간 포맷팅
   const formatLastUpdate = (timestamp) => {

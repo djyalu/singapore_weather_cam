@@ -206,18 +206,46 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
         tileLayer.addTo(map);
 
-        // 중심점 마커 추가
+        // Hwa Chong International School 별표 마커 추가
         try {
-          const centerMarker = window.L.marker(SINGAPORE_CENTER).addTo(map);
+          const schoolIcon = window.L.divIcon({
+            html: `<div style="
+              width: 32px; height: 32px; 
+              background: #FFD700; 
+              border: 2px solid #FFA500; 
+              border-radius: 50%; 
+              display: flex; align-items: center; justify-content: center; 
+              font-size: 18px; color: #B8860B; font-weight: bold;
+              box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+              cursor: pointer;
+            ">⭐</div>`,
+            className: 'school-marker',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+          });
+
+          const centerMarker = window.L.marker(SINGAPORE_CENTER, { 
+            icon: schoolIcon,
+            zIndexOffset: 2000 // 다른 마커들보다 위에 표시
+          }).addTo(map);
+          
           centerMarker.bindPopup(`
-            <div style="text-align: center; padding: 8px;">
-              <strong>🏫 Hwa Chong International School</strong><br>
-              <small>날씨 모니터링 중심점</small><br>
-              <small>위도: ${SINGAPORE_CENTER[0]}, 경도: ${SINGAPORE_CENTER[1]}</small>
+            <div style="text-align: center; padding: 12px; min-width: 200px;">
+              <strong style="color: #B8860B; font-size: 16px;">⭐ Hwa Chong International School</strong><br>
+              <div style="margin: 8px 0; padding: 6px; background: #FFF8DC; border-radius: 4px;">
+                <div style="color: #8B4513; font-size: 12px; font-weight: 500;">📍 날씨 모니터링 중심점</div>
+                <div style="color: #666; font-size: 11px; margin-top: 2px;">663 Bukit Timah Road</div>
+              </div>
+              <div style="font-size: 10px; color: #999;">
+                위도: ${SINGAPORE_CENTER[0]}, 경도: ${SINGAPORE_CENTER[1]}
+              </div>
             </div>
-          `);
+          `, {
+            maxWidth: 250,
+            className: 'school-popup'
+          });
         } catch (markerError) {
-          console.warn('마커 생성 오류:', markerError);
+          console.warn('학교 마커 생성 오류:', markerError);
         }
 
         // 권역별 날씨 히트맵 추가
@@ -406,8 +434,8 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
               <span>권역별 날씨</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-purple-600 rounded-full border border-white"></div>
-              <span>🏫 Hwa Chong School</span>
+              <div className="w-3 h-3 bg-yellow-400 rounded-full border border-orange-400" style="display: flex; align-items: center; justify-content: center; font-size: 8px;">⭐</div>
+              <span>⭐ Hwa Chong School</span>
             </div>
           </div>
           <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
