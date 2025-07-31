@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } from 'lucide-react';
-import cohereService from '../../services/cohereService';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -68,7 +67,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     generateSmartWeatherSummary();
   }, [weatherData]);
 
-  // 상세 분석 - 현재 데이터 기반 심화 분석
+  // GitHub Actions AI 분석 데이터 로드
   const handleRealAIAnalysis = async () => {
     if (!weatherData) {
       alert('날씨 데이터를 먼저 로드해주세요.');
@@ -79,10 +78,37 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
     setCohereAnalysis(null);
 
     try {
-      // 2초 딜레이로 분석하는 모습 연출
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('🤖 GitHub Actions AI 분석 데이터 로드 중...');
       
-      console.log('🤖 심화 데이터 분석 수행 중...');
+      // GitHub Actions에서 생성된 AI 분석 데이터 가져오기
+      const basePath = import.meta.env.BASE_URL || '/';
+      const timestamp = new Date().getTime();
+      
+      try {
+        const response = await fetch(`${basePath}data/weather-summary/latest.json?t=${timestamp}`);
+        
+        if (response.ok) {
+          const aiData = await response.json();
+          console.log('✅ GitHub Actions AI 데이터 로드 성공:', aiData);
+          
+          setCohereAnalysis({
+            analysis: aiData.analysis || aiData.summary || '분석 데이터가 없습니다.',
+            confidence: aiData.confidence || 0.9,
+            model: 'GitHub Actions + Cohere AI',
+            timestamp: aiData.timestamp || new Date().toISOString(),
+            isRealAnalysis: true
+          });
+          setShowRealAI(true);
+          return;
+        } else {
+          throw new Error('GitHub Actions AI 데이터 로드 실패');
+        }
+      } catch (fetchError) {
+        console.warn('⚠️ GitHub Actions AI 데이터 로드 실패, 로컬 분석으로 전환:', fetchError);
+      }
+      
+      // 백업: 로컬 심화 분석
+      console.log('🔄 로컬 심화 데이터 분석 수행 중...');
       
       const overallData = getOverallWeatherData();
       const analysisResult = generateAdvancedAnalysis(overallData, weatherData);
@@ -90,11 +116,12 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
       setCohereAnalysis(analysisResult);
       setShowRealAI(true);
       
-      console.log('✅ 심화 분석 완료:', analysisResult);
+      console.log('✅ 로컬 심화 분석 완료:', analysisResult);
     } catch (error) {
       console.error('🚨 분석 실패:', error);
       
-      // 에러 시 기본 분석 제공
+      // 최종 백업: 기본 분석
+      const overallData = getOverallWeatherData();
       const fallbackResult = {
         analysis: `현재 데이터를 기반으로 한 기본 분석입니다.\n\n` +
                  `온도: ${overallData.temperature.toFixed(1)}°C (${overallData.temperature >= 30 ? '더운 날씨' : '쾌적한 날씨'})\n` +  
@@ -475,9 +502,9 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               className={`text-sm font-semibold px-3 py-1 rounded-full transition-all ${
                 cohereLoading 
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : cohereService.isConfigured()
-                  ? 'bg-purple-100 text-purple-800 hover:bg-purple-200 active:scale-95'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : !weatherData
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-purple-100 text-purple-800 hover:bg-purple-200 active:scale-95'
               }`}
             >
               {cohereLoading ? (
@@ -493,7 +520,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               )}
             </button>
             <div className="text-xs text-gray-500 mt-0.5">
-              {cohereService.isConfigured() ? 'Cohere AI' : 'API 미설정'}
+              GitHub AI
             </div>
           </div>
         </div>
@@ -521,13 +548,13 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           </div>
         )}
 
-        {/* Cohere AI 실시간 분석 결과 */}
+        {/* GitHub AI 실시간 분석 결과 */}
         {showRealAI && cohereAnalysis && (
           <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Brain className="w-5 h-5 text-purple-600" />
-                <span className="font-semibold text-purple-800">🤖 Cohere AI 실시간 분석</span>
+                <span className="font-semibold text-purple-800">🤖 GitHub AI 분석</span>
               </div>
               <button
                 onClick={() => setShowRealAI(false)}
@@ -563,7 +590,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             <div className="flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-300 border-t-purple-600"></div>
               <div>
-                <div className="text-sm font-medium text-purple-800">🤖 Cohere AI 분석 중...</div>
+                <div className="text-sm font-medium text-purple-800">🤖 GitHub AI 분석 중...</div>
                 <div className="text-xs text-purple-600">실시간 날씨 데이터를 분석하고 있습니다</div>
               </div>
             </div>
