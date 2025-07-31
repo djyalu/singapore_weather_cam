@@ -362,4 +362,7 @@ async function main() {
 }
 
 // Run the script
-main();
+main().catch(error => {
+  console.error('💥 Script execution failed:', error);
+  process.exit(1);
+});
