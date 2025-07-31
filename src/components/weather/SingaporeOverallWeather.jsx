@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles } from 'lucide-react';
+import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } from 'lucide-react';
+import cohereService from '../../services/cohereService';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -9,6 +10,9 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [aiSummary, setAiSummary] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [cohereAnalysis, setCohereAnalysis] = useState(null);
+  const [cohereLoading, setCohereLoading] = useState(false);
+  const [showRealAI, setShowRealAI] = useState(false);
 
   // 1초마다 현재 시간 업데이트
   useEffect(() => {
@@ -63,6 +67,38 @@ const SingaporeOverallWeather = React.memo(({ weatherData, className = '' }) => 
 
     generateSmartWeatherSummary();
   }, [weatherData]);
+
+  // Cohere AI 실시간 분석
+  const handleRealAIAnalysis = async () => {
+    if (!weatherData) {
+      alert('날씨 데이터를 먼저 로드해주세요.');
+      return;
+    }
+
+    if (!cohereService.isConfigured()) {
+      alert('Cohere API 키가 설정되지 않았습니다.\n.env.local 파일에 VITE_COHERE_API_KEY를 설정해주세요.');
+      return;
+    }
+
+    setCohereLoading(true);
+    setCohereAnalysis(null);
+
+    try {
+      console.log('🤖 Cohere AI 실시간 날씨 분석 시작...');
+      
+      const result = await cohereService.analyzeWeatherData(weatherData);
+      
+      setCohereAnalysis(result);
+      setShowRealAI(true);
+      
+      console.log('✅ Cohere AI 분석 완료:', result);
+    } catch (error) {
+      console.error('🚨 Cohere AI 분석 실패:', error);
+      alert(`AI 분석 실패: ${error.message}`);
+    } finally {
+      setCohereLoading(false);
+    }
+  };
 
   // 날씨 데이터에서 전체 평균값 추출
   const getOverallWeatherData = () => {
