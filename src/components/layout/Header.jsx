@@ -73,10 +73,10 @@ const Header = React.memo(({
                 <div className="flex items-center mt-2 space-x-3">
                   <span className="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 backdrop-blur-sm border border-green-400/30">
                     <CheckCircle className="w-4 h-4" />
-                    <span>Live</span>
+                    <span>실시간</span>
                   </span>
                   <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm border border-blue-400/30">
-                    🌡️ Real-time
+                    🌡️ 날씨 정보
                   </span>
                 </div>
               </div>
@@ -87,7 +87,7 @@ const Header = React.memo(({
               {/* 현재 시간 표시 */}
               <div className="text-right">
                 <div className="bg-white/10 backdrop-blur-sm p-2 sm:p-4 rounded-xl border border-white/20">
-                  <div className="text-xs sm:text-sm text-blue-100 mb-1 hidden sm:block">Singapore Time</div>
+                  <div className="text-xs sm:text-sm text-blue-100 mb-1 hidden sm:block">싱가포르 시간</div>
                   <div className="text-sm sm:text-xl font-mono font-bold text-white">
                     {formatTime(currentTime)}
                   </div>
@@ -113,10 +113,10 @@ const Header = React.memo(({
                 <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                   <div className="flex items-center space-x-2 text-sm text-blue-100 mb-2">
                     <Clock className="w-4 h-4" />
-                    <span>{systemStats.lastUpdate || 'Loading...'}</span>
+                    <span>{systemStats.lastUpdate || '로딩 중...'}</span>
                   </div>
                   <div className="text-xs text-blue-200">
-                    <div>📹 {systemStats.totalWebcams || systemStats.totalCameras || 0} cameras</div>
+                    <div>📹 실시간 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개</div>
                   </div>
                 </div>
               </div>
@@ -126,7 +126,7 @@ const Header = React.memo(({
           {/* 모바일용 간단한 상태 표시 */}
           <div className="mt-4 flex justify-between items-center lg:hidden">
             <div className="text-sm text-blue-200">
-              📹 {systemStats.totalWebcams || systemStats.totalCameras || 0} cameras • Updated {systemStats.lastUpdate || 'Loading...'}
+              📹 실시간 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • 업데이트: {systemStats.lastUpdate || '로딩 중...'}
             </div>
             <div className="text-sm text-blue-100 font-mono">
               {formatTime(currentTime)}
