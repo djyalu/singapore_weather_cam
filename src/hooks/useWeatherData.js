@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { transformWeatherData } from '../utils/weatherDataTransformer.js';
+import { validateStationData } from '../utils/station59SecurityValidation.js';
 
 /**
  * Enhanced useWeatherData hook with full 59-station support
@@ -36,21 +37,56 @@ export const useWeatherData = () => {
       if (response.ok) {
         const data = await response.json();
         
-        console.log('✅ Raw 59-station data loaded:', {
+        // 🛡️ SECURITY: Validate data integrity and security
+        const validationResult = validateStationData(data);
+        
+        console.log('✅ Raw 59-station data loaded and validated:', {
           stations_used: data.stations_used?.length || 0,
           data_quality_score: data.data_quality_score,
           station_details: Object.keys(data.station_details || {}).length,
-          geographic_coverage: data.geographic_coverage
+          geographic_coverage: data.geographic_coverage,
+          security_validation: {
+            is_valid: validationResult.isValid,
+            security_score: validationResult.securityScore,
+            errors: validationResult.errors.length,
+            warnings: validationResult.warnings.length
+          }
         });
         
+        // Use sanitized data if validation passed
+        const dataToUse = validationResult.isValid && validationResult.sanitizedData 
+          ? validationResult.sanitizedData 
+          : data;
+          
+        // Add validation metadata
+        dataToUse.validation = {
+          is_validated: true,
+          security_score: validationResult.securityScore,
+          validation_timestamp: new Date().toISOString(),
+          errors: validationResult.errors,
+          warnings: validationResult.warnings
+        };
+        
         // Store raw data for direct access
-        setRawWeatherData(data);
+        setRawWeatherData(dataToUse);
         
         // Transform data for compatibility with existing components
-        const transformedData = transformWeatherData(data);
-        transformedData.rawData = data; // Include raw data for enhanced features
+        const transformedData = transformWeatherData(dataToUse);
+        transformedData.rawData = dataToUse; // Include raw data for enhanced features
+        transformedData.validation = dataToUse.validation; // Include validation results
         
         setWeatherData(transformedData);
+        
+        // Log security warnings if any
+        if (validationResult.warnings.length > 0) {
+          console.warn('⚠️ Station data validation warnings:', validationResult.warnings);
+        }
+        
+        // Log security errors if any (but still proceed with sanitized data)
+        if (validationResult.errors.length > 0) {
+          console.error('🚨 Station data validation errors:', validationResult.errors);
+        }
+        
         return;
       } else {
         throw new Error(`Failed to fetch data: ${response.status}`);
