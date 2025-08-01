@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { useDataLoader } from '../hooks/useDataLoader';
 import { useSystemStats } from '../hooks/useSystemStats';
+import { useTrafficCameraData } from '../hooks/useTrafficCameraData';
 import { useServiceWorker } from '../hooks/useServiceWorker';
 import { useMetrics } from '../services/metricsService';
 import { useComponentPerformance } from '../hooks/useComponentPerformance';
@@ -55,8 +56,11 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     getReliabilityReport,
   } = dataLoader;
 
-  // System statistics calculation
-  const systemStats = useSystemStats(webcamData);
+  // Traffic camera data for system statistics
+  const { trafficData, loading: trafficLoading, error: trafficError } = useTrafficCameraData(60000);
+
+  // System statistics calculation (now includes traffic camera data)
+  const systemStats = useSystemStats(webcamData, trafficData);
 
   // PWA service worker functionality
   const serviceWorker = useServiceWorker();
@@ -89,7 +93,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
       weatherDataAvailable: !!weatherData,
       webcamDataAvailable: !!webcamData,
       isLoading: isInitialLoading,
-      systemStatsCount: systemStats?.totalCameras || 0,
+      systemStatsCount: systemStats?.totalCameras || systemStats?.totalWebcams || 0,
     }, {
       trackRenders: true,
       trackProps: true,
@@ -108,6 +112,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     data: {
       weather: weatherData,
       webcam: webcamData,
+      trafficCameras: trafficData,
       systemStats,
     },
 
@@ -116,12 +121,14 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
       isInitialLoading,
       isRefreshing,
       loading,
+      trafficLoading,
     },
 
     // Error handling
     error: {
       error,
       retryCount,
+      trafficError,
     },
 
     // Data freshness and quality
@@ -157,12 +164,15 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
   }), [
     weatherData,
     webcamData,
+    trafficData,
     systemStats,
     isInitialLoading,
     isRefreshing,
     loading,
+    trafficLoading,
     error,
     retryCount,
+    trafficError,
     lastFetch,
     dataFreshness,
     reliabilityMetrics,
@@ -232,6 +242,15 @@ export const useWebcamData = () => {
     isLoading: context.loading.isInitialLoading,
     error: context.error.error,
     refresh: context.actions.refresh,
+  }));
+};
+
+// Traffic camera data hook
+export const useTrafficCameraDataContext = () => {
+  return useAppData(context => ({
+    trafficData: context.data.trafficCameras,
+    isLoading: context.loading.trafficLoading,
+    error: context.error.trafficError,
   }));
 };
 

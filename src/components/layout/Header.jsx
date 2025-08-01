@@ -116,7 +116,7 @@ const Header = React.memo(({
                     <span>{systemStats.lastUpdate || 'Loading...'}</span>
                   </div>
                   <div className="text-xs text-blue-200">
-                    <div>📹 {systemStats.totalWebcams || 0} cameras</div>
+                    <div>📹 {systemStats.totalWebcams || systemStats.totalCameras || 0} cameras</div>
                   </div>
                 </div>
               </div>
@@ -126,7 +126,7 @@ const Header = React.memo(({
           {/* 모바일용 간단한 상태 표시 */}
           <div className="mt-4 flex justify-between items-center lg:hidden">
             <div className="text-sm text-blue-200">
-              📹 {systemStats.totalWebcams || 0} cameras • Updated {systemStats.lastUpdate || 'Loading...'}
+              📹 {systemStats.totalWebcams || systemStats.totalCameras || 0} cameras • Updated {systemStats.lastUpdate || 'Loading...'}
             </div>
             <div className="text-sm text-blue-100 font-mono">
               {formatTime(currentTime)}
