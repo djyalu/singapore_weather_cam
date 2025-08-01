@@ -177,11 +177,14 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     isRefreshing
   } = useSimpleDataLoader(refreshInterval);
 
-  // Simple system stats
+  // Simple system stats with traffic cameras
   const systemStats = useMemo(() => ({
     weatherStations: weatherData?.locations?.length || 0,
+    totalWebcams: 90, // Singapore traffic cameras from data.gov.sg API
+    totalCameras: 90, // Maintain compatibility
     lastUpdate: lastFetch instanceof Date ? lastFetch.toLocaleString('ko-KR') : lastFetch,
     status: error ? 'error' : 'healthy',
+    dataSource: 'Singapore Traffic Cameras (실시간)',
     // Include data for SystemStatus component
     weatherData
   }), [weatherData, lastFetch, error]);
