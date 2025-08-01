@@ -21,6 +21,7 @@ on:
     paths:
       - 'scripts/ai-weather-summary.js'
       - '.github/workflows/ai-weather-summary.yml'
+      - 'test-cohere.trigger'
 
 env:
   NODE_ENV: production
