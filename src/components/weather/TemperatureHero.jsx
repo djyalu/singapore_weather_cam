@@ -28,32 +28,56 @@ const TemperatureHero = React.memo(({
   // Refs for accessibility
   const heroRef = useRef(null);
   const retryButtonRef = useRef(null);
-  // Get primary weather data (Newton station - S117) - memoized
+  // Get primary weather data with proper fallback logic - memoized
   const getPrimaryWeatherData = useMemo(() => {
     if (!weatherData || !weatherData.current) {
       return null;
     }
 
-    // Try to get Newton station data specifically
-    const newtonStation = weatherData.locations?.find(
-      location => location.station_id === 'S117',
-    );
-
-    // Fall back to current average data
     const current = weatherData.current;
-    const primaryStation = getStationInfo('S117');
+    
+    // Try to get specific high-priority station data from actual available stations
+    let primaryStation = null;
+    let stationData = null;
+    
+    if (weatherData.locations && weatherData.locations.length > 0) {
+      // Priority order: S109 (Ang Mo Kio), S24 (Choa Chu Kang), S104 (Jurong West)
+      const priorityStations = ['S109', 'S24', 'S104', 'S115', 'S50'];
+      
+      for (const stationId of priorityStations) {
+        const foundStation = weatherData.locations.find(
+          location => location.station_id === stationId
+        );
+        if (foundStation && foundStation.temperature !== null && foundStation.temperature !== undefined) {
+          stationData = foundStation;
+          primaryStation = getStationInfo(stationId);
+          break;
+        }
+      }
+      
+      // If no priority station found, use the first available station with temperature data
+      if (!stationData) {
+        stationData = weatherData.locations.find(
+          location => location.temperature !== null && location.temperature !== undefined
+        );
+        if (stationData) {
+          primaryStation = getStationInfo(stationData.station_id);
+        }
+      }
+    }
 
     return {
-      temperature: newtonStation?.temperature || current.temperature,
+      temperature: stationData?.temperature || current.temperature,
       feelsLike: current.feelsLike,
       description: current.description,
       icon: current.icon,
-      location: newtonStation ? primaryStation.name : current.location,
-      displayName: newtonStation ? primaryStation.displayName : 'Singapore Average',
-      humidity: newtonStation?.humidity || current.humidity,
+      location: stationData ? (primaryStation?.name || stationData.name || stationData.station_id) : current.location,
+      displayName: stationData ? (primaryStation?.displayName || stationData.displayName || stationData.name || `Station ${stationData.station_id}`) : 'Singapore Average',
+      humidity: stationData?.humidity || current.humidity,
       windSpeed: current.windSpeed,
       windDirection: current.windDirection,
       timestamp: weatherData.timestamp,
+      stationId: stationData?.station_id || null,
     };
   }, [weatherData]);
 

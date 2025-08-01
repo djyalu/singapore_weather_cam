@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useWeatherData } from '../../hooks/useWeatherData';
 import StationSelector from './StationSelector';
 import StationComparison from './StationComparison';
+import RegionalWeatherDisplay from './RegionalWeatherDisplay';
 import { 
   BarChart3, 
   Map, 
@@ -392,9 +393,15 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
                 </div>
               )}
 
+              {/* Regional Weather Display - 정확한 지역별 데이터 */}
+              <RegionalWeatherDisplay 
+                weatherData={weatherData}
+                className="mb-6"
+              />
+
               {/* Key Station Highlights */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Weather Stations</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">주요 관측소 현황</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {systemStatus.filteredStations.slice(0, 6).map(station => (
                     <div 
@@ -420,7 +427,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
                         <div className="space-y-1">
                           {station.currentData.temperature && (
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Temperature:</span>
+                              <span className="text-gray-600">온도:</span>
                               <span className="font-medium">
                                 {station.currentData.temperature.toFixed(1)}°C
                               </span>
@@ -428,15 +435,15 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
                           )}
                           {station.currentData.humidity && (
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Humidity:</span>
+                              <span className="text-gray-600">습도:</span>
                               <span className="font-medium">
                                 {Math.round(station.currentData.humidity)}%
                               </span>
                             </div>
                           )}
-                          {station.currentData.rainfall && (
+                          {station.currentData.rainfall !== undefined && (
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Rainfall:</span>
+                              <span className="text-gray-600">강수량:</span>
                               <span className="font-medium">
                                 {station.currentData.rainfall.toFixed(1)}mm
                               </span>
