@@ -91,9 +91,9 @@ jobs:
             git add data/weather-summary/
             git commit -m "feat: Update AI weather summary data
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>" || exit 0
+            🤖 Generated with [Claude Code](https://claude.ai/code)
+            
+            Co-Authored-By: Claude <noreply@anthropic.com>" || exit 0
             git push
             echo "✅ AI weather summary data committed successfully"
           else
