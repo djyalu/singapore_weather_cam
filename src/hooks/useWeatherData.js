@@ -204,13 +204,57 @@ export const useWeatherData = () => {
     // Enhanced 59-station utilities
     stations: stationUtils,
     
-    // Legacy compatibility
-    current: weatherData ? {
-      temperature: weatherData.data?.temperature?.average || 0,
-      humidity: weatherData.data?.humidity?.average || 0,
-      rainfall: weatherData.data?.rainfall?.total || 0,
-      description: weatherData.data?.forecast?.general?.forecast || 'Unknown'
-    } : null
+    // Legacy compatibility - Use primary station data instead of averages
+    current: weatherData ? getCurrentWeatherFromPrimaryStation(weatherData) : null
+  };
+};
+
+// Get current weather from primary station (not average)
+const getCurrentWeatherFromPrimaryStation = (weatherData) => {
+  if (!weatherData?.data) return null;
+
+  // Priority order for primary station selection
+  const priorityStations = ['S109', 'S24', 'S104', 'S115', 'S50'];
+  let primaryStationData = null;
+
+  // Find first available priority station with temperature data
+  for (const stationId of priorityStations) {
+    const tempReading = weatherData.data.temperature?.readings?.find(r => r.station === stationId);
+    if (tempReading) {
+      primaryStationData = {
+        stationId: stationId,
+        temperature: tempReading.value,
+        stationName: tempReading.station_name,
+        coordinates: tempReading.coordinates
+      };
+      break;
+    }
+  }
+
+  // If no priority station found, use first available station
+  if (!primaryStationData && weatherData.data.temperature?.readings?.length > 0) {
+    const firstReading = weatherData.data.temperature.readings[0];
+    primaryStationData = {
+      stationId: firstReading.station,
+      temperature: firstReading.value,
+      stationName: firstReading.station_name,
+      coordinates: firstReading.coordinates
+    };
+  }
+
+  // Add other data from the same station if available
+  const humidity = weatherData.data.humidity?.readings?.find(r => r.station === primaryStationData?.stationId)?.value;
+  const rainfall = weatherData.data.rainfall?.readings?.find(r => r.station === primaryStationData?.stationId)?.value;
+
+  return {
+    temperature: primaryStationData?.temperature || weatherData.data?.temperature?.average || 0,
+    humidity: humidity || weatherData.data?.humidity?.average || 0,
+    rainfall: rainfall || weatherData.data?.rainfall?.total || 0,
+    description: weatherData.data?.forecast?.general?.forecast || 'Unknown',
+    stationId: primaryStationData?.stationId,
+    stationName: primaryStationData?.stationName,
+    location: primaryStationData?.stationName || 'Singapore',
+    coordinates: primaryStationData?.coordinates
   };
 };
 
