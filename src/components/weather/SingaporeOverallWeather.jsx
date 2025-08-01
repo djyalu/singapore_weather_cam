@@ -705,7 +705,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               </span>
               <span className="text-sm text-blue-100">°C</span>
             </div>
-            <div className="text-xs text-blue-100 hidden sm:block">
+            <div className="text-xs text-blue-100">
               {overallData.stationCount}개 평균
             </div>
           </div>
@@ -714,14 +714,14 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
 
       {/* 핵심 정보만 간결하게 표시 */}
       <div className="p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
           {/* 습도 */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Droplets className="w-4 h-4 text-blue-500" />
               <span className="text-xs text-gray-600 font-medium">습도</span>
             </div>
-            <div className="text-lg sm:text-xl font-bold text-gray-800">
+            <div className="text-xl font-bold text-gray-800">
               {Math.round(overallData.humidity)}%
             </div>
             <div className="text-xs text-gray-500">
@@ -735,7 +735,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <Cloud className="w-4 h-4 text-gray-500" />
               <span className="text-xs text-gray-600 font-medium">강수량</span>
             </div>
-            <div className="text-lg sm:text-xl font-bold text-gray-800">
+            <div className="text-xl font-bold text-gray-800">
               {overallData.rainfall.toFixed(1)}
             </div>
             <div className="text-xs text-gray-500">mm</div>

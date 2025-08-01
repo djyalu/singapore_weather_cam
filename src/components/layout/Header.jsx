@@ -73,8 +73,7 @@ const Header = React.memo(({
                 <div className="flex items-center mt-2 space-x-3">
                   <span className="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 backdrop-blur-sm border border-green-400/30">
                     <CheckCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Live Monitoring</span>
-                    <span className="sm:hidden">Live</span>
+                    <span>Live</span>
                   </span>
                   <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm border border-blue-400/30">
                     🌡️ Real-time
@@ -85,11 +84,11 @@ const Header = React.memo(({
 
             {/* 우측 컨트롤 */}
             <div className="flex items-center gap-3 sm:gap-4">
-              {/* 현재 시간 표시 - 모바일에서 숨김 */}
-              <div className="hidden lg:block text-right">
-                <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20">
-                  <div className="text-sm text-blue-100 mb-1">Singapore Time</div>
-                  <div className="text-lg sm:text-xl font-mono font-bold text-white">
+              {/* 현재 시간 표시 */}
+              <div className="text-right">
+                <div className="bg-white/10 backdrop-blur-sm p-2 sm:p-4 rounded-xl border border-white/20">
+                  <div className="text-xs sm:text-sm text-blue-100 mb-1 hidden sm:block">Singapore Time</div>
+                  <div className="text-sm sm:text-xl font-mono font-bold text-white">
                     {formatTime(currentTime)}
                   </div>
                 </div>
