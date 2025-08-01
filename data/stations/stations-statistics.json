@@ -1,0 +1,61 @@
+{
+  "total_stations": 59,
+  "data_types": {
+    "rainfall": 59,
+    "wind_direction": 6,
+    "wind_speed": 6,
+    "temperature": 4,
+    "humidity": 4,
+    "air_temperature": 4
+  },
+  "priority_levels": {
+    "critical": 23,
+    "high": 15,
+    "medium": 8,
+    "low": 13
+  },
+  "regions": {},
+  "coordinate_sources": {
+    "known_database": 15,
+    "estimated": 44
+  },
+  "generated_at": "2025-08-01T23:04:13.347Z",
+  "key_locations": {
+    "hwa_chong": {
+      "name": "Hwa Chong International School",
+      "coordinates": {
+        "lat": 1.3437,
+        "lng": 103.764
+      },
+      "priority": "primary",
+      "description": "Primary monitoring center - International school campus"
+    },
+    "bukit_timah": {
+      "name": "Bukit Timah Nature Reserve",
+      "coordinates": {
+        "lat": 1.352,
+        "lng": 103.7767
+      },
+      "priority": "secondary",
+      "description": "Nature reserve weather monitoring"
+    },
+    "newton": {
+      "name": "Newton",
+      "coordinates": {
+        "lat": 1.3138,
+        "lng": 103.842
+      },
+      "priority": "tertiary",
+      "description": "Central Singapore urban monitoring"
+    },
+    "clementi": {
+      "name": "Clementi",
+      "coordinates": {
+        "lat": 1.3162,
+        "lng": 103.7649
+      },
+      "priority": "tertiary",
+      "description": "Western residential monitoring"
+    }
+  }
+}

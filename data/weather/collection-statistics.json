@@ -1,0 +1,581 @@
+{
+  "timestamp": "2025-08-01T23:04:29.725Z",
+  "collection_stats": {
+    "totalRequests": 11,
+    "successfulRequests": 11,
+    "failedRequests": 4,
+    "stationsUsed": {},
+    "dataQualityScores": []
+  },
+  "data_quality_score": 99,
+  "geographic_coverage": {
+    "regions_covered": 5,
+    "total_regions": 5,
+    "coverage_percentage": 100,
+    "stations_by_region": {
+      "north": 4,
+      "south": 7,
+      "east": 25,
+      "west": 3,
+      "central": 20
+    }
+  },
+  "stations_status": [
+    {
+      "station_id": "S109",
+      "data_types": [
+        "temperature",
+        "humidity",
+        "rainfall",
+        "wind_direction",
+        "wind_speed"
+      ],
+      "last_seen": "2025-08-01T23:04:23.354Z",
+      "status": "active",
+      "reading_count": 5
+    },
+    {
+      "station_id": "S107",
+      "data_types": [
+        "temperature",
+        "humidity",
+        "rainfall",
+        "wind_direction",
+        "wind_speed"
+      ],
+      "last_seen": "2025-08-01T23:04:23.354Z",
+      "status": "active",
+      "reading_count": 5
+    },
+    {
+      "station_id": "S24",
+      "data_types": [
+        "temperature",
+        "humidity",
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 3
+    },
+    {
+      "station_id": "S104",
+      "data_types": [
+        "temperature",
+        "humidity",
+        "rainfall",
+        "wind_direction",
+        "wind_speed"
+      ],
+      "last_seen": "2025-08-01T23:04:23.354Z",
+      "status": "active",
+      "reading_count": 5
+    },
+    {
+      "station_id": "S224",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S77",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S216",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S117",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S217",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S64",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S90",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S208",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S201",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S50",
+      "data_types": [
+        "rainfall",
+        "wind_direction",
+        "wind_speed"
+      ],
+      "last_seen": "2025-08-01T23:04:23.354Z",
+      "status": "active",
+      "reading_count": 3
+    },
+    {
+      "station_id": "S220",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S213",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S215",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S222",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S221",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S33",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S229",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S228",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S71",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S43",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S211",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S66",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S112",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S07",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S226",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S40",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S223",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S108",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S113",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S44",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S119",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S203",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S29",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S94",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S78",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S106",
+      "data_types": [
+        "rainfall",
+        "wind_direction",
+        "wind_speed"
+      ],
+      "last_seen": "2025-08-01T23:04:23.354Z",
+      "status": "active",
+      "reading_count": 3
+    },
+    {
+      "station_id": "S81",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S111",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S900",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S102",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S60",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S84",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S79",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S92",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S214",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S88",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S123",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S115",
+      "data_types": [
+        "rainfall",
+        "wind_direction",
+        "wind_speed"
+      ],
+      "last_seen": "2025-08-01T23:04:23.354Z",
+      "status": "active",
+      "reading_count": 3
+    },
+    {
+      "station_id": "S69",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S08",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S230",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S210",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S227",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S219",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    },
+    {
+      "station_id": "S209",
+      "data_types": [
+        "rainfall"
+      ],
+      "last_seen": "2025-08-01T23:04:21.501Z",
+      "status": "active",
+      "reading_count": 1
+    }
+  ],
+  "api_performance": {
+    "total_calls": 9,
+    "success_rate": 78,
+    "average_response_time": 1185
+  }
+}

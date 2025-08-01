@@ -1,0 +1,369 @@
+[
+  {
+    "station_id": "S92",
+    "data_types": [
+      "rainfall"
+    ],
+    "first_seen": "2025-08-01T23:04:06.397Z",
+    "last_seen": "2025-08-01T23:04:06.397Z",
+    "readings_count": 1,
+    "coordinates": {
+      "lat": 1.3361652042042456,
+      "lng": 103.89927715656194,
+      "name": "Central Station S92",
+      "estimated": true,
+      "source": "estimated"
+    },
+    "reliability_score": 1,
+    "metadata": {
+      "latest_rainfall": 0
+    },
+    "proximities": {
+      "hwa_chong": {
+        "distance_km": 15.06,
+        "location_name": "Hwa Chong International School",
+        "priority": "primary"
+      },
+      "bukit_timah": {
+        "distance_km": 13.74,
+        "location_name": "Bukit Timah Nature Reserve",
+        "priority": "secondary"
+      },
+      "newton": {
+        "distance_km": 6.84,
+        "location_name": "Newton",
+        "priority": "tertiary"
+      },
+      "clementi": {
+        "distance_km": 15.1,
+        "location_name": "Clementi",
+        "priority": "tertiary"
+      }
+    },
+    "nearest_key_location": "newton",
+    "priority_score": 56.6434141736326,
+    "priority_level": "medium"
+  },
+  {
+    "station_id": "S07",
+    "data_types": [
+      "rainfall"
+    ],
+    "first_seen": "2025-08-01T23:04:06.397Z",
+    "last_seen": "2025-08-01T23:04:06.397Z",
+    "readings_count": 1,
+    "coordinates": {
+      "lat": 1.3283,
+      "lng": 103.9043,
+      "name": "Bedok",
+      "source": "known_database"
+    },
+    "reliability_score": 1,
+    "metadata": {
+      "latest_rainfall": 0
+    },
+    "proximities": {
+      "hwa_chong": {
+        "distance_km": 15.69,
+        "location_name": "Hwa Chong International School",
+        "priority": "primary"
+      },
+      "bukit_timah": {
+        "distance_km": 14.43,
+        "location_name": "Bukit Timah Nature Reserve",
+        "priority": "secondary"
+      },
+      "newton": {
+        "distance_km": 7.11,
+        "location_name": "Newton",
+        "priority": "tertiary"
+      },
+      "clementi": {
+        "distance_km": 15.55,
+        "location_name": "Clementi",
+        "priority": "tertiary"
+      }
+    },
+    "nearest_key_location": "newton",
+    "priority_score": 53.891935402307524,
+    "priority_level": "medium"
+  },
+  {
+    "station_id": "S60",
+    "data_types": [
+      "rainfall"
+    ],
+    "first_seen": "2025-08-01T23:04:06.397Z",
+    "last_seen": "2025-08-01T23:04:06.397Z",
+    "readings_count": 1,
+    "coordinates": {
+      "lat": 1.2494,
+      "lng": 103.8303,
+      "name": "Sentosa Island",
+      "source": "known_database"
+    },
+    "reliability_score": 1,
+    "metadata": {
+      "latest_rainfall": 0
+    },
+    "proximities": {
+      "hwa_chong": {
+        "distance_km": 12.82,
+        "location_name": "Hwa Chong International School",
+        "priority": "primary"
+      },
+      "bukit_timah": {
+        "distance_km": 12.87,
+        "location_name": "Bukit Timah Nature Reserve",
+        "priority": "secondary"
+      },
+      "newton": {
+        "distance_km": 7.28,
+        "location_name": "Newton",
+        "priority": "tertiary"
+      },
+      "clementi": {
+        "distance_km": 10.39,
+        "location_name": "Clementi",
+        "priority": "tertiary"
+      }
+    },
+    "nearest_key_location": "newton",
+    "priority_score": 52.218851635382116,
+    "priority_level": "medium"
+  },
+  {
+    "station_id": "S112",
+    "data_types": [
+      "rainfall"
+    ],
+    "first_seen": "2025-08-01T23:04:06.397Z",
+    "last_seen": "2025-08-01T23:04:06.397Z",
+    "readings_count": 1,
+    "coordinates": {
+      "lat": 1.3271216707028495,
+      "lng": 103.90659435973882,
+      "name": "East Station S112",
+      "estimated": true,
+      "source": "estimated"
+    },
+    "reliability_score": 1,
+    "metadata": {
+      "latest_rainfall": 0
+    },
+    "proximities": {
+      "hwa_chong": {
+        "distance_km": 15.96,
+        "location_name": "Hwa Chong International School",
+        "priority": "primary"
+      },
+      "bukit_timah": {
+        "distance_km": 14.7,
+        "location_name": "Bukit Timah Nature Reserve",
+        "priority": "secondary"
+      },
+      "newton": {
+        "distance_km": 7.33,
+        "location_name": "Newton",
+        "priority": "tertiary"
+      },
+      "clementi": {
+        "distance_km": 15.8,
+        "location_name": "Clementi",
+        "priority": "tertiary"
+      }
+    },
+    "nearest_key_location": "newton",
+    "priority_score": 51.68144762803527,
+    "priority_level": "medium"
+  },
+  {
+    "station_id": "S107",
+    "data_types": [
+      "temperature",
+      "humidity",
+      "rainfall",
+      "wind_direction",
+      "wind_speed",
+      "air_temperature"
+    ],
+    "first_seen": "2025-08-01T23:04:04.230Z",
+    "last_seen": "2025-08-01T23:04:09.722Z",
+    "readings_count": 6,
+    "coordinates": {
+      "lat": 1.3048,
+      "lng": 103.9318,
+      "name": "East Coast Parkway",
+      "source": "known_database"
+    },
+    "reliability_score": 1,
+    "metadata": {
+      "latest_temperature": 28.7,
+      "latest_humidity": 86.5,
+      "latest_rainfall": 0,
+      "latest_wind_direction": 212,
+      "latest_wind_speed": 11.4,
+      "latest_air_temperature": 28.7
+    },
+    "proximities": {
+      "hwa_chong": {
+        "distance_km": 19.15,
+        "location_name": "Hwa Chong International School",
+        "priority": "primary"
+      },
+      "bukit_timah": {
+        "distance_km": 18.02,
+        "location_name": "Bukit Timah Nature Reserve",
+        "priority": "secondary"
+      },
+      "newton": {
+        "distance_km": 10.03,
+        "location_name": "Newton",
+        "priority": "tertiary"
+      },
+      "clementi": {
+        "distance_km": 18.6,
+        "location_name": "Clementi",
+        "priority": "tertiary"
+      }
+    },
+    "nearest_key_location": "newton",
+    "priority_score": 50,
+    "priority_level": "medium"
+  },
+  {
+    "station_id": "S88",
+    "data_types": [
+      "rainfall"
+    ],
+    "first_seen": "2025-08-01T23:04:06.397Z",
+    "last_seen": "2025-08-01T23:04:06.397Z",
+    "readings_count": 1,
+    "coordinates": {
+      "lat": 1.3371117661738023,
+      "lng": 103.90755894947499,
+      "name": "Central Station S88",
+      "estimated": true,
+      "source": "estimated"
+    },
+    "reliability_score": 1,
+    "metadata": {
+      "latest_rainfall": 0
+    },
+    "proximities": {
+      "hwa_chong": {
+        "distance_km": 15.98,
+        "location_name": "Hwa Chong International School",
+        "priority": "primary"
+      },
+      "bukit_timah": {
+        "distance_km": 14.64,
+        "location_name": "Bukit Timah Nature Reserve",
+        "priority": "secondary"
+      },
+      "newton": {
+        "distance_km": 7.74,
+        "location_name": "Newton",
+        "priority": "tertiary"
+      },
+      "clementi": {
+        "distance_km": 16.03,
+        "location_name": "Clementi",
+        "priority": "tertiary"
+      }
+    },
+    "nearest_key_location": "newton",
+    "priority_score": 47.648645437883545,
+    "priority_level": "medium"
+  },
+  {
+    "station_id": "S203",
+    "data_types": [
+      "rainfall"
+    ],
+    "first_seen": "2025-08-01T23:04:06.397Z",
+    "last_seen": "2025-08-01T23:04:06.397Z",
+    "readings_count": 1,
+    "coordinates": {
+      "lat": 1.2590898762326257,
+      "lng": 103.8851600067862,
+      "name": "South Station S203",
+      "estimated": true,
+      "source": "estimated"
+    },
+    "reliability_score": 1,
+    "metadata": {
+      "latest_rainfall": 0
+    },
+    "proximities": {
+      "hwa_chong": {
+        "distance_km": 16.43,
+        "location_name": "Hwa Chong International School",
+        "priority": "primary"
+      },
+      "bukit_timah": {
+        "distance_km": 15.88,
+        "location_name": "Bukit Timah Nature Reserve",
+        "priority": "secondary"
+      },
+      "newton": {
+        "distance_km": 7.75,
+        "location_name": "Newton",
+        "priority": "tertiary"
+      },
+      "clementi": {
+        "distance_km": 14.8,
+        "location_name": "Clementi",
+        "priority": "tertiary"
+      }
+    },
+    "nearest_key_location": "newton",
+    "priority_score": 47.52143076518679,
+    "priority_level": "medium"
+  },
+  {
+    "station_id": "S77",
+    "data_types": [
+      "rainfall"
+    ],
+    "first_seen": "2025-08-01T23:04:06.396Z",
+    "last_seen": "2025-08-01T23:04:06.396Z",
+    "readings_count": 1,
+    "coordinates": {
+      "lat": 1.3233005007073806,
+      "lng": 103.913226511433,
+      "name": "Central Station S77",
+      "estimated": true,
+      "source": "estimated"
+    },
+    "reliability_score": 1,
+    "metadata": {
+      "latest_rainfall": 0
+    },
+    "proximities": {
+      "hwa_chong": {
+        "distance_km": 16.74,
+        "location_name": "Hwa Chong International School",
+        "priority": "primary"
+      },
+      "bukit_timah": {
+        "distance_km": 15.51,
+        "location_name": "Bukit Timah Nature Reserve",
+        "priority": "secondary"
+      },
+      "newton": {
+        "distance_km": 7.99,
+        "location_name": "Newton",
+        "priority": "tertiary"
+      },
+      "clementi": {
+        "distance_km": 16.51,
+        "location_name": "Clementi",
+        "priority": "tertiary"
+      }
+    },
+    "nearest_key_location": "newton",
+    "priority_score": 45.119085200435265,
+    "priority_level": "medium"
+  }
+]
