@@ -174,89 +174,229 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
     );
   }
 
+  // Status indicator component
+  const StatusIndicator = ({ status, label }) => {
+    const getStatusColor = () => {
+      switch (status) {
+        case 'operational': return 'text-green-600 bg-green-50 border-green-200';
+        case 'warning': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        case 'error': return 'text-red-600 bg-red-50 border-red-200';
+        default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      }
+    };
+
+    const getStatusIcon = () => {
+      switch (status) {
+        case 'operational': return <CheckCircle className="w-4 h-4" />;
+        case 'warning': return <AlertCircle className="w-4 h-4" />;
+        case 'error': return <AlertCircle className="w-4 h-4" />;
+        default: return <Activity className="w-4 h-4" />;
+      }
+    };
+
+    return (
+      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor()}`}>
+        {getStatusIcon()}
+        {label}
+      </div>
+    );
+  };
+
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* System Status Header */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-blue-600" />
+    <div className={`bg-white rounded-lg shadow-lg border border-gray-200 ${className}`}>
+      {/* Header with System Status */}
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
               Singapore Weather Monitoring System
-            </CardTitle>
-            <button
-              onClick={refetch}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors"
-              title="Refresh all station data"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Enhanced 59-Station NEA Integration • Last updated: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : 'Never'}
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-blue-600">{totalStations}</div>
+          <button
+            onClick={refetch}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            aria-label="Refresh weather data"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+
+        {/* System Status Bar */}
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">Total Stations</div>
+              <MapPin className="w-4 h-4 text-gray-400" />
             </div>
-            <div>
-              <div className="text-2xl font-bold text-green-600">{activeStations}</div>
-              <div className="text-sm text-gray-600">Active Stations</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-600">{dataQualityScore}</div>
-              <div className="text-sm text-gray-600">Quality Score</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">
-                {geographicCoverage?.coverage_percentage || 0}%
-              </div>
-              <div className="text-sm text-gray-600">Coverage</div>
-            </div>
+            <div className="text-2xl font-bold text-gray-900">{systemStatus.totalStations}</div>
           </div>
-        </CardContent>
-      </Card>
+          
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">Active Stations</div>
+              <Activity className="w-4 h-4 text-green-500" />
+            </div>
+            <div className="text-2xl font-bold text-green-600">{systemStatus.activeStations}</div>
+          </div>
+          
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">Data Quality</div>
+              <Star className="w-4 h-4 text-yellow-500" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{systemStatus.dataQualityScore}</div>
+          </div>
+          
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">Coverage</div>
+              <Globe className="w-4 h-4 text-blue-500" />
+            </div>
+            <div className="text-2xl font-bold text-blue-600">{systemStatus.geographicCoverage}%</div>
+          </div>
+        </div>
 
-      {/* Main Dashboard Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <Grid3X3 className="w-4 h-4" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="stations" className="flex items-center gap-2">
-            <Database className="w-4 h-4" />
-            Stations ({filteredStations.length})
-          </TabsTrigger>
-          <TabsTrigger value="comparison" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Compare ({selectedStations.size})
-          </TabsTrigger>
-          <TabsTrigger value="map" className="flex items-center gap-2">
-            <Map className="w-4 h-4" />
-            Map View
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Overview Tab - Shows overall Singapore weather + key stations */}
-        <TabsContent value="overview" className="space-y-6">
-          {/* Overall Singapore Weather */}
-          <SingaporeOverallWeather 
-            weatherData={weatherData}
-            className="mb-6"
+        {/* Status Indicator */}
+        <div className="mt-4 flex items-center justify-between">
+          <StatusIndicator 
+            status={error ? 'error' : 'operational'} 
+            label={`System ${error ? 'Error' : 'Operational'}`} 
           />
+          <div className="text-sm text-gray-500">
+            {selectedStations.length > 0 && `${selectedStations.length} station${selectedStations.length !== 1 ? 's' : ''} selected`}
+          </div>
+        </div>
+      </div>
 
-          {/* Key Station Highlights */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Key Weather Stations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredStations.slice(0, 6).map(station => {
-                  const stationData = getStationData(station.station_id);
-                  return (
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200">
+        <nav className="flex space-x-8 px-6" aria-label="Dashboard tabs">
+          {[
+            { id: 'overview', label: 'Overview', icon: Grid3X3 },
+            { id: 'stations', label: 'Stations', icon: Database, count: systemStatus.filteredStations.length },
+            { id: 'compare', label: 'Compare', icon: BarChart3, count: selectedStations.length },
+            { id: 'map', label: 'Map', icon: Map }
+          ].map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`tabpanel-${tab.id}`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span className="ml-1 bg-blue-100 text-blue-600 text-xs rounded-full px-2 py-0.5">
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      <div className="p-6">
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div id="tabpanel-overview" role="tabpanel" aria-labelledby="tab-overview">
+            <div className="space-y-6">
+              {/* Weather Summary Cards */}
+              {weatherSummary && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Temperature Card */}
+                  <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-6 border border-orange-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Temperature</h3>
+                      <Thermometer className="w-6 h-6 text-orange-500" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-3xl font-bold text-gray-900">
+                        {weatherSummary.temperature.current}°C
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Range: {weatherSummary.temperature.range}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {weatherSummary.temperature.stations} stations reporting
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Humidity Card */}
+                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-6 border border-blue-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Humidity</h3>
+                      <Droplets className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-3xl font-bold text-gray-900">
+                        {weatherSummary.humidity.current}%
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Range: {weatherSummary.humidity.range}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {weatherSummary.humidity.stations} stations reporting
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rainfall Card */}
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Rainfall</h3>
+                      <Cloud className="w-6 h-6 text-green-500" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-3xl font-bold text-gray-900">
+                        {weatherSummary.rainfall.total}mm
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {weatherSummary.rainfall.activeStations} stations with rain
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {weatherSummary.rainfall.totalStations} stations total
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Regional Breakdown */}
+              {systemStatus.regionBreakdown && (
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Regional Coverage</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {Object.entries(systemStatus.regionBreakdown).map(([region, count]) => (
+                      <div key={region} className="text-center">
+                        <div className="text-2xl font-bold text-gray-900">{count}</div>
+                        <div className="text-sm text-gray-600 capitalize">{region}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Key Station Highlights */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Weather Stations</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {systemStatus.filteredStations.slice(0, 6).map(station => (
                     <div 
                       key={station.station_id}
                       className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
@@ -276,131 +416,108 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
                         </span>
                       </div>
                       
-                      {stationData?.readings && (
+                      {station.currentData && (
                         <div className="space-y-1">
-                          {stationData.readings.temperature && (
+                          {station.currentData.temperature && (
                             <div className="flex justify-between text-sm">
                               <span className="text-gray-600">Temperature:</span>
                               <span className="font-medium">
-                                {stationData.readings.temperature.value.toFixed(1)}°C
+                                {station.currentData.temperature.toFixed(1)}°C
                               </span>
                             </div>
                           )}
-                          {stationData.readings.humidity && (
+                          {station.currentData.humidity && (
                             <div className="flex justify-between text-sm">
                               <span className="text-gray-600">Humidity:</span>
                               <span className="font-medium">
-                                {Math.round(stationData.readings.humidity.value)}%
+                                {Math.round(station.currentData.humidity)}%
                               </span>
                             </div>
                           )}
-                          {stationData.readings.rainfall && (
+                          {station.currentData.rainfall && (
                             <div className="flex justify-between text-sm">
                               <span className="text-gray-600">Rainfall:</span>
                               <span className="font-medium">
-                                {stationData.readings.rainfall.value.toFixed(1)}mm
+                                {station.currentData.rainfall.toFixed(1)}mm
                               </span>
                             </div>
                           )}
                         </div>
                       )}
                     </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Stations Tab - Station selection and management */}
-        <TabsContent value="stations" className="space-y-6">
-          <StationSelector
-            stations={filteredStations}
-            selectedStations={selectedStations}
-            onStationSelect={handleStationSelect}
-            onStationDeselect={handleStationDeselect}
-            filterOptions={filterOptions}
-            onFilterChange={handleFilterChange}
-          />
-        </TabsContent>
-
-        {/* Comparison Tab - Station comparison */}
-        <TabsContent value="comparison" className="space-y-6">
-          <StationComparison
-            stations={Array.from(selectedStations).map(id => 
-              filteredStations.find(s => s.station_id === id) || { station_id: id, name: `Station ${id}` }
-            )}
-            stationData={selectedStationData}
-            onRemoveStation={handleRemoveFromComparison}
-          />
-          
-          {selectedStations.size === 0 && (
-            <Card>
-              <CardContent className="text-center py-8">
-                <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No Stations Selected for Comparison
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Select stations from the Stations tab to compare their weather data.
-                </p>
-                <button
-                  onClick={() => setActiveTab('stations')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Select Stations
-                </button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* Map Tab - Geographic visualization */}
-        <TabsContent value="map" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Map className="w-5 h-5" />
-                Weather Stations Map
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <Map className="w-12 h-12 mx-auto mb-2" />
-                  <p>Interactive map with all {totalStations} weather stations</p>
-                  <p className="text-sm">Click stations to view detailed data</p>
+                  ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </div>
+        )}
 
-      {/* Debug Information (Development Only) */}
-      {process.env.NODE_ENV === 'development' && rawWeatherData && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="text-sm text-gray-600">
-              <Settings className="w-4 h-4 inline mr-2" />
-              Debug Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
-              <div>
-                <strong>Data Source:</strong> {rawWeatherData.source}
+        {/* Stations Tab */}
+        {activeTab === 'stations' && (
+          <div id="tabpanel-stations" role="tabpanel" aria-labelledby="tab-stations">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Station Selection</h3>
+                <div className="text-sm text-gray-500">
+                  {systemStatus.filteredStations.length} stations available
+                </div>
               </div>
-              <div>
-                <strong>Last Updated:</strong> {new Date(rawWeatherData.timestamp).toLocaleString()}
+              
+              <StationSelector
+                stations={systemStatus.filteredStations}
+                selectedStations={selectedStations}
+                onStationSelect={handleStationSelect}
+                onStationDeselect={handleStationDeselect}
+                maxSelections={5}
+                allowMultiple={true}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Compare Tab */}
+        {activeTab === 'compare' && (
+          <div id="tabpanel-compare" role="tabpanel" aria-labelledby="tab-compare">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Station Comparison</h3>
+                {selectedStations.length > 0 && (
+                  <button
+                    onClick={() => setSelectedStations([])}
+                    className="text-sm text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1"
+                  >
+                    Clear all selections
+                  </button>
+                )}
               </div>
-              <div>
-                <strong>API Calls:</strong> {rawWeatherData.api_calls}/{rawWeatherData.successful_calls} successful
+              
+              <StationComparison
+                stations={selectedStations}
+                onRemoveStation={handleStationDeselect}
+                showDetailedMetrics={true}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Map Tab */}
+        {activeTab === 'map' && (
+          <div id="tabpanel-map" role="tabpanel" aria-labelledby="tab-map">
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
+              <Globe className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Interactive Map View</h3>
+              <p className="text-gray-600 mb-4">
+                Geographic visualization of all {systemStatus.totalStations} weather stations across Singapore.
+              </p>
+              <div className="text-sm text-gray-500">
+                Map integration with existing MapView component will be implemented here.
+                This will show all {systemStatus.totalStations} stations with real-time data overlays.
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 });
