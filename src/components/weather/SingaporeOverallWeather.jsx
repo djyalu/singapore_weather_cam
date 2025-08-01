@@ -779,13 +779,14 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             <button
               onClick={handleRealAIAnalysis}
               disabled={cohereLoading || !weatherData}
-              className={`text-sm font-semibold px-3 py-1 rounded-full transition-all ${
+              className={`text-sm font-semibold px-3 py-1 rounded-full transition-all focus:ring-2 focus:ring-purple-500 focus:outline-none ${
                 cohereLoading 
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : !weatherData
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   : 'bg-purple-100 text-purple-800 hover:bg-purple-200 active:scale-95'
               }`}
+              aria-label="Cohere AI 고급 분석 실행 - 현재 날씨 데이터를 바탕으로 상세한 AI 분석 결과를 제공합니다"
             >
               {cohereLoading ? (
                 <div className="flex items-center gap-1">
@@ -795,12 +796,12 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               ) : (
                 <div className="flex items-center gap-1">
                   <Zap className="w-3 h-3" />
-                  <span>실행</span>
+                  <span>고급 분석</span>
                 </div>
               )}
             </button>
             <div className="text-xs text-gray-500 mt-0.5">
-              GitHub AI
+              고급 AI 분석
             </div>
           </div>
         </div>
@@ -810,7 +811,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">데이터 기반 요약</span>
+              <span className="text-sm font-medium text-blue-800">빠른 분석</span>
             </div>
             <div className="text-sm text-gray-800 leading-relaxed">
               {aiSummary.summary.split('.')[0]}.
@@ -834,7 +835,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Brain className="w-5 h-5 text-purple-600" />
-                <span className="font-semibold text-purple-800">🤖 GitHub AI 분석</span>
+                <span className="font-semibold text-purple-800">🤖 고급 AI 분석</span>
               </div>
               <button
                 onClick={() => setShowRealAI(false)}
@@ -870,8 +871,8 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             <div className="flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-300 border-t-purple-600"></div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-purple-800">🤖 실시간 Cohere AI 분석 중...</div>
-                <div className="text-xs text-purple-600">최신 날씨 데이터로 새로운 분석을 생성하고 있습니다</div>
+                <div className="text-sm font-medium text-purple-800">🤖 고급 AI 분석 중...</div>
+                <div className="text-xs text-purple-600">Cohere AI가 최신 날씨 데이터를 상세 분석하고 있습니다</div>
                 
                 {/* 진행률 바 (선택사항) */}
                 {cohereAnalysis?.progress > 0 && (
