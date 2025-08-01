@@ -1,0 +1,39 @@
+name: Simple Test Workflow
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-simple.yml'
+      - 'test-simple.trigger'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Test basic functionality
+        run: |
+          echo "🧪 Simple test workflow"
+          echo "Node version: $(node --version)"
+          echo "Environment: ${{ github.ref }}"
+          echo "Repository: ${{ github.repository }}"
+          
+      - name: Test Cohere API key availability
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+        run: |
+          echo "🔑 Testing API key availability..."
+          if [ -n "$COHERE_API_KEY" ]; then
+            echo "✅ COHERE_API_KEY is available (length: ${#COHERE_API_KEY})"
+          else
+            echo "❌ COHERE_API_KEY is not available"
+          fi
