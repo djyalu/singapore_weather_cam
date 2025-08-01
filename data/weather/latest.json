@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-07-29T14:06:16.537Z",
+  "timestamp": "2025-08-01T22:46:29.085Z",
   "source": "NEA Singapore (Enhanced)",
-  "collection_time_ms": 4713,
+  "collection_time_ms": 4731,
   "api_calls": 4,
   "successful_calls": 4,
   "failed_calls": 0,
@@ -9,44 +9,52 @@
     "temperature": {
       "readings": [
         {
-          "station": "S107",
-          "value": 29.8
+          "station": "S109",
+          "value": 27.4
         },
         {
-          "station": "S60",
-          "value": 29.4
+          "station": "S107",
+          "value": 29.1
+        },
+        {
+          "station": "S115",
+          "value": 28
         },
         {
           "station": "S24",
-          "value": 29.5
+          "value": 28.2
         },
         {
           "station": "S104",
-          "value": 29.7
+          "value": 25.4
         }
       ],
-      "average": 29.6
+      "average": 27.619999999999997
     },
     "humidity": {
       "readings": [
         {
-          "station": "S107",
-          "value": 75.9
+          "station": "S109",
+          "value": 83.3
         },
         {
-          "station": "S60",
-          "value": 78.4
+          "station": "S107",
+          "value": 83.1
+        },
+        {
+          "station": "S115",
+          "value": 83.6
         },
         {
           "station": "S24",
-          "value": 72.7
+          "value": 82.4
         },
         {
           "station": "S104",
-          "value": 78
+          "value": 99.5
         }
       ],
-      "average": 76.25
+      "average": 86.38
     },
     "rainfall": {
       "readings": [
@@ -140,7 +148,7 @@
         },
         {
           "station": "S211",
-          "value": 0
+          "value": 0.4
         },
         {
           "station": "S66",
@@ -212,7 +220,7 @@
         },
         {
           "station": "S900",
-          "value": 0
+          "value": 0.2
         },
         {
           "station": "S102",
@@ -268,11 +276,11 @@
         },
         {
           "station": "S104",
-          "value": 0
+          "value": 0.4
         },
         {
           "station": "S210",
-          "value": 0
+          "value": 0.4
         },
         {
           "station": "S227",
@@ -284,26 +292,26 @@
         },
         {
           "station": "S209",
-          "value": 0
+          "value": 6.3
         }
       ],
-      "total": 0
+      "total": 7.699999999999999
     },
     "forecast": {
       "general": {
         "forecast": "Thundery Showers",
         "relative_humidity": {
           "low": 60,
-          "high": 95
+          "high": 100
         },
         "temperature": {
-          "low": 25,
+          "low": 26,
           "high": 33
         },
         "wind": {
           "speed": {
             "low": 10,
-            "high": 25
+            "high": 20
           },
           "direction": "SSE"
         }
@@ -311,41 +319,41 @@
       "periods": [
         {
           "time": {
-            "start": "2025-07-29T18:00:00+08:00",
-            "end": "2025-07-30T06:00:00+08:00"
-          },
-          "regions": {
-            "west": "Partly Cloudy (Night)",
-            "east": "Partly Cloudy (Night)",
-            "central": "Partly Cloudy (Night)",
-            "south": "Partly Cloudy (Night)",
-            "north": "Partly Cloudy (Night)"
-          }
-        },
-        {
-          "time": {
-            "start": "2025-07-30T06:00:00+08:00",
-            "end": "2025-07-30T12:00:00+08:00"
+            "start": "2025-08-02T06:00:00+08:00",
+            "end": "2025-08-02T12:00:00+08:00"
           },
           "regions": {
             "west": "Thundery Showers",
-            "east": "Thundery Showers",
+            "east": "Partly Cloudy (Day)",
             "central": "Partly Cloudy (Day)",
-            "south": "Partly Cloudy (Day)",
+            "south": "Thundery Showers",
             "north": "Thundery Showers"
           }
         },
         {
           "time": {
-            "start": "2025-07-30T12:00:00+08:00",
-            "end": "2025-07-30T18:00:00+08:00"
+            "start": "2025-08-02T12:00:00+08:00",
+            "end": "2025-08-02T18:00:00+08:00"
           },
           "regions": {
             "west": "Thundery Showers",
-            "east": "Thundery Showers",
+            "east": "Partly Cloudy (Day)",
             "central": "Partly Cloudy (Day)",
-            "south": "Partly Cloudy (Day)",
+            "south": "Thundery Showers",
             "north": "Thundery Showers"
+          }
+        },
+        {
+          "time": {
+            "start": "2025-08-02T18:00:00+08:00",
+            "end": "2025-08-03T06:00:00+08:00"
+          },
+          "regions": {
+            "west": "Showers",
+            "east": "Showers",
+            "central": "Showers",
+            "south": "Showers",
+            "north": "Showers"
           }
         }
       ]
