@@ -59,18 +59,18 @@ const Header = React.memo(({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex items-center justify-between">
             {/* 로고 및 타이틀 */}
-            <div className="flex items-center space-x-5 sm:space-x-6">
-              <div className="relative flex-shrink-0">
+            <div className="flex items-center space-x-4 sm:space-x-6">
+              <div className="relative">
                 <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-3 sm:p-4 rounded-2xl shadow-lg">
                   <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
               </div>
-              <div className="min-w-0 flex-1">
+              <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text font-sans tracking-tight">
                   Singapore Weather Cam
                 </h1>
-                <div className="flex items-center mt-3 space-x-3">
+                <div className="flex items-center mt-2 space-x-3">
                   <span className="bg-green-500/20 text-green-300 px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 backdrop-blur-sm border border-green-400/30 font-sans">
                     <CheckCircle className="w-3.5 h-3.5" />
                     <span>실시간</span>
@@ -83,28 +83,26 @@ const Header = React.memo(({
             </div>
 
             {/* 우측 컨트롤 */}
-            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+            <div className="flex items-center gap-3 sm:gap-4">
               {/* 실시간 새로고침 버튼 */}
               {onForceRefresh && (
-                <div className="flex items-center">
-                  <RefreshButton
-                    onRefresh={onForceRefresh}
-                    isRefreshing={isRefreshing}
-                    isOnline={isOnline}
-                    lastUpdate={lastUpdate}
-                    variant="glass"
-                    showStatus={false}
-                    showTimer={true}
-                    className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-200 h-12 px-4"
-                  />
-                </div>
+                <RefreshButton
+                  onRefresh={onForceRefresh}
+                  isRefreshing={isRefreshing}
+                  isOnline={isOnline}
+                  lastUpdate={lastUpdate}
+                  variant="glass"
+                  showStatus={false}
+                  showTimer={true}
+                  className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+                />
               )}
 
               {/* 현재 시간 표시 */}
               <div className="text-right">
-                <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20 min-w-0">
-                  <div className="text-xs sm:text-sm text-blue-100 mb-2 hidden sm:block font-sans font-medium whitespace-nowrap">싱가포르 시간</div>
-                  <div className="text-sm sm:text-xl font-sans font-bold text-white tracking-wide whitespace-nowrap">
+                <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20">
+                  <div className="text-xs sm:text-sm text-blue-100 mb-1 hidden sm:block font-sans font-medium">싱가포르 시간</div>
+                  <div className="text-sm sm:text-xl font-sans font-bold text-white">
                     {formatTime(currentTime)}
                   </div>
                 </div>

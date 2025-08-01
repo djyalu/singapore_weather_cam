@@ -1,13 +1,27 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
-import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import { useWeatherData } from '../../hooks/useWeatherData';
 import StationSelector from './StationSelector';
 import StationComparison from './StationComparison';
-import SingaporeOverallWeather from './SingaporeOverallWeather';
-// import { MapView } from '../map/MapView'; // Will be integrated later
-import { BarChart3, Map, Grid3X3, Settings, RefreshCw, Database, Activity } from 'lucide-react';
+import { 
+  BarChart3, 
+  Map, 
+  Grid3X3, 
+  Settings, 
+  RefreshCw, 
+  Database, 
+  Activity,
+  MapPin,
+  Thermometer,
+  Droplets,
+  Cloud,
+  Wind,
+  TrendingUp,
+  CheckCircle,
+  AlertCircle,
+  Star,
+  Globe
+} from 'lucide-react';
 
 /**
  * 🎨 FRONTEND + 🏗️ ARCHITECT: Enhanced 59-Station Weather Dashboard
@@ -22,78 +36,107 @@ import { BarChart3, Map, Grid3X3, Settings, RefreshCw, Database, Activity } from
  */
 const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
   const {
-    // Enhanced 59-station API
-    rawWeatherData,
-    filteredStations,
-    selectedStations,
-    setSelectedStations,
-    filterOptions,
-    setFilterOptions,
-    getStationData,
-    compareStations,
-    searchStations,
-    getStationsByProximity,
-    
-    // Original API (for compatibility)
+    // Core data
     weatherData,
     isLoading,
     error,
+    lastUpdate,
     refetch,
     
-    // Metadata
-    totalStations,
-    activeStations,
-    dataQualityScore,
-    geographicCoverage
+    // Enhanced 59-station utilities
+    stations: stationUtils,
+    
+    // Legacy compatibility
+    current
   } = useWeatherData();
 
   const [activeTab, setActiveTab] = useState('overview');
-  const [comparisonMode, setComparisonMode] = useState(false);
+  const [selectedStations, setSelectedStations] = useState([]);
+  const [filterOptions, setFilterOptions] = useState({
+    region: 'all',
+    dataType: 'all',
+    priority: 'all'
+  });
 
-  // Get data for selected stations
-  const selectedStationData = useMemo(() => {
-    return Array.from(selectedStations)
-      .map(stationId => getStationData(stationId))
-      .filter(Boolean);
-  }, [selectedStations, getStationData]);
+  // Calculate system status and filtered stations
+  const systemStatus = useMemo(() => {
+    if (!weatherData || !stationUtils) {
+      return {
+        totalStations: 0,
+        activeStations: 0,
+        dataQualityScore: 0,
+        geographicCoverage: 0,
+        filteredStations: []
+      };
+    }
+
+    const allStations = stationUtils.getAllStations();
+    const stats = stationUtils.getStationStats();
+    
+    // Apply filters
+    let filtered = allStations;
+    if (filterOptions.region !== 'all') {
+      filtered = stationUtils.getStationsByRegion(filterOptions.region);
+    }
+    if (filterOptions.dataType !== 'all') {
+      filtered = stationUtils.getStationsByDataType(filterOptions.dataType);
+    }
+    if (filterOptions.priority !== 'all') {
+      filtered = stationUtils.getStationsByPriority(filterOptions.priority);
+    }
+    
+    return {
+      totalStations: allStations.length,
+      activeStations: allStations.filter(s => s.currentData?.temperature || s.currentData?.humidity).length,
+      dataQualityScore: weatherData.data_quality_score || 0,
+      geographicCoverage: weatherData.geographic_coverage?.coverage_percentage || 0,
+      regionBreakdown: stats.byRegion,
+      dataTypeBreakdown: stats.byDataType,
+      filteredStations: filtered
+    };
+  }, [weatherData, stationUtils, filterOptions]);
 
   // Handle station selection
   const handleStationSelect = useCallback((station) => {
-    setSelectedStations(prev => new Set([...prev, station.station_id]));
-  }, [setSelectedStations]);
+    setSelectedStations(prev => {
+      if (prev.some(s => s.station_id === station.station_id)) {
+        return prev; // Already selected
+      }
+      return [...prev, station].slice(-5); // Limit to 5 selections
+    });
+  }, []);
 
   // Handle station deselection  
   const handleStationDeselect = useCallback((station) => {
-    setSelectedStations(prev => {
-      const updated = new Set(prev);
-      updated.delete(station.station_id);
-      return updated;
-    });
-  }, [setSelectedStations]);
+    setSelectedStations(prev => 
+      prev.filter(s => s.station_id !== station.station_id)
+    );
+  }, []);
 
-  // Remove station from comparison
-  const handleRemoveFromComparison = useCallback((stationId) => {
-    setSelectedStations(prev => {
-      const updated = new Set(prev);
-      updated.delete(stationId);
-      return updated;
-    });
-  }, [setSelectedStations]);
-
-  // Handle filter changes
-  const handleFilterChange = useCallback((newFilters) => {
-    setFilterOptions(newFilters);
-  }, [setFilterOptions]);
-
-  // Toggle comparison mode
-  const toggleComparisonMode = useCallback(() => {
-    setComparisonMode(prev => !prev);
-    if (!comparisonMode && selectedStations.size === 0) {
-      // Auto-select a few high-priority stations for initial comparison
-      const topStations = filteredStations.slice(0, 3);
-      setSelectedStations(new Set(topStations.map(s => s.station_id)));
-    }
-  }, [comparisonMode, selectedStations.size, filteredStations, setSelectedStations]);
+  // Get current weather summary
+  const weatherSummary = useMemo(() => {
+    if (!weatherData?.data) return null;
+    
+    return {
+      temperature: {
+        current: weatherData.data.temperature?.average?.toFixed(1) || 'N/A',
+        range: weatherData.data.temperature ? 
+          `${weatherData.data.temperature.min?.toFixed(1)}° - ${weatherData.data.temperature.max?.toFixed(1)}°` : 'N/A',
+        stations: weatherData.data.temperature?.total_stations || 0
+      },
+      humidity: {
+        current: weatherData.data.humidity?.average?.toFixed(0) || 'N/A',
+        range: weatherData.data.humidity ? 
+          `${weatherData.data.humidity.min?.toFixed(0)}% - ${weatherData.data.humidity.max?.toFixed(0)}%` : 'N/A',
+        stations: weatherData.data.humidity?.total_stations || 0
+      },
+      rainfall: {
+        total: weatherData.data.rainfall?.total?.toFixed(1) || '0.0',
+        activeStations: weatherData.data.rainfall?.readings?.filter(r => r.value > 0).length || 0,
+        totalStations: weatherData.data.rainfall?.total_stations || 0
+      }
+    };
+  }, [weatherData]);
 
   // Loading state
   if (isLoading) {
