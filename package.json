@@ -10,7 +10,9 @@
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write src/**/*.{js,jsx,css,md}",
     "collect-weather": "node scripts/collect-weather.js",
-    "capture-webcam": "node scripts/capture-webcam.js"
+    "capture-webcam": "node scripts/capture-webcam.js",
+    "test-cohere": "node scripts/test-cohere-api.js",
+    "ai-summary": "node scripts/ai-weather-summary.js"
   },
   "dependencies": {
     "axios": "^1.4.0",

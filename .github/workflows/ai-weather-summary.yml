@@ -46,7 +46,30 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          echo "📦 Installing dependencies..."
+          npm ci
+          echo "✅ Dependencies installed successfully"
+
+      - name: Verify environment
+        run: |
+          echo "🔍 Environment verification:"
+          echo "Node.js version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Working directory: $(pwd)"
+          echo "Files in scripts/:"
+          ls -la scripts/ || echo "No scripts directory found"
+          echo "Weather data file exists:"
+          ls -la data/weather/latest.json || echo "No weather data file found"
+          echo "Test scripts available:"
+          ls -la scripts/test-* 2>/dev/null || echo "No test scripts found"
+
+      - name: Test Cohere API Connection
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+        run: |
+          echo "🧪 Testing Cohere API connection..."
+          node scripts/test-cohere-api.js
 
       - name: Run AI Weather Summary Generation
         env:
@@ -54,6 +77,8 @@ jobs:
           FORCE_ANALYSIS: ${{ inputs.force_analysis || 'false' }}
         run: |
           echo "🤖 Starting Cohere AI weather summary generation..."
+          echo "Force analysis: ${FORCE_ANALYSIS}"
+          echo "API key status: ${{ secrets.COHERE_API_KEY && 'SET' || 'NOT_SET' }}"
           node scripts/ai-weather-summary.js
 
       - name: Commit AI weather summary results

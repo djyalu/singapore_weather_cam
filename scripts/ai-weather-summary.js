@@ -87,21 +87,31 @@ async function loadWeatherData() {
 }
 
 async function analyzeWeatherWithCohere(weatherData) {
-  if (!COHERE_API_KEY || COHERE_API_KEY.trim() === '') {
-    console.warn('⚠️ COHERE_API_KEY not set or empty, using simulation');
+  // Enhanced API key validation
+  if (!COHERE_API_KEY || COHERE_API_KEY.trim() === '' || COHERE_API_KEY === 'undefined') {
+    console.warn('⚠️ COHERE_API_KEY not set, empty, or undefined - using simulation');
     console.log('💡 Set COHERE_API_KEY environment variable to use real AI analysis');
+    console.log(`🔍 Debug - COHERE_API_KEY value: "${COHERE_API_KEY}" (type: ${typeof COHERE_API_KEY})`);
     return generateSimulatedSummary(weatherData);
   }
 
   try {
     console.log('🤖 Calling Cohere AI API for weather analysis...');
-    console.log(`🔑 API Key Status: ${COHERE_API_KEY ? 'SET' : 'NOT_SET'} (length: ${COHERE_API_KEY?.length || 0})`);
+    console.log(`🔑 API Key Status: SET (length: ${COHERE_API_KEY?.length || 0})`);
     console.log(`🚀 Force Analysis: ${FORCE_ANALYSIS}`);
+    
+    // Enhanced weather data validation
+    if (!weatherData || !weatherData.data) {
+      console.error('❌ Invalid weather data structure');
+      return generateSimulatedSummary(weatherData);
+    }
     
     // Prepare weather data summary for AI
     const tempReadings = weatherData.data?.temperature?.readings || [];
     const humidityReadings = weatherData.data?.humidity?.readings || [];
     const rainfallReadings = weatherData.data?.rainfall?.readings || [];
+    
+    console.log(`📊 Data summary: ${tempReadings.length} temp, ${humidityReadings.length} humidity, ${rainfallReadings.length} rainfall readings`);
     
     const avgTemp = tempReadings.length > 0 
       ? tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length 
@@ -297,6 +307,9 @@ function generateSimulatedSummary(weatherData) {
 async function main() {
   try {
     console.log('🚀 Starting AI weather summary generation...');
+    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔑 API Key Status: ${COHERE_API_KEY ? 'SET' : 'NOT_SET'}`);
+    console.log(`⚡ Force Analysis: ${FORCE_ANALYSIS}`);
     
     // Check daily API limit
     const limitCheck = await checkDailyLimit();
