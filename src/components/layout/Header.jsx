@@ -84,7 +84,31 @@ const Header = React.memo(({
 
             {/* 우측 컨트롤 */}
             <div className="flex items-center gap-3 sm:gap-4">
-              {/* 실시간 새로고침 버튼 */}
+              {/* 시스템 정보 - 큰 화면에서만 표시 */}
+              <div className="hidden xl:block text-right">
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                  <div className="flex items-center space-x-2 text-sm text-blue-100 mb-2 font-sans">
+                    <Clock className="w-4 h-4" />
+                    <span className="font-medium">데이터 업데이트</span>
+                  </div>
+                  <div className="text-xs text-blue-200 font-sans font-medium">
+                    <div>{systemStats.lastUpdate || '로딩 중...'}</div>
+                    <div>📹 실시간 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 현재 시간 표시 */}
+              <div className="text-right">
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                  <div className="text-xs sm:text-sm text-blue-100 mb-1 hidden sm:block font-sans font-medium">싱가포르 현재 시간</div>
+                  <div className="text-sm sm:text-xl font-sans font-bold text-white">
+                    {formatTime(currentTime)}
+                  </div>
+                </div>
+              </div>
+
+              {/* 새로고침 버튼 - 가장 우측 */}
               {onForceRefresh && (
                 <RefreshButton
                   onRefresh={onForceRefresh}
@@ -93,43 +117,20 @@ const Header = React.memo(({
                   lastUpdate={lastUpdate}
                   variant="glass"
                   showStatus={false}
-                  showTimer={true}
+                  showTimer={false}
                   className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
                 />
               )}
-
-              {/* 현재 시간 표시 */}
-              <div className="text-right">
-                <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20">
-                  <div className="text-xs sm:text-sm text-blue-100 mb-1 hidden sm:block font-sans font-medium">싱가포르 시간</div>
-                  <div className="text-sm sm:text-xl font-sans font-bold text-white">
-                    {formatTime(currentTime)}
-                  </div>
-                </div>
-              </div>
-              
-              {/* 시스템 정보 - 큰 화면에서만 표시 */}
-              <div className="hidden xl:block text-right">
-                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-                  <div className="flex items-center space-x-2 text-sm text-blue-100 mb-2 font-sans">
-                    <Clock className="w-4 h-4" />
-                    <span className="font-medium">{systemStats.lastUpdate || '로딩 중...'}</span>
-                  </div>
-                  <div className="text-xs text-blue-200 font-sans font-medium">
-                    <div>📹 실시간 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개</div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
           {/* 모바일용 간단한 상태 표시 */}
           <div className="mt-5 flex justify-between items-center lg:hidden">
             <div className="text-sm text-blue-200 font-sans font-medium">
-              📹 실시간 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • 업데이트: {systemStats.lastUpdate || '로딩 중...'}
+              📹 실시간 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • 데이터: {systemStats.lastUpdate || '로딩 중...'}
             </div>
             <div className="text-sm text-blue-100 font-sans font-bold tracking-wide">
-              {formatTime(currentTime)}
+              현재: {formatTime(currentTime)}
             </div>
           </div>
         </div>

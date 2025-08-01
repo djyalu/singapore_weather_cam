@@ -796,12 +796,12 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               ) : (
                 <div className="flex items-center gap-1">
                   <Zap className="w-3 h-3" />
-                  <span>고급 분석</span>
+                  <span>실행</span>
                 </div>
               )}
             </button>
             <div className="text-xs text-gray-500 mt-0.5">
-              고급 AI 분석
+              클릭하여 실행
             </div>
           </div>
         </div>
