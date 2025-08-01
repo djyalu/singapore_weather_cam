@@ -1,22 +1,56 @@
 {
-  "timestamp": "2025-08-01T22:34:53.560Z",
-  "source": "Singapore Weather Cam - AI Summary",
-  "ai_model": "Cohere Command API",
-  "analysis_method": "AI-generated summary",
+  "timestamp": "2025-08-01T22:49:37.163Z",
+  "source": "Singapore Weather Cam - Enhanced AI Summary",
+  "ai_model": "Cohere Command API (Enhanced)",
+  "analysis_method": "Comprehensive AI-generated analysis",
   "weather_data_timestamp": "2025-07-29T14:06:16.537Z",
   "stations_analyzed": 4,
-  "summary": "Here is a Korean language summary of the weather conditions in Singapore, with key characteristics and recommended activities:  The weather on July 29th in Singapore is overall warm and humid. The average temperature is 29.6°C, with 76% humidity, which are ideal conditions for outdoor activities.",
+  "summary": "- 평균/최고/최저 기온의 의미와 지역별 편차 분석 - 계절적 특성 및 일반적인 싱가포르 기후와의 비교 - 바람: SSE 10-25km/h 🚨 실시간 기상 경보 상황 - Ang Mo Kio 지역 소나기 가능성 - Bishan 지역 소나기 가능성 - Boon Lay 지역 소나기 가능성 📝 **요청사항** 8개 섹션으로 상세 분석해주세요:",
   "highlights": [
-    "**1. Overall Weather Conditions (2-3 sentences)**",
-    "Warm temperatures: The warm weather is perfect for spending time by the pool or exploring outdoor attractions comfortably.",
-    "High humidity: It's important to stay hydrated and find ways to beat the heat during the afternoon hours."
+    "현재 평균 기온 29.6°C",
+    "습도 76% (체감온도 상승)",
+    "열대기후 특성에 따른 높은 습도",
+    "건조한 날씨",
+    "야외활동 시 수분 보충 필요"
   ],
-  "recommendation": "현재 날씨에 적합한 활동을 즐겨보세요.",
-  "confidence": 0.85,
-  "api_calls_today": 1,
-  "api_calls_remaining": 99,
+  "recommendation": "- 오전/낮/오후/저녁 각 시간대별 최적 활동 제안 - 구체적인 운동/레저/업무 �",
+  "confidence": 0.92,
+  "detailed_analysis": {
+    "temperature_analysis": "- 평균/최고/최저 기온의 의미와 지역별 편차 분석 - 계절적 특성 및 일반적인 싱가포르 기후와의 비교",
+    "humidity_analysis": "- 바람: SSE 10-25km/h 🚨 실시간 기상 경보 상황 - Ang Mo Kio 지역 소나기 가능성 - Bishan 지역 소나기 가능성 - Boon Lay 지역 소나기 가능성 📝 **요청사항** 8개 섹션으로 상세 분석해주세요:",
+    "rainfall_analysis": "- 분석 관측소: 총 4개 (싱가포르 전역) - 데이터 수집 시간: 2025-07-29T14:06:16.537Z 🌤️ **NEA 공식 예보 정보** - 일반 예보: Thundery Showers - 예상 기온 범위: 25°C - 33°C",
+    "pattern_analysis": "- NEA 예보와 실시간 데이터의 일치성 분석 - 현재 기샨 상황의 전형성/특이성 평가",
+    "health_safety": "",
+    "tomorrow_outlook": ""
+  },
+  "weather_context": {
+    "current_temperature": {
+      "average": "29.6",
+      "max": "29.8",
+      "min": "29.4"
+    },
+    "humidity_levels": {
+      "average": 76,
+      "max": 78.4
+    },
+    "rainfall_status": {
+      "total": "0.0",
+      "active_stations": 0,
+      "total_stations": 59
+    },
+    "forecast_summary": "Thundery Showers"
+  },
+  "api_calls_today": 2,
+  "api_calls_remaining": 98,
   "api_calls_limit": 100,
   "api_limit_reached": false,
-  "raw_analysis": " Here is a Korean language summary of the weather conditions in Singapore, with key characteristics and recommended activities: \n\n**1. Overall Weather Conditions (2-3 sentences)**\nThe weather on July 29th in Singapore is overall warm and humid. The average temperature is 29.6°C, with 76% humidity, which are ideal conditions for outdoor activities. \n\n**2. Key Characteristics (3 points, short keywords)**\n1. Warm temperatures: The warm weather is perfect for spending time by the pool or exploring outdoor attractions comfortably.\n2. High humidity: It's important to stay hydrated and find ways to beat the heat during the afternoon hours.\n3. Light rainfall: While the total rainfall is currently zero, light rain may occur, so it's a good idea to carry an umbrella or raincoat. \n\n**3. Recommended Activities (1 sentence)**\nWith the comfortable temperatures, it's an excellent time to enjoy outdoor activities such as visiting the Singapore Zoo, exploring the Botanic Gardens, or having a picnic at Marina Bay. \n\nRemember to stay hydrated, stay cool, and be prepared for occasional light rain. ",
-  "force_analysis_used": false
+  "raw_analysis": " 당신은 전문 기상 분석가입니다. 다음 싱가포르 실시간 종합 기상 데이터를 바탕으로 상세하고 실용적인 날씨 분석을 한국어로 작성해주세요:\n\n📊 **현재 실시간 관측 데이터**\n- 평균 기온: 29.6°C (최고: 29.8°C, 최저: 29.4°C)\n- 평균 습도: 76% (최고: 78%)\n- 총 강수량: 0.0mm (강수 지역: 0/59개소)\n- 분석 관측소: 총 4개 (싱가포르 전역)\n- 데이터 수집 시간: 2025-07-29T14:06:16.537Z\n\n🌤️ **NEA 공식 예보 정보**\n- 일반 예보: Thundery Showers\n- 예상 기온 범위: 25°C - 33°C\n- 예상 습도 범위: 60% - 95%\n- 바람: SSE 10-25km/h\n\n🚨 실시간 기상 경보 상황\n- Ang Mo Kio 지역 소나기 가능성\n- Bishan 지역 소나기 가능성\n- Boon Lay 지역 소나기 가능성\n\n📝 **요청사항**\n8개 섹션으로 상세 분석해주세요:\n\n1. **🌡️ 현재 기온 상황 분석**\n   - 평균/최고/최저 기온의 의미와 지역별 편차 분석\n   - 계절적 특성 및 일반적인 싱가포르 기후와의 비교\n\n2. **💧 습도 및 체감온도 분석**\n   - 습도가 체감온도에 미치는 영향 상세 설명\n   - 열지수(Heat Index) 관점에서의 건강 영향 분석\n\n3. **🌧️ 강수 패턴 및 예측**\n   - 현재 강수 분포와 향후 예상 패턴\n   - 지역별 강수 차이 및 이동 방향 예측\n\n4. **⛅ 종합 기상 패털 해석**\n   - NEA 예보와 실시간 데이터의 일치성 분석\n   - 현재 기샨 상황의 전형성/특이성 평가\n\n5. **🏃‍♀️ 시간대별 활동 권장사항**\n   - 오전/낮/오후/저녁 각 시간대별 최적 활동 제안\n   - 구체적인 운동/레저/업무 �",
+  "force_analysis_used": true,
+  "analysis_version": "2.0",
+  "enhancement_features": [
+    "detailed_sectional_analysis",
+    "weather_alerts_integration",
+    "comprehensive_data_context",
+    "enhanced_parsing_system"
+  ]
 }
