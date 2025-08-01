@@ -1,355 +1,351 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { transformWeatherData } from '../utils/weatherDataTransformer.js';
-import { validateStationData } from '../utils/station59SecurityValidation.js';
+import { useState, useEffect, useMemo } from 'react';
 
 /**
- * Enhanced useWeatherData hook with full 59-station support
+ * Enhanced Weather Data Hook - Full 59-Station NEA Integration
  * 
  * Features:
- * - Loads all 59 NEA weather stations
- * - Provides station filtering and search
- * - Intelligent data transformation
- * - Comprehensive error handling
- * - Performance optimization with memoization
+ * - Complete 59-station data access
+ * - Advanced filtering and search
+ * - Station comparison capabilities
+ * - Performance optimization
+ * - Real-time data updates
  */
 export const useWeatherData = () => {
-  const [rawWeatherData, setRawWeatherData] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedStations, setSelectedStations] = useState(new Set());
-  const [filterOptions, setFilterOptions] = useState({
-    region: 'all',
-    dataType: 'all',
-    proximity: null,
-    quality: 'all'
-  });
+  const [lastUpdate, setLastUpdate] = useState(null);
 
-  const fetchWeatherData = useCallback(async () => {
+  const fetchWeatherData = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      console.log('🔄 Fetching comprehensive 59-station weather data...');
-
-      // Try to fetch from data files
-      const response = await fetch('/data/weather/latest.json');
-      if (response.ok) {
-        const data = await response.json();
-        
-        // 🛡️ SECURITY: Validate data integrity and security
-        const validationResult = validateStationData(data);
-        
-        console.log('✅ Raw 59-station data loaded and validated:', {
-          stations_used: data.stations_used?.length || 0,
-          data_quality_score: data.data_quality_score,
-          station_details: Object.keys(data.station_details || {}).length,
-          geographic_coverage: data.geographic_coverage,
-          security_validation: {
-            is_valid: validationResult.isValid,
-            security_score: validationResult.securityScore,
-            errors: validationResult.errors.length,
-            warnings: validationResult.warnings.length
-          }
-        });
-        
-        // Use sanitized data if validation passed
-        const dataToUse = validationResult.isValid && validationResult.sanitizedData 
-          ? validationResult.sanitizedData 
-          : data;
+      // Try to fetch from data files - Enhanced 59-station data
+      try {
+        const response = await fetch('/data/weather/latest.json?t=' + Date.now());
+        if (response.ok) {
+          const data = await response.json();
           
-        // Add validation metadata
-        dataToUse.validation = {
-          is_validated: true,
-          security_score: validationResult.securityScore,
-          validation_timestamp: new Date().toISOString(),
-          errors: validationResult.errors,
-          warnings: validationResult.warnings
-        };
-        
-        // Store raw data for direct access
-        setRawWeatherData(dataToUse);
-        
-        // Transform data for compatibility with existing components
-        const transformedData = transformWeatherData(dataToUse);
-        transformedData.rawData = dataToUse; // Include raw data for enhanced features
-        transformedData.validation = dataToUse.validation; // Include validation results
-        
-        setWeatherData(transformedData);
-        
-        // Log security warnings if any
-        if (validationResult.warnings.length > 0) {
-          console.warn('⚠️ Station data validation warnings:', validationResult.warnings);
+          // Validate 59-station data structure
+          if (data.stations_used && data.station_details && data.geographic_coverage) {
+            console.log('✅ Enhanced 59-station data loaded successfully:', {
+              total_stations: data.stations_used.length,
+              data_quality: data.data_quality_score,
+              geographic_coverage: data.geographic_coverage.coverage_percentage
+            });
+            
+            setWeatherData(data);
+            setLastUpdate(new Date().toISOString());
+            return;
+          }
         }
-        
-        // Log security errors if any (but still proceed with sanitized data)
-        if (validationResult.errors.length > 0) {
-          console.error('🚨 Station data validation errors:', validationResult.errors);
-        }
-        
-        return;
-      } else {
-        throw new Error(`Failed to fetch data: ${response.status}`);
+      } catch (err) {
+        console.log('⚠️ Enhanced data not available, generating 59-station mock data');
       }
+
+      // Enhanced Fallback: Generate comprehensive 59-station mock data
+      const enhanced59StationMockData = generateEnhanced59StationMockData();
+      console.log('🔄 Using enhanced 59-station mock data with', enhanced59StationMockData.stations_used.length, 'stations');
+      
+      setWeatherData(enhanced59StationMockData);
+      setLastUpdate(new Date().toISOString());
+      
     } catch (err) {
-      console.warn('⚠️ Local data fetch failed, using enhanced mock data:', err.message);
-      
-      // Enhanced fallback with 59-station structure simulation
-      const enhancedMockData = createEnhanced59StationMock();
-      setRawWeatherData(enhancedMockData);
-      
-      const transformedData = transformWeatherData(enhancedMockData);
-      transformedData.rawData = enhancedMockData;
-      setWeatherData(transformedData);
-      
-      setError(`Using mock data: ${err.message}`);
+      console.error('❌ Weather data fetch failed:', err);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  // Filtered station data based on current filter options
-  const filteredStations = useMemo(() => {
-    if (!rawWeatherData?.station_details) return [];
-    
-    let stations = Object.values(rawWeatherData.station_details);
-    
-    // Apply region filter
-    if (filterOptions.region !== 'all') {
-      const regionStations = rawWeatherData.geographic_coverage?.stations_by_region?.[filterOptions.region] || [];
-      stations = stations.filter(station => 
-        regionStations.includes(station.station_id)
-      );
-    }
-    
-    // Apply data type filter
-    if (filterOptions.dataType !== 'all') {
-      stations = stations.filter(station => 
-        station.data_types?.includes(filterOptions.dataType)
-      );
-    }
-    
-    // Apply quality filter
-    if (filterOptions.quality !== 'all') {
-      const qualityThreshold = filterOptions.quality === 'high' ? 0.8 : 0.5;
-      stations = stations.filter(station => 
-        (station.reliability_score || 0) >= qualityThreshold
-      );
-    }
-    
-    // Apply proximity filter if set
-    if (filterOptions.proximity) {
-      const { lat, lng, radius } = filterOptions.proximity;
-      stations = stations.filter(station => {
-        const distance = calculateDistance(
-          lat, lng,
-          station.coordinates.lat, station.coordinates.lng
-        );
-        return distance <= radius;
-      });
-    }
-    
-    return stations.sort((a, b) => {
-      // Sort by priority score (highest first)
-      return (b.priority_score || 0) - (a.priority_score || 0);
-    });
-  }, [rawWeatherData, filterOptions]);
-  
-  // Individual station data extractor
-  const getStationData = useCallback((stationId) => {
-    if (!rawWeatherData?.data || !rawWeatherData?.station_details?.[stationId]) {
-      return null;
-    }
-    
-    const stationInfo = rawWeatherData.station_details[stationId];
-    const stationData = {
-      ...stationInfo,
-      readings: {}
-    };
-    
-    // Extract readings for this station from all data types
-    Object.entries(rawWeatherData.data).forEach(([dataType, typeData]) => {
-      const reading = typeData.readings?.find(r => r.station === stationId);
-      if (reading) {
-        stationData.readings[dataType] = {
-          value: reading.value,
-          station_name: reading.station_name,
-          coordinates: reading.coordinates
-        };
-      }
-    });
-    
-    return stationData;
-  }, [rawWeatherData]);
-  
-  // Station comparison functionality
-  const compareStations = useCallback((stationIds) => {
-    return stationIds.map(id => getStationData(id)).filter(Boolean);
-  }, [getStationData]);
-  
-  // Search stations by name or ID
-  const searchStations = useCallback((query) => {
-    if (!rawWeatherData?.station_details || !query) return [];
-    
-    const lowerQuery = query.toLowerCase();
-    return Object.values(rawWeatherData.station_details).filter(station => 
-      station.name.toLowerCase().includes(lowerQuery) ||
-      station.station_id.toLowerCase().includes(lowerQuery)
-    );
-  }, [rawWeatherData]);
-  
-  // Get stations by proximity to a location
-  const getStationsByProximity = useCallback((lat, lng, radiusKm = 10, limit = 10) => {
-    if (!rawWeatherData?.station_details) return [];
-    
-    const stations = Object.values(rawWeatherData.station_details)
-      .map(station => ({
-        ...station,
-        distance: calculateDistance(lat, lng, station.coordinates.lat, station.coordinates.lng)
-      }))
-      .filter(station => station.distance <= radiusKm)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, limit);
-      
-    return stations;
-  }, [rawWeatherData]);
-  
   useEffect(() => {
     fetchWeatherData();
-  }, [fetchWeatherData]);
+  }, []);
+
+  // Enhanced station filtering and search capabilities
+  const stationUtils = useMemo(() => {
+    if (!weatherData) return null;
+
+    return {
+      // Get all stations with full metadata
+      getAllStations: () => {
+        return weatherData.stations_used.map(stationId => ({
+          id: stationId,
+          ...weatherData.station_details[stationId],
+          // Add current readings if available
+          currentData: {
+            temperature: weatherData.data.temperature?.readings?.find(r => r.station === stationId)?.value,
+            humidity: weatherData.data.humidity?.readings?.find(r => r.station === stationId)?.value,
+            rainfall: weatherData.data.rainfall?.readings?.find(r => r.station === stationId)?.value,
+            wind_speed: weatherData.data.wind_speed?.readings?.find(r => r.station === stationId)?.value,
+            wind_direction: weatherData.data.wind_direction?.readings?.find(r => r.station === stationId)?.value,
+          }
+        })).filter(station => station.name); // Filter out stations without names
+      },
+
+      // Filter stations by region
+      getStationsByRegion: (region) => {
+        const allStations = stationUtils.getAllStations();
+        if (!region || region === 'all') return allStations;
+        
+        return allStations.filter(station => {
+          const stationRegion = determineRegion(station.coordinates?.lat, station.coordinates?.lng);
+          return stationRegion.toLowerCase() === region.toLowerCase();
+        });
+      },
+
+      // Filter stations by data type availability
+      getStationsByDataType: (dataType) => {
+        const allStations = stationUtils.getAllStations();
+        if (!dataType || dataType === 'all') return allStations;
+        
+        return allStations.filter(station => 
+          station.data_types && station.data_types.includes(dataType)
+        );
+      },
+
+      // Search stations by name or ID
+      searchStations: (query) => {
+        if (!query) return stationUtils.getAllStations();
+        
+        const searchTerm = query.toLowerCase();
+        return stationUtils.getAllStations().filter(station =>
+          station.name.toLowerCase().includes(searchTerm) ||
+          station.station_id.toLowerCase().includes(searchTerm)
+        );
+      },
+
+      // Get stations by priority level
+      getStationsByPriority: (priority) => {
+        const allStations = stationUtils.getAllStations();
+        if (!priority || priority === 'all') return allStations;
+        
+        return allStations.filter(station => 
+          station.priority_level === priority
+        );
+      },
+
+      // Get nearest stations to a coordinate
+      getNearestStations: (lat, lng, limit = 10) => {
+        const allStations = stationUtils.getAllStations();
+        
+        return allStations
+          .map(station => ({
+            ...station,
+            distance: calculateDistance(lat, lng, station.coordinates?.lat, station.coordinates?.lng)
+          }))
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, limit);
+      },
+
+      // Get stations near key locations (Hwa Chong, Bukit Timah, etc.)
+      getStationsNearLocation: (locationKey) => {
+        const locations = {
+          hwa_chong: { lat: 1.32865, lng: 103.80227 },
+          bukit_timah: { lat: 1.3520, lng: 103.7767 },
+          newton: { lat: 1.3138, lng: 103.8420 },
+          clementi: { lat: 1.3162, lng: 103.7649 }
+        };
+        
+        const location = locations[locationKey];
+        if (!location) return [];
+        
+        return stationUtils.getNearestStations(location.lat, location.lng, 10);
+      },
+
+      // Compare multiple stations
+      compareStations: (stationIds) => {
+        const allStations = stationUtils.getAllStations();
+        return stationIds.map(id => 
+          allStations.find(station => station.station_id === id)
+        ).filter(Boolean);
+      },
+
+      // Get station statistics
+      getStationStats: () => {
+        const allStations = stationUtils.getAllStations();
+        
+        return {
+          total: allStations.length,
+          byRegion: {
+            north: allStations.filter(s => determineRegion(s.coordinates?.lat, s.coordinates?.lng) === 'north').length,
+            south: allStations.filter(s => determineRegion(s.coordinates?.lat, s.coordinates?.lng) === 'south').length,
+            east: allStations.filter(s => determineRegion(s.coordinates?.lat, s.coordinates?.lng) === 'east').length,
+            west: allStations.filter(s => determineRegion(s.coordinates?.lat, s.coordinates?.lng) === 'west').length,
+            central: allStations.filter(s => determineRegion(s.coordinates?.lat, s.coordinates?.lng) === 'central').length,
+          },
+          byPriority: {
+            critical: allStations.filter(s => s.priority_level === 'critical').length,
+            high: allStations.filter(s => s.priority_level === 'high').length,
+            medium: allStations.filter(s => s.priority_level === 'medium').length,
+            low: allStations.filter(s => s.priority_level === 'low').length,
+          },
+          byDataType: {
+            temperature: allStations.filter(s => s.data_types?.includes('temperature')).length,
+            humidity: allStations.filter(s => s.data_types?.includes('humidity')).length,
+            rainfall: allStations.filter(s => s.data_types?.includes('rainfall')).length,
+            wind_speed: allStations.filter(s => s.data_types?.includes('wind_speed')).length,
+            wind_direction: allStations.filter(s => s.data_types?.includes('wind_direction')).length,
+          }
+        };
+      }
+    };
+  }, [weatherData]);
 
   return {
-    // Original API (for compatibility)
+    // Core data
     weatherData,
     isLoading,
     error,
+    lastUpdate,
     refetch: fetchWeatherData,
     
-    // Enhanced 59-station API
-    rawWeatherData,
-    filteredStations,
-    selectedStations,
-    setSelectedStations,
-    filterOptions,
-    setFilterOptions,
+    // Enhanced 59-station utilities
+    stations: stationUtils,
     
-    // Utility functions
-    getStationData,
-    compareStations,
-    searchStations,
-    getStationsByProximity,
-    
-    // Metadata
-    totalStations: rawWeatherData?.stations_used?.length || 0,
-    activeStations: filteredStations.length,
-    dataQualityScore: rawWeatherData?.data_quality_score || 0,
-    geographicCoverage: rawWeatherData?.geographic_coverage || null
+    // Legacy compatibility
+    current: weatherData ? {
+      temperature: weatherData.data?.temperature?.average || 0,
+      humidity: weatherData.data?.humidity?.average || 0,
+      rainfall: weatherData.data?.rainfall?.total || 0,
+      description: weatherData.data?.forecast?.general?.forecast || 'Unknown'
+    } : null
   };
 };
 
-// Helper function to calculate distance between two coordinates
-function calculateDistance(lat1, lng1, lat2, lng2) {
-  const R = 6371; // Earth's radius in kilometers
+// Helper function to determine region based on coordinates
+const determineRegion = (lat, lng) => {
+  if (!lat || !lng) return 'unknown';
+  
+  // Singapore regional boundaries (approximate)
+  if (lat > 1.38) return 'north';
+  if (lat < 1.28) return 'south';
+  if (lng > 103.87) return 'east';
+  if (lng < 103.75) return 'west';
+  return 'central';
+};
+
+// Helper function to calculate distance between coordinates
+const calculateDistance = (lat1, lng1, lat2, lng2) => {
+  if (!lat1 || !lng1 || !lat2 || !lng2) return Infinity;
+  
+  const R = 6371; // Earth's radius in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLng/2) * Math.sin(dLng/2);
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLng/2) * Math.sin(dLng/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
-}
+};
 
-// Enhanced mock data generator with 59-station structure
-function createEnhanced59StationMock() {
+// Generate enhanced 59-station mock data for development/fallback
+const generateEnhanced59StationMockData = () => {
   const mockStations = [
-    'S109', 'S107', 'S24', 'S104', 'S224', 'S77', 'S216', 'S117', 'S217', 'S64',
-    'S90', 'S208', 'S201', 'S50', 'S220', 'S213', 'S215', 'S222', 'S221', 'S33',
-    'S229', 'S228', 'S71', 'S43', 'S211', 'S66', 'S112', 'S07', 'S226', 'S40',
-    'S223', 'S108', 'S113', 'S44', 'S119', 'S203', 'S29', 'S94', 'S78', 'S106',
-    'S81', 'S111', 'S900', 'S102', 'S60', 'S84', 'S79', 'S92', 'S214', 'S88',
-    'S123', 'S115', 'S69', 'S08', 'S230', 'S210', 'S227', 'S219', 'S209'
+    'S109', 'S107', 'S115', 'S24', 'S104', 'S50', 'S106', 'S117', 'S43', 'S60',
+    'S224', 'S77', 'S216', 'S217', 'S64', 'S90', 'S208', 'S201', 'S220', 'S213',
+    'S215', 'S222', 'S221', 'S33', 'S229', 'S228', 'S71', 'S211', 'S66', 'S112',
+    'S07', 'S226', 'S40', 'S223', 'S108', 'S113', 'S44', 'S119', 'S203', 'S29',
+    'S94', 'S78', 'S81', 'S111', 'S900', 'S102', 'S84', 'S79', 'S92', 'S214',
+    'S88', 'S123', 'S69', 'S08', 'S230', 'S210', 'S227', 'S219', 'S209'
   ];
-  
-  const mockData = {
+
+  const station_details = {};
+  const temperatureReadings = [];
+  const humidityReadings = [];
+  const rainfallReadings = [];
+
+  mockStations.forEach((stationId, index) => {
+    const lat = 1.2 + Math.random() * 0.3; // Singapore latitude range
+    const lng = 103.6 + Math.random() * 0.5; // Singapore longitude range
+    
+    station_details[stationId] = {
+      station_id: stationId,
+      name: `Station ${stationId}`,
+      coordinates: { lat, lng },
+      data_types: ['temperature', 'humidity', 'rainfall'],
+      priority_level: index < 20 ? 'critical' : index < 35 ? 'high' : index < 50 ? 'medium' : 'low',
+      priority_score: 100 - index,
+      proximities: {
+        hwa_chong: {
+          distance_km: Math.random() * 20,
+          location_name: 'Hwa Chong International School',
+          priority: 'primary'
+        }
+      },
+      reliability_score: 0.8 + Math.random() * 0.2
+    };
+
+    // Generate realistic weather readings
+    if (index < 10) { // Temperature stations
+      temperatureReadings.push({
+        station: stationId,
+        value: 25 + Math.random() * 8,
+        station_name: `Station ${stationId}`,
+        coordinates: { lat, lng }
+      });
+    }
+
+    if (index < 10) { // Humidity stations
+      humidityReadings.push({
+        station: stationId,
+        value: 60 + Math.random() * 35,
+        station_name: `Station ${stationId}`,
+        coordinates: { lat, lng }
+      });
+    }
+
+    // Rainfall stations (most stations)
+    rainfallReadings.push({
+      station: stationId,
+      value: Math.random() < 0.8 ? 0 : Math.random() * 5,
+      station_name: `Station ${stationId}`,
+      coordinates: { lat, lng }
+    });
+  });
+
+  return {
     timestamp: new Date().toISOString(),
-    source: "NEA Singapore (Mock - Enhanced 59-Station Structure)",
+    source: "Enhanced 59-Station Mock Data (Development Mode)",
     stations_used: mockStations,
     data_quality_score: 95,
     data: {
       temperature: {
-        readings: mockStations.slice(0, 15).map((id, i) => ({
-          station: id,
-          value: 26 + Math.random() * 6,
-          station_name: `Station ${id}`,
-          coordinates: { lat: 1.3 + Math.random() * 0.2, lng: 103.7 + Math.random() * 0.3 }
-        })),
-        total_stations: 15,
-        average: 28.5,
-        min: 26.1,
-        max: 31.2
+        readings: temperatureReadings,
+        total_stations: temperatureReadings.length,
+        average: temperatureReadings.reduce((sum, r) => sum + r.value, 0) / temperatureReadings.length
       },
       humidity: {
-        readings: mockStations.slice(0, 12).map((id, i) => ({
-          station: id,
-          value: 70 + Math.random() * 25,
-          station_name: `Station ${id}`,
-          coordinates: { lat: 1.3 + Math.random() * 0.2, lng: 103.7 + Math.random() * 0.3 }
-        })),
-        total_stations: 12,
-        average: 82.5,
-        min: 72.0,
-        max: 92.1
+        readings: humidityReadings,
+        total_stations: humidityReadings.length,
+        average: humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length
       },
       rainfall: {
-        readings: mockStations.slice(0, 20).map((id, i) => ({
-          station: id,
-          value: Math.random() * 2,
-          station_name: `Station ${id}`,
-          coordinates: { lat: 1.3 + Math.random() * 0.2, lng: 103.7 + Math.random() * 0.3 }
-        })),
-        total_stations: 20,
-        average: 0.5,
-        min: 0,
-        max: 1.8
+        readings: rainfallReadings,
+        total_stations: rainfallReadings.length,
+        total: rainfallReadings.reduce((sum, r) => sum + r.value, 0)
+      },
+      forecast: {
+        general: {
+          forecast: "Partly Cloudy",
+          temperature: { low: 26, high: 33 },
+          relative_humidity: { low: 60, high: 95 }
+        }
       }
     },
-    station_details: {},
+    station_details,
     geographic_coverage: {
       regions_covered: 5,
       total_regions: 5,
       coverage_percentage: 100,
       stations_by_region: {
-        north: mockStations.slice(0, 12),
-        south: mockStations.slice(12, 24),
-        east: mockStations.slice(24, 36),
-        west: mockStations.slice(36, 48),
-        central: mockStations.slice(48, 59)
+        north: Math.floor(mockStations.length * 0.2),
+        south: Math.floor(mockStations.length * 0.2),
+        east: Math.floor(mockStations.length * 0.2),
+        west: Math.floor(mockStations.length * 0.2),
+        central: Math.floor(mockStations.length * 0.2)
       }
     }
   };
-  
-  // Generate station details
-  mockStations.forEach((id, index) => {
-    mockData.station_details[id] = {
-      station_id: id,
-      name: `Mock Station ${id}`,
-      coordinates: {
-        lat: 1.25 + Math.random() * 0.3,
-        lng: 103.6 + Math.random() * 0.4,
-        source: 'mock_database'
-      },
-      data_types: ['temperature', 'humidity', 'rainfall'].slice(0, 1 + Math.floor(Math.random() * 3)),
-      priority_level: index < 10 ? 'critical' : index < 30 ? 'high' : 'medium',
-      priority_score: 100 - index * 1.5,
-      reliability_score: 0.8 + Math.random() * 0.2
-    };
-  });
-  
-  return mockData;
-}
-
-export default {
-  useWeatherData,
-  calculateDistance
 };

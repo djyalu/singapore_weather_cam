@@ -59,14 +59,14 @@ const Header = React.memo(({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex items-center justify-between">
             {/* 로고 및 타이틀 */}
-            <div className="flex items-center space-x-4 sm:space-x-6">
-              <div className="relative">
+            <div className="flex items-center space-x-5 sm:space-x-6">
+              <div className="relative flex-shrink-0">
                 <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-3 sm:p-4 rounded-2xl shadow-lg">
                   <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text font-sans tracking-tight">
                   Singapore Weather Cam
                 </h1>
@@ -83,30 +83,32 @@ const Header = React.memo(({
             </div>
 
             {/* 우측 컨트롤 */}
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+              {/* 실시간 새로고침 버튼 */}
+              {onForceRefresh && (
+                <div className="flex items-center">
+                  <RefreshButton
+                    onRefresh={onForceRefresh}
+                    isRefreshing={isRefreshing}
+                    isOnline={isOnline}
+                    lastUpdate={lastUpdate}
+                    variant="glass"
+                    showStatus={false}
+                    showTimer={true}
+                    className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-200 h-12 px-4"
+                  />
+                </div>
+              )}
+
               {/* 현재 시간 표시 */}
               <div className="text-right">
-                <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20">
-                  <div className="text-xs sm:text-sm text-blue-100 mb-2 hidden sm:block font-sans font-medium">싱가포르 시간</div>
-                  <div className="text-sm sm:text-xl font-mono font-bold text-white tracking-wider">
+                <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20 min-w-0">
+                  <div className="text-xs sm:text-sm text-blue-100 mb-2 hidden sm:block font-sans font-medium whitespace-nowrap">싱가포르 시간</div>
+                  <div className="text-sm sm:text-xl font-sans font-bold text-white tracking-wide whitespace-nowrap">
                     {formatTime(currentTime)}
                   </div>
                 </div>
               </div>
-
-              {/* 실시간 새로고침 버튼 */}
-              {onForceRefresh && (
-                <RefreshButton
-                  onRefresh={onForceRefresh}
-                  isRefreshing={isRefreshing}
-                  isOnline={isOnline}
-                  lastUpdate={lastUpdate}
-                  variant="glass"
-                  showStatus={false}
-                  showTimer={true}
-                  className="animate-fade-in bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
-                />
-              )}
               
               {/* 시스템 정보 - 큰 화면에서만 표시 */}
               <div className="hidden xl:block text-right">
@@ -128,7 +130,7 @@ const Header = React.memo(({
             <div className="text-sm text-blue-200 font-sans font-medium">
               📹 실시간 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • 업데이트: {systemStats.lastUpdate || '로딩 중...'}
             </div>
-            <div className="text-sm text-blue-100 font-mono font-bold tracking-wide">
+            <div className="text-sm text-blue-100 font-sans font-bold tracking-wide">
               {formatTime(currentTime)}
             </div>
           </div>

@@ -1,349 +1,207 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Search, Filter, MapPin, Activity, Star, Eye, X, ChevronDown } from 'lucide-react';
+import { Search, MapPin, Filter, Star, X, Info } from 'lucide-react';
 
 /**
- * 🏗️ ARCHITECT + 🎨 FRONTEND: Station Selector Component
+ * Advanced Station Selector Component - 59-Station NEA Integration
  * 
- * Comprehensive 59-station selection interface with:
- * - Smart search and filtering
- * - Regional grouping
- * - Quality-based sorting
- * - Proximity-based selection
- * - Favorite stations system
- * - Accessible keyboard navigation
+ * Features:
+ * - Search and filter through all 59 NEA weather stations
+ * - Multiple filtering options (region, data type, priority)
+ * - Favorites system with local storage
+ * - Accessibility compliant (WCAG 2.1 AA)
+ * - Performance optimized for large datasets
  */
 const StationSelector = React.memo(({ 
   stations = [], 
-  selectedStations = new Set(), 
-  onStationSelect,
+  selectedStations = [], 
+  onStationSelect, 
   onStationDeselect,
-  filterOptions = {},
-  onFilterChange,
-  className = ''
+  maxSelections = 5,
+  className = '',
+  allowMultiple = true 
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('all');
+  const [selectedDataType, setSelectedDataType] = useState('all');
+  const [selectedPriority, setSelectedPriority] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState('priority'); // priority, name, distance, quality
-  const [viewMode, setViewMode] = useState('grid'); // grid, list, map
-  const [favoriteStations, setFavoriteStations] = useState(new Set());
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('weather-station-favorites')) || [];
+    } catch {
+      return [];
+    }
+  });
 
-  // Enhanced filtering and search
-  const filteredAndSortedStations = useMemo(() => {
-    let filtered = stations;
+  // Memoized filtered stations for performance
+  const filteredStations = useMemo(() => {
+    let filtered = stations.filter(station => station && station.name);
 
-    // Apply search query
+    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(station => 
+      filtered = filtered.filter(station =>
         station.name.toLowerCase().includes(query) ||
-        station.station_id.toLowerCase().includes(query) ||
-        station.coordinates?.name?.toLowerCase().includes(query)
+        station.station_id.toLowerCase().includes(query)
       );
     }
 
-    // Apply region filter
-    if (filterOptions.region && filterOptions.region !== 'all') {
-      // This would be handled by parent component's filterOptions
+    // Region filter
+    if (selectedRegion !== 'all') {
+      filtered = filtered.filter(station => {
+        const lat = station.coordinates?.lat;
+        const lng = station.coordinates?.lng;
+        if (!lat || !lng) return false;
+        
+        const region = determineRegion(lat, lng);
+        return region === selectedRegion;
+      });
     }
 
-    // Apply data type filter
-    if (filterOptions.dataType && filterOptions.dataType !== 'all') {
-      filtered = filtered.filter(station => 
-        station.data_types?.includes(filterOptions.dataType)
+    // Data type filter
+    if (selectedDataType !== 'all') {
+      filtered = filtered.filter(station =>
+        station.data_types && station.data_types.includes(selectedDataType)
       );
     }
 
-    // Apply quality filter
-    if (filterOptions.quality && filterOptions.quality !== 'all') {
-      const threshold = filterOptions.quality === 'high' ? 0.8 : 0.5;
-      filtered = filtered.filter(station => 
-        (station.reliability_score || 0) >= threshold
+    // Priority filter
+    if (selectedPriority !== 'all') {
+      filtered = filtered.filter(station =>
+        station.priority_level === selectedPriority
       );
     }
 
-    // Sort stations
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'priority':
-          return (b.priority_score || 0) - (a.priority_score || 0);
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'quality':
-          return (b.reliability_score || 0) - (a.reliability_score || 0);
-        case 'distance':
-          return (a.distance || 0) - (b.distance || 0);
-        default:
-          return 0;
-      }
+    // Sort by: favorites first, then by priority score, then by name
+    return filtered.sort((a, b) => {
+      const aFavorite = favorites.includes(a.station_id);
+      const bFavorite = favorites.includes(b.station_id);
+      
+      if (aFavorite && !bFavorite) return -1;
+      if (!aFavorite && bFavorite) return 1;
+      
+      const aPriority = a.priority_score || 0;
+      const bPriority = b.priority_score || 0;
+      if (aPriority !== bPriority) return bPriority - aPriority;
+      
+      return a.name.localeCompare(b.name);
     });
+  }, [stations, searchQuery, selectedRegion, selectedDataType, selectedPriority, favorites]);
 
-    // Prioritize favorites
-    const favorites = sorted.filter(s => favoriteStations.has(s.station_id));
-    const others = sorted.filter(s => !favoriteStations.has(s.station_id));
+  // Station selection handlers
+  const handleStationClick = (station) => {
+    const isSelected = selectedStations.some(s => s.station_id === station.station_id);
     
-    return [...favorites, ...others];
-  }, [stations, searchQuery, filterOptions, sortBy, favoriteStations]);
-
-  // Group stations by region for better organization
-  const stationsByRegion = useMemo(() => {
-    const regions = {
-      north: [],
-      south: [], 
-      east: [],
-      west: [],
-      central: []
-    };
-
-    filteredAndSortedStations.forEach(station => {
-      // Determine region based on coordinates (simplified)
-      const lat = station.coordinates?.lat || 0;
-      const lng = station.coordinates?.lng || 0;
-      
-      let region = 'central';
-      if (lat > 1.38) region = 'north';
-      else if (lat < 1.32) region = 'south';
-      else if (lng > 103.9) region = 'east';
-      else if (lng < 103.75) region = 'west';
-      
-      regions[region].push(station);
-    });
-
-    return regions;
-  }, [filteredAndSortedStations]);
-
-  // Handle station selection/deselection
-  const handleStationToggle = useCallback((station, isSelected) => {
     if (isSelected) {
-      onStationSelect?.(station);
-    } else {
       onStationDeselect?.(station);
+    } else {
+      if (!allowMultiple) {
+        // Single selection mode - deselect all others first
+        selectedStations.forEach(s => onStationDeselect?.(s));
+      } else if (selectedStations.length >= maxSelections) {
+        // Max selections reached
+        return;
+      }
+      onStationSelect?.(station);
     }
-  }, [onStationSelect, onStationDeselect]);
-
-  // Toggle favorite status
-  const toggleFavorite = useCallback((stationId, event) => {
-    event.stopPropagation();
-    setFavoriteStations(prev => {
-      const updated = new Set(prev);
-      if (updated.has(stationId)) {
-        updated.delete(stationId);
-      } else {
-        updated.add(stationId);
-      }
-      return updated;
-    });
-  }, []);
-
-  // Clear all selections
-  const clearAllSelections = useCallback(() => {
-    selectedStations.forEach(stationId => {
-      const station = stations.find(s => s.station_id === stationId);
-      if (station) {
-        onStationDeselect?.(station);
-      }
-    });
-  }, [selectedStations, stations, onStationDeselect]);
-
-  // Get priority level display
-  const getPriorityDisplay = (level) => {
-    const priorities = {
-      critical: { color: 'text-red-600', icon: '🔴', label: 'Critical' },
-      high: { color: 'text-orange-500', icon: '🟡', label: 'High' },
-      medium: { color: 'text-blue-500', icon: '🔵', label: 'Medium' },
-      low: { color: 'text-gray-500', icon: '⚪', label: 'Low' }
-    };
-    return priorities[level] || priorities.medium;
   };
 
-  // Render individual station card
-  const StationCard = ({ station, isSelected, onToggle }) => {
-    const priority = getPriorityDisplay(station.priority_level);
-    const isFavorite = favoriteStations.has(station.station_id);
+  // Favorites management
+  const toggleFavorite = (stationId) => {
+    const newFavorites = favorites.includes(stationId)
+      ? favorites.filter(id => id !== stationId)
+      : [...favorites, stationId];
     
-    return (
-      <div 
-        className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
-          isSelected 
-            ? 'border-blue-500 bg-blue-50 shadow-md' 
-            : 'border-gray-200 hover:border-gray-300'
-        }`}
-        onClick={() => onToggle(station, !isSelected)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onToggle(station, !isSelected);
-          }
-        }}
-        aria-label={`${isSelected ? 'Deselect' : 'Select'} weather station ${station.name}`}
-      >
-        {/* Header with selection and favorite */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={() => onToggle(station, !isSelected)}
-              onClick={(e) => e.stopPropagation()}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              aria-label={`Select ${station.name}`}
-            />
-            <span className="text-xs font-mono text-gray-500">
-              {station.station_id}
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-1">
-            <button
-              onClick={(e) => toggleFavorite(station.station_id, e)}
-              className={`p-1 rounded hover:bg-gray-100 ${
-                isFavorite ? 'text-yellow-500' : 'text-gray-300'
-              }`}
-              aria-label={`${isFavorite ? 'Remove from' : 'Add to'} favorites`}
-            >
-              <Star className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
-            </button>
-            <span className={`text-xs px-2 py-1 rounded-full bg-gray-100 ${priority.color}`}>
-              {priority.icon} {priority.label}
-            </span>
-          </div>
-        </div>
+    setFavorites(newFavorites);
+    try {
+      localStorage.setItem('weather-station-favorites', JSON.stringify(newFavorites));
+    } catch (error) {
+      console.warn('Failed to save favorites:', error);
+    }
+  };
 
-        {/* Station info */}
-        <div className="space-y-1">
-          <h4 className="font-medium text-sm text-gray-900 leading-tight">
-            {station.name}
-          </h4>
-          
-          <div className="flex items-center gap-4 text-xs text-gray-600">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              <span>
-                {station.coordinates?.lat?.toFixed(3)}, {station.coordinates?.lng?.toFixed(3)}
-              </span>
-            </div>
-            
-            {station.distance && (
-              <div className="flex items-center gap-1">
-                <Activity className="w-3 h-3" />
-                <span>{station.distance.toFixed(1)}km</span>
-              </div>
-            )}
-          </div>
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedRegion('all');
+    setSelectedDataType('all');
+    setSelectedPriority('all');
+  };
 
-          {/* Data types */}
-          <div className="flex flex-wrap gap-1 mt-2">
-            {station.data_types?.slice(0, 3).map(type => (
-              <span 
-                key={type}
-                className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full"
-              >
-                {type === 'temperature' ? '🌡️' : 
-                 type === 'humidity' ? '💧' : 
-                 type === 'rainfall' ? '🌧️' : 
-                 type === 'wind_speed' ? '💨' : '📊'} {type}
-              </span>
-            ))}
-            {station.data_types?.length > 3 && (
-              <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
-                +{station.data_types.length - 3}
-              </span>
-            )}
-          </div>
+  // Get station display info
+  const getStationDisplayInfo = (station) => {
+    const region = station.coordinates?.lat && station.coordinates?.lng 
+      ? determineRegion(station.coordinates.lat, station.coordinates.lng)
+      : 'unknown';
+    
+    const distance = station.proximities?.hwa_chong?.distance_km;
+    const dataTypes = station.data_types || [];
+    const priority = station.priority_level || 'unknown';
+    
+    return { region, distance, dataTypes, priority };
+  };
 
-          {/* Quality indicator */}
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-1">
-              <div className={`w-2 h-2 rounded-full ${
-                (station.reliability_score || 0) >= 0.8 ? 'bg-green-500' :
-                (station.reliability_score || 0) >= 0.6 ? 'bg-yellow-500' : 'bg-red-500'
-              }`} />
-              <span className="text-xs text-gray-600">
-                Quality: {Math.round((station.reliability_score || 0) * 100)}%
-              </span>
-            </div>
-            
-            {station.proximities && (
-              <span className="text-xs text-gray-500">
-                Near {Object.keys(station.proximities).length} locations
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+  // Determine if station is selected
+  const isStationSelected = (station) => {
+    return selectedStations.some(s => s.station_id === station.station_id);
   };
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 ${className}`}>
-      {/* Header with controls */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-3">
+    <div className={`bg-white rounded-lg shadow-lg border border-gray-200 ${className}`}>
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">
-            Station Selection
+            Weather Stations ({filteredStations.length})
           </h3>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">
-              {selectedStations.size} of {filteredAndSortedStations.length} selected
-            </span>
-            {selectedStations.size > 0 && (
-              <button
-                onClick={clearAllSelections}
-                className="text-sm text-red-600 hover:text-red-700 font-medium"
-              >
-                Clear All
-              </button>
-            )}
-          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-3 py-1 text-sm text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+            aria-label={showFilters ? 'Hide filters' : 'Show filters'}
+          >
+            <Filter className="w-4 h-4" />
+            Filters
+          </button>
         </div>
 
-        {/* Search and controls */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search stations by name or ID..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="priority">Sort by Priority</option>
-              <option value="name">Sort by Name</option>
-              <option value="quality">Sort by Quality</option>
-              <option value="distance">Sort by Distance</option>
-            </select>
-
+        {/* Search */}
+        <div className="mt-3 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Search stations by name or ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            aria-label="Search weather stations"
+          />
+          {searchQuery && (
             <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 border border-gray-300 rounded-md hover:bg-gray-50 ${
-                showFilters ? 'bg-blue-50 border-blue-300' : ''
-              }`}
-              aria-label="Toggle filters"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label="Clear search"
             >
-              <Filter className="w-4 h-4" />
+              <X className="w-4 h-4" />
             </button>
-          </div>
+          )}
         </div>
+      </div>
 
-        {/* Advanced filters */}
-        {showFilters && (
-          <div className="mt-3 p-3 bg-gray-50 rounded-md">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Filters */}
+      {showFilters && (
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Region Filter */}
+            <div>
+              <label htmlFor="region-select" className="block text-xs font-medium text-gray-700 mb-1">
+                Region
+              </label>
               <select
-                value={filterOptions.region || 'all'}
-                onChange={(e) => onFilterChange?.({ ...filterOptions, region: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                id="region-select"
+                value={selectedRegion}
+                onChange={(e) => setSelectedRegion(e.target.value)}
+                className="w-full text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2"
               >
                 <option value="all">All Regions</option>
                 <option value="north">North</option>
@@ -352,65 +210,199 @@ const StationSelector = React.memo(({
                 <option value="west">West</option>
                 <option value="central">Central</option>
               </select>
+            </div>
 
+            {/* Data Type Filter */}
+            <div>
+              <label htmlFor="data-type-select" className="block text-xs font-medium text-gray-700 mb-1">
+                Data Type
+              </label>
               <select
-                value={filterOptions.dataType || 'all'}
-                onChange={(e) => onFilterChange?.({ ...filterOptions, dataType: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                id="data-type-select"
+                value={selectedDataType}
+                onChange={(e) => setSelectedDataType(e.target.value)}
+                className="w-full text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2"
               >
-                <option value="all">All Data Types</option>
+                <option value="all">All Types</option>
                 <option value="temperature">Temperature</option>
                 <option value="humidity">Humidity</option>
                 <option value="rainfall">Rainfall</option>
                 <option value="wind_speed">Wind Speed</option>
                 <option value="wind_direction">Wind Direction</option>
               </select>
+            </div>
 
+            {/* Priority Filter */}
+            <div>
+              <label htmlFor="priority-select" className="block text-xs font-medium text-gray-700 mb-1">
+                Priority
+              </label>
               <select
-                value={filterOptions.quality || 'all'}
-                onChange={(e) => onFilterChange?.({ ...filterOptions, quality: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                id="priority-select"
+                value={selectedPriority}
+                onChange={(e) => setSelectedPriority(e.target.value)}
+                className="w-full text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 py-1 px-2"
               >
-                <option value="all">All Quality</option>
-                <option value="high">High Quality (80%+)</option>
-                <option value="medium">Medium Quality (50%+)</option>
+                <option value="all">All Priorities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
               </select>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Station list */}
-      <div className="p-4">
-        {filteredAndSortedStations.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <div className="mt-3 flex justify-between items-center">
+            <button
+              onClick={clearFilters}
+              className="text-xs text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded px-2 py-1"
+            >
+              Clear all filters
+            </button>
+            <div className="text-xs text-gray-500">
+              {allowMultiple && `${selectedStations.length}/${maxSelections} selected`}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Station List */}
+      <div className="max-h-96 overflow-y-auto">
+        {filteredStations.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            <Info className="w-8 h-8 mx-auto mb-2 text-gray-400" />
             <p>No stations found matching your criteria</p>
+            <button
+              onClick={clearFilters}
+              className="mt-2 text-sm text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1"
+            >
+              Clear filters to see all stations
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filteredAndSortedStations.map(station => (
-              <StationCard
-                key={station.station_id}
-                station={station}
-                isSelected={selectedStations.has(station.station_id)}
-                onToggle={handleStationToggle}
-              />
-            ))}
+          <div className="divide-y divide-gray-100">
+            {filteredStations.map((station) => {
+              const { region, distance, dataTypes, priority } = getStationDisplayInfo(station);
+              const isSelected = isStationSelected(station);
+              const isFavorite = favorites.includes(station.station_id);
+              const canSelect = allowMultiple ? selectedStations.length < maxSelections : true;
+
+              return (
+                <div
+                  key={station.station_id}
+                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                    isSelected ? 'bg-blue-50 border-r-4 border-blue-500' : ''
+                  } ${!canSelect && !isSelected ? 'opacity-50' : ''}`}
+                  onClick={() => (canSelect || isSelected) && handleStationClick(station)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      (canSelect || isSelected) && handleStationClick(station);
+                    }
+                  }}
+                  aria-label={`${isSelected ? 'Deselect' : 'Select'} ${station.name} weather station`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium text-gray-900 truncate">
+                          {station.name}
+                        </h4>
+                        {isFavorite && (
+                          <Star className="w-4 h-4 text-yellow-500 fill-current flex-shrink-0" />
+                        )}
+                        {isSelected && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {station.station_id}
+                        </span>
+                        <span className="capitalize">{region}</span>
+                        {distance && (
+                          <span>{distance.toFixed(1)}km from Hwa Chong</span>
+                        )}
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          priority === 'critical' ? 'bg-red-100 text-red-800' :
+                          priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                          priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {priority}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {dataTypes.slice(0, 3).map(type => (
+                          <span
+                            key={type}
+                            className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full"
+                          >
+                            {type === 'wind_speed' ? 'wind' : 
+                             type === 'wind_direction' ? 'direction' : type}
+                          </span>
+                        ))}
+                        {dataTypes.length > 3 && (
+                          <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                            +{dataTypes.length - 3} more
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Current data preview */}
+                      {station.currentData && (
+                        <div className="flex gap-3 mt-2 text-xs text-gray-600">
+                          {station.currentData.temperature && (
+                            <span>🌡️ {station.currentData.temperature.toFixed(1)}°C</span>
+                          )}
+                          {station.currentData.humidity && (
+                            <span>💧 {Math.round(station.currentData.humidity)}%</span>
+                          )}
+                          {station.currentData.rainfall > 0 && (
+                            <span>🌧️ {station.currentData.rainfall}mm</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(station.station_id);
+                      }}
+                      className="ml-2 p-1 text-gray-400 hover:text-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 rounded"
+                      aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      <Star className={`w-4 h-4 ${isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Summary footer */}
-      {selectedStations.size > 0 && (
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>
-              Selected {selectedStations.size} station{selectedStations.size !== 1 ? 's' : ''}
-            </span>
-            <span>
-              Covering {Array.from(selectedStations).length > 0 ? 'multiple' : 'no'} regions
-            </span>
+      {/* Footer */}
+      {selectedStations.length > 0 && (
+        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              {allowMultiple ? (
+                `${selectedStations.length} station${selectedStations.length !== 1 ? 's' : ''} selected`
+              ) : (
+                `${selectedStations[0]?.name || 'Station'} selected`
+              )}
+            </div>
+            <button
+              onClick={() => selectedStations.forEach(station => onStationDeselect?.(station))}
+              className="text-sm text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1"
+            >
+              Clear selection
+            </button>
           </div>
         </div>
       )}
@@ -418,27 +410,38 @@ const StationSelector = React.memo(({
   );
 });
 
+// Helper function to determine region based on coordinates
+const determineRegion = (lat, lng) => {
+  // Singapore regional boundaries (approximate)
+  if (lat > 1.38) return 'north';
+  if (lat < 1.28) return 'south';
+  if (lng > 103.87) return 'east';
+  if (lng < 103.75) return 'west';
+  return 'central';
+};
+
 StationSelector.propTypes = {
-  stations: PropTypes.arrayOf(PropTypes.shape({
-    station_id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    coordinates: PropTypes.shape({
-      lat: PropTypes.number,
-      lng: PropTypes.number
-    }),
-    data_types: PropTypes.arrayOf(PropTypes.string),
-    priority_level: PropTypes.string,
-    priority_score: PropTypes.number,
-    reliability_score: PropTypes.number,
-    distance: PropTypes.number,
-    proximities: PropTypes.object
-  })).isRequired,
-  selectedStations: PropTypes.instanceOf(Set),
+  stations: PropTypes.arrayOf(
+    PropTypes.shape({
+      station_id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      coordinates: PropTypes.shape({
+        lat: PropTypes.number,
+        lng: PropTypes.number
+      }),
+      data_types: PropTypes.array,
+      priority_level: PropTypes.string,
+      priority_score: PropTypes.number,
+      proximities: PropTypes.object,
+      currentData: PropTypes.object
+    })
+  ),
+  selectedStations: PropTypes.array,
   onStationSelect: PropTypes.func,
   onStationDeselect: PropTypes.func,
-  filterOptions: PropTypes.object,
-  onFilterChange: PropTypes.func,
-  className: PropTypes.string
+  maxSelections: PropTypes.number,
+  className: PropTypes.string,
+  allowMultiple: PropTypes.bool
 };
 
 StationSelector.displayName = 'StationSelector';
