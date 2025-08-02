@@ -63,16 +63,16 @@ const SystemStatus = React.memo(({
   const shouldShowError = error && (!isOnline || error.severity === 'critical');
 
   return (
-    <div className="bg-gray-50 border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-2">
+    <div className="bg-gray-50 border-b border-gray-200 px-2 sm:px-4 py-1 sm:py-2">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* 업데이트 시간 - 모바일 최적화 */}
         <div className="flex items-center text-xs sm:text-sm text-gray-600 min-w-0 flex-1">
-          <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
+          <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
           <span className="truncate">
             {timeSinceUpdate ? (
               <>
-                <span className="hidden xs:inline">업데이트: </span>
-                <span className="xs:hidden">업데이트 </span>
+                <span className="hidden sm:inline">업데이트: </span>
+                <span className="sm:hidden">업데이트 </span>
                 {timeSinceUpdate}
               </>
             ) : (
@@ -81,16 +81,16 @@ const SystemStatus = React.memo(({
           </span>
         </div>
 
-        {/* 상태 표시 영역 */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        {/* 상태 표시 영역 - 모바일 최적화 */}
+        <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
           {/* 중요한 에러만 표시 */}
           {shouldShowError && (
             <div className="flex items-center text-xs sm:text-sm text-red-600 bg-red-50 px-2 sm:px-3 py-1 rounded-full">
               <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
-              <span className="hidden xs:inline">
+              <span className="hidden sm:inline">
                 {!isOnline ? '오프라인' : '시스템 오류'}
               </span>
-              <span className="xs:hidden">⚠️</span>
+              <span className="sm:hidden">⚠️</span>
             </div>
           )}
 

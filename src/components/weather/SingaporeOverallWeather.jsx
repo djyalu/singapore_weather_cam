@@ -720,10 +720,10 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           {/* 습도 */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <Droplets className="w-4 h-4 text-blue-500" />
-              <span className="text-xs text-gray-600 font-medium">습도</span>
+              <Droplets className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />
+              <span className="text-xs text-gray-600 font-medium hidden sm:inline">습도</span>
             </div>
-            <div className="text-xl font-bold text-gray-800">
+            <div className="text-lg sm:text-xl font-bold text-gray-800">
               {Math.round(overallData.humidity)}%
             </div>
             <div className="text-xs text-gray-500">
@@ -734,17 +734,17 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           {/* 강수량 */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <Cloud className="w-4 h-4 text-gray-500" />
-              <span className="text-xs text-gray-600 font-medium">강수량</span>
+              <Cloud className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+              <span className="text-xs text-gray-600 font-medium hidden sm:inline">강수량</span>
             </div>
-            <div className="text-xl font-bold text-gray-800">
+            <div className="text-lg sm:text-xl font-bold text-gray-800">
               {overallData.rainfall.toFixed(1)}
             </div>
             <div className="text-xs text-gray-500">mm</div>
           </div>
 
-          {/* 날씨 상태 */}
-          <div className="text-center">
+          {/* 날씨 상태 - 대형 화면에서만 표시 */}
+          <div className="text-center hidden sm:block">
             <div className="flex items-center justify-center gap-1 mb-1">
               <span className="text-sm">{getWeatherIcon(overallData.forecast)}</span>
               <span className="text-xs text-gray-600 font-medium">상태</span>
@@ -758,8 +758,8 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             </div>
           </div>
 
-          {/* 업데이트 시간 */}
-          <div className="text-center">
+          {/* 업데이트 시간 - 대형 화면에서만 표시 */}
+          <div className="text-center hidden lg:block">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Clock className={`w-4 h-4 ${weatherData?.source?.includes('Real-time') ? 'text-red-500' : 'text-green-500'}`} />
               <span className="text-xs text-gray-600 font-medium">업데이트</span>
@@ -772,8 +772,8 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             </div>
           </div>
 
-          {/* AI 분석 버튼 */}
-          <div className="text-center">
+          {/* AI 분석 버튼 - 대형 화면에서만 표시 */}
+          <div className="text-center hidden lg:block">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Brain className="w-4 h-4 text-purple-500" />
               <span className="text-xs text-gray-600 font-medium">AI 분석</span>

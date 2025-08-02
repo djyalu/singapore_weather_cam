@@ -46,20 +46,20 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
 
   const handleImageError = () => {
     setImageLoading(false);
+    setImageError(true);
     
     // 재시도 로직 (최대 2회)
     if (retryCount < 2) {
-      console.log(`🔄 Retrying image load for camera ${camera.id}, attempt ${retryCount + 1}`);
       setTimeout(() => {
         setRetryCount(prev => prev + 1);
         setImageLoading(true);
         setImageError(false);
         // 캐시 버스터를 추가해서 재시도
         const baseImageUrl = camera.image?.url || camera.image;
-        setCurrentImageUrl(`${baseImageUrl}${baseImageUrl.includes('?') ? '&' : '?'}retry=${retryCount + 1}&t=${Date.now()}`);
+        const retryUrl = baseImageUrl ? `${baseImageUrl}${baseImageUrl.includes('?') ? '&' : '?'}retry=${retryCount + 1}` : baseImageUrl;
+        setCurrentImageUrl(retryUrl);
       }, 1000 * (retryCount + 1)); // 1초, 2초 지연
     } else {
-      console.error(`❌ Image load failed for camera ${camera.id} after ${retryCount + 1} attempts`);
       setImageError(true);
     }
   };
@@ -147,20 +147,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   const [error, setError] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // 디버깅: props 확인
-  console.log('🔍 RegionalTrafficCameras props check:', {
-    selectedRegions,
-    selectedRegionsType: typeof selectedRegions,
-    selectedRegionsLength: selectedRegions?.length,
-    onCameraClick: typeof onCameraClick
-  });
-  
-  // 추가 디버깅: 날씨 지역 선택과 교통 카메라 연동 확인
-  console.log('🌍 Weather-Traffic Region Sync Check:', {
-    receivedRegions: selectedRegions,
-    regionCoordinatesKeys: Object.keys(regionCoordinates),
-    expectedRegions: ['hwa-chong', 'newton', 'changi', 'jurong']
-  });
+  // 디버깅 제거 - 성능 최적화
 
   // 지역별 중심 좌표 (날씨 스테이션 기준)
   const regionCoordinates = {
@@ -248,7 +235,6 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         
         if (response.ok) {
           const data = await response.json();
-          console.log('✅ Direct API call successful:', data?.items?.[0]?.cameras?.length || 0, 'cameras');
           
           if (data?.items?.[0]?.cameras) {
             const apiCameras = data.items[0].cameras.map(camera => ({
@@ -270,7 +256,6 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
             
             setCameras(apiCameras);
             setError(null);
-            console.log('🎯 Real-time cameras loaded successfully');
             return;
           }
         }
@@ -278,10 +263,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         throw new Error(`Direct API response failed: ${response.status}`);
         
       } catch (err) {
-        console.warn('⚠️ All API attempts failed:', err.message);
-        
         // 최종 폴백: 정적 데이터 사용
-        console.log('🔄 Using static fallback data...');
         const fallbackCameras = generateFallbackCameras();
         setCameras(fallbackCameras);
         setError('실시간 데이터 연결 실패 - 캐시된 데이터 사용 중');
@@ -492,18 +474,14 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       ? selectedRegions 
       : ['hwa-chong', 'newton', 'changi'];
     
-    console.log('📋 Using regions:', regionsToUse);
-
     // 카메라가 없는 경우 즉시 fallback 카메라 생성
     if (!cameras.length) {
-      console.log('🚨 No cameras available, generating emergency fallback');
       const emergencyFallback = generateFallbackCameras();
       const result = regionsToUse.slice(0, 3).map((regionId, index) => ({
         camera: emergencyFallback[index] || emergencyFallback[0],
         regionId,
         distance: null
       }));
-      console.log('🔄 Emergency fallback result:', result.length);
       return result;
     }
 
@@ -511,16 +489,11 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     const usedCameras = new Set(); // 중복 방지
     
     regionsToUse.forEach(regionId => {
-      console.log(`🎯 Finding camera for region: ${regionId}`);
-      
       // 사용되지 않은 카메라들 중에서 가장 가까운 것 찾기
       const availableCameras = cameras.filter(cam => !usedCameras.has(cam.id));
-      console.log(`📋 Available cameras for ${regionId}:`, availableCameras.length);
       
-      // 디버깅: 각 카메라까지의 거리 계산해서 표시
       const regionCoord = regionCoordinates[regionId];
       if (regionCoord && availableCameras.length > 0) {
-        console.log(`📍 ${regionId} region coordinates:`, regionCoord);
         
         const distances = availableCameras.map(camera => {
           if (camera.location?.latitude && camera.location?.longitude) {
