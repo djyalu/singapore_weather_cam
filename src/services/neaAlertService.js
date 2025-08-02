@@ -281,7 +281,7 @@ class NEAAlertService {
         type: 'info',
         priority: 'low',
         icon: forecastIcon,
-        message: `${forecastMessage} - ${tempReadings.length || 0}개 관측소 기준`,
+        message: `${forecastMessage} - NEA Singapore 공식 예보`,
         timestamp: now.toISOString(),
         source: 'Weather Forecast'
       });
@@ -289,12 +289,24 @@ class NEAAlertService {
     
     // 기본 상황 요약
     if (alerts.length === 0) {
-      const stationCount = data.stations_used?.length || tempReadings.length || 0;
+      // 전체 관측소 수 계산 (온도, 습도, 강수량 등 모든 센서 포함)
+      const totalStations = data.stations_used?.length || 
+                           data.geographic_coverage?.total_stations ||
+                           (data.data?.rainfall?.readings?.length) || 
+                           tempReadings.length || 0;
+      
+      const stationTypes = [];
+      if (tempReadings.length > 0) stationTypes.push(`온도 ${tempReadings.length}개`);
+      if (data.data?.humidity?.readings?.length > 0) stationTypes.push(`습도 ${data.data.humidity.readings.length}개`);
+      if (data.data?.rainfall?.readings?.length > 0) stationTypes.push(`강수량 ${data.data.rainfall.readings.length}개`);
+      
+      const detailInfo = stationTypes.length > 0 ? ` (${stationTypes.join(', ')})` : '';
+      
       alerts.push({
         type: 'info',
         priority: 'low',
         icon: '📊',
-        message: `현재 ${stationCount}개 관측소에서 정상적으로 데이터 수집 중입니다.`,
+        message: `현재 ${totalStations}개 관측소에서 정상적으로 데이터 수집 중입니다${detailInfo}.`,
         timestamp: now.toISOString(),
         source: 'System Status'
       });
