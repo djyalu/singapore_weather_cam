@@ -4,47 +4,27 @@ import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
+import SimpleClock from '../common/SimpleClock';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
  */
 const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = '' }) => {
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [aiSummary, setAiSummary] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [cohereAnalysis, setCohereAnalysis] = useState(null);
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
-  console.log('🚀 SingaporeOverallWeather 컴포넌트 렌더링됨', new Date().toLocaleTimeString());
-
-  // 싱가포르 실시간 시간 업데이트 - 다른 방식으로 시도
+  // 1초마다 강제 리렌더링으로 시간 업데이트
   useEffect(() => {
-    let timer;
-    
-    const updateTime = () => {
-      const now = new Date();
-      // 싱가포르 시간으로 변환 (UTC+8)
-      const singaporeTime = new Date(now.getTime() + (8 * 60 * 60 * 1000) - (now.getTimezoneOffset() * 60 * 1000));
-      setCurrentTime(singaporeTime);
-      console.log('⏰ 싱가포르 시간 업데이트:', singaporeTime.toLocaleTimeString());
-    };
-    
-    // 즉시 실행
-    updateTime();
-    
-    // 타이머 설정
-    timer = setInterval(updateTime, 1000);
-    
-    console.log('✅ 타이머 ID:', timer);
-    
-    return () => {
-      if (timer) {
-        clearInterval(timer);
-        console.log('🛑 타이머 정리 완료');
-      }
-    };
-  }, [weatherData]); // weatherData 변경 시에도 시간 업데이트
+    const timer = setInterval(() => {
+      setForceUpdate(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
@@ -1041,7 +1021,16 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
                 {weatherData?.source?.includes('Real-time') ? '🔴 실시간 NEA API' : '📊 최신 수집'} • {overallData.stationCount}개 관측소
               </p>
               <p className="text-blue-100 text-xs font-mono">
-                🕘 {currentTime.getFullYear()}-{String(currentTime.getMonth() + 1).padStart(2, '0')}-{String(currentTime.getDate()).padStart(2, '0')} {String(currentTime.getHours()).padStart(2, '0')}:{String(currentTime.getMinutes()).padStart(2, '0')}:{String(currentTime.getSeconds()).padStart(2, '0')} SGT
+                🕘 {new Date().toLocaleString('ko-KR', { 
+                  timeZone: 'Asia/Singapore',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: false
+                })} SGT
               </p>
             </div>
           </div>

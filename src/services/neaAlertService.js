@@ -287,7 +287,105 @@ class NEAAlertService {
       });
     }
 
-    // 기본 상황 요약
+    // 실제 날씨 데이터 티커 표시 - 우선 순위에 따라 여러 정보 표시
+    const currentTemp = tempReadings.length > 0 
+      ? tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length 
+      : null;
+    
+    const currentHumidity = data.data?.humidity?.readings?.length > 0 
+      ? data.data.humidity.readings.reduce((sum, r) => sum + r.value, 0) / data.data.humidity.readings.length 
+      : null;
+
+    const currentRainfall = data.data?.rainfall?.readings?.length > 0 
+      ? data.data.rainfall.readings.reduce((sum, r) => sum + r.value, 0)
+      : 0;
+
+    // 온도 정보 (높은 우선순위)
+    if (currentTemp !== null) {
+      let tempIcon = '🌡️';
+      let tempStatus = '정상';
+      let tempPriority = 'low';
+      
+      if (currentTemp >= 35) {
+        tempIcon = '🔥';
+        tempStatus = '매우 높음';
+        tempPriority = 'medium';
+      } else if (currentTemp >= 33) {
+        tempIcon = '🌡️';
+        tempStatus = '높음';
+        tempPriority = 'low';
+      } else if (currentTemp <= 25) {
+        tempIcon = '❄️';
+        tempStatus = '낮음';
+        tempPriority = 'low';
+      }
+
+      alerts.push({
+        type: 'info',
+        priority: tempPriority,
+        icon: tempIcon,
+        message: `현재 기온 ${currentTemp.toFixed(1)}°C (${tempStatus}) • ${tempReadings.length}개 관측소 평균`,
+        timestamp: now.toISOString(),
+        source: 'Temperature Monitor',
+      });
+    }
+
+    // 습도 정보
+    if (currentHumidity !== null) {
+      let humidityIcon = '💧';
+      let humidityStatus = '정상';
+      let humidityPriority = 'low';
+      
+      if (currentHumidity >= 90) {
+        humidityIcon = '💦';
+        humidityStatus = '매우 높음';
+        humidityPriority = 'low';
+      } else if (currentHumidity >= 80) {
+        humidityIcon = '💧';
+        humidityStatus = '높음';
+        humidityPriority = 'low';
+      } else if (currentHumidity <= 40) {
+        humidityIcon = '🏜️';
+        humidityStatus = '낮음';
+        humidityPriority = 'low';
+      }
+
+      alerts.push({
+        type: 'info',
+        priority: humidityPriority,
+        icon: humidityIcon,
+        message: `현재 습도 ${currentHumidity.toFixed(0)}% (${humidityStatus}) • 체감온도 ${(currentTemp + (currentHumidity - 60) * 0.1).toFixed(1)}°C`,
+        timestamp: now.toISOString(),
+        source: 'Humidity Monitor',
+      });
+    }
+
+    // 강수량 정보 (현재 비 오지 않아도 표시)
+    if (data.data?.rainfall?.readings?.length > 0) {
+      const activeRainStations = data.data.rainfall.readings.filter(r => r.value > 0).length;
+      
+      if (activeRainStations > 0) {
+        alerts.push({
+          type: 'info',
+          priority: 'medium',
+          icon: '🌧️',
+          message: `현재 ${activeRainStations}개 지역 강수 중 • 총 ${currentRainfall.toFixed(1)}mm 기록`,
+          timestamp: now.toISOString(),
+          source: 'Rainfall Monitor',
+        });
+      } else {
+        alerts.push({
+          type: 'info',
+          priority: 'low',
+          icon: '☀️',
+          message: `전국 건조 상태 • ${data.data.rainfall.readings.length}개 관측소 모두 강수량 0mm`,
+          timestamp: now.toISOString(),
+          source: 'Rainfall Monitor',
+        });
+      }
+    }
+
+    // 기본 상황 요약 (데이터가 없을 때만)
     if (alerts.length === 0) {
       // 전체 관측소 수 계산 (온도, 습도, 강수량 등 모든 센서 포함)
       const totalStations = data.stations_used?.length ||
