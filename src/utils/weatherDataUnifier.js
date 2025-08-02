@@ -44,6 +44,46 @@ export const STANDARD_REGIONS = [
     fallbackTemp: 30.1,
     emoji: '🌳',
     description: '북부 주거 및 산업 지역'
+  },
+  {
+    id: 'jurong',
+    name: 'Jurong Area',
+    displayName: 'Jurong',
+    stationIds: ['S104', 'S60'], // Jurong West & Sentosa
+    coordinates: { lat: 1.3496, lng: 103.7063 },
+    fallbackTemp: 29.8,
+    emoji: '🏭',
+    description: 'Jurong 산업단지 및 서부 지역'
+  },
+  {
+    id: 'central',
+    name: 'Central Business',
+    displayName: 'Central',
+    stationIds: ['S109', 'S106'], // Newton & Tai Seng 
+    coordinates: { lat: 1.3048, lng: 103.8318 },
+    fallbackTemp: 30.5,
+    emoji: '🌆',
+    description: 'Central 중부 도심 지역'
+  },
+  {
+    id: 'east',
+    name: 'East Coast',
+    displayName: 'East',
+    stationIds: ['S107', 'S43'], // East Coast & Kim Chuan
+    coordinates: { lat: 1.3048, lng: 103.9318 },
+    fallbackTemp: 28.9,
+    emoji: '🏖️',
+    description: 'East Coast Parkway 및 동부 지역'
+  },
+  {
+    id: 'south',
+    name: 'South',
+    displayName: 'South',
+    stationIds: ['S60', 'S104'], // Sentosa & Jurong (남서부)
+    coordinates: { lat: 1.2700, lng: 103.8200 },
+    fallbackTemp: 29.2,
+    description: 'Sentosa 및 남서부 지역',
+    emoji: '🏝️'
   }
 ];
 

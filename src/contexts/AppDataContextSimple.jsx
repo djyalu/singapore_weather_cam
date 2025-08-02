@@ -27,71 +27,164 @@ const useSimpleDataLoader = (refreshInterval) => {
         
         console.log('🔄 Loading weather data: Attempting real-time NEA API call...');
         
-        // 1순위: NEA Singapore API 직접 호출 (항상 시도)
+        // 1순위: 다중 NEA Singapore API 호출로 더 많은 관측소 데이터 수집
         try {
-          const neaApiUrl = 'https://api.data.gov.sg/v1/environment/air-temperature';
-          const neaResponse = await fetch(neaApiUrl, {
-            headers: {
-              'Accept': 'application/json',
-              'User-Agent': 'Singapore-Weather-Cam/1.0'
-            },
-            timeout: 10000
-          });
+          console.log('🔄 Attempting multiple NEA API calls for comprehensive data...');
           
-          if (neaResponse.ok) {
-            const neaData = await neaResponse.json();
-            console.log('✅ Real-time NEA data fetched successfully');
-            
-            // NEA API 응답을 우리 형식으로 변환
-            const temperatureReadings = neaData.items?.[0]?.readings?.map(reading => ({
+          // 여러 NEA API 엔드포인트 동시 호출
+          const apiCalls = [
+            fetch('https://api.data.gov.sg/v1/environment/air-temperature', {
+              headers: { 'Accept': 'application/json', 'User-Agent': 'Singapore-Weather-Cam/1.0' },
+              timeout: 10000
+            }),
+            fetch('https://api.data.gov.sg/v1/environment/relative-humidity', {
+              headers: { 'Accept': 'application/json', 'User-Agent': 'Singapore-Weather-Cam/1.0' },
+              timeout: 10000
+            }),
+            fetch('https://api.data.gov.sg/v1/environment/rainfall', {
+              headers: { 'Accept': 'application/json', 'User-Agent': 'Singapore-Weather-Cam/1.0' },
+              timeout: 10000
+            }),
+            fetch('https://api.data.gov.sg/v1/environment/wind-speed', {
+              headers: { 'Accept': 'application/json', 'User-Agent': 'Singapore-Weather-Cam/1.0' },
+              timeout: 10000
+            })
+          ];
+          
+          const results = await Promise.allSettled(apiCalls);
+          const [tempResult, humidityResult, rainfallResult, windResult] = results;
+          
+          let allTemperatureReadings = [];
+          let allHumidityReadings = [];
+          let allRainfallReadings = [];
+          let allWindReadings = [];
+          let successfulCalls = 0;
+          
+          // 온도 데이터 처리
+          if (tempResult.status === 'fulfilled' && tempResult.value.ok) {
+            const tempData = await tempResult.value.json();
+            allTemperatureReadings = tempData.items?.[0]?.readings?.map(reading => ({
               station: reading.station_id,
               value: reading.value
             })) || [];
-            
-            console.log('📊 Real-time NEA API response details:', {
-              totalItems: neaData.items?.length,
-              latestItemTimestamp: neaData.items?.[0]?.timestamp,
-              totalStations: temperatureReadings.length,
-              sampleStations: temperatureReadings.slice(0, 3),
-              allStationIds: temperatureReadings.map(r => r.station),
-              avgTemperature: temperatureReadings.reduce((sum, r) => sum + r.value, 0) / temperatureReadings.length
-            });
-            
+            successfulCalls++;
+            console.log('✅ Temperature data:', allTemperatureReadings.length, 'stations');
+          }
+          
+          // 습도 데이터 처리
+          if (humidityResult.status === 'fulfilled' && humidityResult.value.ok) {
+            const humidityData = await humidityResult.value.json();
+            allHumidityReadings = humidityData.items?.[0]?.readings?.map(reading => ({
+              station: reading.station_id,
+              value: reading.value
+            })) || [];
+            successfulCalls++;
+            console.log('✅ Humidity data:', allHumidityReadings.length, 'stations');
+          }
+          
+          // 강수량 데이터 처리
+          if (rainfallResult.status === 'fulfilled' && rainfallResult.value.ok) {
+            const rainfallData = await rainfallResult.value.json();
+            allRainfallReadings = rainfallData.items?.[0]?.readings?.map(reading => ({
+              station: reading.station_id,
+              value: reading.value
+            })) || [];
+            successfulCalls++;
+            console.log('✅ Rainfall data:', allRainfallReadings.length, 'stations');
+          }
+          
+          // 풍속 데이터 처리
+          if (windResult.status === 'fulfilled' && windResult.value.ok) {
+            const windData = await windResult.value.json();
+            allWindReadings = windData.items?.[0]?.readings?.map(reading => ({
+              station: reading.station_id,
+              value: reading.value
+            })) || [];
+            successfulCalls++;
+            console.log('✅ Wind data:', allWindReadings.length, 'stations');
+          }
+          
+          // 모든 관측소 ID 수집
+          const allStationIds = new Set([
+            ...allTemperatureReadings.map(r => r.station),
+            ...allHumidityReadings.map(r => r.station),
+            ...allRainfallReadings.map(r => r.station),
+            ...allWindReadings.map(r => r.station)
+          ]);
+          
+          console.log('📊 Comprehensive NEA API response:', {
+            temperatureStations: allTemperatureReadings.length,
+            humidityStations: allHumidityReadings.length,
+            rainfallStations: allRainfallReadings.length,
+            windStations: allWindReadings.length,
+            totalUniqueStations: allStationIds.size,
+            successfulApiCalls: successfulCalls,
+            allStationIds: Array.from(allStationIds),
+            avgTemperature: allTemperatureReadings.length > 0 ? 
+              allTemperatureReadings.reduce((sum, r) => sum + r.value, 0) / allTemperatureReadings.length : null
+          });
+          
+          if (successfulCalls > 0 && allStationIds.size > 0) {
             // 실시간 NEA API 데이터를 완전한 형식으로 변환
             weatherJson = {
               timestamp: new Date().toISOString(),
-              source: "NEA Singapore (Real-time)",
+              source: `NEA Singapore (Real-time - ${allStationIds.size} stations)`,
               collection_time_ms: Date.now() - timestamp,
-              api_calls: 1,
-              successful_calls: 1,
-              failed_calls: 0,
+              api_calls: 4,
+              successful_calls: successfulCalls,
+              failed_calls: 4 - successfulCalls,
               data: {
                 temperature: {
-                  readings: temperatureReadings
+                  readings: allTemperatureReadings
                 },
-                humidity: { readings: [] },
-                rainfall: { readings: [] },
-                wind: { readings: [] }
+                humidity: {
+                  readings: allHumidityReadings
+                },
+                rainfall: {
+                  readings: allRainfallReadings
+                },
+                wind: {
+                  readings: allWindReadings
+                }
               },
               // 변환 함수가 필요로 하는 메타데이터 추가
-              stations_used: temperatureReadings.map(r => r.station),
-              station_details: temperatureReadings.reduce((acc, reading) => {
-                acc[reading.station] = {
-                  id: reading.station,
-                  temperature: reading.value,
+              stations_used: Array.from(allStationIds),
+              station_details: Array.from(allStationIds).reduce((acc, stationId) => {
+                const tempReading = allTemperatureReadings.find(r => r.station === stationId);
+                const humidityReading = allHumidityReadings.find(r => r.station === stationId);
+                const rainfallReading = allRainfallReadings.find(r => r.station === stationId);
+                const windReading = allWindReadings.find(r => r.station === stationId);
+                
+                acc[stationId] = {
+                  id: stationId,
+                  temperature: tempReading?.value || null,
+                  humidity: humidityReading?.value || null,
+                  rainfall: rainfallReading?.value || null,
+                  wind_speed: windReading?.value || null,
                   status: 'active',
-                  data_available: ['temperature']
+                  data_available: [
+                    tempReading && 'temperature',
+                    humidityReading && 'humidity', 
+                    rainfallReading && 'rainfall',
+                    windReading && 'wind'
+                  ].filter(Boolean)
                 };
                 return acc;
               }, {}),
               geographic_coverage: {
-                total_stations: temperatureReadings.length,
-                coverage_percentage: Math.min(100, (temperatureReadings.length / 59) * 100),
-                regions_covered: ['singapore'] // 전체 싱가포르
+                total_stations: allStationIds.size,
+                coverage_percentage: Math.min(100, (allStationIds.size / 59) * 100),
+                regions_covered: ['singapore'],
+                data_completeness: {
+                  temperature: (allTemperatureReadings.length / allStationIds.size) * 100,
+                  humidity: (allHumidityReadings.length / allStationIds.size) * 100,
+                  rainfall: (allRainfallReadings.length / allStationIds.size) * 100,
+                  wind: (allWindReadings.length / allStationIds.size) * 100
+                }
               }
             };
           } else {
-            throw new Error(`NEA API responded with ${neaResponse.status}`);
+            throw new Error('All NEA API calls failed or returned no data');
           }
         } catch (neaError) {
           console.warn('⚠️ Real-time NEA API failed, falling back to local data:', neaError.message);
