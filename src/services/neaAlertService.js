@@ -195,6 +195,12 @@ class NEAAlertService {
     // 실제 온도, 습도, 강수량 데이터로 티커 생성
     const tempReadings = data.data.temperature?.readings || [];
     
+    console.log('🌡️ Processing temperature data:', {
+      readings: tempReadings,
+      count: tempReadings.length,
+      values: tempReadings.map(r => r.value)
+    });
+    
     // 온도 정보 (항상 표시)
     if (tempReadings.length > 0) {
       const currentTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
@@ -316,6 +322,12 @@ class NEAAlertService {
     }
 
     console.log('✅ Generated alerts:', alerts.length, alerts.map(a => a.message));
+    console.log('🔍 Final data check before fallback:', {
+      hasTemp: tempReadings.length > 0,
+      hasHumidity: data.data?.humidity?.readings?.length > 0,
+      hasRainfall: data.data?.rainfall?.readings?.length > 0,
+      alertsGenerated: alerts.length
+    });
 
     // 디버깅: alerts가 비어있으면 기본 메시지 추가
     if (alerts.length === 0) {

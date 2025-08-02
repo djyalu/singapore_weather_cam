@@ -495,3 +495,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 6b200557
 
+## 체크포인트 12 - 2025-08-02 23:46
+- 내용: 시계 박스 크기 변동 문제 완전 해결 - tabular numbers와 고정폭 적용으로 레이아웃 시프트 방지
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: bb902231
+
