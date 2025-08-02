@@ -444,8 +444,8 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
 🌡️ **실시간 지역별 온도 분포 분석**
 • 센서 수: ${tempReadings.length}개 (NEA 공식 관측소)
 • 지역 커버리지: 약 ${totalEstimatedRegions}개 주요 지역 추정
-• 최고 기온: ${maxTemp.toFixed(1)}°C | 최저 기온: ${minTemp.toFixed(1)}°C
-• 온도 편차: ${tempRange.toFixed(1)}°C | 신뢰도: ${reliabilityScore}%`;
+• 최고 기온: ${maxTemp && typeof maxTemp === 'number' ? maxTemp.toFixed(1) : '--'}°C | 최저 기온: ${minTemp && typeof minTemp === 'number' ? minTemp.toFixed(1) : '--'}°C
+• 온도 편차: ${tempRange && typeof tempRange === 'number' ? tempRange.toFixed(1) : '--'}°C | 신뢰도: ${reliabilityScore}%`;
 
       // 실제 싱가포르 지역명 기반 온도 분포
       const singaporeRegions = ['Orchard', 'Marina Bay', 'Sentosa', 'Jurong', 'Tampines', 'Woodlands', 'Changi', 'Bukit Timah', 'Newton', 'Toa Payoh', 'Ang Mo Kio', 'Bedok', 'Clementi', 'Yishun', 'Hougang', 'Punggol', 'Sengkang', 'Pasir Ris', 'Queenstown', 'Bishan', 'Serangoon', 'Kallang', 'Novena', 'Dhoby Ghaut', 'Little India'];
@@ -779,7 +779,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
       alertLevel,
       totalStations: rainfallReadings.length,
       activeRainStations: activeRainStations.length,
-      totalRainfall: totalRainfall.toFixed(1),
+      totalRainfall: totalRainfall !== null && totalRainfall !== undefined && typeof totalRainfall === 'number' ? totalRainfall.toFixed(1) : '0.0',
       regionBreakdown: {
         dry: dryRegions.length,
         light: lightRainRegions.length,
@@ -1022,7 +1022,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           <div className="text-right">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-white drop-shadow-lg">
-                {overallData.temperature ? overallData.temperature.toFixed(1) : '--'}
+                {overallData.temperature !== null && overallData.temperature !== undefined && typeof overallData.temperature === 'number' ? overallData.temperature.toFixed(1) : '--'}
               </span>
               <span className="text-sm text-blue-100">°C</span>
             </div>
@@ -1043,10 +1043,10 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <span className="text-xs text-gray-600 font-medium hidden sm:inline">습도</span>
             </div>
             <div className="text-lg sm:text-xl font-bold text-gray-800">
-              {overallData.humidity ? Math.round(overallData.humidity) : '--'}%
+              {overallData.humidity !== null && overallData.humidity !== undefined && typeof overallData.humidity === 'number' ? Math.round(overallData.humidity) : '--'}%
             </div>
             <div className="text-xs text-gray-500">
-              {overallData.humidity ? (overallData.humidity >= 80 ? '높음' : overallData.humidity >= 60 ? '보통' : '낮음') : '정보없음'}
+              {overallData.humidity !== null && overallData.humidity !== undefined && typeof overallData.humidity === 'number' ? (overallData.humidity >= 80 ? '높음' : overallData.humidity >= 60 ? '보통' : '낮음') : '정보없음'}
             </div>
           </div>
 
@@ -1057,7 +1057,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <span className="text-xs text-gray-600 font-medium hidden sm:inline">강수량</span>
             </div>
             <div className="text-lg sm:text-xl font-bold text-gray-800">
-              {overallData.rainfall ? overallData.rainfall.toFixed(1) : '--'}
+              {overallData.rainfall !== null && overallData.rainfall !== undefined && typeof overallData.rainfall === 'number' ? overallData.rainfall.toFixed(1) : '--'}
             </div>
             <div className="text-xs text-gray-500">mm</div>
           </div>
