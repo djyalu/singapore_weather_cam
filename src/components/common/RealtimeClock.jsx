@@ -31,7 +31,7 @@ const RealtimeClock = ({ className = "text-blue-100 text-xs font-mono" }) => {
   }, []);
 
   return (
-    <span className={`${className} inline-block min-w-[120px] text-center`}>
+    <span className={`${className} inline-block w-[140px] text-center font-mono tabular-nums`}>
       {time}
     </span>
   );
