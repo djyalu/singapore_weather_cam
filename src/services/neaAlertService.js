@@ -31,9 +31,14 @@ class NEAAlertService {
       if (!this.baseURL) {
         console.log('🔄 프로덕션 환경: 수집된 데이터 우선 사용');
         const collectedData = await this.getCollectedWeatherData();
+        console.log('🔍 Ticker: Collected data result:', !!collectedData, collectedData ? Object.keys(collectedData) : 'null');
+        
         if (collectedData) {
+          console.log('✅ Ticker: Using collected data for alerts generation');
           return this.generateAlertsFromCollectedData(collectedData);
         }
+        
+        console.warn('⚠️ Ticker: No collected data available, using fallback message');
         // 수집된 데이터도 없을 경우 기본 메시지
         return [{
           type: 'info',
@@ -473,8 +478,17 @@ class NEAAlertService {
   async getCollectedWeatherData() {
     try {
       // 1순위: 전역 상태에서 실시간 데이터 확인
+      console.log('🔍 Ticker: Checking for global weather data...', !!window.weatherData);
       if (window.weatherData) {
-        console.log('📊 Ticker: Using global real-time weather data');
+        console.log('📊 Ticker: Using global real-time weather data:', {
+          hasData: !!window.weatherData.data,
+          hasTemp: !!window.weatherData.data?.temperature,
+          tempCount: window.weatherData.data?.temperature?.readings?.length || 0,
+          hasHumidity: !!window.weatherData.data?.humidity,
+          humidityCount: window.weatherData.data?.humidity?.readings?.length || 0,
+          hasRainfall: !!window.weatherData.data?.rainfall,
+          rainfallCount: window.weatherData.data?.rainfall?.readings?.length || 0
+        });
         return window.weatherData;
       }
 

@@ -4,7 +4,7 @@ import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
-import SimpleClock from '../common/SimpleClock';
+import RealtimeClock from '../common/RealtimeClock';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -15,16 +15,6 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [cohereAnalysis, setCohereAnalysis] = useState(null);
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
-  const [forceUpdate, setForceUpdate] = useState(0);
-
-  // 1초마다 강제 리렌더링으로 시간 업데이트
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setForceUpdate(prev => prev + 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
@@ -1020,17 +1010,8 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <p className="text-blue-100 text-xs">
                 {weatherData?.source?.includes('Real-time') ? '🔴 실시간 NEA API' : '📊 최신 수집'} • {overallData.stationCount}개 관측소
               </p>
-              <p className="text-blue-100 text-xs font-mono">
-                🕘 {new Date().toLocaleString('ko-KR', { 
-                  timeZone: 'Asia/Singapore',
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  hour12: false
-                })} SGT
+              <p>
+                <RealtimeClock />
               </p>
             </div>
           </div>
