@@ -385,6 +385,8 @@
 @media (hover: none) and (pointer: coarse) {
   .animate-scroll-left {
     animation-timing-function: ease-out; /* 모바일에서 부드러운 애니메이션 */
+    transform: translateZ(0); /* 추가 GPU 레이어 강제 활성화 */
+    -webkit-transform: translateZ(0);
   }
 }
 

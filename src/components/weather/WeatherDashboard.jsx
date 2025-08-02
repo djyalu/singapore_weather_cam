@@ -55,29 +55,39 @@ const WeatherDashboard = ({ data }) => {
 
   return (
     <div className="space-y-6">
-      {/* Location Selector */}
-      <div className="flex flex-wrap gap-2">
+      {/* Location Selector - Enhanced for Mobile */}
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
         <button
           onClick={() => setSelectedLocation('all')}
-          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+          className={`px-3 sm:px-4 py-3 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 
+                     touch-manipulation min-h-[44px] sm:min-h-auto active:scale-95 ${
             selectedLocation === 'all'
-              ? 'bg-singapore-red text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              ? 'bg-singapore-red text-white shadow-md'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
           }`}
+          aria-pressed={selectedLocation === 'all'}
         >
-          All Singapore
+          <span className="flex items-center justify-center">
+            <span className="hidden xs:inline">All Singapore</span>
+            <span className="xs:hidden">전체</span>
+          </span>
         </button>
         {locations?.map((location) => (
           <button
             key={location.id}
             onClick={() => setSelectedLocation(location.id)}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+            className={`px-3 sm:px-4 py-3 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 
+                       touch-manipulation min-h-[44px] sm:min-h-auto active:scale-95 ${
               selectedLocation === location.id
-                ? 'bg-singapore-red text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-singapore-red text-white shadow-md'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
             }`}
+            aria-pressed={selectedLocation === location.id}
+            title={location.displayName || location.name}
           >
-            {location.displayName || location.name}
+            <span className="truncate">
+              {location.displayName || location.name}
+            </span>
           </button>
         ))}
       </div>
@@ -98,31 +108,35 @@ const WeatherDashboard = ({ data }) => {
         </div>
       )}
 
-      {/* Current Weather */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Current Weather - Mobile Optimized Grid */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <WeatherCard
           title="Temperature"
           value={`${filteredData.current?.temperature || '--'}°C`}
           icon="🌡️"
           description={`Feels like ${filteredData.current?.feelsLike || '--'}°C`}
+          className="min-h-[100px] sm:min-h-auto"
         />
         <WeatherCard
           title="Humidity"
           value={`${filteredData.current?.humidity || '--'}%`}
           icon="💧"
           description={filteredData.current?.humidity > 70 ? 'High humidity' : 'Comfortable'}
+          className="min-h-[100px] sm:min-h-auto"
         />
         <WeatherCard
           title="Rainfall"
           value={`${filteredData.current?.rainfall || '0'} mm`}
           icon="🌧️"
           description={filteredData.current?.rainfall > 0 ? 'Rain detected' : 'No rain'}
+          className="min-h-[100px] sm:min-h-auto"
         />
         <WeatherCard
           title="Wind"
           value={`${filteredData.current?.windSpeed || '--'} km/h`}
           icon="💨"
           description={`Direction: ${filteredData.current?.windDirection || '--'}`}
+          className="min-h-[100px] sm:min-h-auto"
         />
       </div>
 
@@ -134,16 +148,16 @@ const WeatherDashboard = ({ data }) => {
         </div>
       )}
 
-      {/* Additional Info */}
+      {/* Additional Info - Mobile Enhanced */}
       <div className="card bg-weather-blue text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm opacity-90">UV Index</p>
-            <p className="text-2xl font-bold">{filteredData.current?.uvIndex || '--'}</p>
+        <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:justify-between">
+          <div className="text-center sm:text-left">
+            <p className="text-xs sm:text-sm opacity-90 mb-1">UV Index</p>
+            <p className="text-xl sm:text-2xl font-bold">{filteredData.current?.uvIndex || '--'}</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm opacity-90">Visibility</p>
-            <p className="text-2xl font-bold">{filteredData.current?.visibility || '--'} km</p>
+          <div className="text-center sm:text-right">
+            <p className="text-xs sm:text-sm opacity-90 mb-1">Visibility</p>
+            <p className="text-xl sm:text-2xl font-bold">{filteredData.current?.visibility || '--'} km</p>
           </div>
         </div>
       </div>

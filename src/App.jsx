@@ -92,7 +92,7 @@ const App = () => {
     );
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* 싱가포르 전체 평균 날씨 정보 - 개선된 컴팩트한 디자인 */}
         <SingaporeOverallWeather 
           weatherData={weatherData}
@@ -111,10 +111,10 @@ const App = () => {
         />
 
         {/* 선택된 지역의 상세 정보는 상단 카드에서 표시 */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
 
           {/* 지역별 교통 카메라 - 선택된 날씨 지역과 연동 */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
             <RegionalTrafficCameras
               selectedRegions={selectedRegions}
               onCameraClick={handleCameraSelect}
@@ -124,7 +124,7 @@ const App = () => {
 
           {/* 실제 OpenStreetMap 지도 */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-3 sm:p-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800 mb-2">
                 🗺️ Singapore 인터랙티브 지도
               </h2>

@@ -374,21 +374,21 @@ const RegionalWeatherDashboard = React.memo(({
   );
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
+    <div className={`bg-white rounded-xl shadow-lg p-3 sm:p-6 ${className}`}>
       {/* 헤더 */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
           🌏 <span>주요 지역 날씨</span>
         </h2>
-        <div className="mb-4">
-          <p className="text-sm text-gray-600">
+        <div className="mb-3 sm:mb-4">
+          <p className="text-xs sm:text-sm text-gray-600">
             실시간 기상 관측 데이터 - 지역 버튼을 클릭하여 3개 지역을 선택하세요
           </p>
         </div>
         
-        {/* 지역 선택 버튼들 - 개선된 레이아웃 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+        {/* 지역 선택 버튼들 - 모바일 최적화 레이아웃 */}
+        <div className="bg-gray-50 p-2 sm:p-4 rounded-lg mb-4 sm:mb-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-2">
             {AVAILABLE_REGIONS.map(region => (
               <button
                 key={region.id}
@@ -403,20 +403,21 @@ const RegionalWeatherDashboard = React.memo(({
                 }}
                 title={region.description}
                 className={`
-                  px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  flex flex-col items-center gap-1 cursor-pointer min-h-[60px]
+                  px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200
+                  flex flex-col items-center gap-1 cursor-pointer min-h-[50px] sm:min-h-[60px] touch-manipulation
+                  active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
                   ${selectedRegions.includes(region.id)
                     ? 'bg-blue-500 text-white shadow-md ring-2 ring-blue-300 scale-105'
                     : 'bg-white text-gray-700 hover:bg-blue-100 hover:text-blue-700 border border-gray-200'
                   }
                 `}
               >
-                <span className="text-lg">{region.emoji}</span>
-                <span className="text-xs font-medium">{region.name}</span>
+                <span className="text-sm sm:text-lg">{region.emoji}</span>
+                <span className="text-xs font-medium leading-tight">{region.name}</span>
               </button>
             ))}
           </div>
-          <div className="mt-3 text-xs text-gray-500 text-center">
+          <div className="mt-2 sm:mt-3 text-xs text-gray-500 text-center px-1">
             현재 선택된 지역: {selectedRegions.map(id => 
               AVAILABLE_REGIONS.find(r => r.id === id)?.name
             ).join(', ')}
@@ -424,8 +425,8 @@ const RegionalWeatherDashboard = React.memo(({
         </div>
       </div>
 
-      {/* 지역별 날씨 카드 그리드 - 컴팩트하고 간격이 넓은 레이아웃 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* 지역별 날씨 카드 그리드 - 모바일 최적화 레이아웃 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
         {selectedRegionConfigs.map(region => {
           const data = getRegionalWeatherData[region.id];
           

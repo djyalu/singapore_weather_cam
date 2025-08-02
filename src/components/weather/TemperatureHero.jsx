@@ -388,21 +388,21 @@ const TemperatureHero = React.memo(({
       <div className="relative p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
 
-          {/* Main Temperature Display with semantic markup */}
+          {/* Main Temperature Display with enhanced mobile layout */}
           <div className="text-center lg:text-left flex-1 w-full animate-slide-in-left">
-            <header className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 mb-3 sm:mb-2 animate-fade-in">
+            <header className="flex items-center justify-center lg:justify-start gap-3 sm:gap-3 mb-4 sm:mb-3 animate-fade-in">
               <span
-                className="text-3xl sm:text-4xl md:text-5xl animate-pulse-slow flex-shrink-0 hover-scale"
+                className="text-4xl sm:text-5xl md:text-6xl animate-pulse-slow flex-shrink-0 hover-scale"
                 role="img"
                 aria-label={`Weather condition: ${primaryData.description}`}
               >
                 {primaryData.icon}
               </span>
-              <div className="text-white/90 text-sm sm:text-sm md:text-base font-medium min-w-0">
-                <h1 className="truncate text-base sm:text-base md:text-lg font-semibold animate-fade-in delay-100">
+              <div className="text-white/90 text-base sm:text-base md:text-lg font-medium min-w-0">
+                <h1 className="truncate text-lg sm:text-xl md:text-2xl font-bold animate-fade-in delay-100 leading-tight">
                   {primaryData.displayName}
                 </h1>
-                <div className="text-white/70 text-xs sm:text-xs md:text-sm truncate animate-fade-in delay-150">
+                <div className="text-white/80 text-sm sm:text-base md:text-lg truncate animate-fade-in delay-150 leading-tight">
                   {primaryData.description}
                 </div>
               </div>
@@ -410,26 +410,26 @@ const TemperatureHero = React.memo(({
 
             <div
               id="temperature-details"
-              className="flex items-baseline justify-center lg:justify-start gap-1 sm:gap-2 mb-3 sm:mb-3 animate-fade-in delay-200"
+              className="flex items-baseline justify-center lg:justify-start gap-2 sm:gap-3 mb-4 sm:mb-4 animate-fade-in delay-200"
             >
               <span
-                className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight ${getTemperatureColor(displayTemperature)} drop-shadow-lg animate-scale-in delay-300`}
+                className={`text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight ${getTemperatureColor(displayTemperature)} drop-shadow-xl animate-scale-in delay-300`}
                 role="text"
                 aria-label={`Temperature: ${formatTemperature(displayTemperature)} degrees Celsius${!isValidTemperature ? ' (data may be inaccurate)' : ''}`}
               >
                 {formatTemperature(displayTemperature)}
                 {!isValidTemperature && (
                   <span
-                    className="text-lg sm:text-xl md:text-2xl align-top ml-2 text-white/60"
+                    className="text-xl sm:text-2xl md:text-3xl align-top ml-2 text-white/60"
                     role="img"
                     aria-label="Warning: temperature data may be inaccurate"
                   >
-                    <AlertTriangle className="inline-block w-6 h-6" aria-hidden="true" />
+                    <AlertTriangle className="inline-block w-6 h-6 sm:w-8 sm:h-8" aria-hidden="true" />
                   </span>
                 )}
               </span>
               <span
-                className="text-xl sm:text-2xl md:text-3xl text-white/80 font-light animate-fade-in delay-400"
+                className="text-2xl sm:text-3xl md:text-4xl text-white/80 font-light animate-fade-in delay-400"
                 aria-hidden="true"
               >
                 °C
@@ -448,31 +448,31 @@ const TemperatureHero = React.memo(({
             )}
 
             {primaryData.feelsLike && (
-              <div className="text-white/70 text-xs mb-2 animate-fade-in delay-500">
+              <div className="text-white/80 text-sm sm:text-base mb-3 animate-fade-in delay-500 font-medium">
                 체감: {formatTemperature(primaryData.feelsLike)}°C
               </div>
             )}
           </div>
 
-          {/* Enhanced Weather Summary Cards */}
+          {/* Enhanced Weather Summary Cards - Mobile Optimized */}
           <div className="flex-shrink-0 w-full lg:w-auto animate-slide-in-right">
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 gap-4 sm:gap-4">
               {/* Humidity Card */}
-              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 text-center lg:text-left border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 transform shadow-lg">
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 text-center lg:text-left border border-white/20 hover:bg-white/25 transition-all duration-300 hover:scale-105 transform shadow-lg min-h-[90px] flex flex-col justify-center">
                 <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
-                  <span className="text-xl" role="img" aria-label="습도">💧</span>
-                  <div className="text-white/80 text-xs font-medium">습도</div>
+                  <span className="text-2xl sm:text-2xl" role="img" aria-label="습도">💧</span>
+                  <div className="text-white/90 text-sm sm:text-base font-semibold">습도</div>
                 </div>
-                <div className="text-white font-bold text-lg drop-shadow-md">{Math.round(primaryData.humidity || 0)}%</div>
+                <div className="text-white font-bold text-xl sm:text-2xl drop-shadow-md">{Math.round(primaryData.humidity || 0)}%</div>
               </div>
               
               {/* Wind Card */}
-              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 text-center lg:text-left border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 transform shadow-lg">
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 text-center lg:text-left border border-white/20 hover:bg-white/25 transition-all duration-300 hover:scale-105 transform shadow-lg min-h-[90px] flex flex-col justify-center">
                 <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
-                  <span className="text-xl" role="img" aria-label="바람">💨</span>
-                  <div className="text-white/80 text-xs font-medium">바람</div>
+                  <span className="text-2xl sm:text-2xl" role="img" aria-label="바람">💨</span>
+                  <div className="text-white/90 text-sm sm:text-base font-semibold">바람</div>
                 </div>
-                <div className="text-white font-bold text-sm drop-shadow-md">{primaryData.windDirection || '--'}</div>
+                <div className="text-white font-bold text-base sm:text-lg drop-shadow-md leading-tight">{primaryData.windDirection || '--'}</div>
               </div>
             </div>
           </div>

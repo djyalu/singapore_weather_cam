@@ -67,8 +67,8 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-      {/* 카메라 이미지 섹션 */}
-      <div className="relative h-48 bg-gray-100">
+      {/* 카메라 이미지 섹션 - 모바일 최적화 */}
+      <div className="relative h-32 sm:h-48 bg-gray-100">
         {imageLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -105,25 +105,25 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
         </div>
       </div>
 
-      {/* 카메라 정보 섹션 */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-gray-800 truncate">
+      {/* 카메라 정보 섹션 - 모바일 최적화 */}
+      <div className="p-2 sm:p-4">
+        <div className="flex items-center justify-between mb-1 sm:mb-2">
+          <h3 className="font-semibold text-gray-800 truncate text-sm sm:text-base">
             {camera.location?.description || camera.location?.name || '교통 카메라'}
           </h3>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 ml-1 flex-shrink-0">
             {camera.timestamp ? formatTime(camera.timestamp) : '실시간'}
           </span>
         </div>
         
-        {/* 기본 카메라 정보 */}
-        <div className="text-sm text-gray-600">
-          <div className="flex items-center gap-2">
+        {/* 기본 카메라 정보 - 모바일 최적화 */}
+        <div className="text-xs sm:text-sm text-gray-600">
+          <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-green-600">📹</span>
             <span>실시간 교통 상황</span>
           </div>
           {camera.location?.latitude && camera.location?.longitude && (
-            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+            <div className="flex items-center gap-1 sm:gap-2 mt-1 text-xs text-gray-500 hidden sm:flex">
               <span>📍</span>
               <span>
                 {camera.location.latitude.toFixed(4)}, {camera.location.longitude.toFixed(4)}
@@ -606,16 +606,16 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         {[1, 2, 3].map(i => (
           <div key={i} className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="h-48 bg-gray-200 animate-pulse"></div>
-            <div className="p-4 space-y-3">
-              <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-                <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-                <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-32 sm:h-48 bg-gray-200 animate-pulse"></div>
+            <div className="p-2 sm:p-4 space-y-2 sm:space-y-3">
+              <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="grid grid-cols-3 gap-1 sm:gap-2">
+                <div className="h-4 sm:h-6 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 sm:h-6 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 sm:h-6 bg-gray-200 rounded animate-pulse"></div>
               </div>
             </div>
           </div>
@@ -652,25 +652,25 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="text-center">
-        <h3 className="text-lg font-bold text-gray-800 mb-2">
+      {/* 헤더 - 모바일 최적화 */}
+      <div className="text-center px-2">
+        <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">
           🚗 선택된 지역 교통 상황
         </h3>
         <div className="space-y-2">
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             실시간 교통 카메라 이미지
           </p>
           
           {error && (
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
               <p className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full inline-block">
                 ⚠️ {error}
               </p>
               <button
                 onClick={handleManualRefresh}
                 disabled={isRefreshing}
-                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 touch-manipulation min-h-[44px] active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
               >
                 {isRefreshing ? (
                   <>
@@ -689,8 +689,8 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         </div>
       </div>
 
-      {/* 카메라 그리드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* 카메라 그리드 - 모바일 최적화 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         {selectedCameras.map(({ camera, regionId, distance }, index) => (
           <div key={`${regionId}-${camera.id}`} className="relative">
             <RegionalCameraCard

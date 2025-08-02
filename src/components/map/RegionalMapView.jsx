@@ -238,10 +238,13 @@ const RegionalMapView = ({
 
       // Calculate average temperature for the region
       const avgTemp = filteredWeatherData?.locations?.length > 0 ?
-        filteredWeatherData.locations
-          .filter(loc => loc.temperature !== null)
-          .reduce((sum, loc, _, arr) => sum + loc.temperature / arr.length, 0)
-          .toFixed(1) : null;
+        (() => {
+          const validTemps = filteredWeatherData.locations
+            .filter(loc => loc.temperature !== null && loc.temperature !== undefined);
+          if (validTemps.length === 0) return null;
+          const sum = validTemps.reduce((acc, loc) => acc + loc.temperature, 0);
+          return (sum / validTemps.length).toFixed(1);
+        })() : null;
 
       return {
         weatherCount,
@@ -426,10 +429,10 @@ const RegionalMapView = ({
           </p>
         </header>
 
-        {/* Region Selection Buttons with Enhanced Accessibility */}
+        {/* Region Selection Buttons with Enhanced Mobile Accessibility */}
         <div
           ref={regionSelectorRef}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 mb-4 animate-stagger-in"
+          className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-3 mb-4 animate-stagger-in"
           role="radiogroup"
           aria-labelledby="regional-view-title"
           aria-describedby="regional-view-description"
@@ -441,14 +444,14 @@ const RegionalMapView = ({
               onClick={() => handleRegionChange(key, false)}
               onKeyDown={(e) => handleRegionKeydown(e, key, index)}
               className={`
-                region-button relative p-3 sm:p-4 rounded-lg border-2 
+                region-button relative p-4 sm:p-4 rounded-xl border-2 
                 status-transition hover-lift
-                min-h-[72px] sm:min-h-[80px] touch-manipulation active:scale-95
+                min-h-[80px] sm:min-h-[80px] touch-manipulation active:scale-95
                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                animate-fade-in
+                animate-fade-in transition-all duration-200
                 ${selectedRegion === key
-              ? `${getRegionColorClass(key, 'border')} ${getRegionColorClass(key, 'bgLight')} shadow-md active animate-scale-in`
-              : `border-neutral-200 ${getRegionColorClass(key, 'bgHover')}`
+              ? `${getRegionColorClass(key, 'border')} ${getRegionColorClass(key, 'bgLight')} shadow-lg active animate-scale-in transform scale-105`
+              : `border-neutral-200 ${getRegionColorClass(key, 'bgHover')} hover:shadow-md`
             }
               `}
               style={{ animationDelay: `${index * 100}ms` }}
@@ -458,9 +461,9 @@ const RegionalMapView = ({
               aria-label={`${region.name} region`}
               tabIndex={selectedRegion === key ? 0 : -1}
             >
-              <div className="text-left h-full flex flex-col justify-center">
+              <div className="text-center sm:text-left h-full flex flex-col justify-center">
                 <div className={`
-                  font-semibold text-sm sm:text-base mb-1 leading-tight
+                  font-bold text-base sm:text-base mb-2 leading-tight
                   ${selectedRegion === key
               ? getRegionColorClass(key, 'text')
               : 'text-neutral-700'
@@ -470,7 +473,7 @@ const RegionalMapView = ({
                 </div>
                 <div
                   id={`region-${key}-desc`}
-                  className="text-xs sm:text-xs text-neutral-500 leading-tight line-clamp-2"
+                  className="text-xs sm:text-xs text-neutral-500 leading-relaxed line-clamp-2"
                 >
                   {region.description}
                 </div>
@@ -480,7 +483,7 @@ const RegionalMapView = ({
               {selectedRegion === key && (
                 <div
                   className={`
-                    active-indicator absolute top-2 right-2 w-3 h-3 sm:w-4 sm:h-4 rounded-full
+                    active-indicator absolute top-3 right-3 w-4 h-4 sm:w-4 sm:h-4 rounded-full
                     animate-scale-in animate-pulse-slow
                     ${getRegionColorClass(key, 'bg')}
                   `}
@@ -496,82 +499,82 @@ const RegionalMapView = ({
           ))}
         </div>
 
-        {/* Region Statistics with Enhanced Accessibility */}
+        {/* Region Statistics with Enhanced Mobile Accessibility */}
         <div
-          className="region-stats grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 p-3 sm:p-4 bg-neutral-50 rounded-lg animate-fade-in delay-500"
+          className="region-stats grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-4 bg-neutral-50 rounded-xl animate-fade-in delay-500"
           role="group"
           aria-label="Regional statistics summary"
         >
           <div
-            className="stat-card text-center p-3 sm:p-4 bg-white rounded-lg shadow-sm hover-lift touch-manipulation animate-scale-in delay-600"
+            className="stat-card text-center p-4 sm:p-4 bg-white rounded-xl shadow-sm hover-lift touch-manipulation animate-scale-in delay-600 min-h-[80px] flex flex-col justify-center"
             role="group"
             aria-labelledby="weather-count-label"
           >
             <div
-              className="text-xl sm:text-2xl font-bold text-weather-blue mb-1 animate-fade-in delay-700"
+              className="text-2xl sm:text-2xl font-bold text-weather-blue mb-2 animate-fade-in delay-700"
               aria-label={`${regionStats.weatherCount} weather stations in selected region`}
             >
               {regionStats.weatherCount}
             </div>
             <div
               id="weather-count-label"
-              className="text-xs sm:text-xs text-neutral-600 leading-tight"
+              className="text-xs sm:text-sm text-neutral-600 leading-tight font-medium"
             >
-              Weather<br className="sm:hidden" /> Stations
+              Weather<br className="xs:hidden" /><span className="xs:inline"> </span>Stations
             </div>
           </div>
           <div
-            className="stat-card text-center p-3 sm:p-4 bg-white rounded-lg shadow-sm hover-lift touch-manipulation animate-scale-in delay-650"
+            className="stat-card text-center p-4 sm:p-4 bg-white rounded-xl shadow-sm hover-lift touch-manipulation animate-scale-in delay-650 min-h-[80px] flex flex-col justify-center"
             role="group"
             aria-labelledby="webcam-count-label"
           >
             <div
-              className="text-xl sm:text-2xl font-bold text-singapore-red mb-1 animate-fade-in delay-750"
+              className="text-2xl sm:text-2xl font-bold text-singapore-red mb-2 animate-fade-in delay-750"
               aria-label={`${regionStats.webcamCount} traffic cameras in selected region`}
             >
               {regionStats.webcamCount}
             </div>
             <div
               id="webcam-count-label"
-              className="text-xs sm:text-xs text-neutral-600 leading-tight"
+              className="text-xs sm:text-sm text-neutral-600 leading-tight font-medium"
             >
-              Traffic<br className="sm:hidden" /> Cameras
+              Traffic<br className="xs:hidden" /><span className="xs:inline"> </span>Cameras
             </div>
           </div>
           <div
-            className="stat-card text-center p-3 sm:p-4 bg-white rounded-lg shadow-sm hover-lift touch-manipulation animate-scale-in delay-700"
+            className="stat-card text-center p-4 sm:p-4 bg-white rounded-xl shadow-sm hover-lift touch-manipulation animate-scale-in delay-700 min-h-[80px] flex flex-col justify-center"
             role="group"
             aria-labelledby="avg-temp-label"
           >
             <div
-              className="text-xl sm:text-2xl font-bold text-accent-600 mb-1 animate-fade-in delay-800"
+              className="text-2xl sm:text-2xl font-bold text-accent-600 mb-2 animate-fade-in delay-800"
               aria-label={`Average temperature: ${regionStats.avgTemp || 'not available'} degrees Celsius`}
             >
               {regionStats.avgTemp || '--'}°C
             </div>
             <div
               id="avg-temp-label"
-              className="text-xs sm:text-xs text-neutral-600 leading-tight"
+              className="text-xs sm:text-sm text-neutral-600 leading-tight font-medium"
             >
-              Avg<br className="sm:hidden" /> Temperature
+              Avg<br className="xs:hidden" /><span className="xs:inline"> </span>Temperature
             </div>
           </div>
           <div
-            className="stat-card text-center p-3 sm:p-4 bg-white rounded-lg shadow-sm hover-lift touch-manipulation animate-scale-in delay-750"
+            className="stat-card text-center p-4 sm:p-4 bg-white rounded-xl shadow-sm hover-lift touch-manipulation animate-scale-in delay-750 min-h-[80px] flex flex-col justify-center"
             role="group"
             aria-labelledby="total-stations-label"
           >
             <div
-              className="text-xl sm:text-2xl font-bold text-neutral-700 mb-1 animate-fade-in delay-850"
+              className="text-2xl sm:text-2xl font-bold text-neutral-700 mb-2 animate-fade-in delay-850"
               aria-label={`Total stations: ${regionStats.totalStations} monitoring stations in selected region`}
             >
               {regionStats.totalStations}
             </div>
             <div
               id="total-stations-label"
-              className="text-xs sm:text-xs text-neutral-600 leading-tight"
+              className="text-xs sm:text-sm text-neutral-600 leading-tight font-medium"
             >
-              Total<br className="sm:hidden" /> Stations
+              Total<br className="xs:hidden" /><span className="xs:inline"> </span>Stations
             </div>
           </div>
         </div>

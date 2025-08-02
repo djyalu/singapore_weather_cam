@@ -177,44 +177,80 @@ class NEAAlertService {
       }];
     }
     
-    // 온도 기반 경보
+    // 온도 기반 경보 - 통합 버전
     const tempReadings = data.data.temperature?.readings || [];
     if (tempReadings.length > 0) {
-      const avgTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
-      const maxTemp = Math.max(...tempReadings.map(r => r.value));
-      
-      if (maxTemp >= 35) {
-        alerts.push({
-          type: 'warning',
-          priority: 'high',
-          icon: '🌡️',
-          message: `폭염 주의보! 최고 기온 ${maxTemp.toFixed(1)}°C 기록. 충분한 수분 섭취 필요`,
-          timestamp: now.toISOString(),
-          source: 'Temperature Monitor'
-        });
-      } else if (avgTemp >= 32) {
-        alerts.push({
-          type: 'info',
-          priority: 'medium',
-          icon: '☀️',
-          message: `고온 주의 평균 ${avgTemp.toFixed(1)}°C. 야외활동 시 수분 섭취 권장`,
-          timestamp: now.toISOString(),
-          source: 'Temperature Monitor'
-        });
+      const validTemps = tempReadings.filter(r => r.value !== null && r.value !== undefined);
+      if (validTemps.length > 0) {
+        const avgTemp = validTemps.reduce((sum, r) => sum + r.value, 0) / validTemps.length;
+        const maxTemp = Math.max(...validTemps.map(r => r.value));
+        const hotStations = validTemps.filter(r => r.value >= 35).length;
+        const warmStations = validTemps.filter(r => r.value >= 32).length;
+        
+        if (maxTemp >= 35) {
+          alerts.push({
+            type: 'warning',
+            priority: 'high',
+            icon: '🌡️',
+            message: `폭염 주의보! 최고 ${maxTemp.toFixed(1)}°C (평균 ${avgTemp.toFixed(1)}°C). ${hotStations}개 지역에서 35°C 이상 기록`,
+            timestamp: now.toISOString(),
+            source: 'Temperature Monitor'
+          });
+        } else if (maxTemp >= 32) {
+          alerts.push({
+            type: 'info',
+            priority: 'medium',
+            icon: '☀️',
+            message: `고온 주의 최고 ${maxTemp.toFixed(1)}°C (평균 ${avgTemp.toFixed(1)}°C). ${warmStations}개 지역에서 32°C 이상`,
+            timestamp: now.toISOString(),
+            source: 'Temperature Monitor'
+          });
+        } else if (avgTemp >= 30) {
+          alerts.push({
+            type: 'info',
+            priority: 'low',
+            icon: '🌤️',
+            message: `따뜻한 날씨 평균 ${avgTemp.toFixed(1)}°C (최고 ${maxTemp.toFixed(1)}°C). ${validTemps.length}개 관측소 기준`,
+            timestamp: now.toISOString(),
+            source: 'Temperature Monitor'
+          });
+        }
       }
     }
     
-    // 강수량 기반 경보
+    // 강수량 기반 경보 - 통합 버전
     const rainfallReadings = data.data.rainfall?.readings || [];
     const activeRain = rainfallReadings.filter(r => r.value > 0);
     if (activeRain.length > 0) {
       const maxRain = Math.max(...activeRain.map(r => r.value));
-      if (maxRain >= 10) {
+      const avgRain = activeRain.reduce((sum, r) => sum + r.value, 0) / activeRain.length;
+      const heavyRainStations = activeRain.filter(r => r.value >= 20).length;
+      const moderateRainStations = activeRain.filter(r => r.value >= 10).length;
+      
+      if (maxRain >= 20) {
         alerts.push({
           type: 'warning',
           priority: 'high',
           icon: '☔',
-          message: `강수 감지! 최대 ${maxRain.toFixed(1)}mm 기록. 우산 지참 필수`,
+          message: `호우 경보! 최대 ${maxRain.toFixed(1)}mm 강수. ${heavyRainStations}개 지역에서 집중호우`,
+          timestamp: now.toISOString(),
+          source: 'Rainfall Monitor'
+        });
+      } else if (maxRain >= 10) {
+        alerts.push({
+          type: 'info',
+          priority: 'medium',
+          icon: '🌧️',
+          message: `강한 비 주의 최대 ${maxRain.toFixed(1)}mm. ${moderateRainStations}개 지역에서 강수 진행`,
+          timestamp: now.toISOString(),
+          source: 'Rainfall Monitor'
+        });
+      } else if (activeRain.length >= 5) {
+        alerts.push({
+          type: 'info',
+          priority: 'low',
+          icon: '🌦️',
+          message: `소나기 진행 중 최대 ${maxRain.toFixed(1)}mm. ${activeRain.length}개 지역에서 강수`,
           timestamp: now.toISOString(),
           source: 'Rainfall Monitor'
         });
@@ -500,7 +536,7 @@ class NEAAlertService {
   }
 
   /**
-   * 온도 분석 및 폭염 경보 생성
+   * 온도 분석 및 폭염 경보 생성 - 지역 통합 버전
    */
   analyzeTemperature(data) {
     const alerts = [];
@@ -510,43 +546,63 @@ class NEAAlertService {
     const tempData = data.items[0];
     const readings = tempData.readings;
 
-    readings.forEach(reading => {
-      const temp = reading.value;
-      const station = reading.station_id;
-      
-      // 폭염 경보 (35도 이상)
-      if (temp >= 35) {
-        alerts.push({
-          type: 'warning',
-          priority: 'high',
-          icon: '🌡️',
-          message: `폭염 주의보! 현재 ${temp}°C. 충분한 수분 섭취와 그늘에서 휴식하세요.`,
-          timestamp: tempData.timestamp,
-          source: 'NEA Temperature',
-          value: temp,
-          station: station
-        });
-      }
-      // 고온 정보 (32도 이상)
-      else if (temp >= 32) {
-        alerts.push({
-          type: 'info',
-          priority: 'medium',
-          icon: '☀️',
-          message: `고온 주의 현재 ${temp}°C. 야외활동 시 수분 섭취에 주의하세요.`,
-          timestamp: tempData.timestamp,
-          source: 'NEA Temperature',
-          value: temp,
-          station: station
-        });
-      }
-    });
+    if (readings.length === 0) return alerts;
+
+    // 전체 싱가포르 온도 통계 계산
+    const temperatures = readings.map(r => r.value).filter(t => t !== null);
+    const maxTemp = Math.max(...temperatures);
+    const avgTemp = temperatures.reduce((sum, temp) => sum + temp, 0) / temperatures.length;
+    const hotStations = readings.filter(r => r.value >= 35).length;
+    const warmStations = readings.filter(r => r.value >= 32).length;
+
+    // 통합된 지역 경보 생성 (개별 관측소별이 아닌)
+    if (maxTemp >= 35) {
+      alerts.push({
+        type: 'warning',
+        priority: 'high',
+        icon: '🌡️',
+        message: `폭염 주의보! 최고 ${maxTemp.toFixed(1)}°C (평균 ${avgTemp.toFixed(1)}°C). ${hotStations}개 지역에서 35°C 이상 기록`,
+        timestamp: tempData.timestamp,
+        source: 'NEA Temperature Alert',
+        value: maxTemp,
+        avgValue: avgTemp,
+        stationCount: hotStations,
+        totalStations: readings.length
+      });
+    } else if (maxTemp >= 32) {
+      alerts.push({
+        type: 'info',
+        priority: 'medium',
+        icon: '☀️',
+        message: `고온 주의 최고 ${maxTemp.toFixed(1)}°C (평균 ${avgTemp.toFixed(1)}°C). ${warmStations}개 지역에서 32°C 이상 기록`,
+        timestamp: tempData.timestamp,
+        source: 'NEA Temperature Alert',
+        value: maxTemp,
+        avgValue: avgTemp,
+        stationCount: warmStations,
+        totalStations: readings.length
+      });
+    } else if (avgTemp >= 30) {
+      // 평균 온도가 높은 경우에도 알림
+      alerts.push({
+        type: 'info',
+        priority: 'low',
+        icon: '🌤️',
+        message: `따뜻한 날씨 평균 ${avgTemp.toFixed(1)}°C (최고 ${maxTemp.toFixed(1)}°C). 수분 섭취 권장`,
+        timestamp: tempData.timestamp,
+        source: 'NEA Temperature Alert',
+        value: maxTemp,
+        avgValue: avgTemp,
+        stationCount: readings.length,
+        totalStations: readings.length
+      });
+    }
 
     return alerts;
   }
 
   /**
-   * 강수량 분석 및 호우 경보 생성
+   * 강수량 분석 및 호우 경보 생성 - 지역 통합 버전
    */
   analyzeRainfall(data) {
     const alerts = [];
@@ -556,37 +612,60 @@ class NEAAlertService {
     const rainData = data.items[0];
     const readings = rainData.readings;
 
-    readings.forEach(reading => {
-      const rainfall = reading.value;
-      const station = reading.station_id;
-      
-      // 호우 경보 (시간당 20mm 이상)
-      if (rainfall >= 20) {
-        alerts.push({
-          type: 'warning',
-          priority: 'high',
-          icon: '☔',
-          message: `호우 경보! 시간당 ${rainfall}mm 강수. 침수 지역 접근 금지, 안전한 곳으로 대피하세요.`,
-          timestamp: rainData.timestamp,
-          source: 'NEA Rainfall',
-          value: rainfall,
-          station: station
-        });
-      }
-      // 강한 비 정보 (시간당 10mm 이상)
-      else if (rainfall >= 10) {
-        alerts.push({
-          type: 'info',
-          priority: 'medium',
-          icon: '🌧️',
-          message: `강한 비 주의 시간당 ${rainfall}mm. 우산과 우비를 준비하세요.`,
-          timestamp: rainData.timestamp,
-          source: 'NEA Rainfall',
-          value: rainfall,
-          station: station
-        });
-      }
-    });
+    if (readings.length === 0) return alerts;
+
+    // 강수량 통계 계산
+    const rainfallData = readings.filter(r => r.value > 0);
+    if (rainfallData.length === 0) return alerts;
+
+    const maxRainfall = Math.max(...rainfallData.map(r => r.value));
+    const totalRainfall = rainfallData.reduce((sum, r) => sum + r.value, 0);
+    const avgRainfall = totalRainfall / rainfallData.length;
+    const heavyRainStations = rainfallData.filter(r => r.value >= 20).length;
+    const moderateRainStations = rainfallData.filter(r => r.value >= 10).length;
+
+    // 통합된 강수 경보 생성
+    if (maxRainfall >= 20) {
+      alerts.push({
+        type: 'warning',
+        priority: 'high',
+        icon: '☔',
+        message: `호우 경보! 최대 ${maxRainfall.toFixed(1)}mm 강수. ${heavyRainStations}개 지역에서 집중호우 발생`,
+        timestamp: rainData.timestamp,
+        source: 'NEA Rainfall Alert',
+        value: maxRainfall,
+        avgValue: avgRainfall,
+        stationCount: heavyRainStations,
+        totalStations: rainfallData.length
+      });
+    } else if (maxRainfall >= 10) {
+      alerts.push({
+        type: 'info',
+        priority: 'medium',
+        icon: '🌧️',
+        message: `강한 비 주의 최대 ${maxRainfall.toFixed(1)}mm. ${moderateRainStations}개 지역에서 강수 진행 중`,
+        timestamp: rainData.timestamp,
+        source: 'NEA Rainfall Alert',
+        value: maxRainfall,
+        avgValue: avgRainfall,
+        stationCount: moderateRainStations,
+        totalStations: rainfallData.length
+      });
+    } else if (rainfallData.length >= 5) {
+      // 여러 지역에서 소량 강수
+      alerts.push({
+        type: 'info',
+        priority: 'low',
+        icon: '🌦️',
+        message: `소나기 진행 중 최대 ${maxRainfall.toFixed(1)}mm. ${rainfallData.length}개 지역에서 강수 감지`,
+        timestamp: rainData.timestamp,
+        source: 'NEA Rainfall Alert',
+        value: maxRainfall,
+        avgValue: avgRainfall,
+        stationCount: rainfallData.length,
+        totalStations: readings.length
+      });
+    }
 
     return alerts;
   }

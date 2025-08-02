@@ -71,7 +71,7 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
 
   // 경보 우선순위에 따른 스타일 결정 - 모바일 최적화 포함
   const getAlertStyle = (alert) => {
-    const baseClasses = "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 whitespace-nowrap text-sm sm:text-base";
+    const baseClasses = "flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-3 whitespace-nowrap text-sm sm:text-base min-h-[48px] touch-manipulation";
     
     switch (alert.priority) {
       case 'critical':
@@ -92,9 +92,9 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
   // 경보 아이콘 결정 - 모바일 최적화
   const getAlertIcon = (alert) => {
     if (alert.type === 'critical' || alert.type === 'warning') {
-      return <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse text-red-600 flex-shrink-0" />;
+      return <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse text-red-600 flex-shrink-0" />;
     }
-    return <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />;
+    return <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />;
   };
 
   // 티커 숨기기/보이기
@@ -161,38 +161,38 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-md hover:bg-white/20 active:scale-95"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[48px] min-h-[48px] p-3 rounded-md hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
               title="새로고침"
               aria-label="날씨 경보 새로고침"
             >
-              <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 sm:w-6 sm:h-6 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={togglePause}
-              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] px-3 py-2 text-xs sm:text-sm rounded-md bg-white/20 hover:bg-white/30 active:scale-95"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[48px] min-h-[48px] px-3 py-2 text-sm sm:text-base rounded-md bg-white/20 hover:bg-white/30 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
               title={isPaused ? "재생" : "일시정지"}
               aria-label={isPaused ? "티커 재생" : "티커 일시정지"}
             >
-              <span className="text-sm">{isPaused ? '▶️' : '⏸️'}</span>
+              <span className="text-base">{isPaused ? '▶️' : '⏸️'}</span>
             </button>
             <button
               onClick={toggleVisibility}
-              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-md hover:bg-white/20 active:scale-95"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[48px] min-h-[48px] p-3 rounded-md hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
               title="닫기"
               aria-label="기상 경보 티커 닫기"
             >
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
 
         {/* 스크롤 티커 영역 - 모바일 최적화 */}
-        <div className="relative h-10 sm:h-12 overflow-hidden touch-manipulation">
+        <div className="relative h-12 sm:h-14 overflow-hidden touch-manipulation">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex items-center gap-2 text-gray-700">
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span className="text-xs sm:text-sm">기상 정보 업데이트 중...</span>
+                <span className="text-sm sm:text-base">기상 정보 업데이트 중...</span>
               </div>
             </div>
           ) : (
@@ -202,7 +202,9 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               style={{
                 animationDuration: `${animationDuration}s`,
                 animationPlayState: shouldAnimate ? 'running' : 'paused',
-                transform: shouldAnimate ? 'translateZ(0)' : 'none' // GPU 레이어 활성화
+                transform: shouldAnimate ? 'translateZ(0)' : 'none', // GPU 레이어 활성화
+                backfaceVisibility: 'hidden', // iOS Safari 최적화
+                perspective: '1000px' // 3D 렌더링 성능 향상
               }}
             >
               {/* 원본 메시지들 */}

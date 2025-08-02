@@ -687,7 +687,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
   return (
     <Card className={`shadow-lg ${className}`}>
       {/* 심플한 헤더 - 그라데이션 배경 */}
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-xl p-4">
+      <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-xl p-3 sm:p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{getWeatherIcon(overallData.forecast)}</span>
@@ -714,9 +714,9 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
         </div>
       </CardHeader>
 
-      {/* 핵심 정보만 간결하게 표시 */}
-      <CardContent className="p-4">
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
+      {/* 핵심 정보만 간결하게 표시 - 모바일 최적화 */}
+      <CardContent className="p-2 sm:p-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-3 sm:mb-4">
           {/* 습도 */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">

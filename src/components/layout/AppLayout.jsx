@@ -116,10 +116,10 @@ const AppLayout = React.memo(({ children }) => {
         />
 
 
-        {/* Main content area with mobile-optimized spacing */}
+        {/* Main content area with mobile-optimized spacing for maximum information density */}
         <main
           id="main"
-          className="max-w-7xl mx-auto px-2 sm:px-4 pb-6 sm:pb-8 safe-bottom"
+          className="max-w-7xl mx-auto px-2 xs:px-3 sm:px-4 lg:px-6 pb-6 sm:pb-8 lg:pb-10 safe-bottom"
           role="main"
           tabIndex="-1"
         >

@@ -563,7 +563,7 @@ const TrafficCameraGallery = () => {
 
 
       {/* Camera Grid - Enhanced mobile responsiveness */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
         {filteredCameras.map((camera, index) => (
           <CameraCard
             key={camera.id}
@@ -575,21 +575,29 @@ const TrafficCameraGallery = () => {
         ))}
       </div>
 
-      {/* Summary - Mobile optimized */}
-      <div className="card">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
-          <span className="text-gray-700">
+      {/* Summary - Enhanced Mobile Display */}
+      <div className="card bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2">
+          <div className="text-sm sm:text-base text-gray-700 font-medium">
             {viewMode === 'nearby' ? (
-              <>Hwa Chong에서 <strong>{filteredCameras.length}</strong>개 가까운 카메라 (10km 이내)</>
+              <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2">
+                <span className="text-blue-600 font-semibold">🏫 Hwa Chong 근처:</span>
+                <span><strong className="text-lg">{filteredCameras.length}</strong>개 카메라 (10km 이내)</span>
+              </div>
             ) : (
-              <>총 <strong>{cameras.length}</strong>개 카메라 중 <strong>{filteredCameras.length}</strong>개 표시</>
+              <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2">
+                <span className="text-blue-600 font-semibold">📹 표시 중:</span>
+                <span><strong className="text-lg">{filteredCameras.length}</strong>개 / 총 <strong>{cameras.length}</strong>개</span>
+              </div>
             )}
-          </span>
-          <span className="text-green-600 flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="hidden sm:inline">실시간 (data.gov.sg API)</span>
-            <span className="sm:hidden">실시간</span>
-          </span>
+          </div>
+          <div className="flex items-center justify-center sm:justify-end">
+            <span className="text-green-600 flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold hidden xs:inline">실시간 (data.gov.sg API)</span>
+              <span className="text-sm font-semibold xs:hidden">LIVE</span>
+            </span>
+          </div>
         </div>
       </div>
 

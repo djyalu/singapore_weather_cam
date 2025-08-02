@@ -129,7 +129,12 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       screens: {
-        'xs': '475px',
+        'xs': '375px',  // Extra small devices (improved mobile support)
+        'sm': '640px',  // Small devices (landscape phones)
+        'md': '768px',  // Medium devices (tablets)
+        'lg': '1024px', // Large devices (desktops)
+        'xl': '1280px', // Extra large devices
+        '2xl': '1536px' // 2X Extra large devices
       },
     },
   },

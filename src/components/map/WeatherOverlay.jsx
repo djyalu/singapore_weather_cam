@@ -15,109 +15,105 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
   const weatherRegions = useMemo(() => {
     if (!weatherData?.locations) return [];
 
-    // 싱가포르 권역별 온도 히트맵 정의 - 더 큰 영역으로 세분화
-    const regions = [
+    // 실제 데이터 기반 동적 지역 생성 - 좌표를 기준으로 자동 그룹핑
+    const regions = [];
+    
+    // 실제 사용 가능한 스테이션들을 지역별로 그룹핑
+    const availableStations = weatherData.locations.filter(
+      loc => loc.coordinates && loc.temperature !== null && loc.temperature !== undefined
+    );
+
+    if (availableStations.length === 0) return [];
+
+    // 지리적 위치 기반 지역 정의 (실제 싱가포르 지역 기준)
+    const regionalGroups = [
       {
         id: 'north',
         name: 'Northern Singapore',
-        stationIds: ['S121', 'S118', 'S104'], // Woodlands, North
-        coordinates: { lat: 1.4200, lng: 103.7900 },
+        center: { lat: 1.42, lng: 103.79 },
         emoji: '🌳',
+        bounds: { north: 1.50, south: 1.38, east: 103.85, west: 103.68 },
         radius: 4000
       },
       {
         id: 'northwest',
-        name: 'Northwest',
-        stationIds: ['S104', 'S116', 'S109'], // Bukit Timah, Hwa Chong 지역
-        coordinates: { lat: 1.3500, lng: 103.7600 },
+        name: 'Northwest (Bukit Timah)',
+        center: { lat: 1.35, lng: 103.76 },
         emoji: '🏫',
+        bounds: { north: 1.38, south: 1.32, east: 103.82, west: 103.70 },
         radius: 3500
       },
       {
         id: 'central',
         name: 'Central Singapore',
-        stationIds: ['S109', 'S106', 'S107'], // Orchard, Newton, CBD
-        coordinates: { lat: 1.3100, lng: 103.8300 },
+        center: { lat: 1.31, lng: 103.83 },
         emoji: '🏙️',
+        bounds: { north: 1.35, south: 1.27, east: 103.88, west: 103.78 },
         radius: 3000
       },
       {
         id: 'west',
         name: 'Western Singapore',
-        stationIds: ['S104', 'S60', 'S50'], // Jurong, Tuas
-        coordinates: { lat: 1.3300, lng: 103.7000 },
+        center: { lat: 1.33, lng: 103.70 },
         emoji: '🏭',
+        bounds: { north: 1.38, south: 1.28, east: 103.75, west: 103.60 },
         radius: 4500
       },
       {
         id: 'east',
         name: 'Eastern Singapore',
-        stationIds: ['S24', 'S107', 'S43'], // Changi, East Coast
-        coordinates: { lat: 1.3600, lng: 103.9600 },
+        center: { lat: 1.36, lng: 103.96 },
         emoji: '✈️',
+        bounds: { north: 1.42, south: 1.30, east: 104.10, west: 103.88 },
         radius: 4000
-      },
-      {
-        id: 'southeast',
-        name: 'Southeast',
-        stationIds: ['S24', 'S43', 'S107'], // Bedok, Tampines
-        coordinates: { lat: 1.3200, lng: 103.9200 },
-        emoji: '🏘️',
-        radius: 3500
       },
       {
         id: 'south',
         name: 'Southern Singapore',
-        stationIds: ['S109', 'S106', 'S24'], // Marina Bay, CBD, Sentosa
-        coordinates: { lat: 1.2700, lng: 103.8500 },
+        center: { lat: 1.27, lng: 103.85 },
         emoji: '🌊',
+        bounds: { north: 1.30, south: 1.22, east: 103.95, west: 103.75 },
         radius: 3000
       }
     ];
 
-    return regions.map(region => {
-      // 해당 지역의 스테이션 데이터 찾기
-      const stationData = region.stationIds
-        .map(stationId => weatherData.locations.find(loc => loc.station_id === stationId))
-        .filter(Boolean);
+    // 각 지역에 해당하는 스테이션 찾기
+    return regionalGroups.map(region => {
+      const regionStations = availableStations.filter(station => {
+        const { lat, lng } = station.coordinates;
+        const { bounds } = region;
+        return lat >= bounds.south && lat <= bounds.north && 
+               lng >= bounds.west && lng <= bounds.east;
+      });
 
-      if (stationData.length > 0) {
-        // 여러 스테이션의 평균값 계산
-        const avgTemperature = stationData.reduce((sum, station) => sum + (station.temperature || 0), 0) / stationData.length;
-        const avgHumidity = stationData.reduce((sum, station) => sum + (station.humidity || 0), 0) / stationData.length;
-        const totalRainfall = stationData.reduce((sum, station) => sum + (station.rainfall || 0), 0);
+      if (regionStations.length > 0) {
+        // 실제 데이터 기반 평균값 계산
+        const avgTemperature = regionStations.reduce((sum, station) => sum + station.temperature, 0) / regionStations.length;
+        const avgHumidity = regionStations.reduce((sum, station) => sum + (station.humidity || 0), 0) / regionStations.length;
+        const totalRainfall = regionStations.reduce((sum, station) => sum + (station.rainfall || 0), 0);
 
         const weatherDescription = getWeatherDescription(avgTemperature, totalRainfall);
         const weatherIcon = getWeatherIcon(avgTemperature, totalRainfall);
 
         return {
           ...region,
+          coordinates: region.center,
           temperature: Math.round(avgTemperature * 10) / 10,
           humidity: Math.round(avgHumidity),
           rainfall: Math.round(totalRainfall * 10) / 10,
           description: weatherDescription,
           icon: weatherIcon,
-          stationCount: stationData.length,
+          stationCount: regionStations.length,
+          stationIds: regionStations.map(s => s.station_id || s.id),
           color: getTemperatureColor(avgTemperature),
-          radius: region.radius || getRegionRadius(avgTemperature),
+          radius: region.radius,
           intensity: getTemperatureIntensity(avgTemperature)
         };
       }
 
-      // 데이터가 없는 경우 기본값
-      return {
-        ...region,
-        temperature: 29.0,
-        humidity: 80,
-        rainfall: 0,
-        description: 'No Data',
-        icon: '❓',
-        stationCount: 0,
-        color: '#9CA3AF',
-        radius: region.radius || 1500,
-        intensity: 0.1
-      };
-    });
+      // 해당 지역에 스테이션이 없으면 null 반환 (필터링됨)
+      return null;
+    }).filter(Boolean); // null 값 제거
   }, [weatherData]);
 
   // 온도별 색상 반환 - 더 생동감 있는 색상
