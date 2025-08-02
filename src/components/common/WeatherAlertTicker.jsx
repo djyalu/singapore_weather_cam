@@ -69,13 +69,13 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               ? preCalculatedAvgTemp
               : calculatedAvgTemp;
             
-            const minTemp = Math.min(...tempReadings.map(r => r.value));
-            const maxTemp = Math.max(...tempReadings.map(r => r.value));
+            const minTemp = tempReadings.length > 0 ? Math.min(...tempReadings.map(r => r.value)) : 0;
+            const maxTemp = tempReadings.length > 0 ? Math.max(...tempReadings.map(r => r.value)) : 0;
             
             console.log('🌡️ [WeatherAlertTicker] 온도 계산 결과:', {
               preCalculatedAvgTemp,
-              calculatedAvgTemp: calculatedAvgTemp.toFixed(2),
-              finalAvgTemp: avgTemp.toFixed(2),
+              calculatedAvgTemp: calculatedAvgTemp?.toFixed(2) || '--',
+              finalAvgTemp: avgTemp?.toFixed(2) || '--',
               readingsCount: tempReadings.length
             });
             
@@ -88,7 +88,7 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               type: 'info',
               priority: avgTemp >= 35 ? 'medium' : 'low',
               icon: avgTemp >= 35 ? '🔥' : avgTemp <= 25 ? '❄️' : '🌡️',
-              message: `현재 기온 ${avgTemp.toFixed(1)}°C (${tempStatus}) • ${tempReadings.length}개 관측소 평균 • 최저 ${minTemp.toFixed(1)}°C 최고 ${maxTemp.toFixed(1)}°C`,
+              message: `현재 기온 ${avgTemp?.toFixed(1) || '--'}°C (${tempStatus}) • ${tempReadings.length}개 관측소 평균 • 최저 ${minTemp?.toFixed(1) || '--'}°C 최고 ${maxTemp?.toFixed(1) || '--'}°C`,
               timestamp: now.toISOString(),
               source: 'NEA Singapore',
             });
@@ -107,13 +107,13 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               ? preCalculatedAvgHumidity
               : calculatedAvgHumidity;
             
-            const minHumidity = Math.min(...humidityReadings.map(r => r.value));
-            const maxHumidity = Math.max(...humidityReadings.map(r => r.value));
+            const minHumidity = humidityReadings.length > 0 ? Math.min(...humidityReadings.map(r => r.value)) : 0;
+            const maxHumidity = humidityReadings.length > 0 ? Math.max(...humidityReadings.map(r => r.value)) : 0;
             
             console.log('💧 [WeatherAlertTicker] 습도 계산 결과:', {
               preCalculatedAvgHumidity,
-              calculatedAvgHumidity: calculatedAvgHumidity.toFixed(2),
-              finalAvgHumidity: avgHumidity.toFixed(2),
+              calculatedAvgHumidity: calculatedAvgHumidity?.toFixed(2) || '--',
+              finalAvgHumidity: avgHumidity?.toFixed(2) || '--',
               readingsCount: humidityReadings.length
             });
             
@@ -126,7 +126,7 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               type: 'info',
               priority: 'low',
               icon: avgHumidity >= 90 ? '💦' : avgHumidity <= 40 ? '🏜️' : '💧',
-              message: `현재 습도 ${avgHumidity.toFixed(0)}% (${humidityStatus}) • ${humidityReadings.length}개 관측소 평균 • 최저 ${minHumidity.toFixed(0)}% 최고 ${maxHumidity.toFixed(0)}%`,
+              message: `현재 습도 ${avgHumidity?.toFixed(0) || '--'}% (${humidityStatus}) • ${humidityReadings.length}개 관측소 평균 • 최저 ${minHumidity?.toFixed(0) || '--'}% 최고 ${maxHumidity?.toFixed(0) || '--'}%`,
               timestamp: now.toISOString(),
               source: 'NEA Singapore',
             });
@@ -137,7 +137,7 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
             const rainfallReadings = data.data.rainfall.readings;
             const activeRainStations = rainfallReadings.filter(r => r.value > 0).length;
             const totalRainfall = rainfallReadings.reduce((sum, r) => sum + r.value, 0);
-            const maxRainfall = Math.max(...rainfallReadings.map(r => r.value));
+            const maxRainfall = rainfallReadings.length > 0 ? Math.max(...rainfallReadings.map(r => r.value)) : 0;
             
             if (activeRainStations > 0) {
               let rainIcon = '🌧️';
@@ -154,7 +154,7 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
                 type: 'info',
                 priority: maxRainfall >= 20 ? 'high' : maxRainfall >= 10 ? 'medium' : 'low',
                 icon: rainIcon,
-                message: `${rainStatus} 진행 중 • ${activeRainStations}개 지역에서 강수 • 최대 ${maxRainfall.toFixed(1)}mm • 총 ${totalRainfall.toFixed(1)}mm 기록`,
+                message: `${rainStatus} 진행 중 • ${activeRainStations}개 지역에서 강수 • 최대 ${maxRainfall?.toFixed(1) || '--'}mm • 총 ${totalRainfall?.toFixed(1) || '--'}mm 기록`,
                 timestamp: now.toISOString(),
                 source: 'NEA Singapore',
               });
