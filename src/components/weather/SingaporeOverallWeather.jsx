@@ -1022,7 +1022,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           <div className="text-right">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-white drop-shadow-lg">
-                {overallData.temperature.toFixed(1)}
+                {overallData.temperature ? overallData.temperature.toFixed(1) : '--'}
               </span>
               <span className="text-sm text-blue-100">°C</span>
             </div>
@@ -1043,10 +1043,10 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <span className="text-xs text-gray-600 font-medium hidden sm:inline">습도</span>
             </div>
             <div className="text-lg sm:text-xl font-bold text-gray-800">
-              {Math.round(overallData.humidity)}%
+              {overallData.humidity ? Math.round(overallData.humidity) : '--'}%
             </div>
             <div className="text-xs text-gray-500">
-              {overallData.humidity >= 80 ? '높음' : overallData.humidity >= 60 ? '보통' : '낮음'}
+              {overallData.humidity ? (overallData.humidity >= 80 ? '높음' : overallData.humidity >= 60 ? '보통' : '낮음') : '정보없음'}
             </div>
           </div>
 
@@ -1057,7 +1057,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <span className="text-xs text-gray-600 font-medium hidden sm:inline">강수량</span>
             </div>
             <div className="text-lg sm:text-xl font-bold text-gray-800">
-              {overallData.rainfall.toFixed(1)}
+              {overallData.rainfall ? overallData.rainfall.toFixed(1) : '--'}
             </div>
             <div className="text-xs text-gray-500">mm</div>
           </div>
