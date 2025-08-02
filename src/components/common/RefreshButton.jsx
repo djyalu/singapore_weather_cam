@@ -148,12 +148,13 @@ const RefreshButton = React.memo(({
           className={`
             ${styles.button}
             ${variant === 'glass' 
-              ? 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20' 
-              : 'text-green-600 bg-green-50/80 hover:bg-green-100/90 border-green-200/50'
+              ? 'bg-gradient-to-r from-cyan-500/30 to-purple-600/30 backdrop-blur-lg border-2 border-cyan-400/40 text-white hover:from-cyan-400/40 hover:to-purple-500/40 hover:border-purple-400/60 shadow-2xl' 
+              : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-400 hover:to-emerald-500 border-2 border-green-400/50 shadow-2xl hover:shadow-emerald-500/25'
             }
-            transition-all duration-300
-            hover:scale-105 active:scale-95 touch-manipulation
-            disabled:hover:scale-100
+            transition-all duration-500 transform font-bold
+            hover:scale-110 active:scale-95 touch-manipulation
+            disabled:hover:scale-100 disabled:opacity-50
+            group relative overflow-hidden
           `}
           title={
             !isOnline 
@@ -169,14 +170,18 @@ const RefreshButton = React.memo(({
           }
           aria-describedby="refresh-help"
         >
+          {/* 버튼 내부 글로우 효과 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          
           <Zap
             className={`
-              ${styles.icon} transition-transform duration-200
-              ${isRefreshing ? 'animate-pulse' : ''}
+              ${styles.icon} transition-all duration-500 relative z-10
+              ${isRefreshing ? 'animate-spin text-yellow-300' : 'group-hover:text-yellow-200'}
+              filter group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]
             `}
             aria-hidden="true"
           />
-          <span className={styles.text}>새로고침</span>
+          <span className={`${styles.text} relative z-10`}>새로고침</span>
           
           {/* 스크린 리더용 설명 */}
           <span id="refresh-help" className="sr-only">
