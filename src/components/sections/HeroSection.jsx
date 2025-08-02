@@ -1,6 +1,6 @@
 import React from 'react';
 import TemperatureHero from '../weather/TemperatureHero';
-import { useWeatherData } from "../../contexts/AppDataContextSimple";
+import { useWeatherData } from '../../contexts/AppDataContextSimple';
 
 /**
  * Hero Section Component

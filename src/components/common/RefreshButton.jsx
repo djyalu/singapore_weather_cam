@@ -34,7 +34,7 @@ const RefreshButton = React.memo(({
 
   // 실시간 새로고침 핸들러 (기존 강제 새로고침 로직 사용)
   const handleRefresh = useCallback(async () => {
-    if (!onRefresh || isRefreshing || disabled || !isOnline) return;
+    if (!onRefresh || isRefreshing || disabled || !isOnline) {return;}
 
     try {
       setRefreshCount(prev => prev + 1);
@@ -49,24 +49,24 @@ const RefreshButton = React.memo(({
 
   // 마지막 업데이트 시간 포맷팅
   const formatLastUpdate = useCallback((date) => {
-    if (!date) return null;
-    
+    if (!date) {return null;}
+
     try {
       const now = new Date();
       const updateTime = new Date(date);
       const diffMinutes = Math.floor((now - updateTime) / (1000 * 60));
-      
-      if (diffMinutes < 1) return '방금 전';
-      if (diffMinutes < 60) return `${diffMinutes}분 전`;
-      
+
+      if (diffMinutes < 1) {return '방금 전';}
+      if (diffMinutes < 60) {return `${diffMinutes}분 전`;}
+
       const diffHours = Math.floor(diffMinutes / 60);
-      if (diffHours < 24) return `${diffHours}시간 전`;
-      
+      if (diffHours < 24) {return `${diffHours}시간 전`;}
+
       return updateTime.toLocaleDateString('ko-KR', {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     } catch (error) {
       return null;
@@ -94,21 +94,21 @@ const RefreshButton = React.memo(({
           container: 'flex items-center gap-1',
           button: 'px-2 py-1 text-xs min-h-[32px] min-w-[32px]',
           icon: 'w-3 h-3',
-          text: 'hidden'
+          text: 'hidden',
         };
       case 'hero':
         return {
           container: 'flex items-center gap-3',
           button: 'px-6 py-3 text-sm font-medium min-h-[48px] min-w-[120px]',
           icon: 'w-5 h-5 mr-2',
-          text: 'inline'
+          text: 'inline',
         };
       default:
         return {
           container: 'flex items-center gap-2',
           button: 'px-4 py-3 text-sm font-semibold min-h-[48px] min-w-[48px] rounded-2xl backdrop-blur-md border shadow-lg hover:shadow-xl transition-all duration-300',
           icon: 'w-5 h-5 sm:w-4 sm:h-4',
-          text: 'hidden sm:inline'
+          text: 'hidden sm:inline',
         };
     }
   };
@@ -147,32 +147,32 @@ const RefreshButton = React.memo(({
           size={variant === 'compact' ? 'sm' : 'default'}
           className={`
             ${styles.button}
-            ${variant === 'glass' 
-              ? 'bg-gradient-to-r from-blue-500/30 to-indigo-600/30 backdrop-blur-lg border-2 border-blue-400/40 text-white hover:from-blue-400/40 hover:to-indigo-500/40 hover:border-indigo-400/60 shadow-xl' 
-              : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-400 hover:to-indigo-500 border-2 border-blue-400/50 shadow-xl hover:shadow-blue-500/25'
-            }
+            ${variant === 'glass'
+          ? 'bg-gradient-to-r from-blue-500/30 to-indigo-600/30 backdrop-blur-lg border-2 border-blue-400/40 text-white hover:from-blue-400/40 hover:to-indigo-500/40 hover:border-indigo-400/60 shadow-xl'
+          : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-400 hover:to-indigo-500 border-2 border-blue-400/50 shadow-xl hover:shadow-blue-500/25'
+        }
             transition-all duration-500 transform font-bold
             hover:scale-110 active:scale-95 touch-manipulation
             disabled:hover:scale-100 disabled:opacity-50
             group relative overflow-hidden
           `}
           title={
-            !isOnline 
+            !isOnline
               ? '오프라인 상태에서는 새로고침할 수 없습니다'
-              : isRefreshing 
-                ? '실시간 데이터 새로고침 중...' 
+              : isRefreshing
+                ? '실시간 데이터 새로고침 중...'
                 : '실시간 데이터 새로고침 (NEA API 직접 호출)'
           }
           aria-label={
-            isRefreshing 
-              ? '실시간 데이터 새로고침 중' 
+            isRefreshing
+              ? '실시간 데이터 새로고침 중'
               : '실시간 데이터 새로고침'
           }
           aria-describedby="refresh-help"
         >
           {/* 버튼 내부 글로우 효과 */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          
+
           <Zap
             className={`
               ${styles.icon} transition-all duration-500 relative z-10
@@ -182,13 +182,13 @@ const RefreshButton = React.memo(({
             aria-hidden="true"
           />
           <span className={`${styles.text} relative z-10`}>새로고침</span>
-          
+
           {/* 스크린 리더용 설명 */}
           <span id="refresh-help" className="sr-only">
-            {!isOnline 
+            {!isOnline
               ? '오프라인 상태에서는 새로고침할 수 없습니다'
-              : isRefreshing 
-                ? '현재 실시간 데이터를 새로고침하고 있습니다' 
+              : isRefreshing
+                ? '현재 실시간 데이터를 새로고침하고 있습니다'
                 : 'NEA Singapore API에서 실시간 최신 데이터를 가져옵니다'
             }
           </span>
@@ -204,10 +204,10 @@ const RefreshButton = React.memo(({
       )}
 
       {/* 실시간 상태 알림 (스크린 리더용) */}
-      <div 
-        role="status" 
-        aria-live="polite" 
-        aria-atomic="true" 
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
         className="sr-only"
       >
         {isRefreshing && '실시간 데이터를 새로고침하고 있습니다'}
@@ -223,7 +223,7 @@ RefreshButton.propTypes = {
   isOnline: PropTypes.bool,
   lastUpdate: PropTypes.oneOfType([
     PropTypes.string,
-    PropTypes.instanceOf(Date)
+    PropTypes.instanceOf(Date),
   ]),
   variant: PropTypes.oneOf(['default', 'compact', 'hero']),
   showStatus: PropTypes.bool,

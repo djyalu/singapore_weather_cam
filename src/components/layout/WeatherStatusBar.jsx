@@ -6,17 +6,17 @@ import WeatherInfoCard from '../weather/WeatherInfoCard';
 const WeatherStatusBar = React.memo(({ weatherData, className = '' }) => {
   // Hwa Chong International School 우선 표시를 위한 데이터 정렬
   const priorityStations = ['S116', 'S121', 'S118']; // Bukit Timah 지역 스테이션들
-  
+
   // 우선순위에 따라 스테이션 정렬
   const sortedLocations = weatherData?.locations?.slice().sort((a, b) => {
     const aIndex = priorityStations.indexOf(a.station_id);
     const bIndex = priorityStations.indexOf(b.station_id);
-    
+
     // 우선순위 스테이션이면 앞으로
-    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-    if (aIndex !== -1) return -1;
-    if (bIndex !== -1) return 1;
-    
+    if (aIndex !== -1 && bIndex !== -1) {return aIndex - bIndex;}
+    if (aIndex !== -1) {return -1;}
+    if (bIndex !== -1) {return 1;}
+
     // 나머지는 알파벳 순
     return (a.name || '').localeCompare(b.name || '');
   }) || [];
@@ -25,32 +25,32 @@ const WeatherStatusBar = React.memo(({ weatherData, className = '' }) => {
   const averageData = weatherData?.current || weatherData?.locations?.find(loc => loc.id === 'all');
 
   const formatTemperature = (temp) => {
-    if (temp === null || temp === undefined) return '--';
+    if (temp === null || temp === undefined) {return '--';}
     return `${Math.round(temp * 10) / 10}°C`;
   };
 
   const formatHumidity = (humidity) => {
-    if (humidity === null || humidity === undefined) return '--';
+    if (humidity === null || humidity === undefined) {return '--';}
     return `${Math.round(humidity)}%`;
   };
 
   const formatRainfall = (rainfall) => {
-    if (rainfall === null || rainfall === undefined) return '0';
+    if (rainfall === null || rainfall === undefined) {return '0';}
     return `${Math.round(rainfall * 10) / 10}mm`;
   };
 
   const getTemperatureColor = (temp) => {
-    if (temp === null || temp === undefined) return 'text-gray-500';
-    if (temp > 32) return 'text-red-500';
-    if (temp > 28) return 'text-orange-500';
-    if (temp > 24) return 'text-yellow-500';
+    if (temp === null || temp === undefined) {return 'text-gray-500';}
+    if (temp > 32) {return 'text-red-500';}
+    if (temp > 28) {return 'text-orange-500';}
+    if (temp > 24) {return 'text-yellow-500';}
     return 'text-blue-500';
   };
 
   const getHumidityColor = (humidity) => {
-    if (humidity === null || humidity === undefined) return 'text-gray-500';
-    if (humidity > 80) return 'text-blue-600';
-    if (humidity > 60) return 'text-blue-400';
+    if (humidity === null || humidity === undefined) {return 'text-gray-500';}
+    if (humidity > 80) {return 'text-blue-600';}
+    if (humidity > 60) {return 'text-blue-400';}
     return 'text-green-500';
   };
 

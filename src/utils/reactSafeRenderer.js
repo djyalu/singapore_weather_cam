@@ -51,7 +51,7 @@ export const safeRender = (value, options = {}) => {
 
     // Convert to string and limit length
     const stringValue = String(value);
-    return stringValue.length > maxLength 
+    return stringValue.length > maxLength
       ? `${stringValue.substring(0, maxLength)}...`
       : stringValue;
 
@@ -92,13 +92,13 @@ export const safeNumber = (value, options = {}) => {
  */
 export const safePercentage = (value, options = {}) => {
   const { fallback = '0%', isDecimal = false } = options;
-  
+
   try {
     const num = Number(value);
     if (isNaN(num)) {
       return fallback;
     }
-    
+
     const percentage = isDecimal ? num * 100 : num;
     return `${Math.round(percentage)}%`;
   } catch {
@@ -114,19 +114,19 @@ export const safePercentage = (value, options = {}) => {
  */
 export const safeArray = (value, options = {}) => {
   const { separator = ', ', fallback = '', maxItems = 10 } = options;
-  
+
   try {
     if (!Array.isArray(value)) {
       return fallback;
     }
-    
+
     const items = value.slice(0, maxItems).map(item => safeRender(item));
     const result = items.join(separator);
-    
+
     if (value.length > maxItems) {
       return `${result} ... (+${value.length - maxItems} more)`;
     }
-    
+
     return result;
   } catch {
     return fallback;
@@ -148,7 +148,7 @@ SafeText.propTypes = {
   children: PropTypes.any,
   fallback: PropTypes.string,
   dateFormat: PropTypes.string,
-  maxLength: PropTypes.number
+  maxLength: PropTypes.number,
 };
 
 /**
@@ -159,7 +159,7 @@ export const TypeGuards = {
   isValidString: (value) => typeof value === 'string' && value.length > 0,
   isValidNumber: (value) => typeof value === 'number' && !isNaN(value),
   isValidObject: (value) => value != null && typeof value === 'object',
-  isValidArray: (value) => Array.isArray(value) && value.length > 0
+  isValidArray: (value) => Array.isArray(value) && value.length > 0,
 };
 
 /**
@@ -170,19 +170,19 @@ export const PropValidators = {
     const value = props[propName];
     if (value != null && !TypeGuards.isValidDate(value) && typeof value !== 'string') {
       return new Error(
-        `Invalid prop \`${propName}\` of type \`${typeof value}\` supplied to \`${componentName}\`, expected \`Date\` or \`string\`.`
+        `Invalid prop \`${propName}\` of type \`${typeof value}\` supplied to \`${componentName}\`, expected \`Date\` or \`string\`.`,
       );
     }
   },
-  
+
   safeString: (props, propName, componentName) => {
     const value = props[propName];
     if (value != null && typeof value !== 'string') {
       return new Error(
-        `Invalid prop \`${propName}\` of type \`${typeof value}\` supplied to \`${componentName}\`, expected \`string\`.`
+        `Invalid prop \`${propName}\` of type \`${typeof value}\` supplied to \`${componentName}\`, expected \`string\`.`,
       );
     }
-  }
+  },
 };
 
 export default {
@@ -192,5 +192,5 @@ export default {
   safeArray,
   SafeText,
   TypeGuards,
-  PropValidators
+  PropValidators,
 };

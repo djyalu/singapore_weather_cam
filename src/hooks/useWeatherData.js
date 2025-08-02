@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 
 /**
  * Enhanced Weather Data Hook - Real Data Only (No Mock Data)
- * 
+ *
  * Features:
  * - Complete 59-station data access from real NEA API
  * - Advanced filtering and search
@@ -29,22 +29,22 @@ export const useWeatherData = () => {
           headers: forceRefresh ? {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
-            'Expires': '0'
-          } : {}
+            'Expires': '0',
+          } : {},
         });
-        
+
         if (response.ok) {
           const data = await response.json();
-          
+
           // Always prefer real data over mock data
           if (data && data.timestamp) {
             console.log('✅ Real weather data loaded:', {
               timestamp: data.timestamp,
               source: data.source,
               temperature_avg: data.data?.temperature?.average,
-              stations: data.stations_used?.length || 'unknown'
+              stations: data.stations_used?.length || 'unknown',
             });
-            
+
             setWeatherData(data);
             setLastUpdate(new Date().toISOString());
             return;
@@ -56,16 +56,16 @@ export const useWeatherData = () => {
 
       // Force real data collection if no cached data available
       console.warn('🔄 No cached data available, forcing fresh data collection...');
-      
+
       try {
         // Trigger server-side data collection by running the script
         console.log('🚀 Attempting to trigger fresh data collection...');
-        
+
         // Try to trigger collection via GitHub Actions or direct API
         const freshDataResponse = await fetch('/data/weather/latest.json?force=true', {
-          cache: 'no-cache'
+          cache: 'no-cache',
         });
-        
+
         if (freshDataResponse.ok) {
           const freshData = await freshDataResponse.json();
           if (freshData && freshData.timestamp) {
@@ -78,10 +78,10 @@ export const useWeatherData = () => {
       } catch (collectErr) {
         console.log('⚠️ Fresh data collection failed:', collectErr.message);
       }
-      
+
       // Critical error: No real data available
       throw new Error('Unable to load real weather data. Please run data collection manually or check GitHub Actions.');
-      
+
     } catch (err) {
       console.error('❌ Weather data fetch failed:', err);
       setError(`Real data unavailable: ${err.message}`);
@@ -102,13 +102,13 @@ export const useWeatherData = () => {
 
   // Enhanced station filtering and search capabilities
   const stationUtils = useMemo(() => {
-    if (!weatherData) return null;
+    if (!weatherData) {return null;}
 
     return {
       // Get all stations with full metadata
       getAllStations: () => {
-        if (!weatherData.stations_used) return [];
-        
+        if (!weatherData.stations_used) {return [];}
+
         return weatherData.stations_used.map(stationId => ({
           id: stationId,
           ...weatherData.station_details?.[stationId],
@@ -119,15 +119,15 @@ export const useWeatherData = () => {
             rainfall: weatherData.data?.rainfall?.readings?.find(r => r.station === stationId)?.value,
             wind_speed: weatherData.data?.wind_speed?.readings?.find(r => r.station === stationId)?.value,
             wind_direction: weatherData.data?.wind_direction?.readings?.find(r => r.station === stationId)?.value,
-          }
+          },
         })).filter(station => station.id); // Filter out invalid stations
       },
 
       // Filter stations by region
       getStationsByRegion: (region) => {
         const allStations = stationUtils.getAllStations();
-        if (!region || region === 'all') return allStations;
-        
+        if (!region || region === 'all') {return allStations;}
+
         return allStations.filter(station => {
           const stationRegion = station.region || determineRegion(station.coordinates?.lat, station.coordinates?.lng);
           return stationRegion.toLowerCase() === region.toLowerCase();
@@ -137,21 +137,21 @@ export const useWeatherData = () => {
       // Filter stations by data type availability
       getStationsByDataType: (dataType) => {
         const allStations = stationUtils.getAllStations();
-        if (!dataType || dataType === 'all') return allStations;
-        
-        return allStations.filter(station => 
-          station.data_types && station.data_types.includes(dataType)
+        if (!dataType || dataType === 'all') {return allStations;}
+
+        return allStations.filter(station =>
+          station.data_types && station.data_types.includes(dataType),
         );
       },
 
       // Search stations by name or ID
       searchStations: (query) => {
-        if (!query) return stationUtils.getAllStations();
-        
+        if (!query) {return stationUtils.getAllStations();}
+
         const lowercaseQuery = query.toLowerCase();
         return stationUtils.getAllStations().filter(station =>
           station.id.toLowerCase().includes(lowercaseQuery) ||
-          station.name?.toLowerCase().includes(lowercaseQuery)
+          station.name?.toLowerCase().includes(lowercaseQuery),
         );
       },
 
@@ -175,16 +175,16 @@ export const useWeatherData = () => {
 
       // Compare multiple stations
       compareStations: (stationIds) => {
-        return stationIds.map(id => 
-          stationUtils.getAllStations().find(station => station.id === id)
+        return stationIds.map(id =>
+          stationUtils.getAllStations().find(station => station.id === id),
         ).filter(Boolean);
-      }
+      },
     };
   }, [weatherData]);
 
   // Legacy compatibility - current weather for individual location
   const current = useMemo(() => {
-    if (!weatherData) return null;
+    if (!weatherData) {return null;}
     return getCurrentWeatherData(weatherData);
   }, [weatherData]);
 
@@ -195,36 +195,36 @@ export const useWeatherData = () => {
     error,
     lastUpdate,
     refetch,
-    
+
     // Enhanced 59-station utilities
     stations: stationUtils,
-    
+
     // Legacy compatibility
-    current
+    current,
   };
 };
 
 // Get current weather data for backward compatibility
 const getCurrentWeatherData = (weatherData) => {
-  if (!weatherData) return null;
+  if (!weatherData) {return null;}
 
   // Priority stations for central Singapore (Hwa Chong area)
   const priorityStations = ['S116', 'S121', 'S118'];
-  
+
   let primaryStationData = null;
-  
+
   // Find primary station data
   for (const stationId of priorityStations) {
     const tempReading = weatherData.data?.temperature?.readings?.find(r => r.station === stationId);
     const humidityReading = weatherData.data?.humidity?.readings?.find(r => r.station === stationId);
-    
+
     if (tempReading || humidityReading) {
       primaryStationData = {
         stationId,
         stationName: `Station ${stationId}`,
         temperature: tempReading?.value,
         humidity: humidityReading?.value,
-        coordinates: { lat: 1.3437, lng: 103.7640 } // Hwa Chong area
+        coordinates: { lat: 1.3437, lng: 103.7640 }, // Hwa Chong area
       };
       break;
     }
@@ -243,31 +243,31 @@ const getCurrentWeatherData = (weatherData) => {
     stationId: primaryStationData?.stationId,
     stationName: primaryStationData?.stationName,
     location: primaryStationData?.stationName || 'Singapore',
-    coordinates: primaryStationData?.coordinates
+    coordinates: primaryStationData?.coordinates,
   };
 };
 
 // Helper function to determine region based on coordinates
 const determineRegion = (lat, lng) => {
-  if (!lat || !lng) return 'unknown';
-  
+  if (!lat || !lng) {return 'unknown';}
+
   // Singapore regional boundaries (approximate)
-  if (lat > 1.38) return 'north';
-  if (lat < 1.28) return 'south';
-  if (lng > 103.87) return 'east';
-  if (lng < 103.75) return 'west';
+  if (lat > 1.38) {return 'north';}
+  if (lat < 1.28) {return 'south';}
+  if (lng > 103.87) {return 'east';}
+  if (lng < 103.75) {return 'west';}
   return 'central';
 };
 
 // Helper function to calculate distance between coordinates
 const calculateDistance = (lat1, lng1, lat2, lng2) => {
-  if (!lat1 || !lng1 || !lat2 || !lng2) return Infinity;
-  
+  if (!lat1 || !lng1 || !lat2 || !lng2) {return Infinity;}
+
   const R = 6371; // Earth's radius in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
             Math.sin(dLng/2) * Math.sin(dLng/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;

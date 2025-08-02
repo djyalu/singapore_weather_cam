@@ -358,15 +358,15 @@ export class APIService {
     try {
       const response = await circuitBreaker.execute(async () => {
         const fetchOptions = this.buildFetchOptions(options);
-        
+
         // Implement proper timeout for fetch
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), options.timeout || 10000);
-        
+
         try {
           const response = await fetch(url, {
             ...fetchOptions,
-            signal: controller.signal
+            signal: controller.signal,
           });
 
           if (!response.ok) {

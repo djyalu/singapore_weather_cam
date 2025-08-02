@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, Minus, MapPin, Thermometer, Droplets, Cloud, 
 
 /**
  * Station Comparison Component - Multi-Station Analysis Tool
- * 
+ *
  * Features:
  * - Side-by-side comparison of multiple weather stations
  * - Visual data charts and trend indicators
@@ -12,15 +12,15 @@ import { TrendingUp, TrendingDown, Minus, MapPin, Thermometer, Droplets, Cloud, 
  * - Responsive design with mobile optimization
  * - Accessibility compliant interface
  */
-const StationComparison = React.memo(({ 
-  stations = [], 
+const StationComparison = React.memo(({
+  stations = [],
   onRemoveStation,
   className = '',
-  showDetailedMetrics = true 
+  showDetailedMetrics = true,
 }) => {
   // Prepare comparison data
   const comparisonData = useMemo(() => {
-    if (stations.length === 0) return null;
+    if (stations.length === 0) {return null;}
 
     const metrics = {
       temperature: stations.map(s => s.currentData?.temperature).filter(Boolean),
@@ -37,7 +37,7 @@ const StationComparison = React.memo(({
           min: Math.min(...values),
           max: Math.max(...values),
           avg: values.reduce((sum, val) => sum + val, 0) / values.length,
-          range: Math.max(...values) - Math.min(...values)
+          range: Math.max(...values) - Math.min(...values),
         };
       }
     });
@@ -58,19 +58,19 @@ const StationComparison = React.memo(({
   };
 
   const getComparisonIndicator = (value, stats, type) => {
-    if (!stats[type] || stats[type].range === 0) return <Minus className="w-4 h-4 text-gray-400" />;
-    
+    if (!stats[type] || stats[type].range === 0) {return <Minus className="w-4 h-4 text-gray-400" />;}
+
     const { min, max, avg } = stats[type];
     const threshold = (max - min) * 0.1; // 10% threshold
-    
-    if (value > avg + threshold) return <TrendingUp className="w-4 h-4 text-red-500" />;
-    if (value < avg - threshold) return <TrendingDown className="w-4 h-4 text-blue-500" />;
+
+    if (value > avg + threshold) {return <TrendingUp className="w-4 h-4 text-red-500" />;}
+    if (value < avg - threshold) {return <TrendingDown className="w-4 h-4 text-blue-500" />;}
     return <Minus className="w-4 h-4 text-gray-400" />;
   };
 
   const formatValue = (value, type) => {
-    if (value === null || value === undefined) return 'N/A';
-    
+    if (value === null || value === undefined) {return 'N/A';}
+
     switch (type) {
       case 'temperature':
         return `${value.toFixed(1)}°C`;
@@ -98,11 +98,11 @@ const StationComparison = React.memo(({
   };
 
   const getRegionFromCoordinates = (lat, lng) => {
-    if (!lat || !lng) return 'unknown';
-    if (lat > 1.38) return 'north';
-    if (lat < 1.28) return 'south';
-    if (lng > 103.87) return 'east';
-    if (lng < 103.75) return 'west';
+    if (!lat || !lng) {return 'unknown';}
+    if (lat > 1.38) {return 'north';}
+    if (lat < 1.28) {return 'south';}
+    if (lng > 103.87) {return 'east';}
+    if (lng < 103.75) {return 'west';}
     return 'central';
   };
 
@@ -180,8 +180,8 @@ const StationComparison = React.memo(({
           <tbody className="bg-white divide-y divide-gray-200">
             {stations.map((station, index) => {
               const region = getRegionFromCoordinates(
-                station.coordinates?.lat, 
-                station.coordinates?.lng
+                station.coordinates?.lat,
+                station.coordinates?.lng,
               );
               const distance = station.proximities?.hwa_chong?.distance_km;
 
@@ -216,8 +216,8 @@ const StationComparison = React.memo(({
                               className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full"
                             >
                               {getDataTypeIcon(type)}
-                              {type === 'wind_speed' ? 'wind' : 
-                               type === 'wind_direction' ? 'dir' : type}
+                              {type === 'wind_speed' ? 'wind' :
+                                type === 'wind_direction' ? 'dir' : type}
                             </span>
                           ))}
                         </div>
@@ -229,9 +229,9 @@ const StationComparison = React.memo(({
                   <td className="px-3 py-4 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {comparisonData && getComparisonIndicator(
-                        station.currentData?.temperature, 
-                        comparisonData.stats, 
-                        'temperature'
+                        station.currentData?.temperature,
+                        comparisonData.stats,
+                        'temperature',
                       )}
                       <span className={`text-sm font-medium ${
                         station.currentData?.temperature ? 'text-gray-900' : 'text-gray-400'
@@ -245,9 +245,9 @@ const StationComparison = React.memo(({
                   <td className="px-3 py-4 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {comparisonData && getComparisonIndicator(
-                        station.currentData?.humidity, 
-                        comparisonData.stats, 
-                        'humidity'
+                        station.currentData?.humidity,
+                        comparisonData.stats,
+                        'humidity',
                       )}
                       <span className={`text-sm font-medium ${
                         station.currentData?.humidity ? 'text-gray-900' : 'text-gray-400'
@@ -261,12 +261,12 @@ const StationComparison = React.memo(({
                   <td className="px-3 py-4 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {comparisonData && getComparisonIndicator(
-                        station.currentData?.rainfall, 
-                        comparisonData.stats, 
-                        'rainfall'
+                        station.currentData?.rainfall,
+                        comparisonData.stats,
+                        'rainfall',
                       )}
                       <span className={`text-sm font-medium ${
-                        station.currentData?.rainfall !== null && station.currentData?.rainfall !== undefined 
+                        station.currentData?.rainfall !== null && station.currentData?.rainfall !== undefined
                           ? 'text-gray-900' : 'text-gray-400'
                       }`}>
                         {formatValue(station.currentData?.rainfall, 'rainfall')}
@@ -278,9 +278,9 @@ const StationComparison = React.memo(({
                   <td className="px-3 py-4 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {comparisonData && getComparisonIndicator(
-                        station.currentData?.wind_speed, 
-                        comparisonData.stats, 
-                        'wind_speed'
+                        station.currentData?.wind_speed,
+                        comparisonData.stats,
+                        'wind_speed',
                       )}
                       <span className={`text-sm font-medium ${
                         station.currentData?.wind_speed ? 'text-gray-900' : 'text-gray-400'
@@ -372,7 +372,7 @@ StationComparison.propTypes = {
       name: PropTypes.string.isRequired,
       coordinates: PropTypes.shape({
         lat: PropTypes.number,
-        lng: PropTypes.number
+        lng: PropTypes.number,
       }),
       data_types: PropTypes.array,
       priority_level: PropTypes.string,
@@ -382,13 +382,13 @@ StationComparison.propTypes = {
         humidity: PropTypes.number,
         rainfall: PropTypes.number,
         wind_speed: PropTypes.number,
-        wind_direction: PropTypes.number
-      })
-    })
+        wind_direction: PropTypes.number,
+      }),
+    }),
   ),
   onRemoveStation: PropTypes.func,
   className: PropTypes.string,
-  showDetailedMetrics: PropTypes.bool
+  showDetailedMetrics: PropTypes.bool,
 };
 
 StationComparison.displayName = 'StationComparison';

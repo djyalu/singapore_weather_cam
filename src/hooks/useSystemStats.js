@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 export const useSystemStats = (webcamData, trafficCameraData) => {
   // Format timestamp with proper localization (used by both systems)
   const formatTimestamp = (timestamp) => {
-    if (!timestamp) return null;
+    if (!timestamp) {return null;}
     try {
       return new Date(timestamp).toLocaleString('en-SG', {
         timeZone: 'Asia/Singapore',
@@ -27,7 +27,7 @@ export const useSystemStats = (webcamData, trafficCameraData) => {
     // Priority 1: Use traffic camera data (actively used)
     if (trafficCameraData?.cameras) {
       const totalCameras = trafficCameraData.totalCameras || trafficCameraData.cameras.length;
-      
+
       return {
         totalWebcams: totalCameras, // Keep property name for backward compatibility
         totalCameras: totalCameras,

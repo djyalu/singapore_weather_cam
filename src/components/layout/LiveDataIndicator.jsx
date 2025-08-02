@@ -10,21 +10,21 @@ const LiveDataIndicator = React.memo(({ lastUpdate, isConnected = true, dataAge 
   const now = new Date();
   const updateTime = typeof lastUpdate === 'string' ? new Date(lastUpdate) : lastUpdate;
   const timeDiff = updateTime ? Math.floor((now - updateTime) / 1000) : null;
-  
+
   // 데이터 신선도 판단
   const getDataStatus = () => {
-    if (!timeDiff) return 'unknown';
-    if (timeDiff < 60) return 'live'; // 1분 이내
-    if (timeDiff < 300) return 'recent'; // 5분 이내
-    if (timeDiff < 900) return 'stale'; // 15분 이내
+    if (!timeDiff) {return 'unknown';}
+    if (timeDiff < 60) {return 'live';} // 1분 이내
+    if (timeDiff < 300) {return 'recent';} // 5분 이내
+    if (timeDiff < 900) {return 'stale';} // 15분 이내
     return 'old'; // 15분 초과
   };
 
   const dataStatus = getDataStatus();
 
   const getStatusColor = () => {
-    if (!isConnected) return 'text-red-500';
-    
+    if (!isConnected) {return 'text-red-500';}
+
     switch (dataStatus) {
       case 'live':
         return 'text-green-500';
@@ -40,8 +40,8 @@ const LiveDataIndicator = React.memo(({ lastUpdate, isConnected = true, dataAge 
   };
 
   const getStatusIcon = () => {
-    if (!isConnected) return '⚠️';
-    
+    if (!isConnected) {return '⚠️';}
+
     switch (dataStatus) {
       case 'live':
         return '🟢';
@@ -57,8 +57,8 @@ const LiveDataIndicator = React.memo(({ lastUpdate, isConnected = true, dataAge 
   };
 
   const getStatusText = () => {
-    if (!isConnected) return '연결 끊김';
-    
+    if (!isConnected) {return '연결 끊김';}
+
     switch (dataStatus) {
       case 'live':
         return '실시간';
@@ -74,10 +74,10 @@ const LiveDataIndicator = React.memo(({ lastUpdate, isConnected = true, dataAge 
   };
 
   const formatTimeAgo = () => {
-    if (!timeDiff) return '';
-    
-    if (timeDiff < 60) return `${timeDiff}초 전`;
-    if (timeDiff < 3600) return `${Math.floor(timeDiff / 60)}분 전`;
+    if (!timeDiff) {return '';}
+
+    if (timeDiff < 60) {return `${timeDiff}초 전`;}
+    if (timeDiff < 3600) {return `${Math.floor(timeDiff / 60)}분 전`;}
     return `${Math.floor(timeDiff / 3600)}시간 전`;
   };
 

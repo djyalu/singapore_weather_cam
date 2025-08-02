@@ -10,18 +10,18 @@ const formatTime = (timestamp) => {
     const updateTime = new Date(timestamp);
     const now = new Date();
     const diffMinutes = Math.floor((now - updateTime) / (1000 * 60));
-    
-    if (diffMinutes < 1) return '방금 전';
-    if (diffMinutes < 60) return `${diffMinutes}분 전`;
-    
+
+    if (diffMinutes < 1) {return '방금 전';}
+    if (diffMinutes < 60) {return `${diffMinutes}분 전`;}
+
     const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours}시간 전`;
-    
+    if (diffHours < 24) {return `${diffHours}시간 전`;}
+
     return updateTime.toLocaleDateString('ko-KR', {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   } catch (error) {
     return '실시간';
@@ -47,7 +47,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
   const handleImageError = () => {
     setImageLoading(false);
     setImageError(true);
-    
+
     // 재시도 로직 (최대 2회)
     if (retryCount < 2) {
       setTimeout(() => {
@@ -74,7 +74,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
             <div className="rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500 animate-spin"></div>
           </div>
         )}
-        
+
         <img
           src={currentImageUrl}
           alt={`${region.name} 교통 카메라`}
@@ -85,7 +85,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
           onError={handleImageError}
           onClick={() => onImageClick?.(camera)}
         />
-        
+
         {imageError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200">
             <span className="text-gray-500 text-sm mb-2">
@@ -115,7 +115,7 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
             {camera.timestamp ? formatTime(camera.timestamp) : '실시간'}
           </span>
         </div>
-        
+
         {/* 기본 카메라 정보 - 모바일 최적화 */}
         <div className="text-xs sm:text-sm text-gray-600">
           <div className="flex items-center gap-1 sm:gap-2">
@@ -158,7 +158,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     'central': { lat: 1.3048, lng: 103.8318 },   // Central area
     'east': { lat: 1.3048, lng: 103.9318 },      // East Coast
     'north': { lat: 1.4382, lng: 103.7880 },     // North area
-    'south': { lat: 1.2494, lng: 103.8303 }      // South (Sentosa)
+    'south': { lat: 1.2494, lng: 103.8303 },      // South (Sentosa)
   };
 
   // 두 지점 간의 거리 계산 (Haversine formula)
@@ -177,7 +177,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   // 지역에서 가장 가까운 카메라 찾기
   const findNearestCamera = (regionId, availableCameras) => {
     const regionCoord = regionCoordinates[regionId];
-    if (!regionCoord || !availableCameras.length) return null;
+    if (!regionCoord || !availableCameras.length) {return null;}
 
     let nearestCamera = null;
     let minDistance = Infinity;
@@ -186,9 +186,9 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       if (camera.location?.latitude && camera.location?.longitude) {
         const distance = calculateDistance(
           regionCoord.lat, regionCoord.lng,
-          camera.location.latitude, camera.location.longitude
+          camera.location.latitude, camera.location.longitude,
         );
-        
+
         if (distance < minDistance) {
           minDistance = distance;
           nearestCamera = camera;
@@ -209,65 +209,65 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         setLoading(true);
       }
       console.log('🚗 Attempting real-time traffic camera data fetch...');
-        
-        // 1차 시도: TrafficCameraGallery와 동일한 서비스 사용
-        try {
-          const data = await fetchTrafficCameras();
-          if (data?.cameras && data.cameras.length > 0) {
-            setCameras(data.cameras);
-            setError(null);
-            console.log('✅ Service call successful:', data.cameras.length, 'cameras');
-            return;
-          }
-          throw new Error('No cameras in service response');
-        } catch (serviceErr) {
-          console.warn('⚠️ Service call failed, trying direct API...', serviceErr.message);
-        }
 
-        // 2차 시도: 직접 Singapore API 호출 (CORS 우회)
-        const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-          mode: 'cors'
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          if (data?.items?.[0]?.cameras) {
-            const apiCameras = data.items[0].cameras.map(camera => ({
-              id: camera.camera_id,
-              name: `Camera ${camera.camera_id}`,
-              area: 'Traffic',
-              location: {
-                latitude: parseFloat(camera.location.latitude),
-                longitude: parseFloat(camera.location.longitude),
-                description: `Traffic Camera ${camera.camera_id}`
-              },
-              image: {
-                url: camera.image,
-                width: camera.image_metadata?.width || 1920,
-                height: camera.image_metadata?.height || 1080
-              },
-              timestamp: camera.timestamp
-            }));
-            
-            setCameras(apiCameras);
-            setError(null);
-            return;
-          }
+      // 1차 시도: TrafficCameraGallery와 동일한 서비스 사용
+      try {
+        const data = await fetchTrafficCameras();
+        if (data?.cameras && data.cameras.length > 0) {
+          setCameras(data.cameras);
+          setError(null);
+          console.log('✅ Service call successful:', data.cameras.length, 'cameras');
+          return;
         }
-        
-        throw new Error(`Direct API response failed: ${response.status}`);
-        
-      } catch (err) {
-        // 최종 폴백: 정적 데이터 사용
-        const fallbackCameras = generateFallbackCameras();
-        setCameras(fallbackCameras);
-        setError('실시간 데이터 연결 실패 - 캐시된 데이터 사용 중');
-        
+        throw new Error('No cameras in service response');
+      } catch (serviceErr) {
+        console.warn('⚠️ Service call failed, trying direct API...', serviceErr.message);
+      }
+
+      // 2차 시도: 직접 Singapore API 호출 (CORS 우회)
+      const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+        mode: 'cors',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data?.items?.[0]?.cameras) {
+          const apiCameras = data.items[0].cameras.map(camera => ({
+            id: camera.camera_id,
+            name: `Camera ${camera.camera_id}`,
+            area: 'Traffic',
+            location: {
+              latitude: parseFloat(camera.location.latitude),
+              longitude: parseFloat(camera.location.longitude),
+              description: `Traffic Camera ${camera.camera_id}`,
+            },
+            image: {
+              url: camera.image,
+              width: camera.image_metadata?.width || 1920,
+              height: camera.image_metadata?.height || 1080,
+            },
+            timestamp: camera.timestamp,
+          }));
+
+          setCameras(apiCameras);
+          setError(null);
+          return;
+        }
+      }
+
+      throw new Error(`Direct API response failed: ${response.status}`);
+
+    } catch (err) {
+      // 최종 폴백: 정적 데이터 사용
+      const fallbackCameras = generateFallbackCameras();
+      setCameras(fallbackCameras);
+      setError('실시간 데이터 연결 실패 - 캐시된 데이터 사용 중');
+
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -282,7 +282,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   // 교통 카메라 데이터 가져오기 - 실시간 API 우선, 실패시 정적 데이터
   useEffect(() => {
     fetchCameras();
-    
+
     // 자동 새로고침 비활성화 - 수동 새로고침만 허용
     // const interval = setInterval(() => fetchCameras(false), 5 * 60 * 1000);
     // return () => clearInterval(interval);
@@ -292,7 +292,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   const generateFallbackCameras = () => {
     const currentTimestamp = new Date().toISOString();
     console.log('📅 Generating fallback cameras with current timestamp:', currentTimestamp);
-    
+
     // 실제 AI 분석 데이터와 매칭되는 카메라 정보 (지역별 정확한 배치)
     const fallbackCameras = [
       {
@@ -300,80 +300,80 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/be259922-9e85-444a-8ffa-db841590f6a4.jpg', // 실제 6710 카메라 이미지
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.344205,
           longitude: 103.78577,
           name: 'PIE (BKE) - Bukit Timah Rd',
-          description: 'Bukit Timah Road 인근 (Hwa Chong 근처)'
+          description: 'Bukit Timah Road 인근 (Hwa Chong 근처)',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       {
-        id: '4712', 
+        id: '4712',
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/d07c7a9c-f576-4057-9826-86f36054bc08.jpg', // 실제 4712 카메라 이미지
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.341244001,
           longitude: 103.6439134,
           name: 'PIE Jurong West',
-          description: 'Jurong West 지역 (PIE 고속도로)'
+          description: 'Jurong West 지역 (PIE 고속도로)',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       {
         id: '1701',
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/5671f037-0042-4732-84d3-5059e7f6cfa6.jpg',
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.3644, // Changi Airport에 더 정확한 좌표
           longitude: 103.9915, // Changi Airport에 더 정확한 좌표
-          name: 'Changi Airport Area', 
-          description: 'Changi Airport 지역'
+          name: 'Changi Airport Area',
+          description: 'Changi Airport 지역',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       {
         id: '2701',
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/235bfe61-0102-4cfe-94bb-83124f41440f.jpg',
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.447023728,
           longitude: 103.7716543,
           name: 'Sentosa Gateway',
-          description: 'Sentosa 및 남부 지역'
+          description: 'Sentosa 및 남부 지역',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       {
         id: '2703',
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/e0463016-e443-430e-848c-4cdeb5bfb0bc.jpg',
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.35047790791386,
           longitude: 103.791033581325,
           name: 'Marina Bay - Central Boulevard',
-          description: 'Marina Bay 중부 도심 지역'
+          description: 'Marina Bay 중부 도심 지역',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       // Bukit Timah/Hwa Chong 지역을 위한 카메라 추가 (실제 위치 기준)
       {
@@ -381,16 +381,16 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/810a30ac-e2a1-428f-a584-ff3c3d53ea94.jpg',
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.332691,
           longitude: 103.770278,
           name: 'PIE Bukit Timah West',
-          description: 'Bukit Timah West 지역 (Hwa Chong 인근)'
+          description: 'Bukit Timah West 지역 (Hwa Chong 인근)',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       // Newton 지역을 위한 카메라 추가 (Newton MRT에 더 가까운 위치로 수정)
       {
@@ -398,16 +398,16 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.3140, // Newton MRT에 더 가깝게 수정
           longitude: 103.8380, // Newton MRT에 더 가깝게 수정
           name: 'PIE Kim Keat (Newton)',
-          description: 'Newton MRT 인근 교통 상황'
+          description: 'Newton MRT 인근 교통 상황',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       // 기타 지역을 위한 카메라들 추가
       {
@@ -415,32 +415,32 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/28b64b32-1fb3-4360-b05c-fe1ae84ab14a.jpg',
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.414142,
           longitude: 103.771168,
           name: 'ECP Fort Road',
-          description: 'East Coast Parkway'
+          description: 'East Coast Parkway',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       {
         id: '1703',
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/15daf950-86e1-45c9-9f57-3c4e2655fc11.jpg',
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.4382, // 더 북쪽으로 이동 (Woodlands 지역)
           longitude: 103.7880, // 더 북쪽으로 이동
           name: 'BKE Woodlands North',
-          description: 'Woodlands 북부 주거 지역'
+          description: 'Woodlands 북부 주거 지역',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
+        quality: 'HD 1920x1080',
       },
       // Changi 지역을 위한 추가 카메라 (더 정확한 위치)
       {
@@ -448,17 +448,17 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         image: {
           url: 'https://images.data.gov.sg/api/traffic-images/2025/07/0c11ae6e-8c12-4978-89b8-0d36de8d5bc8.jpg',
           width: 1920,
-          height: 1080
+          height: 1080,
         },
         location: {
           latitude: 1.3500, // ECP Changi 지역
           longitude: 103.9800, // ECP Changi 지역
           name: 'ECP Changi Link',
-          description: 'Changi Airport 연결 고속도로'
+          description: 'Changi Airport 연결 고속도로',
         },
         timestamp: currentTimestamp,
-        quality: 'HD 1920x1080'
-      }
+        quality: 'HD 1920x1080',
+      },
     ];
 
     return fallbackCameras;
@@ -470,67 +470,67 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     console.log('📷 Available cameras count:', cameras.length);
 
     // 기본 지역 설정 (selectedRegions가 없는 경우)
-    const regionsToUse = selectedRegions && selectedRegions.length > 0 
-      ? selectedRegions 
+    const regionsToUse = selectedRegions && selectedRegions.length > 0
+      ? selectedRegions
       : ['hwa-chong', 'newton', 'changi'];
-    
+
     // 카메라가 없는 경우 즉시 fallback 카메라 생성
     if (!cameras.length) {
       const emergencyFallback = generateFallbackCameras();
       const result = regionsToUse.slice(0, 3).map((regionId, index) => ({
         camera: emergencyFallback[index] || emergencyFallback[0],
         regionId,
-        distance: null
+        distance: null,
       }));
       return result;
     }
 
     const result = [];
     const usedCameras = new Set(); // 중복 방지
-    
+
     regionsToUse.forEach(regionId => {
       // 사용되지 않은 카메라들 중에서 가장 가까운 것 찾기
       const availableCameras = cameras.filter(cam => !usedCameras.has(cam.id));
-      
+
       const regionCoord = regionCoordinates[regionId];
       if (regionCoord && availableCameras.length > 0) {
-        
+
         const distances = availableCameras.map(camera => {
           if (camera.location?.latitude && camera.location?.longitude) {
             const distance = calculateDistance(
               regionCoord.lat, regionCoord.lng,
-              camera.location.latitude, camera.location.longitude
+              camera.location.latitude, camera.location.longitude,
             );
             return {
               id: camera.id,
               name: camera.location.description || camera.location.name,
-              distance: distance.toFixed(2)
+              distance: distance.toFixed(2),
             };
           }
           return null;
         }).filter(Boolean).sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-        
+
         console.log(`📏 Distances from ${regionId}:`, distances.slice(0, 3)); // 가장 가까운 3개만 표시
       }
-      
+
       const nearestResult = findNearestCamera(regionId, availableCameras);
-      
+
       if (nearestResult) {
         console.log(`✅ Selected camera for ${regionId}:`, {
           id: nearestResult.camera.id,
           name: nearestResult.camera.location?.description || nearestResult.camera.location?.name,
-          distance: `${nearestResult.distance.toFixed(2)}km`
+          distance: `${nearestResult.distance.toFixed(2)}km`,
         });
-        
-        result.push({ 
-          camera: nearestResult.camera, 
+
+        result.push({
+          camera: nearestResult.camera,
           regionId,
-          distance: nearestResult.distance 
+          distance: nearestResult.distance,
         });
         usedCameras.add(nearestResult.camera.id);
       } else {
         console.log(`⚠️ No camera found for region: ${regionId}, using guaranteed fallback`);
-        
+
         // 폴백: 사용되지 않은 랜덤 카메라 선택
         const availableRandomCameras = cameras.filter(cam => !usedCameras.has(cam.id));
         if (availableRandomCameras.length > 0) {
@@ -541,10 +541,10 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
         } else {
           // 최종 보장: 모든 카메라가 사용된 경우, 첫 번째 카메라 재사용
           console.log(`🔄 Final fallback for ${regionId}: reusing first camera`);
-          result.push({ 
-            camera: cameras[0], 
-            regionId, 
-            distance: null 
+          result.push({
+            camera: cameras[0],
+            regionId,
+            distance: null,
           });
         }
       }
@@ -555,9 +555,9 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       cameraId: item.camera.id,
       cameraName: item.camera.location?.name || item.camera.name,
       cameraDescription: item.camera.location?.description,
-      distance: item.distance ? `${item.distance.toFixed(2)}km` : 'fallback'
+      distance: item.distance ? `${item.distance.toFixed(2)}km` : 'fallback',
     })));
-    
+
     // 🚨 중요: 날씨 지역 vs 교통 카메라 매칭 결과
     console.log('🎯 Weather-Traffic Region Matching Results:');
     result.forEach(item => {
@@ -570,7 +570,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
       result.push({
         camera: cameras[0],
         regionId: regionsToUse[0] || 'hwa-chong',
-        distance: null
+        distance: null,
       });
     }
 
@@ -620,7 +620,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
     'central': { name: 'Central', emoji: '🌆' },
     'east': { name: 'East', emoji: '🏖️' },
     'north': { name: 'North', emoji: '🌳' },
-    'south': { name: 'South', emoji: '🏝️' }
+    'south': { name: 'South', emoji: '🏝️' },
   };
 
   return (
@@ -634,7 +634,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
           <p className="text-xs sm:text-sm text-gray-600">
             실시간 교통 카메라 이미지
           </p>
-          
+
           {error && (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
               <p className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full inline-block">
@@ -670,7 +670,7 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
               camera={camera}
               region={{
                 ...regionInfo[regionId],
-                distance: distance
+                distance: distance,
               }}
               onImageClick={onCameraClick}
             />

@@ -4,13 +4,13 @@ import { useWeatherData } from '../../hooks/useWeatherData';
 import StationSelector from './StationSelector';
 import StationComparison from './StationComparison';
 import RegionalWeatherDisplay from './RegionalWeatherDisplay';
-import { 
-  BarChart3, 
-  Map, 
-  Grid3X3, 
-  Settings, 
-  RefreshCw, 
-  Database, 
+import {
+  BarChart3,
+  Map,
+  Grid3X3,
+  Settings,
+  RefreshCw,
+  Database,
   Activity,
   MapPin,
   Thermometer,
@@ -21,12 +21,12 @@ import {
   CheckCircle,
   AlertCircle,
   Star,
-  Globe
+  Globe,
 } from 'lucide-react';
 
 /**
  * 🎨 FRONTEND + 🏗️ ARCHITECT: Enhanced 59-Station Weather Dashboard
- * 
+ *
  * Complete weather monitoring system featuring:
  * - Full 59-station NEA data integration
  * - Interactive station selection and comparison
@@ -43,12 +43,12 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
     error,
     lastUpdate,
     refetch,
-    
+
     // Enhanced 59-station utilities
     stations: stationUtils,
-    
+
     // Legacy compatibility
-    current
+    current,
   } = useWeatherData();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -56,7 +56,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
   const [filterOptions, setFilterOptions] = useState({
     region: 'all',
     dataType: 'all',
-    priority: 'all'
+    priority: 'all',
   });
 
   // Calculate system status and filtered stations
@@ -67,13 +67,13 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
         activeStations: 0,
         dataQualityScore: 0,
         geographicCoverage: 0,
-        filteredStations: []
+        filteredStations: [],
       };
     }
 
     const allStations = stationUtils.getAllStations();
     const stats = stationUtils.getStationStats();
-    
+
     // Apply filters
     let filtered = allStations;
     if (filterOptions.region !== 'all') {
@@ -85,7 +85,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
     if (filterOptions.priority !== 'all') {
       filtered = stationUtils.getStationsByPriority(filterOptions.priority);
     }
-    
+
     return {
       totalStations: allStations.length,
       activeStations: allStations.filter(s => s.currentData?.temperature || s.currentData?.humidity).length,
@@ -93,7 +93,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
       geographicCoverage: weatherData.geographic_coverage?.coverage_percentage || 0,
       regionBreakdown: stats.byRegion,
       dataTypeBreakdown: stats.byDataType,
-      filteredStations: filtered
+      filteredStations: filtered,
     };
   }, [weatherData, stationUtils, filterOptions]);
 
@@ -107,35 +107,35 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
     });
   }, []);
 
-  // Handle station deselection  
+  // Handle station deselection
   const handleStationDeselect = useCallback((station) => {
-    setSelectedStations(prev => 
-      prev.filter(s => s.station_id !== station.station_id)
+    setSelectedStations(prev =>
+      prev.filter(s => s.station_id !== station.station_id),
     );
   }, []);
 
   // Get current weather summary
   const weatherSummary = useMemo(() => {
-    if (!weatherData?.data) return null;
-    
+    if (!weatherData?.data) {return null;}
+
     return {
       temperature: {
         current: weatherData.data.temperature?.average?.toFixed(1) || 'N/A',
-        range: weatherData.data.temperature ? 
+        range: weatherData.data.temperature ?
           `${weatherData.data.temperature.min?.toFixed(1)}° - ${weatherData.data.temperature.max?.toFixed(1)}°` : 'N/A',
-        stations: weatherData.data.temperature?.total_stations || 0
+        stations: weatherData.data.temperature?.total_stations || 0,
       },
       humidity: {
         current: weatherData.data.humidity?.average?.toFixed(0) || 'N/A',
-        range: weatherData.data.humidity ? 
+        range: weatherData.data.humidity ?
           `${weatherData.data.humidity.min?.toFixed(0)}% - ${weatherData.data.humidity.max?.toFixed(0)}%` : 'N/A',
-        stations: weatherData.data.humidity?.total_stations || 0
+        stations: weatherData.data.humidity?.total_stations || 0,
       },
       rainfall: {
         total: weatherData.data.rainfall?.total?.toFixed(1) || '0.0',
         activeStations: weatherData.data.rainfall?.readings?.filter(r => r.value > 0).length || 0,
-        totalStations: weatherData.data.rainfall?.total_stations || 0
-      }
+        totalStations: weatherData.data.rainfall?.total_stations || 0,
+      },
     };
   }, [weatherData]);
 
@@ -236,7 +236,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
             </div>
             <div className="text-2xl font-bold text-gray-900">{systemStatus.totalStations}</div>
           </div>
-          
+
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">Active Stations</div>
@@ -244,7 +244,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
             </div>
             <div className="text-2xl font-bold text-green-600">{systemStatus.activeStations}</div>
           </div>
-          
+
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">Data Quality</div>
@@ -252,7 +252,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
             </div>
             <div className="text-2xl font-bold text-gray-900">{systemStatus.dataQualityScore}</div>
           </div>
-          
+
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">Coverage</div>
@@ -264,9 +264,9 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
 
         {/* Status Indicator */}
         <div className="mt-4 flex items-center justify-between">
-          <StatusIndicator 
-            status={error ? 'error' : 'operational'} 
-            label={`System ${error ? 'Error' : 'Operational'}`} 
+          <StatusIndicator
+            status={error ? 'error' : 'operational'}
+            label={`System ${error ? 'Error' : 'Operational'}`}
           />
           <div className="text-sm text-gray-500">
             {selectedStations.length > 0 && `${selectedStations.length} station${selectedStations.length !== 1 ? 's' : ''} selected`}
@@ -281,7 +281,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
             { id: 'overview', label: 'Overview', icon: Grid3X3 },
             { id: 'stations', label: 'Stations', icon: Database, count: systemStatus.filteredStations.length },
             { id: 'compare', label: 'Compare', icon: BarChart3, count: selectedStations.length },
-            { id: 'map', label: 'Map', icon: Map }
+            { id: 'map', label: 'Map', icon: Map },
           ].map(tab => {
             const Icon = tab.icon;
             return (
@@ -394,7 +394,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
               )}
 
               {/* Regional Weather Display - 정확한 지역별 데이터 */}
-              <RegionalWeatherDisplay 
+              <RegionalWeatherDisplay
                 weatherData={weatherData}
                 className="mb-6"
               />
@@ -404,7 +404,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">주요 관측소 현황</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {systemStatus.filteredStations.slice(0, 6).map(station => (
-                    <div 
+                    <div
                       key={station.station_id}
                       className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
                       onClick={() => handleStationSelect(station)}
@@ -416,13 +416,13 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
                         </div>
                         <span className={`text-xs px-2 py-1 rounded-full ${
                           station.priority_level === 'critical' ? 'bg-red-100 text-red-700' :
-                          station.priority_level === 'high' ? 'bg-orange-100 text-orange-700' :
-                          'bg-blue-100 text-blue-700'
+                            station.priority_level === 'high' ? 'bg-orange-100 text-orange-700' :
+                              'bg-blue-100 text-blue-700'
                         }`}>
                           {station.priority_level}
                         </span>
                       </div>
-                      
+
                       {station.currentData && (
                         <div className="space-y-1">
                           {station.currentData.temperature && (
@@ -469,7 +469,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
                   {systemStatus.filteredStations.length} stations available
                 </div>
               </div>
-              
+
               <StationSelector
                 stations={systemStatus.filteredStations}
                 selectedStations={selectedStations}
@@ -497,7 +497,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
                   </button>
                 )}
               </div>
-              
+
               <StationComparison
                 stations={selectedStations}
                 onRemoveStation={handleStationDeselect}
@@ -530,7 +530,7 @@ const Enhanced59StationDashboard = React.memo(({ className = '' }) => {
 });
 
 Enhanced59StationDashboard.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 Enhanced59StationDashboard.displayName = 'Enhanced59StationDashboard';

@@ -239,7 +239,7 @@ const TrafficCameraGallery = () => {
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchDevice, setTouchDevice] = useState(false);
-  
+
   // Hwa Chong International School coordinates
   const HWA_CHONG_COORDS = { lat: 1.3437, lng: 103.7640 };
 
@@ -263,8 +263,8 @@ const TrafficCameraGallery = () => {
         ...camera,
         distance: calculateDistance(
           HWA_CHONG_COORDS.lat, HWA_CHONG_COORDS.lng,
-          camera.location.latitude, camera.location.longitude
-        )
+          camera.location.latitude, camera.location.longitude,
+        ),
       }))
       .filter(camera => camera.distance <= 10) // Within 10km
       .sort((a, b) => a.distance - b.distance)
@@ -425,9 +425,9 @@ const TrafficCameraGallery = () => {
                 variant={viewMode === 'nearby' ? 'default' : 'secondary'}
                 size="sm"
                 className={cn(
-                  "min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200",
-                  viewMode === 'nearby' && "bg-green-600 hover:bg-green-700 shadow-md transform scale-105",
-                  viewMode !== 'nearby' && "active:scale-95"
+                  'min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200',
+                  viewMode === 'nearby' && 'bg-green-600 hover:bg-green-700 shadow-md transform scale-105',
+                  viewMode !== 'nearby' && 'active:scale-95',
                 )}
                 aria-pressed={viewMode === 'nearby'}
               >
@@ -442,9 +442,9 @@ const TrafficCameraGallery = () => {
                 variant={viewMode === 'featured' ? 'default' : 'secondary'}
                 size="sm"
                 className={cn(
-                  "min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200",
-                  viewMode === 'featured' && "bg-blue-600 hover:bg-blue-700 shadow-md transform scale-105",
-                  viewMode !== 'featured' && "active:scale-95"
+                  'min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200',
+                  viewMode === 'featured' && 'bg-blue-600 hover:bg-blue-700 shadow-md transform scale-105',
+                  viewMode !== 'featured' && 'active:scale-95',
                 )}
                 aria-pressed={viewMode === 'featured'}
               >
@@ -459,9 +459,9 @@ const TrafficCameraGallery = () => {
                 variant={viewMode === 'all' ? 'default' : 'secondary'}
                 size="sm"
                 className={cn(
-                  "min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200",
-                  viewMode === 'all' && "bg-blue-600 hover:bg-blue-700 shadow-md transform scale-105",
-                  viewMode !== 'all' && "active:scale-95"
+                  'min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200',
+                  viewMode === 'all' && 'bg-blue-600 hover:bg-blue-700 shadow-md transform scale-105',
+                  viewMode !== 'all' && 'active:scale-95',
                 )}
                 aria-pressed={viewMode === 'all'}
               >
@@ -525,8 +525,8 @@ const TrafficCameraGallery = () => {
             <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
               <div className="flex items-center justify-between">
                 <span>
-                  마지막 업데이트: {formatDateSafely(lastUpdate, { 
-                    fallback: getLocalizedString('NO_DATA') 
+                  마지막 업데이트: {formatDateSafely(lastUpdate, {
+                    fallback: getLocalizedString('NO_DATA'),
                   })}
                 </span>
                 <span className="text-green-600 flex items-center gap-1">

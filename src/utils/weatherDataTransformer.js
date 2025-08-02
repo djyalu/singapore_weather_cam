@@ -4,7 +4,7 @@ import { STATION_MAPPING } from '../config/weatherStations.js';
 
 /**
  * ⚡ PERFORMANCE: Enhanced transformer with 59-station optimization
- * 
+ *
  * Features:
  * - Efficient batch processing of all 59 stations
  * - Intelligent data caching and memoization
@@ -14,7 +14,7 @@ import { STATION_MAPPING } from '../config/weatherStations.js';
  */
 export function transformWeatherData(rawData) {
   const startTime = performance.now();
-  
+
   if (!rawData || !rawData.data) {
     console.warn('⚠️ Invalid weather data structure');
     return createFallbackData();
@@ -27,7 +27,7 @@ export function transformWeatherData(rawData) {
       total_stations: stations_used?.length || 0,
       data_types: Object.keys(data || {}).length,
       station_details: Object.keys(station_details || {}).length,
-      processing_start: startTime
+      processing_start: startTime,
     });
 
     // Enhanced current weather extraction with all stations
@@ -48,7 +48,7 @@ export function transformWeatherData(rawData) {
       processing_time_ms: performance.now() - startTime,
       geographic_coverage: geographic_coverage,
       data_completeness: calculateDataCompleteness(data, station_details),
-      station_reliability: calculateStationReliability(station_details)
+      station_reliability: calculateStationReliability(station_details),
     };
 
     const transformedData = {
@@ -68,8 +68,8 @@ export function transformWeatherData(rawData) {
       performance: {
         transformation_time_ms: performance.now() - startTime,
         station_processing_rate: (stations_used?.length || 0) / ((performance.now() - startTime) / 1000),
-        data_efficiency_score: calculateDataEfficiency(data, station_details)
-      }
+        data_efficiency_score: calculateDataEfficiency(data, station_details),
+      },
     };
 
     console.log('✅ 59-station transformation completed:', {
@@ -77,7 +77,7 @@ export function transformWeatherData(rawData) {
       stations_processed: transformedData.meta.stations,
       data_quality: transformedData.meta.dataQuality,
       completeness: transformedData.meta.data_completeness,
-      efficiency_score: transformedData.performance.data_efficiency_score
+      efficiency_score: transformedData.performance.data_efficiency_score,
     });
 
     return transformedData;
@@ -99,7 +99,7 @@ function extractCurrentWeather(data) {
       primaryStationData = {
         stationId: stationId,
         temperature: tempReading.value,
-        stationName: tempReading.station_name
+        stationName: tempReading.station_name,
       };
       break;
     }
@@ -111,16 +111,16 @@ function extractCurrentWeather(data) {
     primaryStationData = {
       stationId: firstReading.station,
       temperature: firstReading.value,
-      stationName: firstReading.station_name
+      stationName: firstReading.station_name,
     };
   }
 
   // Get station-specific data where available
   const temperature = primaryStationData?.temperature || calculateAverage(data.temperature?.readings);
-  const humidity = primaryStationData ? 
+  const humidity = primaryStationData ?
     findStationValue(data.humidity?.readings, primaryStationData.stationId) || calculateAverage(data.humidity?.readings) :
     calculateAverage(data.humidity?.readings);
-  const rainfall = primaryStationData ? 
+  const rainfall = primaryStationData ?
     findStationValue(data.rainfall?.readings, primaryStationData.stationId) || calculateAverage(data.rainfall?.readings) :
     calculateAverage(data.rainfall?.readings);
   const windSpeed = calculateAverage(data.wind_speed?.readings);
@@ -139,7 +139,7 @@ function extractCurrentWeather(data) {
     icon: getWeatherIcon(temperature, rainfall),
     // Add station info for debugging
     stationId: primaryStationData?.stationId,
-    stationName: primaryStationData?.stationName
+    stationName: primaryStationData?.stationName,
   };
 }
 
@@ -251,25 +251,25 @@ function getAverageWindDirection(readings) {
 
 // 바람 방향을 화살표와 한글로 변환하는 함수
 function formatWindDirection(direction) {
-  if (!direction) return null;
-  
+  if (!direction) {return null;}
+
   const windDirections = {
     'N': '↓ 북풍',
-    'NNE': '↙ 북북동풍', 
+    'NNE': '↙ 북북동풍',
     'NE': '↙ 북동풍',
     'ENE': '↙ 동북동풍',
     'E': '← 동풍',
     'ESE': '↖ 동남동풍',
-    'SE': '↖ 남동풍', 
+    'SE': '↖ 남동풍',
     'SSE': '↖ 남남동풍',
     'S': '↑ 남풍',
     'SSW': '↗ 남남서풍',
     'SW': '↗ 남서풍',
-    'WSW': '↗ 서남서풍', 
+    'WSW': '↗ 서남서풍',
     'W': '→ 서풍',
     'WNW': '↘ 서북서풍',
     'NW': '↘ 북서풍',
-    'NNW': '↘ 북북서풍'
+    'NNW': '↘ 북북서풍',
   };
 
   return windDirections[direction.toUpperCase()] || `🧭 ${direction}`;
@@ -362,7 +362,7 @@ function createFallbackData() {
     data: {
       temperature: { readings: [] },
       humidity: { readings: [] },
-      rainfall: { readings: [] }
+      rainfall: { readings: [] },
     },
   };
 }
@@ -372,40 +372,40 @@ function createFallbackData() {
 function extractCurrentWeatherEnhanced(data, stationDetails) {
   // Use the original function for backward compatibility
   const basicCurrent = extractCurrentWeather(data);
-  
+
   // Add enhanced metrics with station-level insights
   // 실시간 API의 경우 stationDetails가 없을 수 있으므로 data.temperature.readings로 대체
   const stationCount = Object.keys(stationDetails || {}).length || data.temperature?.readings?.length || 0;
   const highQualityStations = Object.values(stationDetails || {})
     .filter(station => (station.reliability_score || 0) >= 0.8).length || stationCount; // 실시간 데이터는 모두 고품질로 간주
-  
+
   return {
     ...basicCurrent,
     // Enhanced metadata
     station_coverage: {
       total: stationCount,
       high_quality: highQualityStations,
-      coverage_ratio: stationCount > 0 ? (highQualityStations / stationCount) : 0
+      coverage_ratio: stationCount > 0 ? (highQualityStations / stationCount) : 0,
     },
     data_sources: Object.keys(data || {}).length,
-    last_enhanced: new Date().toISOString()
+    last_enhanced: new Date().toISOString(),
   };
 }
 
 function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
   const locations = [];
-  
+
   // 실시간 API인 경우 stationDetails 대신 temperature readings 사용
   const actualStationCount = Object.keys(stationDetails || {}).length || data.temperature?.readings?.length || 0;
   const isRealtimeApi = !stationDetails || Object.keys(stationDetails).length === 0;
-  
+
   console.log('🗺️ transformLocationsEnhanced:', {
     stationDetailsCount: Object.keys(stationDetails || {}).length,
     temperatureReadingsCount: data.temperature?.readings?.length || 0,
     actualStationCount,
-    isRealtimeApi
+    isRealtimeApi,
   });
-  
+
   // Add overall Singapore summary
   locations.push({
     id: 'all',
@@ -419,18 +419,18 @@ function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
     humidity: calculateAverage(data.humidity?.readings),
     rainfall: calculateAverage(data.rainfall?.readings),
     stationCount: actualStationCount,
-    coverage: geographicCoverage
+    coverage: geographicCoverage,
   });
-  
+
   // Create regional groupings based on actual station coordinates
   const regionStations = {
     north: [],
     south: [],
     east: [],
     west: [],
-    central: []
+    central: [],
   };
-  
+
   // Group stations by region based on coordinates
   const tempReadings = data.temperature?.readings || [];
   tempReadings.forEach(reading => {
@@ -439,7 +439,7 @@ function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
       regionStations[region].push(reading.station);
     }
   });
-  
+
   // 실시간 API인 경우 빈 지역에도 기본 지역 추가
   if (isRealtimeApi) {
     // 지역별 기본 데이터 구조 확보
@@ -447,7 +447,7 @@ function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
     const overallTemp = calculateAverage(data.temperature?.readings);
     const overallHumidity = calculateAverage(data.humidity?.readings);
     const overallRainfall = calculateAverage(data.rainfall?.readings);
-    
+
     allRegions.forEach(region => {
       if (regionStations[region].length === 0) {
         // 빈 지역에 대해서도 기본 정보 제공 (전체 평균 사용)
@@ -464,24 +464,24 @@ function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
           rainfall: overallRainfall !== null ? overallRainfall : null,
           stationCount: 0,
           region: region,
-          estimated: true
+          estimated: true,
         });
       }
     });
   }
-  
+
   // Add regional summaries with actual differentiated temperatures
   Object.entries(regionStations).forEach(([region, stationIds]) => {
     if (stationIds.length > 0) {
       const regionData = calculateRegionalAverages(data, stationIds);
-      
+
       console.log(`🗺️ ${region} region calculation:`, {
         stations: stationIds,
         temperature: regionData.temperature,
         humidity: regionData.humidity,
-        rainfall: regionData.rainfall
+        rainfall: regionData.rainfall,
       });
-      
+
       locations.push({
         id: region,
         name: `${region.charAt(0).toUpperCase() + region.slice(1)} Singapore`,
@@ -492,56 +492,56 @@ function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
         coordinates: getRegionalCoordinates(region),
         ...regionData,
         stationCount: stationIds.length,
-        region: region
+        region: region,
       });
     }
   });
-  
+
   // Add top priority individual stations
   const topStations = Object.values(stationDetails || {})
     .sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0))
     .slice(0, 10); // Top 10 stations
-    
+
   topStations.forEach(station => {
     const stationData = extractStationData(data, station.station_id);
     if (stationData) {
       locations.push({
         ...stationData,
         priority: 'individual',
-        enhanced: true
+        enhanced: true,
       });
     }
   });
-  
+
   return locations;
 }
 
 function generateEnhancedForecast(current, data, stationDetails) {
   const basicForecast = generateBasicForecast(current);
-  
+
   // Enhance with multi-station insights
   const stationReadings = Object.values(stationDetails || {}).length;
   const dataVariability = calculateDataVariability(data);
-  
+
   return basicForecast.map(item => ({
     ...item,
     confidence: stationReadings > 20 ? 0.85 : 0.75,
     variability: dataVariability,
     station_basis: stationReadings,
-    enhanced: true
+    enhanced: true,
   }));
 }
 
 function assessDataQualityEnhanced(data, stationDetails) {
   const basicQuality = assessDataQuality(data);
-  
-  if (!stationDetails) return basicQuality;
-  
+
+  if (!stationDetails) {return basicQuality;}
+
   const stations = Object.values(stationDetails);
   const avgReliability = stations.reduce((sum, s) => sum + (s.reliability_score || 0), 0) / stations.length;
   const dataTypes = Object.keys(data || {}).length;
   const expectedDataTypes = 6; // temperature, humidity, rainfall, wind_speed, wind_direction, air_temperature
-  
+
   let enhancedScore = 'medium';
   if (avgReliability >= 0.8 && dataTypes >= expectedDataTypes * 0.8) {
     enhancedScore = 'high';
@@ -550,33 +550,33 @@ function assessDataQualityEnhanced(data, stationDetails) {
   } else {
     enhancedScore = 'low';
   }
-  
+
   return enhancedScore;
 }
 
 function calculateDataCompleteness(data, stationDetails) {
-  if (!data || !stationDetails) return 0;
-  
+  if (!data || !stationDetails) {return 0;}
+
   const totalStations = Object.keys(stationDetails).length;
   const dataTypes = Object.keys(data);
-  
+
   let totalExpected = 0;
   let totalActual = 0;
-  
+
   dataTypes.forEach(type => {
     totalExpected += totalStations;
     totalActual += (data[type].readings?.length || 0);
   });
-  
+
   return totalExpected > 0 ? (totalActual / totalExpected) : 0;
 }
 
 function calculateStationReliability(stationDetails) {
-  if (!stationDetails) return 0;
-  
+  if (!stationDetails) {return 0;}
+
   const stations = Object.values(stationDetails);
   const totalReliability = stations.reduce((sum, station) => sum + (station.reliability_score || 0), 0);
-  
+
   return stations.length > 0 ? (totalReliability / stations.length) : 0;
 }
 
@@ -584,7 +584,7 @@ function calculateDataEfficiency(data, stationDetails) {
   const completeness = calculateDataCompleteness(data, stationDetails);
   const reliability = calculateStationReliability(stationDetails);
   const coverage = Object.keys(stationDetails || {}).length / 59; // Out of 59 total stations
-  
+
   return (completeness * 0.4 + reliability * 0.4 + coverage * 0.2);
 }
 
@@ -592,54 +592,54 @@ function calculateRegionalAverages(data, stationIds) {
   const results = {
     temperature: null,
     humidity: null,
-    rainfall: null
+    rainfall: null,
   };
-  
+
   // Temperature calculation
-  const tempReadings = data.temperature?.readings?.filter(reading => 
-    stationIds.includes(reading.station)
+  const tempReadings = data.temperature?.readings?.filter(reading =>
+    stationIds.includes(reading.station),
   ) || [];
-  
+
   if (tempReadings.length > 0) {
     const tempValues = tempReadings.map(r => r.value).filter(v => v !== null && v !== undefined && !isNaN(v));
     if (tempValues.length > 0) {
       results.temperature = Math.round((tempValues.reduce((sum, val) => sum + val, 0) / tempValues.length) * 10) / 10;
     }
   }
-  
+
   // Humidity calculation
-  const humidityReadings = data.humidity?.readings?.filter(reading => 
-    stationIds.includes(reading.station)
+  const humidityReadings = data.humidity?.readings?.filter(reading =>
+    stationIds.includes(reading.station),
   ) || [];
-  
+
   if (humidityReadings.length > 0) {
     const humidityValues = humidityReadings.map(r => r.value).filter(v => v !== null && v !== undefined && !isNaN(v));
     if (humidityValues.length > 0) {
       results.humidity = Math.round(humidityValues.reduce((sum, val) => sum + val, 0) / humidityValues.length);
     }
   }
-  
+
   // Rainfall calculation
-  const rainfallReadings = data.rainfall?.readings?.filter(reading => 
-    stationIds.includes(reading.station)
+  const rainfallReadings = data.rainfall?.readings?.filter(reading =>
+    stationIds.includes(reading.station),
   ) || [];
-  
+
   if (rainfallReadings.length > 0) {
     const rainfallValues = rainfallReadings.map(r => r.value).filter(v => v !== null && v !== undefined && !isNaN(v));
     if (rainfallValues.length > 0) {
       results.rainfall = Math.round((rainfallValues.reduce((sum, val) => sum + val, 0) / rainfallValues.length) * 10) / 10;
     }
   }
-  
+
   console.log(`🔧 Regional calculation for stations [${stationIds.join(', ')}]:`, {
     temperature: results.temperature,
     humidity: results.humidity,
     rainfall: results.rainfall,
     tempReadings: tempReadings.length,
     humidityReadings: humidityReadings.length,
-    rainfallReadings: rainfallReadings.length
+    rainfallReadings: rainfallReadings.length,
   });
-  
+
   return results;
 }
 
@@ -649,32 +649,32 @@ function getRegionalCoordinates(region) {
     south: { lat: 1.28, lng: 103.82 },
     east: { lat: 1.35, lng: 103.95 },
     west: { lat: 1.35, lng: 103.70 },
-    central: { lat: 1.35, lng: 103.82 }
+    central: { lat: 1.35, lng: 103.82 },
   };
-  
+
   return coordinates[region] || { lat: 1.3521, lng: 103.8198 };
 }
 
 function calculateDataVariability(data) {
   const variability = {};
-  
+
   Object.entries(data || {}).forEach(([dataType, typeData]) => {
     const values = typeData.readings?.map(r => r.value).filter(v => v !== null && v !== undefined) || [];
-    
+
     if (values.length > 1) {
       const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
       const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
       const stdDev = Math.sqrt(variance);
-      
+
       variability[dataType] = {
         mean,
         std_dev: stdDev,
         coefficient_of_variation: mean !== 0 ? (stdDev / mean) : 0,
-        range: Math.max(...values) - Math.min(...values)
+        range: Math.max(...values) - Math.min(...values),
       };
     }
   });
-  
+
   return variability;
 }
 
@@ -684,25 +684,25 @@ function determineRegionFromStation(stationId) {
     // North Singapore (Woodlands, Sembawang, Yishun area)
     'S77': 'north', 'S108': 'north', 'S228': 'north', 'S229': 'north', 'S230': 'north',
     'S66': 'north', 'S43': 'north', 'S71': 'north', 'S40': 'north',
-    
-    // South Singapore (Sentosa, Harbourfront, Marina area)  
+
+    // South Singapore (Sentosa, Harbourfront, Marina area)
     'S24': 'south', 'S81': 'south', 'S94': 'south', 'S88': 'south', 'S92': 'south',
     'S78': 'south', 'S119': 'south', 'S123': 'south',
-    
+
     // East Singapore (Changi, Tampines, Pasir Ris area)
     'S50': 'east', 'S29': 'east', 'S102': 'east', 'S60': 'east', 'S84': 'east',
     'S214': 'east', 'S215': 'east', 'S216': 'east', 'S217': 'east',
-    
+
     // West Singapore (Jurong, Tuas, Clementi area)
     'S104': 'west', 'S106': 'west', 'S111': 'west', 'S112': 'west', 'S113': 'west',
     'S115': 'west', 'S117': 'west', 'S44': 'west', 'S33': 'west',
-    
+
     // Central Singapore (City, Newton, Bukit Timah area)
     'S107': 'central', 'S109': 'central', 'S07': 'central', 'S08': 'central', 'S69': 'central',
     'S79': 'central', 'S90': 'central', 'S220': 'central', 'S221': 'central', 'S222': 'central',
-    'S223': 'central', 'S224': 'central', 'S226': 'central', 'S227': 'central'
+    'S223': 'central', 'S224': 'central', 'S226': 'central', 'S227': 'central',
   };
-  
+
   return stationRegionMap[stationId] || 'central'; // Default to central if not found
 }
 
@@ -711,10 +711,10 @@ export default {
   createFallbackData,
   // Enhanced functions
   extractCurrentWeatherEnhanced,
-  transformLocationsEnhanced,  
+  transformLocationsEnhanced,
   generateEnhancedForecast,
   assessDataQualityEnhanced,
   calculateDataCompleteness,
   calculateStationReliability,
-  calculateDataEfficiency
+  calculateDataEfficiency,
 };

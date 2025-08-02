@@ -21,7 +21,7 @@ const RegionalWeatherCard = React.memo(({
   isActive = false,
   onClick,
   lastUpdate,
-  className = ''
+  className = '',
 }) => {
   // 디버깅: 받은 props 확인
   console.log(`🔧 RegionalWeatherCard props for ${region}:`, {
@@ -31,51 +31,51 @@ const RegionalWeatherCard = React.memo(({
     weatherIcon,
     humidity,
     rainfall,
-    windDirection
+    windDirection,
   });
 
   const formatTemperature = (temp) => {
-    if (temp === null || temp === undefined) return '--';
+    if (temp === null || temp === undefined) {return '--';}
     return Math.round(temp * 10) / 10;
   };
 
   const formatHumidity = (hum) => {
-    if (hum === null || hum === undefined) return '--';
+    if (hum === null || hum === undefined) {return '--';}
     return Math.round(hum);
   };
 
   const getTemperatureColor = (temp) => {
-    if (temp === null || temp === undefined) return 'text-gray-500';
-    if (temp > 32) return 'text-red-500';
-    if (temp > 28) return 'text-orange-500';
-    if (temp > 24) return 'text-blue-500';
+    if (temp === null || temp === undefined) {return 'text-gray-500';}
+    if (temp > 32) {return 'text-red-500';}
+    if (temp > 28) {return 'text-orange-500';}
+    if (temp > 24) {return 'text-blue-500';}
     return 'text-blue-600';
   };
 
   const getTemperatureBackground = (temp) => {
-    if (temp === null || temp === undefined) return 'from-gray-100 to-gray-200';
-    if (temp > 32) return 'from-red-50 to-red-100';
-    if (temp > 28) return 'from-orange-50 to-orange-100';
-    if (temp > 24) return 'from-blue-50 to-blue-100';
+    if (temp === null || temp === undefined) {return 'from-gray-100 to-gray-200';}
+    if (temp > 32) {return 'from-red-50 to-red-100';}
+    if (temp > 28) {return 'from-orange-50 to-orange-100';}
+    if (temp > 24) {return 'from-blue-50 to-blue-100';}
     return 'from-blue-50 to-indigo-100';
   };
 
   const getRegionEmoji = (region) => {
     // region이 이미 이모지를 포함하고 있으면 빈 문자열 반환
-    if (!region || typeof region !== 'string') return '📍';
-    
+    if (!region || typeof region !== 'string') {return '📍';}
+
     // 이미 이모지가 포함된 경우 처리
-    if (region.includes('🏫') || region.includes('🏙️') || region.includes('✈️') || 
+    if (region.includes('🏫') || region.includes('🏙️') || region.includes('✈️') ||
         region.includes('🏭') || region.includes('🌳') || region.includes('🏝️')) {
       return ''; // 이미 이모지가 있으므로 추가하지 않음
     }
-    
+
     const lowerRegion = region.toLowerCase();
-    if (lowerRegion.includes('hwa chong') || lowerRegion.includes('bukit timah')) return '🏫';
-    if (lowerRegion.includes('newton') || lowerRegion.includes('orchard')) return '🏙️';
-    if (lowerRegion.includes('changi') || lowerRegion.includes('east')) return '✈️';
-    if (lowerRegion.includes('jurong') || lowerRegion.includes('west')) return '🏭';
-    if (lowerRegion.includes('woodlands') || lowerRegion.includes('north')) return '🌳';
+    if (lowerRegion.includes('hwa chong') || lowerRegion.includes('bukit timah')) {return '🏫';}
+    if (lowerRegion.includes('newton') || lowerRegion.includes('orchard')) {return '🏙️';}
+    if (lowerRegion.includes('changi') || lowerRegion.includes('east')) {return '✈️';}
+    if (lowerRegion.includes('jurong') || lowerRegion.includes('west')) {return '🏭';}
+    if (lowerRegion.includes('woodlands') || lowerRegion.includes('north')) {return '🌳';}
     return '📍';
   };
 
@@ -85,9 +85,9 @@ const RegionalWeatherCard = React.memo(({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-xl",
-        isActive && "ring-2 ring-primary shadow-xl scale-[1.02]",
-        className
+        'relative overflow-hidden transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-xl',
+        isActive && 'ring-2 ring-primary shadow-xl scale-[1.02]',
+        className,
       )}
       onClick={onClick}
       role="button"

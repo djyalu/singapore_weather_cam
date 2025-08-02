@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import { Camera, Clock, CheckCircle } from 'lucide-react';
 import RefreshButton from '../common/RefreshButton';
 
-const Header = React.memo(({ 
-  systemStats = {}, 
-  onRefresh, 
-  onForceRefresh, 
+const Header = React.memo(({
+  systemStats = {},
+  onRefresh,
+  onForceRefresh,
   isRefreshing = false,
-  lastUpdate 
+  lastUpdate,
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -49,7 +49,7 @@ const Header = React.memo(({
         {/* 정적 배경 효과 - 애니메이션 제거 */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-indigo-600/5 to-purple-600/5"></div>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 opacity-60"></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
           <div className="flex items-center justify-between">
             {/* 로고 및 타이틀 - 완전히 새로운 디자인 */}

@@ -94,7 +94,7 @@ const App = () => {
     return (
       <div className="space-y-4 sm:space-y-6">
         {/* 싱가포르 전체 평균 날씨 정보 - 개선된 컴팩트한 디자인 */}
-        <SingaporeOverallWeather 
+        <SingaporeOverallWeather
           weatherData={weatherData}
           refreshTrigger={refreshTrigger}
           className=""

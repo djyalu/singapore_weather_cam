@@ -16,18 +16,18 @@ export const useTrafficCameraData = (refreshInterval = 60000) => {
     try {
       setError(null);
       setLoading(true);
-      
+
       const data = await fetchTrafficCameras({
         cacheTTL: 60000, // 1 minute cache
         timeout: 15000,  // 15 second timeout (increased)
       });
-      
+
       console.log('✅ Traffic cameras data received:', {
         totalCameras: data.totalCameras || data.cameras?.length || 0,
         timestamp: data.timestamp,
-        dataKeys: Object.keys(data)
+        dataKeys: Object.keys(data),
       });
-      
+
       setTrafficData(data);
       setLastFetch(new Date());
       console.log(`📷 Traffic cameras loaded successfully: ${data.cameras?.length || 0} cameras`);
@@ -35,10 +35,10 @@ export const useTrafficCameraData = (refreshInterval = 60000) => {
       console.error('❌ Traffic camera data fetch failed:', {
         error: err.message,
         stack: err.stack,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       setError(err);
-      
+
       // Set fallback data to prevent 0 cameras display
       setTrafficData({
         totalCameras: 90,
@@ -46,8 +46,8 @@ export const useTrafficCameraData = (refreshInterval = 60000) => {
         timestamp: new Date().toISOString(),
         metadata: {
           source: 'Fallback (API Error)',
-          error: err.message
-        }
+          error: err.message,
+        },
       });
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ export const useTrafficCameraData = (refreshInterval = 60000) => {
 
   // Set up refresh interval
   useEffect(() => {
-    if (!refreshInterval) return;
+    if (!refreshInterval) {return;}
 
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);

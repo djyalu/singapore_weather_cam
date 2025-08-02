@@ -7,7 +7,7 @@ import LoadingScreen from '../common/LoadingScreen';
 import ScrollProgress from '../navigation/ScrollProgress';
 import DataSyncGuide from '../common/DataSyncGuide';
 import WeatherAlertTicker from '../common/WeatherAlertTicker';
-import { useSystemStatus } from "../../contexts/AppDataContextSimple";
+import { useSystemStatus } from '../../contexts/AppDataContextSimple';
 import { usePullToRefresh } from '../../hooks/useTouchGestures';
 
 /**
@@ -94,7 +94,7 @@ const AppLayout = React.memo(({ children }) => {
         </a>
 
         {/* Header with system stats */}
-        <Header 
+        <Header
           systemStats={systemStats}
           onRefresh={refresh}
           onForceRefresh={forceRefresh}
@@ -103,7 +103,7 @@ const AppLayout = React.memo(({ children }) => {
         />
 
         {/* 실시간 기상 경보 티커 */}
-        <WeatherAlertTicker 
+        <WeatherAlertTicker
           refreshInterval={300000} // 5분마다 업데이트
           className="animate-ticker-fade"
         />

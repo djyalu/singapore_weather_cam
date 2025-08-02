@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { useAppData } from "../../contexts/AppDataContextSimple";
+import { useAppData } from '../../contexts/AppDataContextSimple';
 
 // Lazy load analysis components
 const WeatherAnalysisCardRefactored = React.lazy(() => import('../analysis/WeatherAnalysisCardRefactored'));

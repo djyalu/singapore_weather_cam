@@ -37,7 +37,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
       forceRefresh: () => {},
       dataFreshness: { weather: 'unknown', webcam: 'unknown' },
       reliabilityMetrics: {},
-      getReliabilityReport: () => ({})
+      getReliabilityReport: () => ({}),
     };
   }
   const {
@@ -81,7 +81,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     console.warn('useMetrics failed:', error);
     metricsHook = {
       trackPageView: () => {},
-      trackUserInteraction: () => {}
+      trackUserInteraction: () => {},
     };
   }
   const { trackPageView, trackUserInteraction } = metricsHook;

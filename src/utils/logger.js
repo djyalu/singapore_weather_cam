@@ -25,7 +25,7 @@ export const logger = {
   warn: (message, ...args) => {
     const sanitizedMessage = sanitizeMessage(message);
     const sanitizedArgs = sanitizeArgs(args);
-    
+
     if (isDevelopment || isTest) {
       console.warn(`[WARN] ${sanitizedMessage}`, ...sanitizedArgs);
     } else {
@@ -41,16 +41,16 @@ export const logger = {
   error: (message, error, ...args) => {
     const sanitizedMessage = sanitizeMessage(message);
     const sanitizedArgs = sanitizeArgs(args);
-    
+
     if (isDevelopment || isTest) {
       console.error(`[ERROR] ${sanitizedMessage}`, error, ...sanitizedArgs);
     } else {
       // In production, log minimal error info
       const errorInfo = error instanceof Error ? {
         name: error.name,
-        message: sanitizeMessage(error.message)
+        message: sanitizeMessage(error.message),
       } : 'Unknown error';
-      
+
       console.error(`[ERROR] ${sanitizedMessage}`, errorInfo);
     }
   },
@@ -62,7 +62,7 @@ export const logger = {
     if (isDevelopment) {
       console.debug(`[DEBUG] ${sanitizeMessage(message)}`, ...sanitizeArgs(args));
     }
-  }
+  },
 };
 
 /**
@@ -113,7 +113,7 @@ function sanitizeObject(obj) {
   }
 
   const sensitiveKeys = ['apikey', 'api_key', 'token', 'password', 'secret', 'authorization'];
-  
+
   for (const key in obj) {
     if (sensitiveKeys.some(sensitive => key.toLowerCase().includes(sensitive))) {
       obj[key] = '***';
@@ -121,7 +121,7 @@ function sanitizeObject(obj) {
       obj[key] = sanitizeObject(obj[key]);
     }
   }
-  
+
   return obj;
 }
 
@@ -134,23 +134,23 @@ export const safeDateUtils = {
    */
   formatDate: (date, locale = 'ko-KR', options = {}) => {
     try {
-      if (!date) return 'No date';
-      
+      if (!date) {return 'No date';}
+
       if (typeof date === 'string') {
         date = new Date(date);
       }
-      
+
       if (!(date instanceof Date) || isNaN(date.getTime())) {
         return 'Invalid date';
       }
-      
+
       return date.toLocaleString(locale, {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        ...options
+        ...options,
       });
     } catch (error) {
       logger.warn('Date formatting error:', error);
@@ -163,17 +163,17 @@ export const safeDateUtils = {
    */
   parseDate: (input) => {
     try {
-      if (!input) return null;
-      
+      if (!input) {return null;}
+
       if (input instanceof Date) {
         return isNaN(input.getTime()) ? null : input;
       }
-      
+
       if (typeof input === 'string' || typeof input === 'number') {
         const parsed = new Date(input);
         return isNaN(parsed.getTime()) ? null : parsed;
       }
-      
+
       return null;
     } catch (error) {
       logger.warn('Date parsing error:', error);
@@ -186,7 +186,7 @@ export const safeDateUtils = {
    */
   isValidDate: (date) => {
     return date instanceof Date && !isNaN(date.getTime());
-  }
+  },
 };
 
 export default logger;

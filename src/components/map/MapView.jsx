@@ -33,8 +33,8 @@ const initializeLeaflet = () => {
 
 // 아이콘 생성 함수들 (Leaflet 로드 후 생성)
 const createIcons = () => {
-  if (typeof window.L === 'undefined') return null;
-  
+  if (typeof window.L === 'undefined') {return null;}
+
   return {
     weatherIcon: window.L.divIcon({
       html: '<div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">🌡️</div>',
@@ -42,27 +42,27 @@ const createIcons = () => {
       iconSize: [32, 32],
       iconAnchor: [16, 32],
     }),
-    
+
     trafficCameraIcon: window.L.divIcon({
       html: '<div class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md border border-white">🚗</div>',
       className: 'custom-div-icon',
       iconSize: [24, 24],
       iconAnchor: [12, 24],
     }),
-    
+
     featuredTrafficIcon: window.L.divIcon({
       html: '<div class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">🚗</div>',
       className: 'custom-div-icon',
       iconSize: [32, 32],
       iconAnchor: [16, 32],
     }),
-    
+
     schoolIcon: window.L.divIcon({
       html: '<div class="bg-purple-600 text-white rounded-lg w-10 h-10 flex items-center justify-center text-lg font-bold shadow-lg border-2 border-white">🏫</div>',
       className: 'custom-div-icon',
       iconSize: [40, 40],
       iconAnchor: [20, 40],
-    })
+    }),
   };
 };
 
@@ -71,7 +71,7 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
   const [isLoadingTraffic, setIsLoadingTraffic] = useState(true);
   const [trafficError, setTrafficError] = useState(null);
   const [mapInitError, setMapInitError] = useState(null);
-  
+
   // 날씨 레이어 표시 상태
   const [showWeatherOverlay, setShowWeatherOverlay] = useState(true);
   const [showTemperatureLayer, setShowTemperatureLayer] = useState(true);
@@ -109,17 +109,17 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
 
   const getAreaFromCoordinates = (lat, lng) => {
     // Singapore 실제 지역 경계 기반 분류
-    if (lat >= 1.4000) return 'North'; // 북부 (Woodlands, Yishun)
-    if (lat <= 1.2500) return 'South'; // 남부 (Sentosa, Marina Bay)
-    if (lng <= 103.7500) return 'West'; // 서부 (Jurong, Tuas)
-    if (lng >= 103.9000) return 'East'; // 동부 (Changi, Pasir Ris)
+    if (lat >= 1.4000) {return 'North';} // 북부 (Woodlands, Yishun)
+    if (lat <= 1.2500) {return 'South';} // 남부 (Sentosa, Marina Bay)
+    if (lng <= 103.7500) {return 'West';} // 서부 (Jurong, Tuas)
+    if (lng >= 103.9000) {return 'East';} // 동부 (Changi, Pasir Ris)
     return 'Central'; // 중부 (Orchard, CBD)
   };
 
   const getLocationName = (lat, lng, cameraId) => {
     // 좌표 기반 실제 위치명 생성
     const area = getAreaFromCoordinates(lat, lng);
-    
+
     // 알려진 랜드마크 근처 확인 (100m 내)
     const landmarks = [
       { name: 'Marina Bay', lat: 1.2741, lng: 103.8513, radius: 0.01 },
@@ -129,18 +129,18 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
       { name: 'Jurong', lat: 1.3204, lng: 103.7065, radius: 0.02 },
       { name: 'Bukit Timah', lat: 1.3520, lng: 103.7767, radius: 0.02 },
       { name: 'Sentosa', lat: 1.2494, lng: 103.8303, radius: 0.015 },
-      { name: 'CBD', lat: 1.2884, lng: 103.8470, radius: 0.015 }
+      { name: 'CBD', lat: 1.2884, lng: 103.8470, radius: 0.015 },
     ];
-    
+
     for (const landmark of landmarks) {
       const distance = Math.sqrt(
-        Math.pow(lat - landmark.lat, 2) + Math.pow(lng - landmark.lng, 2)
+        Math.pow(lat - landmark.lat, 2) + Math.pow(lng - landmark.lng, 2),
       );
       if (distance <= landmark.radius) {
         return `${landmark.name} (${cameraId})`;
       }
     }
-    
+
     // 랜드마크와 매치되지 않으면 지역명 + 카메라 ID 사용
     return `${area} Traffic Cam ${cameraId}`;
   };
@@ -149,10 +149,10 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
     try {
       setIsLoadingTraffic(true);
       setTrafficError(null);
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
+
       const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images', {
         method: 'GET',
         headers: {
@@ -160,94 +160,94 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
         },
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
-      const data = await response.json();
-        
-        if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
-          throw new Error('No traffic camera data available');
-        }
-        
-        const latestItem = data.items[0];
-        if (!latestItem.cameras || !Array.isArray(latestItem.cameras)) {
-          throw new Error('Invalid camera data structure');
-        }
-        
-        // 하드코딩된 카메라 이름 제거하고 좌표 기반 동적 생성 사용
 
-        console.log(`🚗 총 ${latestItem.cameras.length}개 카메라 데이터 수신`);
-        
-        const processedCameras = latestItem.cameras
-          .filter(camera => 
-            camera.camera_id &&
+      const data = await response.json();
+
+      if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+        throw new Error('No traffic camera data available');
+      }
+
+      const latestItem = data.items[0];
+      if (!latestItem.cameras || !Array.isArray(latestItem.cameras)) {
+        throw new Error('Invalid camera data structure');
+      }
+
+      // 하드코딩된 카메라 이름 제거하고 좌표 기반 동적 생성 사용
+
+      console.log(`🚗 총 ${latestItem.cameras.length}개 카메라 데이터 수신`);
+
+      const processedCameras = latestItem.cameras
+        .filter(camera =>
+          camera.camera_id &&
             camera.location &&
             camera.image &&
             typeof camera.location.latitude === 'number' &&
-            typeof camera.location.longitude === 'number'
-          )
-          .map(camera => {
-            const lat = parseFloat(camera.location.latitude);
-            const lng = parseFloat(camera.location.longitude);
-            return {
-              id: camera.camera_id,
-              name: getLocationName(lat, lng, camera.camera_id),
-              area: getAreaFromCoordinates(lat, lng),
-              location: {
-                latitude: lat,
-                longitude: lng,
-              },
-              image: {
-                url: camera.image,
-                width: camera.image_metadata?.width || 0,
-                height: camera.image_metadata?.height || 0,
-              },
-              timestamp: camera.timestamp,
-              quality: (camera.image_metadata?.width >= 1920) ? 'HD' : 'Standard',
-              status: 'active',
-            };
-          });
-        
-        console.log(`✅ 처리 완료: ${processedCameras.length}개 카메라 지도에 표시`);
-        setTrafficCameras(processedCameras);
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          setTrafficError(error.message);
-        }
-        
-        // 실제 API 데이터를 가져올 수 없는 경우의 fallback
-        const mockCameras = [
-          {
-            id: '1501',
-            name: getLocationName(1.2741, 103.8513, '1501'),
-            area: getAreaFromCoordinates(1.2741, 103.8513),
-            location: { latitude: 1.2741, longitude: 103.8513 },
-            image: { url: '', width: 1920, height: 1080 },
-            timestamp: new Date().toISOString(),
-            quality: 'HD',
+            typeof camera.location.longitude === 'number',
+        )
+        .map(camera => {
+          const lat = parseFloat(camera.location.latitude);
+          const lng = parseFloat(camera.location.longitude);
+          return {
+            id: camera.camera_id,
+            name: getLocationName(lat, lng, camera.camera_id),
+            area: getAreaFromCoordinates(lat, lng),
+            location: {
+              latitude: lat,
+              longitude: lng,
+            },
+            image: {
+              url: camera.image,
+              width: camera.image_metadata?.width || 0,
+              height: camera.image_metadata?.height || 0,
+            },
+            timestamp: camera.timestamp,
+            quality: (camera.image_metadata?.width >= 1920) ? 'HD' : 'Standard',
             status: 'active',
-          },
-          {
-            id: '6710',
-            name: getLocationName(1.3442, 103.7858, '6710'),
-            area: getAreaFromCoordinates(1.3442, 103.7858),
-            location: { latitude: 1.3442, longitude: 103.7858 },
-            image: { url: '', width: 1920, height: 1080 },
-            timestamp: new Date().toISOString(),
-            quality: 'HD',
-            status: 'active',
-          },
-        ];
-        
-        setTrafficCameras(mockCameras);
-      } finally {
-        setIsLoadingTraffic(false);
+          };
+        });
+
+      console.log(`✅ 처리 완료: ${processedCameras.length}개 카메라 지도에 표시`);
+      setTrafficCameras(processedCameras);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        setTrafficError(error.message);
       }
-    };
+
+      // 실제 API 데이터를 가져올 수 없는 경우의 fallback
+      const mockCameras = [
+        {
+          id: '1501',
+          name: getLocationName(1.2741, 103.8513, '1501'),
+          area: getAreaFromCoordinates(1.2741, 103.8513),
+          location: { latitude: 1.2741, longitude: 103.8513 },
+          image: { url: '', width: 1920, height: 1080 },
+          timestamp: new Date().toISOString(),
+          quality: 'HD',
+          status: 'active',
+        },
+        {
+          id: '6710',
+          name: getLocationName(1.3442, 103.7858, '6710'),
+          area: getAreaFromCoordinates(1.3442, 103.7858),
+          location: { latitude: 1.3442, longitude: 103.7858 },
+          image: { url: '', width: 1920, height: 1080 },
+          timestamp: new Date().toISOString(),
+          quality: 'HD',
+          status: 'active',
+        },
+      ];
+
+      setTrafficCameras(mockCameras);
+    } finally {
+      setIsLoadingTraffic(false);
+    }
+  };
 
   useEffect(() => {
     loadTrafficCameras();
@@ -282,7 +282,7 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
               style={{ zIndex: 100 }}
             />
           )}
-          
+
           {/* 기존 개별 날씨 스테이션 마커들 (옵션) */}
           {!showWeatherOverlay && weatherData?.locations?.map((location) => (
             location.coordinates && (
@@ -319,7 +319,7 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                     if (onCameraSelect) {
                       onCameraSelect(camera);
                     }
-                  }
+                  },
                 }}
               >
                 <Popup>
@@ -349,12 +349,12 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                         </span>
                       </div>
                     </div>
-                    
+
                     {camera.image?.url && (
                       <div className="mt-3">
                         <div className="relative">
-                          <img 
-                            src={camera.image.url} 
+                          <img
+                            src={camera.image.url}
                             alt={`${camera.name} 실시간 교통 상황`}
                             className="w-full h-32 object-cover rounded border border-gray-200"
                             loading="lazy"
@@ -380,13 +380,13 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                         </p>
                       </div>
                     )}
-                    
+
                     {isFeatured && (
                       <div className="mt-2 bg-red-50 px-2 py-1 rounded text-xs text-red-700 font-medium">
                         ⭐ 주요 교통 지점
                       </div>
                     )}
-                    
+
                     {/* Camera selection button */}
                     <div className="mt-3 pt-3 border-t border-gray-200">
                       <button
@@ -437,15 +437,15 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                 클릭하여 레이어 표시/숨김
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {/* 날씨 오버레이 토글 */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowWeatherOverlay(!showWeatherOverlay)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    showWeatherOverlay 
-                      ? 'bg-blue-100 text-blue-800 border border-blue-300' 
+                    showWeatherOverlay
+                      ? 'bg-blue-100 text-blue-800 border border-blue-300'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -464,8 +464,8 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                     showTemperatureLayer && showWeatherOverlay
                       ? 'bg-orange-100 text-orange-800 border border-orange-300'
                       : showWeatherOverlay
-                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-50 text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   <span className="text-lg">🌡️</span>
@@ -485,8 +485,8 @@ const MapView = React.memo(({ weatherData, selectedRegion = 'all', regionConfig 
                     showWeatherIcons && showWeatherOverlay
                       ? 'bg-green-100 text-green-800 border border-green-300'
                       : showWeatherOverlay
-                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-50 text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   <span className="text-lg">🌤️</span>

@@ -23,18 +23,18 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     try {
       setIsLoadingTraffic(true);
       const response = await fetch('https://api.data.gov.sg/v1/transport/traffic-images');
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      
+
       const data = await response.json();
       const cameras = data.items?.[0]?.cameras || [];
-      
+
       cameras.forEach((camera) => {
         if (camera.location && camera.image) {
           const { latitude, longitude } = camera.location;
-          
+
           // 교통 카메라 아이콘
           const cameraIcon = window.L.divIcon({
             html: `<div style="
@@ -49,12 +49,12 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             ">🚗</div>`,
             className: 'traffic-camera-icon',
             iconSize: [24, 24],
-            iconAnchor: [12, 12]
+            iconAnchor: [12, 12],
           });
 
-          const marker = window.L.marker([latitude, longitude], { 
+          const marker = window.L.marker([latitude, longitude], {
             icon: cameraIcon,
-            zIndexOffset: 1000 
+            zIndexOffset: 1000,
           }).addTo(map);
 
           marker.bindPopup(`
@@ -91,14 +91,14 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             </div>
           `, {
             maxWidth: 400,
-            className: 'custom-popup'
+            className: 'custom-popup',
           });
         }
       });
-      
+
       setTrafficCameras(cameras);
       console.log(`✅ ${cameras.length}개 교통 카메라 로드 완료`);
-      
+
     } catch (error) {
       console.error('교통 카메라 로딩 실패:', error);
     } finally {
@@ -111,10 +111,10 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     let timeoutId;
     let attemptCount = 0;
     const maxAttempts = 30; // 15초 최대 대기
-    
+
     const initializeMap = () => {
       attemptCount++;
-      
+
       // DOM 준비 확인
       if (!mapRef.current) {
         console.log('⏳ DOM 컨테이너 대기 중...');
@@ -137,7 +137,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
       try {
         console.log('✅ Leaflet CDN 로드 완료, 지도 초기화 시작');
-        
+
         // 기존 지도 인스턴스 정리
         if (leafletMapRef.current) {
           try {
@@ -160,7 +160,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           preferCanvas: false,
           zoomAnimation: true,
           fadeAnimation: true,
-          markerZoomAnimation: true
+          markerZoomAnimation: true,
         });
 
         // 지도 로드 이벤트 리스너
@@ -177,7 +177,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           crossOrigin: true,
           keepBuffer: 2,
           updateWhenZooming: false,
-          updateWhenIdle: true
+          updateWhenIdle: true,
         });
 
         tileLayer.on('loading', () => {
@@ -210,14 +210,14 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             ">⭐</div>`,
             className: 'school-marker',
             iconSize: [32, 32],
-            iconAnchor: [16, 16]
+            iconAnchor: [16, 16],
           });
 
-          const centerMarker = window.L.marker(SINGAPORE_CENTER, { 
+          const centerMarker = window.L.marker(SINGAPORE_CENTER, {
             icon: schoolIcon,
-            zIndexOffset: 2000 // 다른 마커들보다 위에 표시
+            zIndexOffset: 2000, // 다른 마커들보다 위에 표시
           }).addTo(map);
-          
+
           centerMarker.bindPopup(`
             <div style="text-align: center; padding: 12px; min-width: 200px;">
               <strong style="color: #B8860B; font-size: 16px;">⭐ Hwa Chong International School</strong><br>
@@ -231,7 +231,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             </div>
           `, {
             maxWidth: 250,
-            className: 'school-popup'
+            className: 'school-popup',
           });
         } catch (markerError) {
           console.warn('학교 마커 생성 오류:', markerError);
@@ -239,12 +239,12 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
         leafletMapRef.current = map;
         setMapError(null);
-        
+
         console.log('🎉 Leaflet 지도 초기화 완료!');
-        
+
         // 교통 카메라 로딩
         loadTrafficCameras(map);
-        
+
       } catch (error) {
         console.error('🚨 Leaflet 지도 초기화 실패:', error);
         setMapError(`지도 초기화 실패: ${error.message}`);
@@ -271,7 +271,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
   }, []); // 빈 의존성 배열로 한 번만 실행
 
   // 히트맵 생성 - 지도 준비 완료 후 실행
-  useEffect(() => {    
+  useEffect(() => {
     // 지도가 준비되지 않았으면 대기
     if (!isMapReady || !leafletMapRef.current) {
       return;
@@ -281,14 +281,14 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     const timer = setTimeout(() => {
       createHeatmapLayers();
     }, 500);
-    
+
     return () => clearTimeout(timer);
 
     function createHeatmapLayers() {
       if (!leafletMapRef.current || !window.L) {
         return;
       }
-      
+
       // 기존 날씨 레이어 제거 - 부드럽게 처리
       try {
         const layersToRemove = [];
@@ -297,7 +297,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             layersToRemove.push(layer);
           }
         });
-        
+
         // 한 번에 제거하여 깜빡임 최소화
         layersToRemove.forEach(layer => {
           leafletMapRef.current.removeLayer(layer);
@@ -309,16 +309,16 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       // 🎯 데이터 일치성 검증
       const validation = validateDataConsistency(weatherData);
       console.log('🔍 지도 히트맵 데이터 일치성 검증:', validation);
-      
+
       if (!validation.isConsistent) {
         console.warn('⚠️ 데이터 일치성 문제 발견:', validation.issues);
       }
 
       // 통합된 지역 데이터 사용
-      STANDARD_REGIONS.forEach((region, index) => {        
+      STANDARD_REGIONS.forEach((region, index) => {
         const avgTemp = getRegionalTemperature(weatherData, region.id);
         const tempColor = getTemperatureColor(avgTemp);
-        
+
         try {
           // 온도 기반 히트맵 원형 생성
           const circle = window.L.circle([region.coordinates.lat, region.coordinates.lng], {
@@ -329,14 +329,14 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
             radius: 10000,
             weight: 3,
             interactive: true,
-            className: 'weather-layer'
+            className: 'weather-layer',
           });
 
           circle.addTo(leafletMapRef.current);
-          
+
           // 데이터 소스 표시
           const dataSource = validation.regionalTemps[region.id]?.source === 'real_data' ? '실시간 데이터' : 'Fallback 데이터';
-          
+
           // 온도 정보 팝업
           circle.bindPopup(`
             <div style="text-align: center; padding: 12px;">
@@ -378,66 +378,66 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
   return (
     <div className={`relative ${className}`}>
       {/* 지도 컨테이너 */}
-      <div 
-        ref={mapRef} 
+      <div
+        ref={mapRef}
         className="w-full h-[600px] border border-gray-300 rounded-lg"
         style={{ background: '#f0f0f0' }}
       />
-      
+
       {/* 온도 범례 - 항상 표시, 최상단 레이어 */}
       {isMapReady && (
-        <div 
+        <div
           className="absolute bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 border-2 border-gray-300"
-          style={{ 
+          style={{
             zIndex: 10000,
             backgroundColor: 'rgba(255, 255, 255, 0.98)',
             backdropFilter: 'blur(8px)',
-            pointerEvents: 'none' // 지도 조작에 방해되지 않도록
+            pointerEvents: 'none', // 지도 조작에 방해되지 않도록
           }}
         >
-        <div className="text-sm font-bold text-gray-800 mb-3 flex items-center">
+          <div className="text-sm font-bold text-gray-800 mb-3 flex items-center">
           🌡️ 온도 범례
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-3">
-            <div 
-              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
-              style={{ backgroundColor: '#3B82F6' }}
-            ></div>
-            <span className="text-xs font-medium text-gray-700">25°C 이하</span>
           </div>
-          <div className="flex items-center space-x-3">
-            <div 
-              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
-              style={{ backgroundColor: '#22C55E' }}
-            ></div>
-            <span className="text-xs font-medium text-gray-700">26-27°C</span>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-3">
+              <div
+                className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                style={{ backgroundColor: '#3B82F6' }}
+              ></div>
+              <span className="text-xs font-medium text-gray-700">25°C 이하</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div
+                className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                style={{ backgroundColor: '#22C55E' }}
+              ></div>
+              <span className="text-xs font-medium text-gray-700">26-27°C</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div
+                className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                style={{ backgroundColor: '#EAB308' }}
+              ></div>
+              <span className="text-xs font-medium text-gray-700">28-29°C</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div
+                className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                style={{ backgroundColor: '#F97316' }}
+              ></div>
+              <span className="text-xs font-medium text-gray-700">30-31°C</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div
+                className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                style={{ backgroundColor: '#EF4444' }}
+              ></div>
+              <span className="text-xs font-medium text-gray-700">32°C 이상</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <div 
-              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
-              style={{ backgroundColor: '#EAB308' }}
-            ></div>
-            <span className="text-xs font-medium text-gray-700">28-29°C</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div 
-              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
-              style={{ backgroundColor: '#F97316' }}
-            ></div>
-            <span className="text-xs font-medium text-gray-700">30-31°C</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div 
-              className="w-5 h-5 rounded-full border-2 border-white shadow-sm" 
-              style={{ backgroundColor: '#EF4444' }}
-            ></div>
-            <span className="text-xs font-medium text-gray-700">32°C 이상</span>
-          </div>
-        </div>
         </div>
       )}
-      
+
       {/* 로딩 오버레이 */}
       {!isMapReady && (
         <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
@@ -448,7 +448,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           </div>
         </div>
       )}
-      
+
     </div>
   );
 };

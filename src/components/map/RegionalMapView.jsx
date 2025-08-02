@@ -241,7 +241,7 @@ const RegionalMapView = ({
         (() => {
           const validTemps = filteredWeatherData.locations
             .filter(loc => loc.temperature !== null && loc.temperature !== undefined);
-          if (validTemps.length === 0) return null;
+          if (validTemps.length === 0) {return null;}
           const sum = validTemps.reduce((acc, loc) => acc + loc.temperature, 0);
           return (sum / validTemps.length).toFixed(1);
         })() : null;

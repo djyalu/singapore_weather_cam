@@ -6,30 +6,30 @@ import { Clock, RefreshCw, Zap, Info, Calendar, Gauge, X } from 'lucide-react';
  * 데이터 동기화 가이드 컴포넌트
  * 자동 수집 주기와 수동 새로고침 기능을 사용자에게 안내
  */
-const DataSyncGuide = React.memo(({ 
-  onRefresh, 
-  onForceRefresh, 
-  isRefreshing = false, 
+const DataSyncGuide = React.memo(({
+  onRefresh,
+  onForceRefresh,
+  isRefreshing = false,
   lastUpdate = null,
   className = '',
-  showRefreshControls = true
+  showRefreshControls = true,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatLastUpdate = (date) => {
-    if (!date) return '업데이트 정보 없음';
-    
+    if (!date) {return '업데이트 정보 없음';}
+
     try {
       const now = new Date();
       const updateTime = new Date(date);
       const diffMinutes = Math.floor((now - updateTime) / (1000 * 60));
-      
-      if (diffMinutes < 1) return '방금 전';
-      if (diffMinutes < 60) return `${diffMinutes}분 전`;
-      
+
+      if (diffMinutes < 1) {return '방금 전';}
+      if (diffMinutes < 60) {return `${diffMinutes}분 전`;}
+
       const diffHours = Math.floor(diffMinutes / 60);
-      if (diffHours < 24) return `${diffHours}시간 전`;
-      
+      if (diffHours < 24) {return `${diffHours}시간 전`;}
+
       return updateTime.toLocaleDateString('ko-KR');
     } catch (error) {
       return '시간 정보 오류';
@@ -41,11 +41,11 @@ const DataSyncGuide = React.memo(({
       const now = new Date();
       const nextUpdate = new Date(now);
       nextUpdate.setHours(Math.floor(now.getHours() / 3) * 3 + 3, 0, 0, 0);
-      
+
       const diffMinutes = Math.floor((nextUpdate - now) / (1000 * 60));
       const diffHours = Math.floor(diffMinutes / 60);
       const remainingMinutes = diffMinutes % 60;
-      
+
       if (diffHours > 0) {
         return `${diffHours}시간 ${remainingMinutes}분 후`;
       }
@@ -74,10 +74,10 @@ const DataSyncGuide = React.memo(({
               className="p-1 hover:bg-blue-100 rounded-md transition-colors"
               aria-label={isExpanded ? '정보 접기' : '정보 펼치기'}
             >
-              <X 
+              <X
                 className={`w-4 h-4 text-blue-600 transition-transform ${
                   isExpanded ? 'rotate-45' : ''
-                }`} 
+                }`}
               />
             </button>
           </div>
@@ -130,8 +130,8 @@ const DataSyncGuide = React.memo(({
                     <button
                       onClick={onForceRefresh}
                       disabled={isRefreshing}
-                      className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium 
-                        text-green-600 bg-green-50 hover:bg-green-100 disabled:opacity-50 
+                      className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium
+                        text-green-600 bg-green-50 hover:bg-green-100 disabled:opacity-50
                         rounded-md transition-colors min-h-[40px]"
                       title="NEA Singapore API에서 실시간 최신 데이터 가져오기"
                     >
@@ -178,7 +178,7 @@ DataSyncGuide.propTypes = {
   isRefreshing: PropTypes.bool,
   lastUpdate: PropTypes.oneOfType([
     PropTypes.string,
-    PropTypes.instanceOf(Date)
+    PropTypes.instanceOf(Date),
   ]),
   className: PropTypes.string,
   showRefreshControls: PropTypes.bool,

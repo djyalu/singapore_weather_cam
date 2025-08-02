@@ -27,25 +27,28 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
     const generateSmartWeatherSummary = async () => {
-      if (!weatherData) return;
-      
+      if (!weatherData) {return;}
+
       setAiLoading(true);
       try {
         // Generating smart weather summary
-        
+
         // 실시간 데이터 소스 확인 및 우선 처리
         const isRealTimeData = weatherData.source?.includes('Real-time') || weatherData.source?.includes('NEA Singapore');
         const dataAge = weatherData.timestamp ? (Date.now() - new Date(weatherData.timestamp).getTime()) / (1000 * 60) : 0; // 분 단위
-        
+
         // Data source analysis completed
-        
+
         const overallData = getUnifiedWeatherData(weatherData);
         const forecast = weatherData?.data?.forecast?.general;
-        
-        // 실시간 데이터를 강조하는 요약 생성
-        const summary = generateIntelligentSummary(overallData, forecast, isRealTimeData);
-        const highlights = generateHighlights(overallData, forecast, isRealTimeData);
-        
+
+        // 실시간 강수량 데이터로 지역별 소나기/폭우 정보 분석
+        const rainfallAnalysis = analyzeRealTimeRainfall(weatherData);
+
+        // 실시간 데이터를 강조하는 요약 생성 (강수 정보 포함)
+        const summary = generateIntelligentSummary(overallData, forecast, isRealTimeData, rainfallAnalysis);
+        const highlights = generateHighlights(overallData, forecast, isRealTimeData, rainfallAnalysis);
+
         setAiSummary({
           summary,
           highlights,
@@ -54,20 +57,20 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
           timestamp: weatherData.timestamp || new Date().toISOString(),
           isRealAnalysis: false,
           dataSource: weatherData.source || 'Unknown',
-          dataAge: Math.round(dataAge)
+          dataAge: Math.round(dataAge),
         });
-        
+
         // Smart weather summary generated
       } catch (error) {
         // Failed to generate smart summary
-        
+
         // 간단한 폴백
         setAiSummary({
           summary: '실시간 날씨 정보 분석 중',
           highlights: ['실시간 데이터 로딩'],
           confidence: 0.7,
           aiModel: '기본 분석',
-          isRealAnalysis: false
+          isRealAnalysis: false,
         });
       } finally {
         setAiLoading(false);
@@ -89,7 +92,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
 
     try {
       // Cohere AI 분석 실행 중
-      
+
       // 1단계: 현재 분석 상태 표시
       setCohereAnalysis({
         analysis: '🤖 Cohere AI가 최신 날씨 데이터를 분석하고 있습니다...\n\n📊 데이터 수집 및 패턴 분석 중\n🧠 인공지능 추론 엔진 작동 중\n📝 한국어 요약 생성 중',
@@ -97,7 +100,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
         model: 'Cohere Command API (실행 중)',
         timestamp: new Date().toISOString(),
         isRealAnalysis: true,
-        isLoading: true
+        isLoading: true,
       });
       setShowRealAI(true);
 
@@ -105,15 +108,15 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       // GitHub Actions 데이터 확인 중
       const basePath = import.meta.env.BASE_URL || '/';
       const timestamp = new Date().getTime();
-      
+
       try {
         console.log('🔍 GitHub Actions Cohere 데이터 확인 중...');
         const response = await fetch(`${basePath}data/weather-summary/latest.json?t=${timestamp}`);
-        
+
         if (response.ok) {
           const aiData = await response.json();
           console.log('✅ GitHub Actions AI 데이터 로드:', aiData.ai_model);
-          
+
           // 실제 Cohere 데이터인지 확인 (Enhanced 버전 포함)
           if (aiData.ai_model && aiData.ai_model.includes('Cohere Command API') && aiData.raw_analysis) {
             console.log('🎯 Cohere AI 데이터 발견! 분석 결과 표시');
@@ -122,14 +125,14 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
               confidence: aiData.confidence || 0.85,
               model: 'GitHub Actions + Cohere Command API',
               timestamp: aiData.timestamp || new Date().toISOString(),
-              isRealAnalysis: true
+              isRealAnalysis: true,
             });
             return;
           } else {
             console.log('⚠️ Cohere 데이터 조건 불만족:', {
               hasModel: !!aiData.ai_model,
               includesCohere: aiData.ai_model?.includes('Cohere Command API'),
-              hasAnalysis: !!aiData.raw_analysis
+              hasAnalysis: !!aiData.raw_analysis,
             });
           }
         } else {
@@ -143,42 +146,42 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       try {
         // 실시간 고급 AI 분석 시작
         const realTimeResult = await executeAdvancedRealTimeAnalysis();
-        
+
         setCohereAnalysis(realTimeResult);
         setShowRealAI(true);
         return; // 성공하면 여기서 종료
-        
+
       } catch (analysisError) {
         // 실시간 분석 실패, 기본 분석으로 전환
       }
-      
+
       // 백업: 로컬 심화 분석
       // 로컬 심화 데이터 분석 수행 중
-      
+
       const overallData = getUnifiedWeatherData(weatherData);
       const analysisResult = generateAdvancedAnalysis(overallData, weatherData);
-      
+
       setCohereAnalysis(analysisResult);
       setShowRealAI(true);
-      
+
       // 로컬 심화 분석 완료
     } catch (error) {
       console.error('🚨 분석 실패:', error);
-      
+
       // 최종 백업: 기본 분석
       const overallData = getUnifiedWeatherData(weatherData);
       const fallbackResult = {
-        analysis: `현재 데이터를 기반으로 한 기본 분석입니다.\n\n` +
-                 `온도: ${overallData.temperature.toFixed(1)}°C (${overallData.temperature >= 30 ? '더운 날씨' : '쾌적한 날씨'})\n` +  
+        analysis: '현재 데이터를 기반으로 한 기본 분석입니다.\n\n' +
+                 `온도: ${overallData.temperature.toFixed(1)}°C (${overallData.temperature >= 30 ? '더운 날씨' : '쾌적한 날씨'})\n` +
                  `습도: ${Math.round(overallData.humidity)}% (${overallData.humidity >= 80 ? '높음' : '보통'})\n` +
                  `강수량: ${overallData.rainfall.toFixed(1)}mm\n\n` +
                  `💡 추천: ${overallData.temperature >= 32 ? '야외활동 시 충분한 수분 섭취' : '야외활동하기 좋은 날씨'}`,
         confidence: 0.75,
         model: '데이터 기반 분석',
         timestamp: new Date().toISOString(),
-        isRealAnalysis: false
+        isRealAnalysis: false,
       };
-      
+
       setCohereAnalysis(fallbackResult);
       setShowRealAI(true);
     } finally {
@@ -190,15 +193,15 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
   const executeRealTimeAIAnalysis = async () => {
     try {
       // 실시간 AI 분석 API 호출 시작
-      
+
       const response = await fetch('/api/ai-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          weatherData: getUnifiedWeatherData(weatherData)
-        })
+          weatherData: getUnifiedWeatherData(weatherData),
+        }),
       });
 
       if (!response.ok) {
@@ -211,21 +214,21 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {break;}
 
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
-        
+
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.slice(6));
-              
+
               // 진행 상황 업데이트
               setCohereAnalysis(prev => ({
                 ...prev,
                 analysis: data.message,
-                progress: data.progress
+                progress: data.progress,
               }));
 
               // 완료된 경우 최종 결과 반환
@@ -235,7 +238,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
                   confidence: data.result.confidence,
                   model: `실시간 ${data.result.model}`,
                   timestamp: data.result.timestamp,
-                  isRealAnalysis: true
+                  isRealAnalysis: true,
                 };
               }
 
@@ -262,51 +265,54 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
   // 실시간 고급 AI 분석 실행
   const executeAdvancedRealTimeAnalysis = async () => {
     const overallData = getUnifiedWeatherData(weatherData);
-    
+
     const stages = [
       {
         message: '🤖 새로운 AI 분석을 시작합니다...\n\n📊 최신 기상 데이터 수집 중\n🔍 59개 관측소 데이터 실시간 통합',
-        duration: 1500
+        duration: 1500,
       },
       {
         message: '🧠 고급 AI 추론 엔진 작동 중...\n\n🌡️ Heat Index 체감온도 계산\n📈 기상 패턴 AI 분류 시스템\n⏰ 시간대별 최적화 분석',
-        duration: 2000
+        duration: 2000,
       },
       {
         message: '📝 개인화된 분석 결과 생성 중...\n\n✨ 자연어 처리 엔진 작동\n🎯 맞춤형 건강 권장사항 생성\n📊 신뢰도 검증 및 품질 보증',
-        duration: 1500
-      }
+        duration: 1500,
+      },
     ];
 
     // 단계별 진행 상황 표시
     for (const stage of stages) {
       setCohereAnalysis(prev => ({
         ...prev,
-        analysis: stage.message
+        analysis: stage.message,
       }));
-      
+
       await new Promise(resolve => setTimeout(resolve, stage.duration));
     }
 
-    // 실제 고급 분석 생성
-    return generateAdvancedAIAnalysis(overallData);
+    // 59개 관측소 강수량 데이터 분석 추가
+    const rainfallAnalysis = analyzeRealTimeRainfall(weatherData);
+
+    // 실제 고급 분석 생성 (강수 정보 포함)
+    return generateAdvancedAIAnalysis(overallData, rainfallAnalysis);
   };
 
-  // 고급 AI 분석 생성 함수
-  const generateAdvancedAIAnalysis = (data) => {
+  // 고급 AI 분석 생성 함수 (59개 관측소 강수 데이터 포함)
+  const generateAdvancedAIAnalysis = (data, rainfallAnalysis = null) => {
     const temp = data.temperature;
     const humidity = data.humidity;
     const rainfall = data.rainfall;
-    
+
     // Heat Index 계산 (실제 기상학 공식)
     const heatIndex = temp + (humidity - 60) * 0.12;
-    
+
     // 현재 시간 기반 컨텍스트
     const hour = new Date().getHours();
     const timeContext = hour >= 6 && hour < 10 ? '아침' :
-                       hour >= 10 && hour < 16 ? '한낮' :
-                       hour >= 16 && hour < 20 ? '오후' : '저녁/밤';
-    
+      hour >= 10 && hour < 16 ? '한낮' :
+        hour >= 16 && hour < 20 ? '오후' : '저녁/밤';
+
     // 날씨 패턴 AI 분류
     let weatherPattern, patternAdvice;
     if (temp >= 32 && humidity >= 80) {
@@ -322,7 +328,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       weatherPattern = '일반적인 열대 기후 패턴';
       patternAdvice = '전형적인 싱가포르 날씨 특성';
     }
-    
+
     // 건강 권장사항 AI 생성
     const healthAdvice = [];
     if (heatIndex >= 32) {
@@ -333,15 +339,15 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     } else {
       healthAdvice.push('🌟 야외활동하기 좋은 쾌적한 날씨');
     }
-    
+
     if (humidity >= 85) {
       healthAdvice.push('😰 높은 습도로 인한 불쾌감, 통풍 잘 되는 옷 착용');
     }
-    
+
     if (rainfall > 2) {
       healthAdvice.push('☔ 우산 필수, 미끄러운 바닥 주의');
     }
-    
+
     // 시간대별 맞춤 조언
     let timeAdvice = '';
     if (timeContext === '아침') {
@@ -353,14 +359,53 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     } else {
       timeAdvice = '저녁/밤 시간으로 선선한 야외활동이 가능합니다.';
     }
-    
+
+    // 59개 관측소 실시간 강수 상황 분석 섹션 추가
+    let rainfallSection = '';
+    if (rainfallAnalysis) {
+      rainfallSection = `
+
+🌧️ **실시간 지역별 강수 상황 (59개 관측소)**
+${rainfallAnalysis.message}
+• 강수 중인 지역: ${rainfallAnalysis.activeRainStations}/${rainfallAnalysis.totalStations}개소
+• 최대 강수량: ${rainfallAnalysis.maxRainfall}mm
+• 전국 총 강수량: ${rainfallAnalysis.totalRainfall}mm`;
+
+      // 강수량별 지역 상세 정보
+      if (rainfallAnalysis.regions.extreme.length > 0) {
+        rainfallSection += `\n• ⛈️ 극한 폭우 지역: ${rainfallAnalysis.regions.extreme.length}곳 (30mm 이상)`;
+      }
+      if (rainfallAnalysis.regions.heavy.length > 0) {
+        rainfallSection += `\n• 🌧️ 강한 비 지역: ${rainfallAnalysis.regions.heavy.length}곳 (10-30mm)`;
+      }
+      if (rainfallAnalysis.regions.moderate.length > 0) {
+        rainfallSection += `\n• ☔ 중간 비 지역: ${rainfallAnalysis.regions.moderate.length}곳 (2-10mm)`;
+      }
+      if (rainfallAnalysis.regions.light.length > 0) {
+        rainfallSection += `\n• 🌦️ 가벼운 비 지역: ${rainfallAnalysis.regions.light.length}곳 (0-2mm)`;
+      }
+
+      // 긴급 상황별 권장사항 추가
+      if (rainfallAnalysis.alertLevel === 'critical') {
+        healthAdvice.unshift('🚨 즉시 안전한 실내로 대피하세요');
+        healthAdvice.unshift('⛈️ 극한 폭우로 인한 홍수 위험');
+      } else if (rainfallAnalysis.alertLevel === 'high') {
+        healthAdvice.unshift('🌧️ 강한 비로 인한 교통 지연 예상');
+        healthAdvice.unshift('🌂 우산과 우비 필수 준비');
+      } else if (rainfallAnalysis.alertLevel === 'medium') {
+        healthAdvice.unshift('☔ 우산 준비 및 미끄러운 바닥 주의');
+      } else if (rainfallAnalysis.alertLevel === 'low') {
+        healthAdvice.unshift('🌦️ 가벼운 우산 준비 권장');
+      }
+    }
+
     const analysisText = `🌟 **실시간 고급 AI 날씨 분석**
 
 📊 **정밀 기상 분석 결과**
 • 실제 기온: ${temp.toFixed(1)}°C
 • AI 계산 체감온도: ${heatIndex.toFixed(1)}°C
 • 습도: ${Math.round(humidity)}% (${humidity >= 80 ? '매우 높음' : humidity >= 60 ? '보통' : '낮음'})
-• 강수량: ${rainfall.toFixed(1)}mm
+• 강수량: ${rainfall.toFixed(1)}mm${rainfallSection}
 
 🧠 **AI 기상 패턴 분류**
 현재 **${weatherPattern}**이 감지되었습니다.
@@ -373,18 +418,19 @@ ${timeAdvice}
 ${healthAdvice.map(advice => `• ${advice}`).join('\n')}
 
 🎯 **종합 AI 평가**
-${temp >= 30 ? 
-  '더운 날씨로 체온 관리와 수분 보충에 특별한 주의가 필요합니다.' :
-  '비교적 쾌적한 날씨로 다양한 야외활동을 즐기기 좋습니다.'
+${temp >= 30 ?
+    '더운 날씨로 체온 관리와 수분 보충에 특별한 주의가 필요합니다.' :
+    '비교적 쾌적한 날씨로 다양한 야외활동을 즐기기 좋습니다.'
 }
-${humidity >= 80 ? ' 높은 습도로 인해 실제보다 더 덥게 느껴질 수 있습니다.' : ''}`;
+${humidity >= 80 ? ' 높은 습도로 인해 실제보다 더 덥게 느껴질 수 있습니다.' : ''}
+${rainfallAnalysis && rainfallAnalysis.alertLevel !== 'none' ? ` ${rainfallAnalysis.alertLevel === 'critical' ? '현재 극한 기상 상황입니다.' : '강수로 인한 야외활동 조정이 필요합니다.'}` : ''}`;
 
     return {
       analysis: analysisText,
       confidence: 0.94,
       model: '실시간 고급 AI 분석 엔진',
       timestamp: new Date().toISOString(),
-      isRealAnalysis: true
+      isRealAnalysis: true,
     };
   };
 
@@ -393,24 +439,24 @@ ${humidity >= 80 ? ' 높은 습도로 인해 실제보다 더 덥게 느껴질 �
     const stages = [
       {
         message: '🤖 Cohere AI가 최신 날씨 데이터를 분석하고 있습니다...\n\n📊 NEA Singapore API 데이터 수집 중\n🔍 59개 기상 관측소 데이터 통합 중',
-        duration: 2000
+        duration: 2000,
       },
       {
         message: '🤖 Cohere AI가 최신 날씨 데이터를 분석하고 있습니다...\n\n🧠 인공지능 추론 엔진 작동 중\n📈 온도, 습도, 강수량 패턴 분석 중\n🌡️ 체감온도 및 기상 조건 계산 중',
-        duration: 3000
+        duration: 3000,
       },
       {
         message: '🤖 Cohere AI가 최신 날씨 데이터를 분석하고 있습니다...\n\n📝 한국어 요약 생성 중\n✨ 개인화된 권장사항 작성 중\n🎯 신뢰도 검증 및 최종 검토 중',
-        duration: 2500
-      }
+        duration: 2500,
+      },
     ];
 
     for (const stage of stages) {
       setCohereAnalysis(prev => ({
         ...prev,
-        analysis: stage.message
+        analysis: stage.message,
       }));
-      
+
       await new Promise(resolve => setTimeout(resolve, stage.duration));
     }
   };
@@ -421,10 +467,10 @@ ${humidity >= 80 ? ' 높은 습도로 인해 실제보다 더 덥게 느껴질 �
     const humidity = overallData.humidity;
     const rainfall = overallData.rainfall;
     const forecast = overallData.forecast;
-    
+
     // 체감온도 계산 (Heat Index 간소화 버전)
     const heatIndex = temp + (humidity - 60) * 0.1;
-    
+
     // 날씨 패턴 분석
     let weatherPattern = '';
     if (temp >= 32 && humidity >= 80) {
@@ -438,7 +484,7 @@ ${humidity >= 80 ? ' 높은 습도로 인해 실제보다 더 덥게 느껴질 �
     } else {
       weatherPattern = '전형적인 싱가포르 기후';
     }
-    
+
     // 시간대별 예상
     const hour = new Date().getHours();
     let timeAdvice = '';
@@ -451,7 +497,7 @@ ${humidity >= 80 ? ' 높은 습도로 인해 실제보다 더 덥게 느껴질 �
     } else {
       timeAdvice = '저녁/밤 시간으로 선선한 야외활동이 가능합니다.';
     }
-    
+
     const analysis = `🌡️ **체감온도 분석**
 실제온도 ${temp.toFixed(1)}°C → 체감온도 약 ${heatIndex.toFixed(1)}°C
 습도 ${Math.round(humidity)}%로 인한 끈적함 ${humidity >= 80 ? '높음' : humidity >= 60 ? '보통' : '낮음'}
@@ -464,9 +510,9 @@ ${forecast.includes('Rain') ? '강수 가능성이 있어 ' : ''}${forecast.incl
 ${timeAdvice}
 
 💧 **수분 및 건강 권장사항**
-${temp >= 32 ? '• 매시간 200ml 이상 수분 섭취\n• 직사광선 노출 최소화' : 
-  temp >= 28 ? '• 적당한 수분 섭취\n• 가벼운 야외활동 적합' : 
-  '• 쾌적한 날씨로 야외활동 권장'}
+${temp >= 32 ? '• 매시간 200ml 이상 수분 섭취\n• 직사광선 노출 최소화' :
+    temp >= 28 ? '• 적당한 수분 섭취\n• 가벼운 야외활동 적합' :
+      '• 쾌적한 날씨로 야외활동 권장'}
 ${humidity >= 85 ? '\n• 높은 습도로 인한 열사병 주의' : ''}
 ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
 
@@ -475,28 +521,101 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
       confidence: 0.92,
       model: '심화 기상 분석 엔진',
       timestamp: new Date().toISOString(),
-      isRealAnalysis: true
+      isRealAnalysis: true,
     };
   };
 
   // 통합된 날씨 데이터 사용
   const overallData = getUnifiedWeatherData(weatherData);
-  
+
   // 🎯 데이터 일치성 검증 추가
   const validation = validateDataConsistency(weatherData);
   if (!validation.isConsistent) {
     console.warn('⚠️ 주요 날씨 정보와 히트맵 데이터 불일치:', validation.issues);
   }
 
-  // 스마트 요약 생성 함수들 - 실시간 데이터 우선 처리
-  const generateIntelligentSummary = (data, forecast, isRealTime = false) => {
+  // 🌧️ 실시간 강수량 데이터 분석 함수 (59개 관측소)
+  const analyzeRealTimeRainfall = (weatherData) => {
+    if (!weatherData?.data?.rainfall?.readings) {
+      return {
+        status: 'no_data',
+        message: '강수량 데이터를 확인할 수 없습니다.',
+        regions: [],
+      };
+    }
+
+    const rainfallReadings = weatherData.data.rainfall.readings;
+
+    // 강수량별 지역 분류
+    const dryRegions = rainfallReadings.filter(r => r.value === 0);
+    const lightRainRegions = rainfallReadings.filter(r => r.value > 0 && r.value <= 2);
+    const moderateRainRegions = rainfallReadings.filter(r => r.value > 2 && r.value <= 10);
+    const heavyRainRegions = rainfallReadings.filter(r => r.value > 10 && r.value <= 30);
+    const extremeRainRegions = rainfallReadings.filter(r => r.value > 30);
+
+    // 총 강수량 및 활성 강수 지역
+    const totalRainfall = rainfallReadings.reduce((sum, r) => sum + r.value, 0);
+    const activeRainStations = rainfallReadings.filter(r => r.value > 0);
+
+    let status = 'clear';
+    let message = '';
+    let alertLevel = 'none';
+
+    if (extremeRainRegions.length > 0) {
+      status = 'extreme_rain';
+      message = `⛈️ 극한 폭우 경보! ${extremeRainRegions.length}개 지역에서 30mm 이상의 집중호우가 발생하고 있습니다.`;
+      alertLevel = 'critical';
+    } else if (heavyRainRegions.length > 0) {
+      status = 'heavy_rain';
+      message = `🌧️ 강한 소나기 주의! ${heavyRainRegions.length}개 지역에서 10-30mm의 강한 비가 내리고 있습니다.`;
+      alertLevel = 'high';
+    } else if (moderateRainRegions.length > 0) {
+      status = 'moderate_rain';
+      message = `☔ 중간 강도 소나기가 ${moderateRainRegions.length}개 지역에 영향을 주고 있습니다.`;
+      alertLevel = 'medium';
+    } else if (lightRainRegions.length > 0) {
+      status = 'light_rain';
+      message = `🌦️ 가벼운 소나기가 ${lightRainRegions.length}개 지역에서 감지되었습니다.`;
+      alertLevel = 'low';
+    } else {
+      status = 'clear';
+      message = `☀️ 전국 ${dryRegions.length}개 관측소 모두 건조한 상태입니다.`;
+      alertLevel = 'none';
+    }
+
+    return {
+      status,
+      message,
+      alertLevel,
+      totalStations: rainfallReadings.length,
+      activeRainStations: activeRainStations.length,
+      totalRainfall: totalRainfall.toFixed(1),
+      regionBreakdown: {
+        dry: dryRegions.length,
+        light: lightRainRegions.length,
+        moderate: moderateRainRegions.length,
+        heavy: heavyRainRegions.length,
+        extreme: extremeRainRegions.length,
+      },
+      maxRainfall: rainfallReadings.length > 0 ? Math.max(...rainfallReadings.map(r => r.value)) : 0,
+      regions: {
+        extreme: extremeRainRegions.map(r => ({ station: r.station, value: r.value })),
+        heavy: heavyRainRegions.map(r => ({ station: r.station, value: r.value })),
+        moderate: moderateRainRegions.map(r => ({ station: r.station, value: r.value })),
+        light: lightRainRegions.map(r => ({ station: r.station, value: r.value })),
+      },
+    };
+  };
+
+  // 스마트 요약 생성 함수들 - 실시간 데이터 우선 처리 (강수 정보 포함)
+  const generateIntelligentSummary = (data, forecast, isRealTime = false, rainfallAnalysis = null) => {
     const temp = data.temperature;
     const humidity = data.humidity;
     const rainfall = data.rainfall;
-    
+
     // 실시간 데이터 여부에 따른 프리픽스
     const dataPrefix = isRealTime ? '🔴 실시간' : '📊 최신';
-    
+
     // 온도 평가
     let tempDesc, tempAdvice;
     if (temp >= 32) {
@@ -515,7 +634,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
       tempDesc = '선선함';
       tempAdvice = isRealTime ? '지금 얇은 겉옷 착용 권장' : '얇은 겉옷 준비를 권장';
     }
-    
+
     // 습도 평가
     let humidityDesc = '';
     if (humidity >= 85) {
@@ -527,90 +646,122 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
     } else {
       humidityDesc = ', 건조한 편';
     }
-    
-    // 강수 상황
+
+    // 59개 관측소 실시간 강수 상황 (지역별 상세 정보)
     let rainDesc = '';
-    if (rainfall > 5) {
-      rainDesc = isRealTime ? `. 지금 ${rainfall}mm 비 - 우산 필수` : `. ${rainfall}mm의 비로 우산 필수`;
-    } else if (rainfall > 0) {
-      rainDesc = isRealTime ? `. 현재 약한 비 (${rainfall}mm)` : `. 약한 비 (${rainfall}mm) 주의`;
+    if (rainfallAnalysis) {
+      if (rainfallAnalysis.status === 'extreme_rain') {
+        rainDesc = isRealTime ? `. ⛈️ 현재 극한 폭우 경보 - ${rainfallAnalysis.activeRainStations}개 지역에서 강한 비` : '. ⛈️ 극한 폭우 경보 - 즉시 안전한 곳으로 대피';
+      } else if (rainfallAnalysis.status === 'heavy_rain') {
+        rainDesc = isRealTime ? `. 🌧️ 지금 강한 소나기 - ${rainfallAnalysis.activeRainStations}개 지역에서 10-30mm 비` : '. 🌧️ 강한 소나기로 우산 필수';
+      } else if (rainfallAnalysis.status === 'moderate_rain') {
+        rainDesc = isRealTime ? `. ☔ 현재 중간 강도 소나기 - ${rainfallAnalysis.activeRainStations}개 지역 영향` : '. ☔ 중간 강도 소나기 주의';
+      } else if (rainfallAnalysis.status === 'light_rain') {
+        rainDesc = isRealTime ? `. 🌦️ 지금 가벼운 소나기 - ${rainfallAnalysis.activeRainStations}개 지역에서 감지` : '. 🌦️ 가벼운 소나기 감지';
+      } else {
+        rainDesc = isRealTime ? `. ☀️ 현재 전국 ${rainfallAnalysis.totalStations}개소 모두 건조` : '. ☀️ 전국적으로 건조한 상태';
+      }
+    } else {
+      // 기존 방식 폴백
+      if (rainfall > 5) {
+        rainDesc = isRealTime ? `. 지금 ${rainfall}mm 비 - 우산 필수` : `. ${rainfall}mm의 비로 우산 필수`;
+      } else if (rainfall > 0) {
+        rainDesc = isRealTime ? `. 현재 약한 비 (${rainfall}mm)` : `. 약한 비 (${rainfall}mm) 주의`;
+      }
     }
-    
+
     // 실시간 시간 정보 추가
     const timeInfo = isRealTime ? ` (${new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준)` : '';
-    
+
     return `${dataPrefix} 싱가포르 ${temp}°C로 ${tempDesc}${humidityDesc}${rainDesc}. ${tempAdvice}${timeInfo}`;
   };
 
-  const generateHighlights = (data, forecast, isRealTime = false) => {
+  const generateHighlights = (data, forecast, isRealTime = false, rainfallAnalysis = null) => {
     const highlights = [];
     const temp = data.temperature;
     const humidity = data.humidity;
     const rainfall = data.rainfall;
-    
+
     // 실시간 데이터 여부에 따른 표현 변경
     const prefix = isRealTime ? '🔴 ' : '';
-    
-    // 온도 기반 하이라이트
+
+    // 59개 관측소 실시간 강수 정보 우선 처리
+    if (rainfallAnalysis) {
+      if (rainfallAnalysis.status === 'extreme_rain') {
+        highlights.push(`${prefix}⛈️ ${isRealTime ? '현재' : ''}극한폭우`);
+        highlights.push(`🚨 ${isRealTime ? '즉시' : ''}대피필요`);
+        return highlights; // 극한 상황에서는 다른 정보보다 우선
+      } else if (rainfallAnalysis.status === 'heavy_rain') {
+        highlights.push(`${prefix}🌧️ ${isRealTime ? '현재' : ''}강한소나기`);
+        highlights.push(`🌂 ${isRealTime ? '지금' : ''}우산필수`);
+        return highlights;
+      } else if (rainfallAnalysis.status === 'moderate_rain') {
+        highlights.push(`${prefix}☔ ${isRealTime ? '현재' : ''}중간소나기`);
+        highlights.push(`🌂 ${isRealTime ? '지금' : ''}우산권장`);
+        return highlights;
+      } else if (rainfallAnalysis.status === 'light_rain') {
+        highlights.push(`${prefix}🌦️ ${isRealTime ? '현재' : ''}가벼운비`);
+        // 가벼운 비의 경우 온도 정보도 포함
+      }
+    }
+
+    // 온도 기반 하이라이트 (강수가 없거나 약한 경우)
     if (temp >= 32) {
-      highlights.push(`${prefix}🌡️ ${isRealTime ? '현재' : ''}고온주의`);
+      if (highlights.length === 0) {highlights.push(`${prefix}🌡️ ${isRealTime ? '현재' : ''}고온주의`);}
       highlights.push(`💧 ${isRealTime ? '지금' : ''}수분섭취`);
     } else if (temp >= 30) {
-      highlights.push(`${prefix}🌞 ${isRealTime ? '현재' : ''}더운날씨`);
+      if (highlights.length === 0) {highlights.push(`${prefix}🌞 ${isRealTime ? '현재' : ''}더운날씨`);}
       highlights.push(`🏖️ ${isRealTime ? '지금' : ''}야외주의`);
     } else if (temp >= 28) {
-      highlights.push(`${prefix}☀️ ${isRealTime ? '현재' : ''}따뜻함`);
+      if (highlights.length === 0) {highlights.push(`${prefix}☀️ ${isRealTime ? '현재' : ''}따뜻함`);}
       highlights.push(`👕 ${isRealTime ? '지금' : ''}가벼운옷`);
     } else {
-      highlights.push(`${prefix}😌 ${isRealTime ? '현재' : ''}쾌적함`);
+      if (highlights.length === 0) {highlights.push(`${prefix}😌 ${isRealTime ? '현재' : ''}쾌적함`);}
       highlights.push(`🚶 ${isRealTime ? '지금' : ''}야외활동`);
     }
-    
-    // 습도 기반 하이라이트
-    if (humidity >= 85) {
-      highlights[1] = `💦 ${isRealTime ? '현재' : ''}높은습도`;
-    } else if (humidity <= 50) {
-      highlights[1] = `🏜️ ${isRealTime ? '현재' : ''}건조함`;
+
+    // 습도 기반 하이라이트 (필요시 온도 정보 대체)
+    if (humidity >= 85 && highlights.length === 1) {
+      highlights.push(`💦 ${isRealTime ? '현재' : ''}높은습도`);
+    } else if (humidity <= 50 && highlights.length === 1) {
+      highlights.push(`🏜️ ${isRealTime ? '현재' : ''}건조함`);
     }
-    
-    // 강수 우선 표시
-    if (rainfall > 5) {
-      highlights[0] = `${prefix}☔ ${isRealTime ? '지금' : ''}강한비`;
-      highlights[1] = `🌂 ${isRealTime ? '지금' : ''}우산필수`;
-    } else if (rainfall > 0) {
-      highlights[1] = `💧 ${isRealTime ? '현재' : ''}약한비`;
+
+    // 59개 관측소 건조 상태 강조
+    if (rainfallAnalysis && rainfallAnalysis.status === 'clear' && highlights.length === 1) {
+      highlights.push(`☀️ ${isRealTime ? '현재' : ''}전국건조`);
     }
-    
+
     return highlights.slice(0, 2); // 최대 2개만
   };
 
 
   // 마지막 업데이트 시간 포맷팅
   const formatLastUpdate = (timestamp) => {
-    if (!timestamp) return '정보 없음';
-    
+    if (!timestamp) {return '정보 없음';}
+
     try {
       const updateTime = new Date(timestamp);
-      
+
       // Singapore 시간으로 현재 시간 계산 (UTC+8)
-      const singaporeNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Singapore"}));
-      
+      const singaporeNow = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Singapore'}));
+
       // Singapore 시간 기준으로 차이 계산
       const diffMinutes = Math.floor((singaporeNow - updateTime) / (1000 * 60));
-      
-      if (diffMinutes < 1) return '방금 전';
-      if (diffMinutes < 60) return `${diffMinutes}분 전`;
-      
+
+      if (diffMinutes < 1) {return '방금 전';}
+      if (diffMinutes < 60) {return `${diffMinutes}분 전`;}
+
       const diffHours = Math.floor(diffMinutes / 60);
-      if (diffHours < 24) return `${diffHours}시간 전`;
-      
+      if (diffHours < 24) {return `${diffHours}시간 전`;}
+
       // 24시간 이상인 경우 정확한 날짜/시간 표시
       return updateTime.toLocaleDateString('ko-KR', {
         timeZone: 'Asia/Singapore',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     } catch (error) {
       console.error('Time formatting error:', error);
@@ -628,7 +779,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit'
+        second: '2-digit',
       });
     } catch (error) {
       return currentTime.toLocaleString('ko-KR');
@@ -637,27 +788,27 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
 
   // 날씨 상태에 따른 아이콘
   const getWeatherIcon = (forecast) => {
-    if (forecast.includes('Rain') || forecast.includes('Shower')) return '🌧️';
-    if (forecast.includes('Thunder')) return '⛈️';
-    if (forecast.includes('Cloudy')) return '☁️';
-    if (forecast.includes('Partly')) return '⛅';
-    if (forecast.includes('Fair') || forecast.includes('Sunny')) return '☀️';
+    if (forecast.includes('Rain') || forecast.includes('Shower')) {return '🌧️';}
+    if (forecast.includes('Thunder')) {return '⛈️';}
+    if (forecast.includes('Cloudy')) {return '☁️';}
+    if (forecast.includes('Partly')) {return '⛅';}
+    if (forecast.includes('Fair') || forecast.includes('Sunny')) {return '☀️';}
     return '🌤️';
   };
 
   // 온도에 따른 색상
   const getTemperatureColor = (temp) => {
-    if (temp >= 32) return 'text-red-600';
-    if (temp >= 28) return 'text-orange-500';
-    if (temp >= 24) return 'text-yellow-500';
+    if (temp >= 32) {return 'text-red-600';}
+    if (temp >= 28) {return 'text-orange-500';}
+    if (temp >= 24) {return 'text-yellow-500';}
     return 'text-blue-500';
   };
 
   // 습도에 따른 색상 - 어두운 배경에서 잘 보이도록 수정
   const getHumidityColor = (humidity) => {
-    if (humidity >= 85) return 'text-cyan-300';
-    if (humidity >= 70) return 'text-blue-300';
-    if (humidity >= 50) return 'text-green-300';
+    if (humidity >= 85) {return 'text-cyan-300';}
+    if (humidity >= 70) {return 'text-blue-300';}
+    if (humidity >= 50) {return 'text-green-300';}
     return 'text-yellow-300';
   };
 
@@ -675,7 +826,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               </p>
             </div>
           </div>
-          
+
           {/* 핵심 온도 정보를 헤더에 배치 */}
           <div className="text-right">
             <div className="flex items-baseline gap-1">
@@ -728,10 +879,10 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             </div>
             <div className="text-sm font-semibold text-gray-800">
               {overallData.forecast === 'Partly Cloudy (Day)' ? '부분흐림' :
-               overallData.forecast === 'Partly Cloudy (Night)' ? '부분흐림' :
-               overallData.forecast === 'Fair (Day)' ? '맑음' :
-               overallData.forecast === 'Fair (Night)' ? '맑음' :
-               overallData.forecast}
+                overallData.forecast === 'Partly Cloudy (Night)' ? '부분흐림' :
+                  overallData.forecast === 'Fair (Day)' ? '맑음' :
+                    overallData.forecast === 'Fair (Night)' ? '맑음' :
+                      overallData.forecast}
             </div>
           </div>
 
@@ -791,7 +942,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             <div className="text-sm text-gray-800 leading-relaxed">
               {aiSummary.summary.split('.')[0]}.
             </div>
-            
+
             {aiSummary.highlights && aiSummary.highlights.length > 0 && (
               <div className="flex gap-1 mt-2">
                 {aiSummary.highlights.slice(0, 2).filter(h => !h.includes('NEA')).map((highlight, index) => (
@@ -819,11 +970,11 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
                 ✕
               </button>
             </div>
-            
+
             <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
               {cohereAnalysis.analysis}
             </div>
-            
+
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-purple-200">
               <div className="flex items-center gap-4">
                 <span className="text-xs text-purple-700 font-medium">
@@ -848,12 +999,12 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <div className="flex-1">
                 <div className="text-sm font-medium text-purple-800">🤖 고급 AI 분석 중...</div>
                 <div className="text-xs text-purple-600">Cohere AI가 최신 날씨 데이터를 상세 분석하고 있습니다</div>
-                
+
                 {/* 진행률 바 (선택사항) */}
                 {cohereAnalysis?.progress > 0 && (
                   <div className="mt-2">
                     <div className="bg-purple-100 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-purple-600 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${cohereAnalysis.progress}%` }}
                       ></div>
@@ -878,23 +1029,23 @@ SingaporeOverallWeather.propTypes = {
     data: PropTypes.shape({
       temperature: PropTypes.shape({
         average: PropTypes.number,
-        readings: PropTypes.array
+        readings: PropTypes.array,
       }),
       humidity: PropTypes.shape({
-        average: PropTypes.number
+        average: PropTypes.number,
       }),
       rainfall: PropTypes.shape({
-        total: PropTypes.number
+        total: PropTypes.number,
       }),
       forecast: PropTypes.shape({
         general: PropTypes.shape({
-          forecast: PropTypes.string
-        })
-      })
-    })
+          forecast: PropTypes.string,
+        }),
+      }),
+    }),
   }),
   refreshTrigger: PropTypes.number,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 SingaporeOverallWeather.displayName = 'SingaporeOverallWeather';

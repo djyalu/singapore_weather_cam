@@ -13,27 +13,27 @@ export const STANDARD_REGIONS = [
     coordinates: { lat: 1.3437, lng: 103.7640 },
     fallbackTemp: 29.5,
     emoji: '🏫',
-    description: 'Hwa Chong International School 지역'
+    description: 'Hwa Chong International School 지역',
   },
   {
     id: 'newton',
-    name: 'Central Singapore', 
+    name: 'Central Singapore',
     displayName: 'Newton',
     stationIds: ['S109', 'S107'], // Newton & East Coast
     coordinates: { lat: 1.3100, lng: 103.8300 },
     fallbackTemp: 30.2,
     emoji: '🏙️',
-    description: 'Newton MRT 및 Central 지역'
+    description: 'Newton MRT 및 Central 지역',
   },
   {
     id: 'changi',
     name: 'Eastern Singapore',
-    displayName: 'Changi', 
+    displayName: 'Changi',
     stationIds: ['S24', 'S107'], // Changi & East Coast
     coordinates: { lat: 1.3600, lng: 103.9600 },
     fallbackTemp: 28.8,
     emoji: '✈️',
-    description: 'Changi Airport 및 동부 지역'
+    description: 'Changi Airport 및 동부 지역',
   },
   {
     id: 'north',
@@ -43,7 +43,7 @@ export const STANDARD_REGIONS = [
     coordinates: { lat: 1.4200, lng: 103.7900 },
     fallbackTemp: 30.1,
     emoji: '🌳',
-    description: '북부 주거 및 산업 지역'
+    description: '북부 주거 및 산업 지역',
   },
   {
     id: 'jurong',
@@ -53,17 +53,17 @@ export const STANDARD_REGIONS = [
     coordinates: { lat: 1.3496, lng: 103.7063 },
     fallbackTemp: 29.8,
     emoji: '🏭',
-    description: 'Jurong 산업단지 및 서부 지역'
+    description: 'Jurong 산업단지 및 서부 지역',
   },
   {
     id: 'central',
     name: 'Central Business',
     displayName: 'Central',
-    stationIds: ['S109', 'S106'], // Newton & Tai Seng 
+    stationIds: ['S109', 'S106'], // Newton & Tai Seng
     coordinates: { lat: 1.3048, lng: 103.8318 },
     fallbackTemp: 30.5,
     emoji: '🌆',
-    description: 'Central 중부 도심 지역'
+    description: 'Central 중부 도심 지역',
   },
   {
     id: 'east',
@@ -73,7 +73,7 @@ export const STANDARD_REGIONS = [
     coordinates: { lat: 1.3048, lng: 103.9318 },
     fallbackTemp: 28.9,
     emoji: '🏖️',
-    description: 'East Coast Parkway 및 동부 지역'
+    description: 'East Coast Parkway 및 동부 지역',
   },
   {
     id: 'south',
@@ -83,13 +83,13 @@ export const STANDARD_REGIONS = [
     coordinates: { lat: 1.2700, lng: 103.8200 },
     fallbackTemp: 29.2,
     description: 'Sentosa 및 남서부 지역',
-    emoji: '🏝️'
-  }
+    emoji: '🏝️',
+  },
 ];
 
 /**
  * 통합된 지역별 온도 계산 함수
- * @param {Object} weatherData - 날씨 데이터 
+ * @param {Object} weatherData - 날씨 데이터
  * @param {string} regionId - 지역 ID
  * @returns {number} 해당 지역의 평균 온도
  */
@@ -106,11 +106,11 @@ export const getRegionalTemperature = (weatherData, regionId) => {
     const matchedStations = region.stationIds
       .map(id => weatherData.locations.find(loc => loc.id === id || loc.station_id === id))
       .filter(Boolean);
-      
+
     const temps = matchedStations
       .map(loc => loc.temperature)
       .filter(temp => typeof temp === 'number' && !isNaN(temp));
-    
+
     if (temps.length > 0) {
       const avgTemp = temps.reduce((sum, temp) => sum + temp, 0) / temps.length;
       console.log(`✅ ${region.displayName} 실제 온도 (locations): ${avgTemp.toFixed(1)}°C (Stations: ${region.stationIds.join(', ')})`);
@@ -123,11 +123,11 @@ export const getRegionalTemperature = (weatherData, regionId) => {
     const matchedReadings = region.stationIds
       .map(stationId => weatherData.data.temperature.readings.find(reading => reading.station === stationId))
       .filter(Boolean);
-      
+
     const temps = matchedReadings
       .map(reading => reading.value)
       .filter(temp => typeof temp === 'number' && !isNaN(temp));
-    
+
     if (temps.length > 0) {
       const avgTemp = temps.reduce((sum, temp) => sum + temp, 0) / temps.length;
       console.log(`✅ ${region.displayName} 실제 온도 (readings): ${avgTemp.toFixed(1)}°C (Stations: ${region.stationIds.join(', ')})`);
@@ -154,7 +154,7 @@ export const getOverallWeatherData = (weatherData) => {
       forecast: 'Partly Cloudy',
       lastUpdate: new Date().toISOString(),
       stationCount: 0,
-      source: 'fallback'
+      source: 'fallback',
     };
   }
 
@@ -162,29 +162,29 @@ export const getOverallWeatherData = (weatherData) => {
   if (weatherData.data?.temperature?.readings && Array.isArray(weatherData.data.temperature.readings)) {
     const readings = weatherData.data.temperature.readings;
     const stationCount = readings.length;
-    
+
     // stations_used 배열도 확인하여 더 정확한 관측소 수 계산
     const totalStations = Math.max(
       stationCount,
       weatherData.stations_used?.length || 0,
-      weatherData.geographic_coverage?.total_stations || 0
+      weatherData.geographic_coverage?.total_stations || 0,
     );
-    
+
     // 실시간 온도 데이터로부터 평균 계산 (기존 average 대신 readings 기반)
     const temps = readings
       .map(reading => reading.value)
       .filter(temp => typeof temp === 'number' && !isNaN(temp));
-    
-    const avgTemp = temps.length > 0 
+
+    const avgTemp = temps.length > 0
       ? temps.reduce((sum, temp) => sum + temp, 0) / temps.length
       : 29.0;
-    
+
     const minTemp = temps.length > 0 ? Math.min(...temps) : 29.0;
     const maxTemp = temps.length > 0 ? Math.max(...temps) : 29.0;
-    
+
     console.log(`📊 NEA API 실시간 온도 계산: readings=${stationCount}, stations_used=${weatherData.stations_used?.length}, total=${weatherData.geographic_coverage?.total_stations}`);
     console.log(`🌡️ 온도 통계: 평균=${avgTemp.toFixed(1)}°C, 최저=${minTemp.toFixed(1)}°C, 최고=${maxTemp.toFixed(1)}°C`);
-    
+
     return {
       temperature: avgTemp,
       minTemperature: minTemp,
@@ -194,7 +194,7 @@ export const getOverallWeatherData = (weatherData) => {
       forecast: weatherData.data.forecast?.general?.forecast || 'Partly Cloudy',
       lastUpdate: weatherData.timestamp,
       stationCount: totalStations,
-      source: 'nea_api_direct'
+      source: 'nea_api_direct',
     };
   }
 
@@ -207,7 +207,7 @@ export const getOverallWeatherData = (weatherData) => {
       forecast: weatherData.current.description || 'Partly Cloudy',
       lastUpdate: weatherData.timestamp,
       stationCount: weatherData.meta?.stations || weatherData.stations_used?.length || 0,
-      source: 'current_average'
+      source: 'current_average',
     };
   }
 
@@ -219,13 +219,13 @@ export const getOverallWeatherData = (weatherData) => {
 
     if (allTemps.length > 0) {
       const avgTemp = allTemps.reduce((sum, temp) => sum + temp, 0) / allTemps.length;
-      
+
       // 습도와 강수량도 계산
       const allHumidity = weatherData.locations
         .map(loc => loc.humidity)
         .filter(h => typeof h === 'number' && !isNaN(h));
-      const avgHumidity = allHumidity.length > 0 
-        ? allHumidity.reduce((sum, h) => sum + h, 0) / allHumidity.length 
+      const avgHumidity = allHumidity.length > 0
+        ? allHumidity.reduce((sum, h) => sum + h, 0) / allHumidity.length
         : 80;
 
       const allRainfall = weatherData.locations
@@ -236,7 +236,7 @@ export const getOverallWeatherData = (weatherData) => {
         : 0;
 
       console.log(`📊 전체 평균: ${avgTemp.toFixed(1)}°C (${allTemps.length}개 지역 기준)`);
-      
+
       return {
         temperature: avgTemp,
         humidity: avgHumidity,
@@ -244,22 +244,22 @@ export const getOverallWeatherData = (weatherData) => {
         forecast: 'Partly Cloudy',
         lastUpdate: weatherData.timestamp,
         stationCount: weatherData.locations.length,
-        source: 'regional_average'
+        source: 'regional_average',
       };
     }
   }
 
   // 4순위: Fallback 데이터
   const fallbackAvg = STANDARD_REGIONS.reduce((sum, region) => sum + region.fallbackTemp, 0) / STANDARD_REGIONS.length;
-  
+
   return {
     temperature: fallbackAvg,
     humidity: 80,
     rainfall: 0,
-    forecast: 'Partly Cloudy', 
+    forecast: 'Partly Cloudy',
     lastUpdate: new Date().toISOString(),
     stationCount: 0,
-    source: 'fallback_average'
+    source: 'fallback_average',
   };
 };
 
@@ -269,10 +269,10 @@ export const getOverallWeatherData = (weatherData) => {
  * @returns {string} CSS 색상 코드
  */
 export const getTemperatureColor = (temp) => {
-  if (temp >= 32) return '#EF4444'; // 빨간색 - 매우 더움
-  if (temp >= 30) return '#F97316'; // 주황색 - 더움  
-  if (temp >= 28) return '#EAB308'; // 노란색 - 따뜻함
-  if (temp >= 26) return '#22C55E'; // 초록색 - 쾌적함
+  if (temp >= 32) {return '#EF4444';} // 빨간색 - 매우 더움
+  if (temp >= 30) {return '#F97316';} // 주황색 - 더움
+  if (temp >= 28) {return '#EAB308';} // 노란색 - 따뜻함
+  if (temp >= 26) {return '#22C55E';} // 초록색 - 쾌적함
   return '#3B82F6'; // 파란색 - 선선함
 };
 
@@ -282,10 +282,10 @@ export const getTemperatureColor = (temp) => {
  * @returns {string} 온도 설명
  */
 export const getTemperatureDescription = (temp) => {
-  if (temp >= 32) return '매우 더움';
-  if (temp >= 30) return '덥고 습함';
-  if (temp >= 28) return '따뜻함';
-  if (temp >= 26) return '쾌적함';
+  if (temp >= 32) {return '매우 더움';}
+  if (temp >= 30) {return '덥고 습함';}
+  if (temp >= 28) {return '따뜻함';}
+  if (temp >= 26) {return '쾌적함';}
   return '선선함';
 };
 
@@ -299,7 +299,7 @@ export const validateDataConsistency = (weatherData) => {
     isConsistent: true,
     issues: [],
     regionalTemps: {},
-    overallTemp: null
+    overallTemp: null,
   };
 
   // 전체 온도 계산
@@ -312,7 +312,7 @@ export const validateDataConsistency = (weatherData) => {
     results.regionalTemps[region.id] = {
       temperature: regionalTemp,
       name: region.displayName,
-      source: weatherData?.locations ? 'real_data' : 'fallback'
+      source: weatherData?.locations ? 'real_data' : 'fallback',
     };
 
     // 전체 평균과 지역별 온도 차이 검사 (2도 이상 차이나면 경고)

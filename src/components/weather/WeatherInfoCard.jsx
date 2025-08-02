@@ -15,34 +15,34 @@ const WeatherInfoCard = React.memo(({ weatherData, className = '' }) => {
   }
 
   const { current, locations } = weatherData;
-  
+
   // Hwa Chong 주변 스테이션 우선 표시
   const priorityStations = ['S116', 'S121', 'S118'];
-  const hwaChongStations = locations?.filter(loc => 
-    priorityStations.includes(loc.station_id)
+  const hwaChongStations = locations?.filter(loc =>
+    priorityStations.includes(loc.station_id),
   ) || [];
 
   const getTemperatureColor = (temp) => {
-    if (temp === null || temp === undefined) return 'text-gray-500';
-    if (temp > 32) return 'text-red-500';
-    if (temp > 28) return 'text-orange-500';
-    if (temp > 24) return 'text-yellow-600';
+    if (temp === null || temp === undefined) {return 'text-gray-500';}
+    if (temp > 32) {return 'text-red-500';}
+    if (temp > 28) {return 'text-orange-500';}
+    if (temp > 24) {return 'text-yellow-600';}
     return 'text-blue-500';
   };
 
   const getHumidityColor = (humidity) => {
-    if (humidity === null || humidity === undefined) return 'text-gray-500';
-    if (humidity > 80) return 'text-blue-600';
-    if (humidity > 60) return 'text-blue-400';
+    if (humidity === null || humidity === undefined) {return 'text-gray-500';}
+    if (humidity > 80) {return 'text-blue-600';}
+    if (humidity > 60) {return 'text-blue-400';}
     return 'text-green-500';
   };
 
   const getWeatherStatus = (temp, humidity, rainfall) => {
-    if (rainfall > 5) return { text: '비 많이 옴', icon: '🌧️', color: 'text-blue-600' };
-    if (rainfall > 0.5) return { text: '가벼운 비', icon: '🌦️', color: 'text-blue-500' };
-    if (temp > 32) return { text: '매우 더움', icon: '🔥', color: 'text-red-500' };
-    if (temp > 28) return { text: '덥고 습함', icon: '☀️', color: 'text-orange-500' };
-    if (temp > 24) return { text: '따뜻함', icon: '⛅', color: 'text-yellow-600' };
+    if (rainfall > 5) {return { text: '비 많이 옴', icon: '🌧️', color: 'text-blue-600' };}
+    if (rainfall > 0.5) {return { text: '가벼운 비', icon: '🌦️', color: 'text-blue-500' };}
+    if (temp > 32) {return { text: '매우 더움', icon: '🔥', color: 'text-red-500' };}
+    if (temp > 28) {return { text: '덥고 습함', icon: '☀️', color: 'text-orange-500' };}
+    if (temp > 24) {return { text: '따뜻함', icon: '⛅', color: 'text-yellow-600' };}
     return { text: '쾌적함', icon: '😊', color: 'text-green-500' };
   };
 
@@ -74,7 +74,7 @@ const WeatherInfoCard = React.memo(({ weatherData, className = '' }) => {
                   month: 'short',
                   day: 'numeric',
                   hour: '2-digit',
-                  minute: '2-digit'
+                  minute: '2-digit',
                 })}
               </p>
             )}
@@ -115,8 +115,8 @@ const WeatherInfoCard = React.memo(({ weatherData, className = '' }) => {
               {current.humidity ? `${Math.round(current.humidity)}%` : '--%'}
             </div>
             <p className="text-sm text-gray-500 mt-1">
-              {(current.humidity || 0) > 80 ? '매우 습함' : 
-               (current.humidity || 0) > 60 ? '습함' : '건조함'}
+              {(current.humidity || 0) > 80 ? '매우 습함' :
+                (current.humidity || 0) > 60 ? '습함' : '건조함'}
             </p>
           </div>
 
@@ -146,11 +146,11 @@ const WeatherInfoCard = React.memo(({ weatherData, className = '' }) => {
               <span className="font-medium text-gray-700">바람</span>
             </div>
             <p className="text-lg font-semibold text-gray-800">
-              {current.windDirection || 'Variable'} 
+              {current.windDirection || 'Variable'}
               {current.windSpeed && ` ${current.windSpeed}km/h`}
             </p>
           </div>
-          
+
           <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-100">
             <div className="flex items-center gap-2 mb-2">
               <Eye className="w-4 h-4 text-gray-500" />

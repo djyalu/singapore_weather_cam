@@ -35,18 +35,18 @@ const TemperatureHero = React.memo(({
     }
 
     const current = weatherData.current;
-    
+
     // Try to get specific high-priority station data from actual available stations
     let primaryStation = null;
     let stationData = null;
-    
+
     if (weatherData.locations && weatherData.locations.length > 0) {
       // Priority order: S109 (Ang Mo Kio), S24 (Choa Chu Kang), S104 (Jurong West)
       const priorityStations = ['S109', 'S24', 'S104', 'S115', 'S50'];
-      
+
       for (const stationId of priorityStations) {
         const foundStation = weatherData.locations.find(
-          location => location.station_id === stationId
+          location => location.station_id === stationId,
         );
         if (foundStation && foundStation.temperature !== null && foundStation.temperature !== undefined) {
           stationData = foundStation;
@@ -54,11 +54,11 @@ const TemperatureHero = React.memo(({
           break;
         }
       }
-      
+
       // If no priority station found, use the first available station with temperature data
       if (!stationData) {
         stationData = weatherData.locations.find(
-          location => location.temperature !== null && location.temperature !== undefined
+          location => location.temperature !== null && location.temperature !== undefined,
         );
         if (stationData) {
           primaryStation = getStationInfo(stationData.station_id);
@@ -465,7 +465,7 @@ const TemperatureHero = React.memo(({
                 </div>
                 <div className="text-white font-bold text-xl sm:text-2xl drop-shadow-md">{Math.round(primaryData.humidity || 0)}%</div>
               </div>
-              
+
               {/* Wind Card */}
               <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 sm:p-5 text-center lg:text-left border border-white/20 hover:bg-white/25 transition-all duration-300 hover:scale-105 transform shadow-lg min-h-[90px] flex flex-col justify-center">
                 <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
@@ -522,7 +522,7 @@ const TemperatureHero = React.memo(({
                     month: 'short',
                     day: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
                   })}
                 </span>
               )}

@@ -1,7 +1,7 @@
 /**
  * Station Configuration Management Service
  * Manages comprehensive NEA weather stations database and configuration
- * 
+ *
  * Features:
  * - Dynamic station database loading and caching
  * - Intelligent station selection algorithms
@@ -20,7 +20,7 @@ class StationConfigService {
     this.stationStatus = new Map();
     this.lastDatabaseUpdate = null;
     this.isLoading = false;
-    
+
     // Configuration parameters
     this.config = {
       databaseUrl: '/data/stations/nea-stations-complete.json',
@@ -32,8 +32,8 @@ class StationConfigService {
         distance: 0.4,
         reliability: 0.3,
         dataTypes: 0.2,
-        priority: 0.1
-      }
+        priority: 0.1,
+      },
     };
 
     // Key monitoring locations (updated with Hwa Chong as primary)
@@ -42,26 +42,26 @@ class StationConfigService {
         name: 'Hwa Chong International School',
         coordinates: { lat: 1.3437, lng: 103.7640 },
         priority: 'primary',
-        weight: 1.0
+        weight: 1.0,
       },
       bukit_timah: {
         name: 'Bukit Timah Nature Reserve',
         coordinates: { lat: 1.3520, lng: 103.7767 },
         priority: 'secondary',
-        weight: 0.8
+        weight: 0.8,
       },
       newton: {
         name: 'Newton',
         coordinates: { lat: 1.3138, lng: 103.8420 },
         priority: 'tertiary',
-        weight: 0.6
+        weight: 0.6,
       },
       clementi: {
         name: 'Clementi',
         coordinates: { lat: 1.3162, lng: 103.7649 },
         priority: 'tertiary',
-        weight: 0.6
-      }
+        weight: 0.6,
+      },
     };
 
     // Initialize service
@@ -91,7 +91,7 @@ class StationConfigService {
 
     const cacheKey = 'stations_database';
     const cachedData = this.stationCache.get(cacheKey);
-    
+
     if (cachedData && this.isCacheValid(cachedData.timestamp)) {
       console.log('📋 Using cached stations database');
       this.stationsDatabase = cachedData.data;
@@ -99,23 +99,23 @@ class StationConfigService {
     }
 
     this.isLoading = true;
-    
+
     try {
       console.log('📚 Loading NEA stations database...');
-      
+
       // Try to load comprehensive database first
       let databaseData = null;
       try {
         databaseData = await apiService.fetch(this.config.databaseUrl, {
-          cacheTTL: this.config.cacheTTL
+          cacheTTL: this.config.cacheTTL,
         });
       } catch (error) {
         console.warn('⚠️ Failed to load comprehensive database, trying fallback...');
-        
+
         // Fallback to basic stations list
         try {
           const fallbackData = await apiService.fetch(this.config.fallbackUrl, {
-            cacheTTL: this.config.cacheTTL
+            cacheTTL: this.config.cacheTTL,
           });
           databaseData = this.convertFallbackData(fallbackData);
         } catch (fallbackError) {
@@ -127,21 +127,21 @@ class StationConfigService {
       if (databaseData) {
         this.stationsDatabase = databaseData;
         this.lastDatabaseUpdate = new Date().toISOString();
-        
+
         // Cache the data
         this.stationCache.set(cacheKey, {
           data: databaseData,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
 
         console.log(`✅ Stations database loaded: ${this.getTotalStationsCount()} stations`);
         this.logDatabaseSummary();
-        
+
         return this.stationsDatabase;
       } else {
         throw new Error('No stations data available');
       }
-      
+
     } catch (error) {
       console.error('❌ Failed to load stations database:', error.message);
       throw error;
@@ -157,16 +157,16 @@ class StationConfigService {
     const maxWait = 10000; // 10 seconds
     const checkInterval = 100;
     let waited = 0;
-    
+
     while (this.isLoading && waited < maxWait) {
       await new Promise(resolve => setTimeout(resolve, checkInterval));
       waited += checkInterval;
     }
-    
+
     if (this.isLoading) {
       throw new Error('Database loading timeout');
     }
-    
+
     return this.stationsDatabase;
   }
 
@@ -175,17 +175,17 @@ class StationConfigService {
    */
   convertFallbackData(fallbackData) {
     const stations = Array.isArray(fallbackData) ? fallbackData : fallbackData.stations || [];
-    
+
     return {
       metadata: {
         version: '1.0.0-fallback',
         generated_at: new Date().toISOString(),
         total_stations: stations.length,
-        source: 'fallback'
+        source: 'fallback',
       },
       stations: stations,
       station_types: this.categorizeStations(stations),
-      key_locations: this.keyLocations
+      key_locations: this.keyLocations,
     };
   }
 
@@ -199,43 +199,43 @@ class StationConfigService {
         coordinates: { lat: 1.2494, lng: 103.8303, name: 'Sentosa Island' },
         data_types: ['temperature', 'humidity', 'rainfall'],
         priority_level: 'high',
-        priority_score: 75
+        priority_score: 75,
       },
       {
         station_id: 'S24',
         coordinates: { lat: 1.3677, lng: 103.7069, name: 'Choa Chu Kang' },
         data_types: ['temperature', 'humidity', 'rainfall'],
         priority_level: 'high',
-        priority_score: 70
+        priority_score: 70,
       },
       {
         station_id: 'S107',
         coordinates: { lat: 1.3048, lng: 103.9318, name: 'East Coast Parkway' },
         data_types: ['temperature', 'humidity', 'rainfall'],
         priority_level: 'medium',
-        priority_score: 65
+        priority_score: 65,
       },
       {
         station_id: 'S104',
         coordinates: { lat: 1.3496, lng: 103.7063, name: 'Jurong West' },
         data_types: ['temperature', 'humidity', 'rainfall'],
         priority_level: 'medium',
-        priority_score: 60
+        priority_score: 60,
       },
       {
         station_id: 'S117',
         coordinates: { lat: 1.3138, lng: 103.8420, name: 'Newton Road' },
         data_types: ['rainfall'],
         priority_level: 'high',
-        priority_score: 80
+        priority_score: 80,
       },
       {
         station_id: 'S50',
         coordinates: { lat: 1.3162, lng: 103.7649, name: 'Clementi Road' },
         data_types: ['rainfall'],
         priority_level: 'high',
-        priority_score: 75
-      }
+        priority_score: 75,
+      },
     ];
 
     return {
@@ -243,11 +243,11 @@ class StationConfigService {
         version: '1.0.0-hardcoded',
         generated_at: new Date().toISOString(),
         total_stations: hardcodedStations.length,
-        source: 'hardcoded'
+        source: 'hardcoded',
       },
       stations: hardcodedStations,
       station_types: this.categorizeStations(hardcodedStations),
-      key_locations: this.keyLocations
+      key_locations: this.keyLocations,
     };
   }
 
@@ -260,7 +260,7 @@ class StationConfigService {
       humidity: [],
       rainfall: [],
       wind: [],
-      air_quality: []
+      air_quality: [],
     };
 
     for (const station of stations) {
@@ -295,7 +295,7 @@ class StationConfigService {
       maxStations = this.config.maxStationsPerType,
       minStations = this.config.minStationsPerType,
       location = null,
-      priorityOnly = false
+      priorityOnly = false,
     } = options;
 
     if (!this.stationsDatabase) {
@@ -313,7 +313,7 @@ class StationConfigService {
             maxStations,
             minStations,
             location,
-            priorityOnly
+            priorityOnly,
           });
         }
       }
@@ -321,7 +321,7 @@ class StationConfigService {
       // Get optimal stations for specific data type
       result[dataType] = this.selectOptimalStationsForType(
         this.stationsDatabase.station_types[dataType],
-        { maxStations, minStations, location, priorityOnly }
+        { maxStations, minStations, location, priorityOnly },
       );
     }
 
@@ -339,7 +339,7 @@ class StationConfigService {
     }
 
     // Filter by priority if requested
-    let candidateStations = priorityOnly 
+    let candidateStations = priorityOnly
       ? stations.filter(s => s.priority_level === 'critical' || s.priority_level === 'high')
       : stations;
 
@@ -350,7 +350,7 @@ class StationConfigService {
     // Calculate selection scores
     const scoredStations = candidateStations.map(station => ({
       ...station,
-      selection_score: this.calculateSelectionScore(station, location)
+      selection_score: this.calculateSelectionScore(station, location),
     }));
 
     // Sort by selection score
@@ -359,7 +359,7 @@ class StationConfigService {
     // Select appropriate number of stations
     const selectedCount = Math.min(
       Math.max(minStations, Math.ceil(scoredStations.length * 0.4)),
-      maxStations
+      maxStations,
     );
 
     return scoredStations.slice(0, selectedCount);
@@ -407,7 +407,7 @@ class StationConfigService {
         station.coordinates.lat,
         station.coordinates.lng,
         targetLocation.lat,
-        targetLocation.lng
+        targetLocation.lng,
       );
       return Math.max(0, 1 - (distance / 30)); // 30km max distance
     }
@@ -418,9 +418,9 @@ class StationConfigService {
         station.coordinates.lat,
         station.coordinates.lng,
         location.coordinates.lat,
-        location.coordinates.lng
+        location.coordinates.lng,
       );
-      
+
       const distanceScore = Math.max(0, 1 - (distance / 25)); // 25km max distance
       const weightedScore = distanceScore * location.weight;
       bestScore = Math.max(bestScore, weightedScore);
@@ -436,9 +436,9 @@ class StationConfigService {
     const R = 6371; // Earth's radius in kilometers
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = 
+    const a =
       Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
       Math.sin(dLng/2) * Math.sin(dLng/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
@@ -453,20 +453,20 @@ class StationConfigService {
         { station_id: 'S60', name: 'Sentosa Island' },
         { station_id: 'S24', name: 'Choa Chu Kang' },
         { station_id: 'S107', name: 'East Coast Parkway' },
-        { station_id: 'S104', name: 'Jurong West' }
+        { station_id: 'S104', name: 'Jurong West' },
       ],
       humidity: [
         { station_id: 'S60', name: 'Sentosa Island' },
         { station_id: 'S24', name: 'Choa Chu Kang' },
         { station_id: 'S107', name: 'East Coast Parkway' },
-        { station_id: 'S104', name: 'Jurong West' }
+        { station_id: 'S104', name: 'Jurong West' },
       ],
       rainfall: [
         { station_id: 'S117', name: 'Newton Road' },
         { station_id: 'S50', name: 'Clementi Road' },
         { station_id: 'S106', name: 'Tai Seng' },
-        { station_id: 'S43', name: 'Kim Chuan Road' }
-      ]
+        { station_id: 'S43', name: 'Kim Chuan Road' },
+      ],
     };
 
     if (dataType === 'all') {
@@ -498,7 +498,7 @@ class StationConfigService {
       coordinates: { lat: 1.3521, lng: 103.8198, name: `Station ${stationId}` },
       data_types: ['unknown'],
       priority_level: 'medium',
-      source: 'fallback'
+      source: 'fallback',
     };
   }
 
@@ -511,7 +511,7 @@ class StationConfigService {
       status: 'unknown',
       last_seen: null,
       data_types: [],
-      reading_count: 0
+      reading_count: 0,
     };
 
     currentStatus.status = status;
@@ -534,21 +534,21 @@ class StationConfigService {
     }
 
     let stations = this.stationsDatabase.stations.filter(station => {
-      if (!station.coordinates) return false;
+      if (!station.coordinates) {return false;}
 
       const distance = this.calculateDistance(
         location.lat,
         location.lng,
         station.coordinates.lat,
-        station.coordinates.lng
+        station.coordinates.lng,
       );
 
       return distance <= radius;
     });
 
     if (dataType) {
-      stations = stations.filter(station => 
-        station.data_types && station.data_types.includes(dataType)
+      stations = stations.filter(station =>
+        station.data_types && station.data_types.includes(dataType),
       );
     }
 
@@ -556,11 +556,11 @@ class StationConfigService {
     stations.sort((a, b) => {
       const distanceA = this.calculateDistance(
         location.lat, location.lng,
-        a.coordinates.lat, a.coordinates.lng
+        a.coordinates.lat, a.coordinates.lng,
       );
       const distanceB = this.calculateDistance(
         location.lat, location.lng,
-        b.coordinates.lat, b.coordinates.lng
+        b.coordinates.lat, b.coordinates.lng,
       );
       return distanceA - distanceB;
     });
@@ -579,7 +579,7 @@ class StationConfigService {
    * Get total stations count
    */
   getTotalStationsCount() {
-    return this.stationsDatabase?.metadata?.total_stations || 
+    return this.stationsDatabase?.metadata?.total_stations ||
            this.stationsDatabase?.stations?.length || 0;
   }
 
@@ -587,7 +587,7 @@ class StationConfigService {
    * Log database summary
    */
   logDatabaseSummary() {
-    if (!this.stationsDatabase) return;
+    if (!this.stationsDatabase) {return;}
 
     console.log('📊 Stations Database Summary:');
     if (this.stationsDatabase.statistics?.data_types) {
@@ -595,7 +595,7 @@ class StationConfigService {
         console.log(`  - ${type}: ${count} stations`);
       });
     }
-    
+
     if (this.stationsDatabase.statistics?.priority_levels) {
       console.log('📈 Priority Distribution:');
       Object.entries(this.stationsDatabase.statistics.priority_levels).forEach(([level, count]) => {
@@ -627,7 +627,7 @@ class StationConfigService {
       total_stations: this.getTotalStationsCount(),
       cache_size: this.stationCache.size,
       active_stations: this.stationStatus.size,
-      database_source: this.stationsDatabase?.metadata?.source || 'unknown'
+      database_source: this.stationsDatabase?.metadata?.source || 'unknown',
     };
   }
 

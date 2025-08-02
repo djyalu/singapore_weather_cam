@@ -10,20 +10,20 @@ import L from 'leaflet';
  * - 인터랙티브 팝업
  */
 const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, showWeatherIcons = true, className = '' }) => {
-  
+
   // 지역별 날씨 정보를 지도 표시용으로 변환
   const weatherRegions = useMemo(() => {
-    if (!weatherData?.locations) return [];
+    if (!weatherData?.locations) {return [];}
 
     // 실제 데이터 기반 동적 지역 생성 - 좌표를 기준으로 자동 그룹핑
     const regions = [];
-    
+
     // 실제 사용 가능한 스테이션들을 지역별로 그룹핑
     const availableStations = weatherData.locations.filter(
-      loc => loc.coordinates && loc.temperature !== null && loc.temperature !== undefined
+      loc => loc.coordinates && loc.temperature !== null && loc.temperature !== undefined,
     );
 
-    if (availableStations.length === 0) return [];
+    if (availableStations.length === 0) {return [];}
 
     // 지리적 위치 기반 지역 정의 (실제 싱가포르 지역 기준)
     const regionalGroups = [
@@ -33,7 +33,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         center: { lat: 1.42, lng: 103.79 },
         emoji: '🌳',
         bounds: { north: 1.50, south: 1.38, east: 103.85, west: 103.68 },
-        radius: 4000
+        radius: 4000,
       },
       {
         id: 'northwest',
@@ -41,7 +41,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         center: { lat: 1.35, lng: 103.76 },
         emoji: '🏫',
         bounds: { north: 1.38, south: 1.32, east: 103.82, west: 103.70 },
-        radius: 3500
+        radius: 3500,
       },
       {
         id: 'central',
@@ -49,7 +49,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         center: { lat: 1.31, lng: 103.83 },
         emoji: '🏙️',
         bounds: { north: 1.35, south: 1.27, east: 103.88, west: 103.78 },
-        radius: 3000
+        radius: 3000,
       },
       {
         id: 'west',
@@ -57,7 +57,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         center: { lat: 1.33, lng: 103.70 },
         emoji: '🏭',
         bounds: { north: 1.38, south: 1.28, east: 103.75, west: 103.60 },
-        radius: 4500
+        radius: 4500,
       },
       {
         id: 'east',
@@ -65,7 +65,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         center: { lat: 1.36, lng: 103.96 },
         emoji: '✈️',
         bounds: { north: 1.42, south: 1.30, east: 104.10, west: 103.88 },
-        radius: 4000
+        radius: 4000,
       },
       {
         id: 'south',
@@ -73,8 +73,8 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         center: { lat: 1.27, lng: 103.85 },
         emoji: '🌊',
         bounds: { north: 1.30, south: 1.22, east: 103.95, west: 103.75 },
-        radius: 3000
-      }
+        radius: 3000,
+      },
     ];
 
     // 각 지역에 해당하는 스테이션 찾기
@@ -82,7 +82,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
       const regionStations = availableStations.filter(station => {
         const { lat, lng } = station.coordinates;
         const { bounds } = region;
-        return lat >= bounds.south && lat <= bounds.north && 
+        return lat >= bounds.south && lat <= bounds.north &&
                lng >= bounds.west && lng <= bounds.east;
       });
 
@@ -107,7 +107,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
           stationIds: regionStations.map(s => s.station_id || s.id),
           color: getTemperatureColor(avgTemperature),
           radius: region.radius,
-          intensity: getTemperatureIntensity(avgTemperature)
+          intensity: getTemperatureIntensity(avgTemperature),
         };
       }
 
@@ -118,10 +118,10 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
 
   // 온도별 색상 반환 - 더 생동감 있는 색상
   const getTemperatureColor = (temp) => {
-    if (temp >= 32) return '#EF4444'; // 선명한 빨간색 (매우 뜨거움)
-    if (temp >= 30) return '#F97316'; // 활기찬 주황색 (뜨거움)
-    if (temp >= 28) return '#EAB308'; // 따뜻한 노란색 (따뜻함)
-    if (temp >= 26) return '#22C55E'; // 상쾌한 초록색 (쾌적함)
+    if (temp >= 32) {return '#EF4444';} // 선명한 빨간색 (매우 뜨거움)
+    if (temp >= 30) {return '#F97316';} // 활기찬 주황색 (뜨거움)
+    if (temp >= 28) {return '#EAB308';} // 따뜻한 노란색 (따뜻함)
+    if (temp >= 26) {return '#22C55E';} // 상쾌한 초록색 (쾌적함)
     return '#3B82F6'; // 시원한 파란색 (시원함)
   };
 
@@ -131,7 +131,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
     const deviation = Math.abs(temp - normalTemp);
     const baseIntensity = 0.2;
     const maxIntensity = 0.4;
-    
+
     // 편차가 클수록 더 진한 색상
     const intensity = baseIntensity + (deviation / 6) * (maxIntensity - baseIntensity);
     return Math.min(Math.max(intensity, 0.15), maxIntensity);
@@ -147,20 +147,20 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
 
   // 날씨 설명 생성
   const getWeatherDescription = (temperature, rainfall) => {
-    if (rainfall > 5) return 'Rainy';
-    if (rainfall > 0.5) return 'Light Rain';
-    if (temperature > 32) return 'Hot';
-    if (temperature > 28) return 'Warm';
-    if (temperature > 24) return 'Pleasant';
+    if (rainfall > 5) {return 'Rainy';}
+    if (rainfall > 0.5) {return 'Light Rain';}
+    if (temperature > 32) {return 'Hot';}
+    if (temperature > 28) {return 'Warm';}
+    if (temperature > 24) {return 'Pleasant';}
     return 'Cool';
   };
 
   // 날씨 아이콘 생성
   const getWeatherIcon = (temperature, rainfall) => {
-    if (rainfall > 5) return '🌧️';
-    if (rainfall > 0.5) return '🌦️';
-    if (temperature > 32) return '☀️';
-    if (temperature > 28) return '⛅';
+    if (rainfall > 5) {return '🌧️';}
+    if (rainfall > 0.5) {return '🌦️';}
+    if (temperature > 32) {return '☀️';}
+    if (temperature > 28) {return '⛅';}
     return '🌤️';
   };
 
@@ -227,7 +227,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
             click: (e) => {
               // 클릭 이벤트 전파 방지
               e.originalEvent.stopPropagation();
-            }
+            },
           }}
         >
           <Popup>
@@ -236,7 +236,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
                 <span>{region.emoji}</span>
                 <span>{region.name} 지역</span>
               </h3>
-              
+
               <div className="space-y-2 text-sm">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-gray-50 p-2 rounded">
@@ -252,7 +252,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-50 p-2 rounded">
                   <div className="font-medium text-gray-600">날씨 상태</div>
                   <div className="flex items-center gap-2 mt-1">
@@ -290,7 +290,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
             click: (e) => {
               // 기본 클릭 이벤트 허용 (팝업 표시)
               e.originalEvent.stopPropagation();
-            }
+            },
           }}
         >
           <Popup>
@@ -299,7 +299,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
                 <span>{region.emoji}</span>
                 <span>{region.name} 실시간 날씨</span>
               </h3>
-              
+
               <div className="space-y-3">
                 {/* 주요 날씨 정보 */}
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg">

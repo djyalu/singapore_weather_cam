@@ -21,7 +21,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
     locations: data?.locations?.length || 0,
     forecast: data?.forecast?.length || 0,
     stations_used: data?.stations_used?.length || 0,
-    data_quality_score: data?.data_quality_score || 'unknown'
+    data_quality_score: data?.data_quality_score || 'unknown',
   });
 
   // Load enhanced station data
@@ -29,11 +29,11 @@ const EnhancedWeatherDashboard = ({ data }) => {
     try {
       setLoading(true);
       await stationConfigService.loadStationsDatabase();
-      
+
       // Get comprehensive station information
       const healthStatus = stationConfigService.getHealthStatus();
       setStationData(healthStatus);
-      
+
     } catch (error) {
       console.error('Error loading station data:', error);
     } finally {
@@ -47,8 +47,8 @@ const EnhancedWeatherDashboard = ({ data }) => {
 
   // Enhanced location filtering with comprehensive stations data
   const getFilteredData = useCallback(() => {
-    if (!data) return null;
-    
+    if (!data) {return null;}
+
     if (selectedLocation === 'all') {
       return {
         current: data.current || data.data,
@@ -56,7 +56,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
         locationData: null,
         stationDetails: data.station_details || {},
         dataQuality: data.data_quality_score || null,
-        geographicCoverage: data.geographic_coverage || null
+        geographicCoverage: data.geographic_coverage || null,
       };
     }
 
@@ -65,21 +65,21 @@ const EnhancedWeatherDashboard = ({ data }) => {
     if (keyLocation) {
       // Get stations near this key location
       const nearbyStations = stationConfigService.getStationsByProximity(
-        keyLocation.coordinates, 
+        keyLocation.coordinates,
         8, // 8km radius
-        null // all data types
+        null, // all data types
       );
-      
+
       // Filter data to only include readings from nearby stations
       const filteredData = { ...data };
       if (filteredData.data) {
         for (const [dataType, typeData] of Object.entries(filteredData.data)) {
           if (typeData.readings && Array.isArray(typeData.readings)) {
             const nearbyStationIds = nearbyStations.map(s => s.station_id);
-            typeData.readings = typeData.readings.filter(reading => 
-              nearbyStationIds.includes(reading.station)
+            typeData.readings = typeData.readings.filter(reading =>
+              nearbyStationIds.includes(reading.station),
             );
-            
+
             // Recalculate averages
             if (typeData.readings.length > 0) {
               typeData.average = typeData.readings.reduce((sum, r) => sum + r.value, 0) / typeData.readings.length;
@@ -89,7 +89,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
           }
         }
       }
-      
+
       return {
         current: filteredData.data || filteredData.current,
         forecast: data.forecast,
@@ -97,18 +97,18 @@ const EnhancedWeatherDashboard = ({ data }) => {
           ...keyLocation,
           id: selectedLocation,
           station_count: nearbyStations.length,
-          nearest_stations: nearbyStations.slice(0, 3)
+          nearest_stations: nearbyStations.slice(0, 3),
         },
         stationDetails: data.station_details || {},
         dataQuality: data.data_quality_score || null,
-        geographicCoverage: data.geographic_coverage || null
+        geographicCoverage: data.geographic_coverage || null,
       };
     }
 
     // Check if selectedLocation is a specific station
     if (selectedStation) {
       const stationInfo = stationConfigService.getStationInfo(selectedStation.station_id);
-      
+
       return {
         current: data.current || data.data,
         forecast: data.forecast,
@@ -116,11 +116,11 @@ const EnhancedWeatherDashboard = ({ data }) => {
           ...stationInfo,
           id: selectedStation.station_id,
           station_count: 1,
-          coordinates: selectedStation.coordinates
+          coordinates: selectedStation.coordinates,
         },
         stationDetails: { [selectedStation.station_id]: selectedStation },
         dataQuality: data.data_quality_score || null,
-        geographicCoverage: data.geographic_coverage || null
+        geographicCoverage: data.geographic_coverage || null,
       };
     }
 
@@ -142,7 +142,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
         locationData: selectedLocationData,
         stationDetails: data.station_details || {},
         dataQuality: data.data_quality_score || null,
-        geographicCoverage: data.geographic_coverage || null
+        geographicCoverage: data.geographic_coverage || null,
       };
     }
 
@@ -152,7 +152,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
       locationData: null,
       stationDetails: data.station_details || {},
       dataQuality: data.data_quality_score || null,
-      geographicCoverage: data.geographic_coverage || null
+      geographicCoverage: data.geographic_coverage || null,
     };
   }, [data, selectedLocation, selectedStation]);
 
@@ -164,11 +164,11 @@ const EnhancedWeatherDashboard = ({ data }) => {
 
   // Convert data structure for weather cards
   const convertDataForCards = useCallback((filteredData) => {
-    if (!filteredData) return null;
+    if (!filteredData) {return null;}
 
     const { current } = filteredData;
-    
-    if (!current) return null;
+
+    if (!current) {return null;}
 
     // Handle new comprehensive data format
     if (current.temperature && typeof current.temperature === 'object') {
@@ -180,7 +180,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
         windDirection: current.wind_direction?.value || current.windDirection,
         uvIndex: current.uv_index?.value || current.uvIndex,
         visibility: current.visibility,
-        feelsLike: current.feelsLike
+        feelsLike: current.feelsLike,
       };
     }
 
@@ -193,7 +193,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
       windDirection: current.windDirection,
       uvIndex: current.uvIndex,
       visibility: current.visibility,
-      feelsLike: current.feelsLike
+      feelsLike: current.feelsLike,
     };
   }, []);
 
@@ -221,7 +221,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
               Comprehensive NEA weather station network analysis
             </p>
           </div>
-          
+
           {/* Data Quality Indicators */}
           <div className="flex flex-wrap items-center gap-4 text-sm">
             {filteredData?.dataQuality && (
@@ -229,14 +229,14 @@ const EnhancedWeatherDashboard = ({ data }) => {
                 <span className="text-gray-600">Data Quality:</span>
                 <span className={`px-2 py-1 rounded font-medium ${
                   filteredData.dataQuality >= 90 ? 'bg-green-100 text-green-800' :
-                  filteredData.dataQuality >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
+                    filteredData.dataQuality >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
                 }`}>
                   {filteredData.dataQuality}%
                 </span>
               </div>
             )}
-            
+
             {data.stations_used && (
               <div className="flex items-center gap-2">
                 <span className="text-gray-600">Stations:</span>
@@ -245,7 +245,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
                 </span>
               </div>
             )}
-            
+
             {filteredData?.geographicCoverage && (
               <div className="flex items-center gap-2">
                 <span className="text-gray-600">Coverage:</span>
@@ -307,7 +307,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
             >
               🇸🇬 All Singapore
             </button>
-            
+
             {Object.entries(KEY_LOCATIONS).map(([key, location]) => (
               <button
                 key={key}
@@ -341,8 +341,8 @@ const EnhancedWeatherDashboard = ({ data }) => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start">
                 <div className="text-2xl mr-3">
-                  {filteredData.locationData.priority === 'primary' ? '🎯' : 
-                   filteredData.locationData.id?.startsWith('S') ? '🏢' : '📍'}
+                  {filteredData.locationData.priority === 'primary' ? '🎯' :
+                    filteredData.locationData.id?.startsWith('S') ? '🏢' : '📍'}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-blue-900">
@@ -351,7 +351,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
                   <p className="text-sm text-blue-700 mt-1">
                     {filteredData.locationData.description}
                   </p>
-                  
+
                   <div className="flex flex-wrap gap-4 mt-2 text-xs text-blue-600">
                     {filteredData.locationData.station_count && (
                       <span>📊 {filteredData.locationData.station_count} stations</span>
@@ -371,7 +371,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
                       <p className="text-xs text-blue-600 font-medium">Nearby Stations:</p>
                       <div className="flex flex-wrap gap-2 mt-1">
                         {filteredData.locationData.nearest_stations.map(station => (
-                          <span 
+                          <span
                             key={station.station_id}
                             className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
                           >
@@ -402,8 +402,8 @@ const EnhancedWeatherDashboard = ({ data }) => {
                 icon="💧"
                 description={
                   weatherCardData.humidity > 80 ? 'Very humid' :
-                  weatherCardData.humidity > 70 ? 'High humidity' :
-                  weatherCardData.humidity > 60 ? 'Moderate humidity' : 'Low humidity'
+                    weatherCardData.humidity > 70 ? 'High humidity' :
+                      weatherCardData.humidity > 60 ? 'Moderate humidity' : 'Low humidity'
                 }
                 trend={weatherCardData.humidity > 80 ? 'up' : 'stable'}
               />
@@ -413,8 +413,8 @@ const EnhancedWeatherDashboard = ({ data }) => {
                 icon="🌧️"
                 description={
                   weatherCardData.rainfall > 10 ? 'Heavy rain' :
-                  weatherCardData.rainfall > 2.5 ? 'Moderate rain' :
-                  weatherCardData.rainfall > 0 ? 'Light rain' : 'No rain'
+                    weatherCardData.rainfall > 2.5 ? 'Moderate rain' :
+                      weatherCardData.rainfall > 0 ? 'Light rain' : 'No rain'
                 }
                 trend={weatherCardData.rainfall > 0 ? 'up' : 'stable'}
               />
@@ -448,8 +448,8 @@ const EnhancedWeatherDashboard = ({ data }) => {
                   </p>
                   <p className="text-sm text-orange-600 mt-1">
                     {(weatherCardData?.uvIndex || 0) > 7 ? 'Very High' :
-                     (weatherCardData?.uvIndex || 0) > 5 ? 'High' :
-                     (weatherCardData?.uvIndex || 0) > 2 ? 'Moderate' : 'Low'} exposure
+                      (weatherCardData?.uvIndex || 0) > 5 ? 'High' :
+                        (weatherCardData?.uvIndex || 0) > 2 ? 'Moderate' : 'Low'} exposure
                   </p>
                 </div>
                 <div className="text-right">
@@ -459,7 +459,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
                   </p>
                   <p className="text-sm text-orange-600 mt-1">
                     {(weatherCardData?.visibility || 0) > 10 ? 'Excellent' :
-                     (weatherCardData?.visibility || 0) > 5 ? 'Good' : 'Limited'}
+                      (weatherCardData?.visibility || 0) > 5 ? 'Good' : 'Limited'}
                   </p>
                 </div>
               </div>
@@ -474,7 +474,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
                     {data.source || 'NEA Singapore'}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Last Updated</span>
                   <span className="text-sm font-medium text-gray-900">
@@ -531,7 +531,7 @@ const EnhancedWeatherDashboard = ({ data }) => {
               height="600px"
             />
           </div>
-          
+
           {selectedStation && (
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <h3 className="font-semibold text-lg mb-2">
@@ -575,7 +575,7 @@ EnhancedWeatherDashboard.propTypes = {
     stations_used: PropTypes.oneOfType([PropTypes.array, PropTypes.number]),
     data_quality_score: PropTypes.number,
     geographic_coverage: PropTypes.object,
-    station_details: PropTypes.object
+    station_details: PropTypes.object,
   }),
 };
 

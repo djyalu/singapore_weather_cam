@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import AppDataProvider from "../../contexts/AppDataContextSimple";
+import AppDataProvider from '../../contexts/AppDataContextSimple';
 import AppLayout from './components/layout/AppLayout';
 import HeroSection from './components/sections/HeroSection';
 import MapSection from './components/sections/MapSection';
@@ -12,7 +12,7 @@ import PerformanceOptimizer from './components/performance/PerformanceOptimizer'
 import LoadingScreen from './components/common/LoadingScreen';
 import { initializeAccessibility } from './utils/accessibility';
 import { initializeSecurity } from './utils/security';
-import { useAppMetrics, useAppData } from "../../contexts/AppDataContextSimple";
+import { useAppMetrics, useAppData } from '../../contexts/AppDataContextSimple';
 import '../src/styles/performance-animations.css';
 import '../src/styles/accessibility.css';
 import '../src/styles/performance.css';

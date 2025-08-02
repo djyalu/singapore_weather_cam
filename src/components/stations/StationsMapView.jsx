@@ -9,7 +9,7 @@ import { KEY_LOCATIONS } from '../../config/weatherStations.js';
 const createStationIcon = (dataTypes, priority, status = 'active') => {
   let iconColor = '#6b7280'; // Default gray
   let iconSymbol = '📊'; // Default data icon
-  
+
   // Determine color based on priority
   switch (priority) {
     case 'critical':
@@ -25,7 +25,7 @@ const createStationIcon = (dataTypes, priority, status = 'active') => {
       iconColor = '#6b7280'; // Gray
       break;
   }
-  
+
   // Determine symbol based on primary data type
   if (dataTypes.includes('temperature')) {
     iconSymbol = '🌡️';
@@ -38,10 +38,10 @@ const createStationIcon = (dataTypes, priority, status = 'active') => {
   } else if (dataTypes.includes('pm25')) {
     iconSymbol = '🏭';
   }
-  
+
   // Add status indicator
   const statusColor = status === 'active' ? '#10b981' : '#ef4444';
-  
+
   return L.divIcon({
     html: `
       <div style="
@@ -73,7 +73,7 @@ const createStationIcon = (dataTypes, priority, status = 'active') => {
     className: 'custom-station-marker',
     iconSize: [32, 32],
     iconAnchor: [16, 16],
-    popupAnchor: [0, -16]
+    popupAnchor: [0, -16],
   });
 };
 
@@ -82,9 +82,9 @@ const createKeyLocationIcon = (priority) => {
   const colors = {
     primary: '#dc2626',
     secondary: '#ea580c',
-    tertiary: '#0ea5e9'
+    tertiary: '#0ea5e9',
   };
-  
+
   return L.divIcon({
     html: `
       <div style="
@@ -107,17 +107,17 @@ const createKeyLocationIcon = (priority) => {
     className: 'key-location-marker',
     iconSize: [24, 24],
     iconAnchor: [12, 12],
-    popupAnchor: [0, -12]
+    popupAnchor: [0, -12],
   });
 };
 
-const StationsMapView = ({ 
-  selectedDataTypes = ['all'], 
+const StationsMapView = ({
+  selectedDataTypes = ['all'],
   selectedPriorities = ['all'],
   showKeyLocations = true,
   showCoverage = false,
   onStationSelect = null,
-  height = '500px'
+  height = '500px',
 }) => {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,37 +129,37 @@ const StationsMapView = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       // Load comprehensive stations database
       await stationConfigService.loadStationsDatabase();
-      
+
       // Get optimal stations based on filters
       const optimalStations = stationConfigService.getOptimalStations({
         dataType: selectedDataTypes.includes('all') ? 'all' : selectedDataTypes[0],
         maxStations: 50,
-        priorityOnly: !selectedPriorities.includes('all')
+        priorityOnly: !selectedPriorities.includes('all'),
       });
-      
+
       // Flatten stations from all data types
       const allStations = [];
       const seenIds = new Set();
-      
+
       for (const [dataType, stationsList] of Object.entries(optimalStations)) {
         for (const station of stationsList) {
           if (!seenIds.has(station.station_id)) {
             seenIds.add(station.station_id);
-            
+
             // Filter by priority if specified
-            if (selectedPriorities.includes('all') || 
+            if (selectedPriorities.includes('all') ||
                 selectedPriorities.includes(station.priority_level)) {
               allStations.push(station);
             }
           }
         }
       }
-      
+
       setStations(allStations);
-      
+
     } catch (err) {
       console.error('Error loading stations:', err);
       setError(err.message);
@@ -185,10 +185,10 @@ const StationsMapView = ({
     if (selectedDataTypes.includes('all')) {
       return stations;
     }
-    
-    return stations.filter(station => 
-      station.data_types && 
-      station.data_types.some(type => selectedDataTypes.includes(type))
+
+    return stations.filter(station =>
+      station.data_types &&
+      station.data_types.some(type => selectedDataTypes.includes(type)),
     );
   }, [stations, selectedDataTypes]);
 
@@ -197,11 +197,11 @@ const StationsMapView = ({
     if (filteredStations.length === 0) {
       return [1.3437, 103.7640]; // Default to Hwa Chong
     }
-    
+
     // Calculate centroid of all stations
     const avgLat = filteredStations.reduce((sum, s) => sum + (s.coordinates?.lat || 1.3521), 0) / filteredStations.length;
     const avgLng = filteredStations.reduce((sum, s) => sum + (s.coordinates?.lng || 103.8198), 0) / filteredStations.length;
-    
+
     return [avgLat, avgLng];
   }, [filteredStations]);
 
@@ -222,7 +222,7 @@ const StationsMapView = ({
         <div className="text-center text-red-600">
           <p className="mb-2">⚠️ Error loading stations</p>
           <p className="text-sm">{error}</p>
-          <button 
+          <button
             onClick={loadStations}
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
@@ -248,7 +248,7 @@ const StationsMapView = ({
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
           </LayersControl.BaseLayer>
-          
+
           <LayersControl.BaseLayer name="Satellite">
             <TileLayer
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -260,19 +260,19 @@ const StationsMapView = ({
           <LayersControl.Overlay checked name="Weather Stations">
             <>
               {filteredStations.map((station) => {
-                if (!station.coordinates) return null;
-                
+                if (!station.coordinates) {return null;}
+
                 return (
                   <Marker
                     key={station.station_id}
                     position={[station.coordinates.lat, station.coordinates.lng]}
                     icon={createStationIcon(
-                      station.data_types || [], 
+                      station.data_types || [],
                       station.priority_level || 'medium',
-                      'active' // Could get from real-time status
+                      'active', // Could get from real-time status
                     )}
                     eventHandlers={{
-                      click: () => handleStationClick(station)
+                      click: () => handleStationClick(station),
                     }}
                   >
                     <Popup maxWidth={300}>
@@ -280,31 +280,31 @@ const StationsMapView = ({
                         <h3 className="font-bold text-lg mb-2">
                           {station.coordinates?.name || `Station ${station.station_id}`}
                         </h3>
-                        
+
                         <div className="space-y-2 text-sm">
                           <div>
                             <span className="font-medium">Station ID:</span> {station.station_id}
                           </div>
-                          
+
                           <div>
                             <span className="font-medium">Priority:</span>{' '}
                             <span className={`px-2 py-1 rounded text-xs font-medium ${
                               station.priority_level === 'critical' ? 'bg-red-100 text-red-800' :
-                              station.priority_level === 'high' ? 'bg-orange-100 text-orange-800' :
-                              station.priority_level === 'medium' ? 'bg-blue-100 text-blue-800' :
-                              'bg-gray-100 text-gray-800'
+                                station.priority_level === 'high' ? 'bg-orange-100 text-orange-800' :
+                                  station.priority_level === 'medium' ? 'bg-blue-100 text-blue-800' :
+                                    'bg-gray-100 text-gray-800'
                             }`}>
                               {station.priority_level || 'medium'}
                             </span>
                           </div>
-                          
+
                           {station.data_types && station.data_types.length > 0 && (
                             <div>
                               <span className="font-medium">Data Types:</span>
                               <div className="mt-1 flex flex-wrap gap-1">
                                 {station.data_types.map(type => (
-                                  <span 
-                                    key={type} 
+                                  <span
+                                    key={type}
                                     className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs"
                                   >
                                     {type}
@@ -313,18 +313,18 @@ const StationsMapView = ({
                               </div>
                             </div>
                           )}
-                          
+
                           {station.priority_score && (
                             <div>
                               <span className="font-medium">Priority Score:</span> {station.priority_score.toFixed(1)}
                             </div>
                           )}
-                          
+
                           <div>
                             <span className="font-medium">Coordinates:</span>{' '}
                             {station.coordinates.lat.toFixed(4)}, {station.coordinates.lng.toFixed(4)}
                           </div>
-                          
+
                           {station.proximities && Object.keys(station.proximities).length > 0 && (
                             <div>
                               <span className="font-medium">Nearest Key Location:</span>
@@ -381,13 +381,13 @@ const StationsMapView = ({
                   <Circle
                     key={index}
                     center={[location.coordinates.lat, location.coordinates.lng]}
-                    radius={location.priority === 'primary' ? 8000 : 
-                           location.priority === 'secondary' ? 6000 : 4000}
-                    fillColor={location.priority === 'primary' ? '#dc2626' : 
-                              location.priority === 'secondary' ? '#ea580c' : '#0ea5e9'}
+                    radius={location.priority === 'primary' ? 8000 :
+                      location.priority === 'secondary' ? 6000 : 4000}
+                    fillColor={location.priority === 'primary' ? '#dc2626' :
+                      location.priority === 'secondary' ? '#ea580c' : '#0ea5e9'}
                     fillOpacity={0.1}
-                    color={location.priority === 'primary' ? '#dc2626' : 
-                           location.priority === 'secondary' ? '#ea580c' : '#0ea5e9'}
+                    color={location.priority === 'primary' ? '#dc2626' :
+                      location.priority === 'secondary' ? '#ea580c' : '#0ea5e9'}
                     weight={2}
                   />
                 ))}
@@ -400,7 +400,7 @@ const StationsMapView = ({
       {/* Map Legend */}
       <div className="absolute bottom-4 left-4 bg-white p-3 rounded-lg shadow-lg text-xs">
         <h4 className="font-bold mb-2">Legend</h4>
-        
+
         <div className="space-y-1">
           <div className="flex items-center">
             <span className="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
@@ -419,7 +419,7 @@ const StationsMapView = ({
             Low Priority
           </div>
         </div>
-        
+
         <div className="mt-3 pt-2 border-t border-gray-200">
           <div className="text-xs text-gray-600">
             Total Stations: {filteredStations.length}
@@ -434,39 +434,39 @@ const StationsMapView = ({
             <h3 className="font-bold text-lg">
               {selectedStation.coordinates?.name || `Station ${selectedStation.station_id}`}
             </h3>
-            <button 
+            <button
               onClick={() => setSelectedStation(null)}
               className="text-gray-400 hover:text-gray-600"
             >
               ✕
             </button>
           </div>
-          
+
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Station ID:</span>
               <span className="font-medium">{selectedStation.station_id}</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-gray-600">Priority:</span>
               <span className={`px-2 py-1 rounded text-xs font-medium ${
                 selectedStation.priority_level === 'critical' ? 'bg-red-100 text-red-800' :
-                selectedStation.priority_level === 'high' ? 'bg-orange-100 text-orange-800' :
-                selectedStation.priority_level === 'medium' ? 'bg-blue-100 text-blue-800' :
-                'bg-gray-100 text-gray-800'
+                  selectedStation.priority_level === 'high' ? 'bg-orange-100 text-orange-800' :
+                    selectedStation.priority_level === 'medium' ? 'bg-blue-100 text-blue-800' :
+                      'bg-gray-100 text-gray-800'
               }`}>
                 {selectedStation.priority_level || 'medium'}
               </span>
             </div>
-            
+
             {selectedStation.data_types && selectedStation.data_types.length > 0 && (
               <div>
                 <span className="text-gray-600">Data Types:</span>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {selectedStation.data_types.map(type => (
-                    <span 
-                      key={type} 
+                    <span
+                      key={type}
                       className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs"
                     >
                       {type}
@@ -475,7 +475,7 @@ const StationsMapView = ({
                 </div>
               </div>
             )}
-            
+
             {selectedStation.priority_score && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Score:</span>
@@ -495,7 +495,7 @@ StationsMapView.propTypes = {
   showKeyLocations: PropTypes.bool,
   showCoverage: PropTypes.bool,
   onStationSelect: PropTypes.func,
-  height: PropTypes.string
+  height: PropTypes.string,
 };
 
 export default StationsMapView;

@@ -84,7 +84,7 @@ export const LEGACY_STATION_MAPPING = {
     priority: 'high',
     coordinates: { lat: 1.3456, lng: 103.7425 },
     region: 'west',
-  }
+  },
 };
 
 /**
@@ -103,35 +103,35 @@ export const STATION_MAPPING = new Proxy(LEGACY_STATION_MAPPING, {
           priority: stationInfo.priority_level || 'medium',
           coordinates: stationInfo.coordinates ? {
             lat: stationInfo.coordinates.lat,
-            lng: stationInfo.coordinates.lng
+            lng: stationInfo.coordinates.lng,
           } : { lat: 1.3521, lng: 103.8198 },
           region: determineRegion(stationInfo.coordinates),
           data_types: stationInfo.data_types || [],
           priority_score: stationInfo.priority_score || 50,
-          source: 'comprehensive_database'
+          source: 'comprehensive_database',
         };
       }
     } catch (error) {
       console.warn(`⚠️ Could not get comprehensive data for ${prop}:`, error.message);
     }
-    
+
     // Fallback to legacy mapping
     return target[prop];
-  }
+  },
 });
 
 /**
  * Determine region based on coordinates
  */
 function determineRegion(coordinates) {
-  if (!coordinates) return 'unknown';
-  
+  if (!coordinates) {return 'unknown';}
+
   const { lat, lng } = coordinates;
-  
-  if (lat > 1.38) return 'north';
-  if (lat < 1.28) return 'south';
-  if (lng > 103.85) return 'east';
-  if (lng < 103.75) return 'west';
+
+  if (lat > 1.38) {return 'north';}
+  if (lat < 1.28) {return 'south';}
+  if (lng > 103.85) {return 'east';}
+  if (lng < 103.75) {return 'west';}
   return 'central';
 }
 
@@ -150,13 +150,13 @@ export const getStationInfo = (stationId) => {
         priority: stationInfo.priority_level || 'medium',
         coordinates: stationInfo.coordinates ? {
           lat: stationInfo.coordinates.lat,
-          lng: stationInfo.coordinates.lng
+          lng: stationInfo.coordinates.lng,
         } : { lat: 1.3521, lng: 103.8198 },
         region: determineRegion(stationInfo.coordinates),
         data_types: stationInfo.data_types || [],
         priority_score: stationInfo.priority_score || 50,
         reliability_score: stationInfo.reliability_score || 0.8,
-        source: 'comprehensive_database'
+        source: 'comprehensive_database',
       };
     }
   } catch (error) {
@@ -171,7 +171,7 @@ export const getStationInfo = (stationId) => {
     priority: 'medium',
     coordinates: { lat: 1.3521, lng: 103.8198 }, // Default to Singapore center
     region: 'unknown',
-    source: 'fallback'
+    source: 'fallback',
   };
 };
 
@@ -183,7 +183,7 @@ export const getStationsByPriority = (priority = 'all') => {
     // Try to get from comprehensive database
     const optimalStations = stationConfigService.getOptimalStations({
       dataType: 'all',
-      priorityOnly: priority !== 'all'
+      priorityOnly: priority !== 'all',
     });
 
     if (optimalStations && Object.keys(optimalStations).length > 0) {
@@ -198,17 +198,17 @@ export const getStationsByPriority = (priority = 'all') => {
               priority: station.priority_level || 'medium',
               coordinates: station.coordinates ? {
                 lat: station.coordinates.lat,
-                lng: station.coordinates.lng
+                lng: station.coordinates.lng,
               } : { lat: 1.3521, lng: 103.8198 },
               region: determineRegion(station.coordinates),
               data_types: station.data_types || [],
               priority_score: station.priority_score || 50,
-              source: 'comprehensive_database'
+              source: 'comprehensive_database',
             }]);
           }
         }
       }
-      
+
       // Remove duplicates based on station_id
       const uniqueStations = [];
       const seenIds = new Set();
@@ -218,7 +218,7 @@ export const getStationsByPriority = (priority = 'all') => {
           uniqueStations.push([id, station]);
         }
       }
-      
+
       return uniqueStations;
     }
   } catch (error) {
@@ -256,9 +256,9 @@ export const getStationsByDataType = (dataType) => {
   try {
     const optimalStations = stationConfigService.getOptimalStations({
       dataType: dataType,
-      maxStations: 10
+      maxStations: 10,
     });
-    
+
     if (optimalStations[dataType]) {
       return optimalStations[dataType].map(station => [station.station_id, {
         name: station.coordinates?.name || station.name,
@@ -267,12 +267,12 @@ export const getStationsByDataType = (dataType) => {
         priority: station.priority_level || 'medium',
         coordinates: station.coordinates ? {
           lat: station.coordinates.lat,
-          lng: station.coordinates.lng
+          lng: station.coordinates.lng,
         } : { lat: 1.3521, lng: 103.8198 },
         region: determineRegion(station.coordinates),
         data_types: station.data_types || [],
         priority_score: station.priority_score || 50,
-        source: 'comprehensive_database'
+        source: 'comprehensive_database',
       }]);
     }
   } catch (error) {
@@ -296,16 +296,16 @@ export const getStationsByProximity = (location, radius = 10, dataType = null) =
       priority: station.priority_level || 'medium',
       coordinates: station.coordinates ? {
         lat: station.coordinates.lat,
-        lng: station.coordinates.lng
+        lng: station.coordinates.lng,
       } : { lat: 1.3521, lng: 103.8198 },
       region: determineRegion(station.coordinates),
       data_types: station.data_types || [],
       priority_score: station.priority_score || 50,
       distance_km: stationConfigService.calculateDistance(
         location.lat, location.lng,
-        station.coordinates.lat, station.coordinates.lng
+        station.coordinates.lat, station.coordinates.lng,
       ),
-      source: 'comprehensive_database'
+      source: 'comprehensive_database',
     }]);
   } catch (error) {
     console.warn('⚠️ Could not get stations by proximity:', error.message);
@@ -325,23 +325,23 @@ export const KEY_LOCATIONS = {
   hwa_chong: {
     name: 'Hwa Chong International School',
     coordinates: { lat: 1.3437, lng: 103.7640 },
-    priority: 'primary'
+    priority: 'primary',
   },
   bukit_timah: {
     name: 'Bukit Timah Nature Reserve',
     coordinates: { lat: 1.3520, lng: 103.7767 },
-    priority: 'secondary'
+    priority: 'secondary',
   },
   newton: {
     name: 'Newton',
     coordinates: { lat: 1.3138, lng: 103.8420 },
-    priority: 'tertiary'
+    priority: 'tertiary',
   },
   clementi: {
     name: 'Clementi',
     coordinates: { lat: 1.3162, lng: 103.7649 },
-    priority: 'tertiary'
-  }
+    priority: 'tertiary',
+  },
 };
 
 export default STATION_MAPPING;

@@ -26,14 +26,14 @@ const useSafeDataLoader = (refreshInterval) => {
       forceRefresh: () => {},
       dataFreshness: { weather: 'unknown', webcam: 'unknown' },
       reliabilityMetrics: {},
-      getReliabilityReport: () => ({})
+      getReliabilityReport: () => ({}),
     };
   }
 };
 
 export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 * 1000 }) => {
   const dataLoader = useSafeDataLoader(refreshInterval);
-  
+
   const {
     weatherData,
     webcamData,
@@ -56,7 +56,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     activeCameras: webcamData?.cameras?.filter(c => c.image).length || 0,
     weatherStations: weatherData?.stations?.length || 0,
     lastUpdate: lastFetch,
-    status: error ? 'error' : 'healthy'
+    status: error ? 'error' : 'healthy',
   }), [webcamData, weatherData, lastFetch, error]);
 
   // Safe service worker fallback
@@ -66,13 +66,13 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     canInstall: false,
     installPWA: () => {},
     updateServiceWorker: () => {},
-    requestNotificationPermission: () => Promise.resolve('default')
+    requestNotificationPermission: () => Promise.resolve('default'),
   };
 
   // Safe metrics fallback
   const metrics = {
     trackPageView: (page, metadata) => console.debug('Page view:', page, metadata),
-    trackUserInteraction: (type, element, metadata) => console.debug('User interaction:', type, element, metadata)
+    trackUserInteraction: (type, element, metadata) => console.debug('User interaction:', type, element, metadata),
   };
 
   const contextValue = useMemo(() => ({

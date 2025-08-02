@@ -4,7 +4,7 @@ import { Search, MapPin, Filter, Star, X, Info } from 'lucide-react';
 
 /**
  * Advanced Station Selector Component - 59-Station NEA Integration
- * 
+ *
  * Features:
  * - Search and filter through all 59 NEA weather stations
  * - Multiple filtering options (region, data type, priority)
@@ -12,14 +12,14 @@ import { Search, MapPin, Filter, Star, X, Info } from 'lucide-react';
  * - Accessibility compliant (WCAG 2.1 AA)
  * - Performance optimized for large datasets
  */
-const StationSelector = React.memo(({ 
-  stations = [], 
-  selectedStations = [], 
-  onStationSelect, 
+const StationSelector = React.memo(({
+  stations = [],
+  selectedStations = [],
+  onStationSelect,
   onStationDeselect,
   maxSelections = 5,
   className = '',
-  allowMultiple = true 
+  allowMultiple = true,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('all');
@@ -43,7 +43,7 @@ const StationSelector = React.memo(({
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(station =>
         station.name.toLowerCase().includes(query) ||
-        station.station_id.toLowerCase().includes(query)
+        station.station_id.toLowerCase().includes(query),
       );
     }
 
@@ -52,8 +52,8 @@ const StationSelector = React.memo(({
       filtered = filtered.filter(station => {
         const lat = station.coordinates?.lat;
         const lng = station.coordinates?.lng;
-        if (!lat || !lng) return false;
-        
+        if (!lat || !lng) {return false;}
+
         const region = determineRegion(lat, lng);
         return region === selectedRegion;
       });
@@ -62,14 +62,14 @@ const StationSelector = React.memo(({
     // Data type filter
     if (selectedDataType !== 'all') {
       filtered = filtered.filter(station =>
-        station.data_types && station.data_types.includes(selectedDataType)
+        station.data_types && station.data_types.includes(selectedDataType),
       );
     }
 
     // Priority filter
     if (selectedPriority !== 'all') {
       filtered = filtered.filter(station =>
-        station.priority_level === selectedPriority
+        station.priority_level === selectedPriority,
       );
     }
 
@@ -77,14 +77,14 @@ const StationSelector = React.memo(({
     return filtered.sort((a, b) => {
       const aFavorite = favorites.includes(a.station_id);
       const bFavorite = favorites.includes(b.station_id);
-      
-      if (aFavorite && !bFavorite) return -1;
-      if (!aFavorite && bFavorite) return 1;
-      
+
+      if (aFavorite && !bFavorite) {return -1;}
+      if (!aFavorite && bFavorite) {return 1;}
+
       const aPriority = a.priority_score || 0;
       const bPriority = b.priority_score || 0;
-      if (aPriority !== bPriority) return bPriority - aPriority;
-      
+      if (aPriority !== bPriority) {return bPriority - aPriority;}
+
       return a.name.localeCompare(b.name);
     });
   }, [stations, searchQuery, selectedRegion, selectedDataType, selectedPriority, favorites]);
@@ -92,7 +92,7 @@ const StationSelector = React.memo(({
   // Station selection handlers
   const handleStationClick = (station) => {
     const isSelected = selectedStations.some(s => s.station_id === station.station_id);
-    
+
     if (isSelected) {
       onStationDeselect?.(station);
     } else {
@@ -112,7 +112,7 @@ const StationSelector = React.memo(({
     const newFavorites = favorites.includes(stationId)
       ? favorites.filter(id => id !== stationId)
       : [...favorites, stationId];
-    
+
     setFavorites(newFavorites);
     try {
       localStorage.setItem('weather-station-favorites', JSON.stringify(newFavorites));
@@ -131,14 +131,14 @@ const StationSelector = React.memo(({
 
   // Get station display info
   const getStationDisplayInfo = (station) => {
-    const region = station.coordinates?.lat && station.coordinates?.lng 
+    const region = station.coordinates?.lat && station.coordinates?.lng
       ? determineRegion(station.coordinates.lat, station.coordinates.lng)
       : 'unknown';
-    
+
     const distance = station.proximities?.hwa_chong?.distance_km;
     const dataTypes = station.data_types || [];
     const priority = station.priority_level || 'unknown';
-    
+
     return { region, distance, dataTypes, priority };
   };
 
@@ -328,9 +328,9 @@ const StationSelector = React.memo(({
                         )}
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           priority === 'critical' ? 'bg-red-100 text-red-800' :
-                          priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                          priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
+                            priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                              priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
                         }`}>
                           {priority}
                         </span>
@@ -341,8 +341,8 @@ const StationSelector = React.memo(({
                             key={type}
                             className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full"
                           >
-                            {type === 'wind_speed' ? 'wind' : 
-                             type === 'wind_direction' ? 'direction' : type}
+                            {type === 'wind_speed' ? 'wind' :
+                              type === 'wind_direction' ? 'direction' : type}
                           </span>
                         ))}
                         {dataTypes.length > 3 && (
@@ -367,7 +367,7 @@ const StationSelector = React.memo(({
                         </div>
                       )}
                     </div>
-                    
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -413,10 +413,10 @@ const StationSelector = React.memo(({
 // Helper function to determine region based on coordinates
 const determineRegion = (lat, lng) => {
   // Singapore regional boundaries (approximate)
-  if (lat > 1.38) return 'north';
-  if (lat < 1.28) return 'south';
-  if (lng > 103.87) return 'east';
-  if (lng < 103.75) return 'west';
+  if (lat > 1.38) {return 'north';}
+  if (lat < 1.28) {return 'south';}
+  if (lng > 103.87) {return 'east';}
+  if (lng < 103.75) {return 'west';}
   return 'central';
 };
 
@@ -427,21 +427,21 @@ StationSelector.propTypes = {
       name: PropTypes.string.isRequired,
       coordinates: PropTypes.shape({
         lat: PropTypes.number,
-        lng: PropTypes.number
+        lng: PropTypes.number,
       }),
       data_types: PropTypes.array,
       priority_level: PropTypes.string,
       priority_score: PropTypes.number,
       proximities: PropTypes.object,
-      currentData: PropTypes.object
-    })
+      currentData: PropTypes.object,
+    }),
   ),
   selectedStations: PropTypes.array,
   onStationSelect: PropTypes.func,
   onStationDeselect: PropTypes.func,
   maxSelections: PropTypes.number,
   className: PropTypes.string,
-  allowMultiple: PropTypes.bool
+  allowMultiple: PropTypes.bool,
 };
 
 StationSelector.displayName = 'StationSelector';

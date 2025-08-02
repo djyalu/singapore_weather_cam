@@ -32,23 +32,23 @@ const SystemStatus = React.memo(({
 
   // Calculate time since last update
   const getTimeSinceUpdate = () => {
-    if (!lastFetch) return null;
+    if (!lastFetch) {return null;}
 
     const now = new Date();
     const diffMinutes = Math.floor((now - lastFetch) / (1000 * 60));
 
-    if (diffMinutes < 1) return '방금 전';
-    if (diffMinutes < 60) return `${diffMinutes}분 전`;
+    if (diffMinutes < 1) {return '방금 전';}
+    if (diffMinutes < 60) {return `${diffMinutes}분 전`;}
 
     const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours}시간 전`;
-    
+    if (diffHours < 24) {return `${diffHours}시간 전`;}
+
     return lastFetch.toLocaleDateString('ko-KR', {
       timeZone: 'Asia/Singapore',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 

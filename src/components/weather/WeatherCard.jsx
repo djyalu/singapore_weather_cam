@@ -14,16 +14,16 @@ const WeatherCard = ({ title, value, icon, description, trend, status = 'normal'
 
   return (
     <Card className={cn(
-      "relative overflow-hidden backdrop-blur-lg transition-all duration-500 hover:scale-110 transform group hover:shadow-2xl border-2 hover:border-purple-400/50",
-      getStatusColor()
+      'relative overflow-hidden backdrop-blur-lg transition-all duration-500 hover:scale-110 transform group hover:shadow-2xl border-2 hover:border-purple-400/50',
+      getStatusColor(),
     )}>
       {/* 차분한 그라데이션 배경 */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/15 via-indigo-500/10 to-purple-600/15"></div>
       <div className="absolute inset-0 bg-gradient-to-tr from-slate-400/5 via-blue-400/8 to-indigo-400/8"></div>
-      
+
       {/* 부드러운 호버 효과 */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-400/15 via-indigo-400/15 to-purple-400/15 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      
+
       {/* 상단 액센트 라인 */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
 
@@ -34,10 +34,10 @@ const WeatherCard = ({ title, value, icon, description, trend, status = 'normal'
               <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider drop-shadow-sm">{title}</p>
               {trend && (
                 <span className={cn(
-                  "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-sm backdrop-blur-sm border",
-                  trend === 'up' && "bg-destructive/10 text-destructive border-destructive/20",
-                  trend === 'down' && "bg-primary/10 text-primary border-primary/20",
-                  trend === 'stable' && "bg-muted text-muted-foreground border-border"
+                  'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-sm backdrop-blur-sm border',
+                  trend === 'up' && 'bg-destructive/10 text-destructive border-destructive/20',
+                  trend === 'down' && 'bg-primary/10 text-primary border-primary/20',
+                  trend === 'stable' && 'bg-muted text-muted-foreground border-border',
                 )}>
                   {trend === 'up' ? '↗️' : trend === 'down' ? '↘️' : '→'}
                 </span>
@@ -75,7 +75,7 @@ const WeatherCard = ({ title, value, icon, description, trend, status = 'normal'
 
         {/* 차분한 하단 액센트 */}
         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full"></div>
-        
+
         {/* 부드러운 코너 효과 */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-indigo-400/15 via-purple-400/8 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </CardContent>

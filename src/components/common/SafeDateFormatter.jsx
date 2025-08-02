@@ -42,7 +42,7 @@ export const formatDateSafely = (date, options = {}) => {
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-      ...(options.dateOptions || {})
+      ...(options.dateOptions || {}),
     };
 
     return dateObj.toLocaleString(locale, formatOptions);
@@ -58,18 +58,18 @@ export const formatDateSafely = (date, options = {}) => {
 /**
  * SafeDateFormatter React Component
  */
-const SafeDateFormatter = ({ 
-  date, 
-  locale = 'ko-KR', 
-  dateOptions = {}, 
+const SafeDateFormatter = ({
+  date,
+  locale = 'ko-KR',
+  dateOptions = {},
   fallback,
   className = '',
-  children
+  children,
 }) => {
-  const formattedDate = formatDateSafely(date, { 
-    locale, 
-    dateOptions, 
-    fallback 
+  const formattedDate = formatDateSafely(date, {
+    locale,
+    dateOptions,
+    fallback,
   });
 
   // If children is provided, it's a render prop pattern
@@ -88,13 +88,13 @@ SafeDateFormatter.propTypes = {
   date: PropTypes.oneOfType([
     PropTypes.instanceOf(Date),
     PropTypes.string,
-    PropTypes.number
+    PropTypes.number,
   ]),
   locale: PropTypes.string,
   dateOptions: PropTypes.object,
   fallback: PropTypes.string,
   className: PropTypes.string,
-  children: PropTypes.func
+  children: PropTypes.func,
 };
 
 /**
@@ -106,23 +106,23 @@ export const DateFormats = {
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   },
   SHORT: {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   },
   TIME_ONLY: {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   },
   DATE_ONLY: {
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
-  }
+    day: '2-digit',
+  },
 };
 
 /**

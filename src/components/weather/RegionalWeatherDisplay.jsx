@@ -4,7 +4,7 @@ import { MapPin, Thermometer, Droplets, Wind, Cloud } from 'lucide-react';
 
 /**
  * Regional Weather Display - Shows accurate data for major Singapore regions
- * 
+ *
  * Features:
  * - Hwa Chong, Newton, Changi region-specific data
  * - Real station data mapping (not averages)
@@ -20,31 +20,31 @@ const RegionalWeatherDisplay = React.memo(({ weatherData, className = '' }) => {
         displayName: 'Hwa Chong International School',
         priorityStations: ['S50', 'S104', 'S109'], // Clementi, Jurong West, Ang Mo Kio
         coordinates: { lat: 1.3437, lng: 103.7640 },
-        icon: '🏫'
+        icon: '🏫',
       },
       'newton': {
         name: 'Newton',
         displayName: 'Newton Area',
         priorityStations: ['S115', 'S109', 'S106'], // Toa Payoh, Ang Mo Kio, Tai Seng
         coordinates: { lat: 1.3138, lng: 103.8420 },
-        icon: '🏙️'
+        icon: '🏙️',
       },
       'changi': {
         name: 'Changi',
         displayName: 'Changi Airport Area',
         priorityStations: ['S107', 'S106', 'S115'], // East Coast, Tai Seng, Toa Payoh
         coordinates: { lat: 1.3644, lng: 103.9915 },
-        icon: '✈️'
-      }
+        icon: '✈️',
+      },
     };
   }, []);
 
   // Get regional weather data with accurate station mapping
   const getRegionalData = useMemo(() => {
-    if (!weatherData?.data) return {};
+    if (!weatherData?.data) {return {};}
 
     const regions = {};
-    
+
     Object.entries(regionalMapping).forEach(([regionId, regionInfo]) => {
       let bestStation = null;
       let stationData = null;
@@ -58,7 +58,7 @@ const RegionalWeatherDisplay = React.memo(({ weatherData, className = '' }) => {
           stationData = {
             temperature: tempReading.value,
             stationName: tempReading.station_name,
-            coordinates: tempReading.coordinates
+            coordinates: tempReading.coordinates,
           };
           break;
         }
@@ -71,7 +71,7 @@ const RegionalWeatherDisplay = React.memo(({ weatherData, className = '' }) => {
           stationData.humidity = humidityReading.value;
         }
 
-        // Add rainfall data if available  
+        // Add rainfall data if available
         const rainfallReading = weatherData.data.rainfall?.readings?.find(r => r.station === bestStation);
         if (rainfallReading) {
           stationData.rainfall = rainfallReading.value;
@@ -97,7 +97,7 @@ const RegionalWeatherDisplay = React.memo(({ weatherData, className = '' }) => {
           rainfall: weatherData.data.rainfall?.average || 0,
           windSpeed: weatherData.data.wind_speed?.average,
           stationName: 'Singapore Average',
-          isAverage: true
+          isAverage: true,
         };
       }
 
@@ -105,7 +105,7 @@ const RegionalWeatherDisplay = React.memo(({ weatherData, className = '' }) => {
         regions[regionId] = {
           ...regionInfo,
           data: stationData,
-          stationId: bestStation
+          stationId: bestStation,
         };
       }
     });
@@ -127,30 +127,30 @@ const RegionalWeatherDisplay = React.memo(({ weatherData, className = '' }) => {
   }
 
   const formatTemperature = (temp) => {
-    if (temp === null || temp === undefined) return '--';
+    if (temp === null || temp === undefined) {return '--';}
     return `${Math.round(temp)}°C`;
   };
 
   const formatHumidity = (humidity) => {
-    if (humidity === null || humidity === undefined) return '--';
+    if (humidity === null || humidity === undefined) {return '--';}
     return `${Math.round(humidity)}%`;
   };
 
   const formatRainfall = (rainfall) => {
-    if (rainfall === null || rainfall === undefined) return '0';
+    if (rainfall === null || rainfall === undefined) {return '0';}
     return `${rainfall.toFixed(1)}mm`;
   };
 
   const formatWindSpeed = (windSpeed) => {
-    if (windSpeed === null || windSpeed === undefined) return '--';
+    if (windSpeed === null || windSpeed === undefined) {return '--';}
     return `${windSpeed.toFixed(1)} km/h`;
   };
 
   const getTemperatureColor = (temp) => {
-    if (temp === null || temp === undefined) return 'text-gray-600';
-    if (temp >= 32) return 'text-red-600';
-    if (temp >= 28) return 'text-orange-600';
-    if (temp >= 24) return 'text-yellow-600';
+    if (temp === null || temp === undefined) {return 'text-gray-600';}
+    if (temp >= 32) {return 'text-red-600';}
+    if (temp >= 28) {return 'text-orange-600';}
+    if (temp >= 24) {return 'text-yellow-600';}
     return 'text-blue-600';
   };
 
@@ -301,27 +301,27 @@ RegionalWeatherDisplay.propTypes = {
     data: PropTypes.shape({
       temperature: PropTypes.shape({
         readings: PropTypes.array,
-        average: PropTypes.number
+        average: PropTypes.number,
       }),
       humidity: PropTypes.shape({
         readings: PropTypes.array,
-        average: PropTypes.number
+        average: PropTypes.number,
       }),
       rainfall: PropTypes.shape({
         readings: PropTypes.array,
-        average: PropTypes.number
+        average: PropTypes.number,
       }),
       wind_speed: PropTypes.shape({
         readings: PropTypes.array,
-        average: PropTypes.number
+        average: PropTypes.number,
       }),
       wind_direction: PropTypes.shape({
         readings: PropTypes.array,
-        average: PropTypes.number
-      })
-    })
+        average: PropTypes.number,
+      }),
+    }),
   }),
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 RegionalWeatherDisplay.displayName = 'RegionalWeatherDisplay';

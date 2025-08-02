@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import { stationConfigService } from '../../services/stationConfigService.js';
 import { KEY_LOCATIONS } from '../../config/weatherStations.js';
 
-const StationsBrowser = ({ 
+const StationsBrowser = ({
   onStationSelect = null,
   showFilters = true,
-  compact = false 
+  compact = false,
 }) => {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,37 +24,37 @@ const StationsBrowser = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       await stationConfigService.loadStationsDatabase();
-      
+
       // Get all available stations
       const optimalStations = stationConfigService.getOptimalStations({
         dataType: 'all',
-        maxStations: 100
+        maxStations: 100,
       });
-      
+
       // Flatten and deduplicate stations
       const allStations = [];
       const seenIds = new Set();
-      
+
       for (const [dataType, stationsList] of Object.entries(optimalStations)) {
         for (const station of stationsList) {
           if (!seenIds.has(station.station_id)) {
             seenIds.add(station.station_id);
             allStations.push({
               ...station,
-              region: determineRegion(station.coordinates)
+              region: determineRegion(station.coordinates),
             });
           }
         }
       }
-      
+
       setStations(allStations);
-      
+
     } catch (err) {
       console.error('Error loading stations:', err);
       setError(err.message);
-      
+
       // Fallback to empty array to prevent crashes
       setStations([]);
     } finally {
@@ -68,84 +68,84 @@ const StationsBrowser = ({
 
   // Determine region based on coordinates
   const determineRegion = useCallback((coordinates) => {
-    if (!coordinates) return 'unknown';
-    
+    if (!coordinates) {return 'unknown';}
+
     const { lat, lng } = coordinates;
-    
-    if (lat > 1.38) return 'north';
-    if (lat < 1.28) return 'south';
-    if (lng > 103.85) return 'east';
-    if (lng < 103.75) return 'west';
+
+    if (lat > 1.38) {return 'north';}
+    if (lat < 1.28) {return 'south';}
+    if (lng > 103.85) {return 'east';}
+    if (lng < 103.75) {return 'west';}
     return 'central';
   }, []);
 
   // Calculate distance to nearest key location
   const calculateNearestKeyLocation = useCallback((station) => {
-    if (!station.coordinates) return null;
-    
+    if (!station.coordinates) {return null;}
+
     let nearest = null;
     let minDistance = Infinity;
-    
+
     for (const [key, location] of Object.entries(KEY_LOCATIONS)) {
       const distance = stationConfigService.calculateDistance(
         station.coordinates.lat,
         station.coordinates.lng,
         location.coordinates.lat,
-        location.coordinates.lng
+        location.coordinates.lng,
       );
-      
+
       if (distance < minDistance) {
         minDistance = distance;
         nearest = {
           key,
           name: location.name,
-          distance: distance
+          distance: distance,
         };
       }
     }
-    
+
     return nearest;
   }, []);
 
   // Filter and sort stations
   const filteredAndSortedStations = useMemo(() => {
-    let filtered = stations.filter(station => {
+    const filtered = stations.filter(station => {
       // Search filter
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
         const matchesId = station.station_id.toLowerCase().includes(searchLower);
         const matchesName = station.coordinates?.name?.toLowerCase().includes(searchLower) || false;
-        if (!matchesId && !matchesName) return false;
+        if (!matchesId && !matchesName) {return false;}
       }
-      
+
       // Data type filter
       if (selectedDataType !== 'all') {
         if (!station.data_types || !station.data_types.includes(selectedDataType)) {
           return false;
         }
       }
-      
+
       // Priority filter
       if (selectedPriority !== 'all') {
         if (station.priority_level !== selectedPriority) {
           return false;
         }
       }
-      
+
       // Region filter
       if (selectedRegion !== 'all') {
         if (station.region !== selectedRegion) {
           return false;
         }
       }
-      
+
       return true;
     });
-    
+
     // Sort stations
     filtered.sort((a, b) => {
       let aValue, bValue;
-      
+
       switch (sortBy) {
         case 'station_id':
           aValue = a.station_id;
@@ -172,14 +172,14 @@ const StationsBrowser = ({
           aValue = a.priority_score || 0;
           bValue = b.priority_score || 0;
       }
-      
+
       if (typeof aValue === 'string') {
         return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       } else {
         return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
       }
     });
-    
+
     return filtered;
   }, [stations, searchTerm, selectedDataType, selectedPriority, selectedRegion, sortBy, sortOrder]);
 
@@ -195,7 +195,7 @@ const StationsBrowser = ({
   const uniquePriorities = useMemo(() => {
     const priorities = new Set();
     stations.forEach(station => {
-      if (station.priority_level) priorities.add(station.priority_level);
+      if (station.priority_level) {priorities.add(station.priority_level);}
     });
     return Array.from(priorities).sort((a, b) => {
       const order = { critical: 4, high: 3, medium: 2, low: 1 };
@@ -206,7 +206,7 @@ const StationsBrowser = ({
   const uniqueRegions = useMemo(() => {
     const regions = new Set();
     stations.forEach(station => {
-      if (station.region) regions.add(station.region);
+      if (station.region) {regions.add(station.region);}
     });
     return Array.from(regions).sort();
   }, [stations]);
@@ -228,7 +228,7 @@ const StationsBrowser = ({
       wind_direction: '🧭',
       pm25: '🏭',
       psi: '📊',
-      uv_index: '☀️'
+      uv_index: '☀️',
     };
     return emojis[dataType] || '📊';
   };
@@ -239,7 +239,7 @@ const StationsBrowser = ({
       critical: 'bg-red-100 text-red-800 border-red-200',
       high: 'bg-orange-100 text-orange-800 border-orange-200',
       medium: 'bg-blue-100 text-blue-800 border-blue-200',
-      low: 'bg-gray-100 text-gray-800 border-gray-200'
+      low: 'bg-gray-100 text-gray-800 border-gray-200',
     };
     return colors[priority] || colors.medium;
   };
@@ -262,7 +262,7 @@ const StationsBrowser = ({
           <p className="text-lg mb-2">⚠️ Error loading stations</p>
           <p className="text-sm">{error}</p>
         </div>
-        <button 
+        <button
           onClick={loadStations}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
         >
@@ -393,8 +393,8 @@ const StationsBrowser = ({
               <button
                 onClick={() => setViewMode('grid')}
                 className={`px-3 py-1 text-sm rounded ${
-                  viewMode === 'grid' 
-                    ? 'bg-blue-500 text-white' 
+                  viewMode === 'grid'
+                    ? 'bg-blue-500 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -403,8 +403,8 @@ const StationsBrowser = ({
               <button
                 onClick={() => setViewMode('list')}
                 className={`px-3 py-1 text-sm rounded ${
-                  viewMode === 'list' 
-                    ? 'bg-blue-500 text-white' 
+                  viewMode === 'list'
+                    ? 'bg-blue-500 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -420,7 +420,7 @@ const StationsBrowser = ({
         <p className="text-sm text-gray-600">
           Showing {filteredAndSortedStations.length} of {stations.length} stations
         </p>
-        
+
         {filteredAndSortedStations.length > 0 && (
           <div className="text-sm text-gray-500">
             {filteredAndSortedStations.filter(s => s.priority_level === 'critical').length} Critical •{' '}
@@ -439,13 +439,13 @@ const StationsBrowser = ({
         </div>
       ) : (
         <div className={
-          viewMode === 'grid' 
+          viewMode === 'grid'
             ? `grid gap-4 ${compact ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`
             : 'space-y-2'
         }>
           {filteredAndSortedStations.map((station) => {
             const nearestLocation = calculateNearestKeyLocation(station);
-            
+
             return (
               <div
                 key={station.station_id}
@@ -467,38 +467,38 @@ const StationsBrowser = ({
                         {station.priority_level}
                       </span>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">ID:</span>
                         <span className="font-mono">{station.station_id}</span>
                       </div>
-                      
+
                       {station.priority_score && (
                         <div className="flex justify-between">
                           <span className="text-gray-600">Score:</span>
                           <span className="font-medium">{station.priority_score.toFixed(1)}</span>
                         </div>
                       )}
-                      
+
                       <div className="flex justify-between">
                         <span className="text-gray-600">Region:</span>
                         <span className="capitalize">{station.region}</span>
                       </div>
-                      
+
                       {nearestLocation && (
                         <div className="text-xs text-gray-500">
                           📍 {nearestLocation.distance.toFixed(1)}km from {nearestLocation.name}
                         </div>
                       )}
                     </div>
-                    
+
                     {station.data_types && station.data_types.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-gray-100">
                         <div className="flex flex-wrap gap-1">
                           {station.data_types.slice(0, 4).map(type => (
-                            <span 
-                              key={type} 
+                            <span
+                              key={type}
                               className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded text-xs"
                               title={type}
                             >
@@ -528,7 +528,7 @@ const StationsBrowser = ({
                         <span className={`px-2 py-1 text-xs font-medium rounded border ${getPriorityColor(station.priority_level)}`}>
                           {station.priority_level}
                         </span>
-                        
+
                         {station.data_types && (
                           <div className="flex gap-1">
                             {station.data_types.slice(0, 3).map(type => (
@@ -544,14 +544,14 @@ const StationsBrowser = ({
                           </div>
                         )}
                       </div>
-                      
+
                       {nearestLocation && (
                         <p className="text-sm text-gray-500 mt-1">
                           📍 {nearestLocation.distance.toFixed(1)}km from {nearestLocation.name} • {station.region}
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="text-right">
                       {station.priority_score && (
                         <div className="text-sm font-medium text-gray-900">
@@ -573,7 +573,7 @@ const StationsBrowser = ({
 StationsBrowser.propTypes = {
   onStationSelect: PropTypes.func,
   showFilters: PropTypes.bool,
-  compact: PropTypes.bool
+  compact: PropTypes.bool,
 };
 
 export default StationsBrowser;

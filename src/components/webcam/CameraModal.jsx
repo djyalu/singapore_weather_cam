@@ -13,7 +13,7 @@ const CameraModal = ({ camera, isOpen, onClose }) => {
   // ESC 키로 모달 닫기
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {onClose();}
     };
 
     if (isOpen) {
@@ -35,7 +35,7 @@ const CameraModal = ({ camera, isOpen, onClose }) => {
     }
   }, [camera]);
 
-  if (!isOpen || !camera) return null;
+  if (!isOpen || !camera) {return null;}
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -63,7 +63,7 @@ const CameraModal = ({ camera, isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* 배경 오버레이 */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -102,7 +102,7 @@ const CameraModal = ({ camera, isOpen, onClose }) => {
             <button
               onClick={toggleFullscreen}
               className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              title={isFullscreen ? "창 모드" : "전체화면"}
+              title={isFullscreen ? '창 모드' : '전체화면'}
             >
               {isFullscreen ? (
                 <Minimize2 className="w-5 h-5" />

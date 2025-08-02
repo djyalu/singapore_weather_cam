@@ -9,13 +9,13 @@ import PropTypes from 'prop-types';
 class EnhancedErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    
+
     this.state = {
       hasError: false,
       error: null,
       errorInfo: null,
       errorId: null,
-      retryCount: 0
+      retryCount: 0,
     };
   }
 
@@ -24,7 +24,7 @@ class EnhancedErrorBoundary extends React.Component {
     return {
       hasError: true,
       error,
-      errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
   }
 
@@ -33,7 +33,7 @@ class EnhancedErrorBoundary extends React.Component {
     this.setState({
       error,
       errorInfo,
-      errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     });
 
     // Log error in development only
@@ -59,7 +59,7 @@ class EnhancedErrorBoundary extends React.Component {
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href,
-      errorId: this.state.errorId
+      errorId: this.state.errorId,
     };
 
     // Only report in production mode to avoid spam in development
@@ -91,7 +91,7 @@ class EnhancedErrorBoundary extends React.Component {
       error: null,
       errorInfo: null,
       errorId: null,
-      retryCount: prevState.retryCount + 1
+      retryCount: prevState.retryCount + 1,
     }));
   };
 
@@ -126,11 +126,11 @@ class EnhancedErrorBoundary extends React.Component {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            
+
             <h2 className="text-xl font-semibold text-gray-900 text-center mb-2">
               앱에서 오류가 발생했습니다
             </h2>
-            
+
             <p className="text-gray-600 text-center mb-6">
               죄송합니다. 예상치 못한 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.
             </p>
@@ -170,7 +170,7 @@ class EnhancedErrorBoundary extends React.Component {
                   페이지 새로고침
                 </button>
               )}
-              
+
               <button
                 onClick={() => window.location.href = '/'}
                 className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
@@ -197,7 +197,7 @@ EnhancedErrorBoundary.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.elementType,
   maxRetries: PropTypes.number,
-  onError: PropTypes.func
+  onError: PropTypes.func,
 };
 
 /**
@@ -237,7 +237,7 @@ export const withErrorBoundary = (Component, errorBoundaryProps = {}) => {
   ));
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 };
 

@@ -15,16 +15,16 @@ const createNotificationContainer = () => {
 // 알림 표시
 export const showNotification = (message, type = 'info', duration = 5000) => {
   const container = createNotificationContainer();
-  
+
   const notification = document.createElement('div');
   notification.className = `
     max-w-sm p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full
     ${type === 'success' ? 'bg-green-500 text-white' :
-      type === 'error' ? 'bg-red-500 text-white' :
+    type === 'error' ? 'bg-red-500 text-white' :
       type === 'warning' ? 'bg-yellow-500 text-black' :
-      'bg-blue-500 text-white'}
+        'bg-blue-500 text-white'}
   `;
-  
+
   notification.innerHTML = `
     <div class="flex items-center gap-2">
       <span class="flex-1 text-sm font-medium">${message}</span>
@@ -33,14 +33,14 @@ export const showNotification = (message, type = 'info', duration = 5000) => {
       </button>
     </div>
   `;
-  
+
   container.appendChild(notification);
-  
+
   // 슬라이드 인 애니메이션
   setTimeout(() => {
     notification.classList.remove('translate-x-full');
   }, 10);
-  
+
   // 자동 제거
   setTimeout(() => {
     notification.classList.add('translate-x-full');

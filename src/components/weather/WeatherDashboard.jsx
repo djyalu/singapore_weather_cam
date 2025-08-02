@@ -61,10 +61,10 @@ const WeatherDashboard = ({ data }) => {
           onClick={() => setSelectedLocation('all')}
           className={`px-3 sm:px-4 py-3 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 
                      touch-manipulation min-h-[44px] sm:min-h-auto active:scale-95 ${
-            selectedLocation === 'all'
-              ? 'bg-singapore-red text-white shadow-md'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
-          }`}
+    selectedLocation === 'all'
+      ? 'bg-singapore-red text-white shadow-md'
+      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
+    }`}
           aria-pressed={selectedLocation === 'all'}
         >
           <span className="flex items-center justify-center">
@@ -78,10 +78,10 @@ const WeatherDashboard = ({ data }) => {
             onClick={() => setSelectedLocation(location.id)}
             className={`px-3 sm:px-4 py-3 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 
                        touch-manipulation min-h-[44px] sm:min-h-auto active:scale-95 ${
-              selectedLocation === location.id
-                ? 'bg-singapore-red text-white shadow-md'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
-            }`}
+          selectedLocation === location.id
+            ? 'bg-singapore-red text-white shadow-md'
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
+          }`}
             aria-pressed={selectedLocation === location.id}
             title={location.displayName || location.name}
           >

@@ -1,6 +1,6 @@
 /**
  * 🛡️ SECURITY: 59-Station Data Security Validation
- * 
+ *
  * Comprehensive security validation for the enhanced 59-station weather system:
  * - Input sanitization and validation
  * - Data integrity verification
@@ -13,7 +13,7 @@
 // Valid Singapore geographic boundaries
 const SINGAPORE_BOUNDS = {
   lat: { min: 1.16, max: 1.48 },
-  lng: { min: 103.6, max: 104.0 }
+  lng: { min: 103.6, max: 104.0 },
 };
 
 // Valid station ID pattern (NEA format)
@@ -26,12 +26,12 @@ const DATA_LIMITS = {
   rainfall: { min: 0, max: 500 }, // mm
   wind_speed: { min: 0, max: 50 }, // m/s
   wind_direction: { min: 0, max: 360 }, // degrees
-  air_temperature: { min: 15, max: 45 } // Celsius
+  air_temperature: { min: 15, max: 45 }, // Celsius
 };
 
 // Valid data type names
 const VALID_DATA_TYPES = [
-  'temperature', 'humidity', 'rainfall', 'wind_speed', 'wind_direction', 'air_temperature'
+  'temperature', 'humidity', 'rainfall', 'wind_speed', 'wind_direction', 'air_temperature',
 ];
 
 // Valid priority levels
@@ -49,7 +49,7 @@ export function validateStationData(rawData) {
     errors: [],
     warnings: [],
     sanitizedData: null,
-    securityScore: 100
+    securityScore: 100,
   };
 
   try {
@@ -90,7 +90,7 @@ export function validateStationData(rawData) {
       isValid: validationResult.isValid,
       errors: validationResult.errors.length,
       warnings: validationResult.warnings.length,
-      securityScore: validationResult.securityScore
+      securityScore: validationResult.securityScore,
     });
 
   } catch (error) {
@@ -114,7 +114,7 @@ function validateBasicStructure(rawData, result) {
   // Required fields
   const requiredFields = ['timestamp', 'source', 'stations_used', 'data', 'station_details'];
   const missingFields = requiredFields.filter(field => !rawData[field]);
-  
+
   if (missingFields.length > 0) {
     result.errors.push(`Missing required fields: ${missingFields.join(', ')}`);
     return false;
@@ -188,7 +188,7 @@ function validateSingleStationDetails(stationId, details, result) {
   // Required fields for station
   const requiredFields = ['station_id', 'name', 'coordinates'];
   const missingFields = requiredFields.filter(field => !details[field]);
-  
+
   if (missingFields.length > 0) {
     result.errors.push(`Station ${stationId} missing fields: ${missingFields.join(', ')}`);
     return false;
@@ -211,7 +211,7 @@ function validateSingleStationDetails(stationId, details, result) {
 
   // Validate reliability score if present
   if (details.reliability_score !== undefined) {
-    if (typeof details.reliability_score !== 'number' || 
+    if (typeof details.reliability_score !== 'number' ||
         details.reliability_score < 0 || details.reliability_score > 1) {
       result.warnings.push(`Invalid reliability score for station ${stationId}: ${details.reliability_score}`);
     }
@@ -429,7 +429,7 @@ function sanitizeStationData(rawData) {
     data: {},
     station_details: {},
     geographic_coverage: rawData.geographic_coverage || null,
-    data_quality_score: Math.max(0, Math.min(100, rawData.data_quality_score || 0))
+    data_quality_score: Math.max(0, Math.min(100, rawData.data_quality_score || 0)),
   };
 
   // Sanitize weather data
@@ -444,13 +444,13 @@ function sanitizeStationData(rawData) {
             station_name: sanitizeString(reading.station_name || ''),
             coordinates: reading.coordinates ? {
               lat: Number(reading.coordinates.lat),
-              lng: Number(reading.coordinates.lng)
-            } : undefined
+              lng: Number(reading.coordinates.lng),
+            } : undefined,
           })),
         total_stations: typeData.total_stations || 0,
         average: Number(typeData.average) || 0,
         min: Number(typeData.min) || 0,
-        max: Number(typeData.max) || 0
+        max: Number(typeData.max) || 0,
       };
     }
   }
@@ -463,16 +463,16 @@ function sanitizeStationData(rawData) {
         name: sanitizeString(details.name || ''),
         coordinates: {
           lat: Number(details.coordinates.lat),
-          lng: Number(details.coordinates.lng)
+          lng: Number(details.coordinates.lng),
         },
-        data_types: Array.isArray(details.data_types) 
+        data_types: Array.isArray(details.data_types)
           ? details.data_types.filter(type => VALID_DATA_TYPES.includes(type))
           : [],
-        priority_level: VALID_PRIORITY_LEVELS.includes(details.priority_level) 
-          ? details.priority_level 
+        priority_level: VALID_PRIORITY_LEVELS.includes(details.priority_level)
+          ? details.priority_level
           : 'medium',
         priority_score: Math.max(0, Math.min(200, Number(details.priority_score) || 0)),
-        reliability_score: Math.max(0, Math.min(1, Number(details.reliability_score) || 0))
+        reliability_score: Math.max(0, Math.min(1, Number(details.reliability_score) || 0)),
       };
     }
   }
@@ -484,8 +484,8 @@ function sanitizeStationData(rawData) {
  * Sanitize string input
  */
 function sanitizeString(input) {
-  if (typeof input !== 'string') return '';
-  
+  if (typeof input !== 'string') {return '';}
+
   return input
     .replace(/[<>\"'&]/g, '') // Remove potentially dangerous characters
     .substring(0, 200) // Limit length
@@ -496,8 +496,8 @@ function sanitizeString(input) {
  * Validate timestamp format
  */
 function isValidTimestamp(timestamp) {
-  if (typeof timestamp !== 'string') return false;
-  
+  if (typeof timestamp !== 'string') {return false;}
+
   const date = new Date(timestamp);
   return !isNaN(date.getTime()) && date.getFullYear() > 2020;
 }
@@ -507,13 +507,13 @@ function isValidTimestamp(timestamp) {
  */
 function calculateSecurityScore(result) {
   let score = 100;
-  
+
   // Deduct points for errors
   score -= result.errors.length * 20;
-  
+
   // Deduct points for warnings
   score -= result.warnings.length * 5;
-  
+
   return Math.max(0, Math.min(100, score));
 }
 
@@ -524,7 +524,7 @@ export function quickValidateStation(stationId, data) {
   if (!VALID_STATION_ID_PATTERN.test(stationId)) {
     return false;
   }
-  
+
   if (data && typeof data === 'object') {
     for (const [dataType, value] of Object.entries(data)) {
       if (VALID_DATA_TYPES.includes(dataType)) {
@@ -535,7 +535,7 @@ export function quickValidateStation(stationId, data) {
       }
     }
   }
-  
+
   return true;
 }
 
@@ -554,5 +554,5 @@ export default {
   SINGAPORE_BOUNDS,
   DATA_LIMITS,
   VALID_DATA_TYPES,
-  VALID_REGIONS
+  VALID_REGIONS,
 };
