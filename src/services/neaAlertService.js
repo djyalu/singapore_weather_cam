@@ -160,11 +160,21 @@ class NEAAlertService {
   }
 
   /**
-   * 수집된 데이터에서 경보 생성
+   * 수집된 데이터에서 실시간 날씨 정보 티커 생성
    */
   generateAlertsFromCollectedData(data) {
     const alerts = [];
     const now = new Date();
+
+    console.log('🔍 Ticker Data Analysis:', {
+      hasData: !!data,
+      hasTemp: !!data?.data?.temperature?.readings,
+      tempCount: data?.data?.temperature?.readings?.length || 0,
+      hasHumidity: !!data?.data?.humidity?.readings,
+      humidityCount: data?.data?.humidity?.readings?.length || 0,
+      hasRainfall: !!data?.data?.rainfall?.readings,
+      rainfallCount: data?.data?.rainfall?.readings?.length || 0
+    });
 
     if (!data || !data.data) {
       return [{
@@ -177,89 +187,133 @@ class NEAAlertService {
       }];
     }
 
-    // 온도 기반 경보 - 통합 버전
+    // 실제 온도, 습도, 강수량 데이터로 티커 생성
     const tempReadings = data.data.temperature?.readings || [];
+    
+    // 온도 정보 (항상 표시)
     if (tempReadings.length > 0) {
-      const validTemps = tempReadings.filter(r => r.value !== null && r.value !== undefined);
-      if (validTemps.length > 0) {
-        const avgTemp = validTemps.reduce((sum, r) => sum + r.value, 0) / validTemps.length;
-        const maxTemp = Math.max(...validTemps.map(r => r.value));
-        const hotStations = validTemps.filter(r => r.value >= 35).length;
-        const warmStations = validTemps.filter(r => r.value >= 32).length;
-
-        if (maxTemp >= 35) {
-          alerts.push({
-            type: 'warning',
-            priority: 'high',
-            icon: '🌡️',
-            message: `폭염 주의보! 최고 ${maxTemp.toFixed(1)}°C (평균 ${avgTemp.toFixed(1)}°C). ${hotStations}개 지역에서 35°C 이상 기록`,
-            timestamp: now.toISOString(),
-            source: 'Temperature Monitor',
-          });
-        } else if (maxTemp >= 32) {
-          alerts.push({
-            type: 'info',
-            priority: 'medium',
-            icon: '☀️',
-            message: `고온 주의 최고 ${maxTemp.toFixed(1)}°C (평균 ${avgTemp.toFixed(1)}°C). ${warmStations}개 지역에서 32°C 이상`,
-            timestamp: now.toISOString(),
-            source: 'Temperature Monitor',
-          });
-        } else if (avgTemp >= 30) {
-          alerts.push({
-            type: 'info',
-            priority: 'low',
-            icon: '🌤️',
-            message: `따뜻한 날씨 평균 ${avgTemp.toFixed(1)}°C (최고 ${maxTemp.toFixed(1)}°C). ${validTemps.length}개 관측소 기준`,
-            timestamp: now.toISOString(),
-            source: 'Temperature Monitor',
-          });
-        }
+      const currentTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+      let tempIcon = '🌡️';
+      let tempStatus = '정상';
+      let tempPriority = 'low';
+      
+      if (currentTemp >= 35) {
+        tempIcon = '🔥';
+        tempStatus = '매우 높음';
+        tempPriority = 'medium';
+      } else if (currentTemp >= 33) {
+        tempIcon = '🌡️';
+        tempStatus = '높음';
+        tempPriority = 'low';
+      } else if (currentTemp <= 25) {
+        tempIcon = '❄️';
+        tempStatus = '낮음';
+        tempPriority = 'low';
       }
+
+      alerts.push({
+        type: 'info',
+        priority: tempPriority,
+        icon: tempIcon,
+        message: `현재 기온 ${currentTemp.toFixed(1)}°C (${tempStatus}) • ${tempReadings.length}개 관측소 평균`,
+        timestamp: now.toISOString(),
+        source: 'Temperature Monitor',
+      });
     }
 
-    // 강수량 기반 경보 - 통합 버전
-    const rainfallReadings = data.data.rainfall?.readings || [];
-    const activeRain = rainfallReadings.filter(r => r.value > 0);
-    if (activeRain.length > 0) {
-      const maxRain = Math.max(...activeRain.map(r => r.value));
-      const avgRain = activeRain.reduce((sum, r) => sum + r.value, 0) / activeRain.length;
-      const heavyRainStations = activeRain.filter(r => r.value >= 20).length;
-      const moderateRainStations = activeRain.filter(r => r.value >= 10).length;
+    // 습도 정보
+    const humidityReadings = data.data.humidity?.readings || [];
+    if (humidityReadings.length > 0) {
+      const currentHumidity = humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length;
+      const currentTemp = tempReadings.length > 0 
+        ? tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length 
+        : 30;
+      
+      let humidityIcon = '💧';
+      let humidityStatus = '정상';
+      
+      if (currentHumidity >= 90) {
+        humidityIcon = '💦';
+        humidityStatus = '매우 높음';
+      } else if (currentHumidity >= 80) {
+        humidityIcon = '💧';
+        humidityStatus = '높음';
+      } else if (currentHumidity <= 40) {
+        humidityIcon = '🏜️';
+        humidityStatus = '낮음';
+      }
 
-      if (maxRain >= 20) {
-        alerts.push({
-          type: 'warning',
-          priority: 'high',
-          icon: '☔',
-          message: `호우 경보! 최대 ${maxRain.toFixed(1)}mm 강수. ${heavyRainStations}개 지역에서 집중호우`,
-          timestamp: now.toISOString(),
-          source: 'Rainfall Monitor',
-        });
-      } else if (maxRain >= 10) {
+      alerts.push({
+        type: 'info',
+        priority: 'low',
+        icon: humidityIcon,
+        message: `현재 습도 ${currentHumidity.toFixed(0)}% (${humidityStatus}) • 체감온도 ${(currentTemp + (currentHumidity - 60) * 0.1).toFixed(1)}°C`,
+        timestamp: now.toISOString(),
+        source: 'Humidity Monitor',
+      });
+    }
+
+    // 강수량 정보
+    const rainfallReadings = data.data.rainfall?.readings || [];
+    if (rainfallReadings.length > 0) {
+      const activeRainStations = rainfallReadings.filter(r => r.value > 0).length;
+      const totalRainfall = rainfallReadings.reduce((sum, r) => sum + r.value, 0);
+      
+      if (activeRainStations > 0) {
         alerts.push({
           type: 'info',
           priority: 'medium',
           icon: '🌧️',
-          message: `강한 비 주의 최대 ${maxRain.toFixed(1)}mm. ${moderateRainStations}개 지역에서 강수 진행`,
+          message: `현재 ${activeRainStations}개 지역 강수 중 • 총 ${totalRainfall.toFixed(1)}mm 기록`,
           timestamp: now.toISOString(),
           source: 'Rainfall Monitor',
         });
-      } else if (activeRain.length >= 5) {
+      } else {
         alerts.push({
           type: 'info',
           priority: 'low',
-          icon: '🌦️',
-          message: `소나기 진행 중 최대 ${maxRain.toFixed(1)}mm. ${activeRain.length}개 지역에서 강수`,
+          icon: '☀️',
+          message: `전국 건조 상태 • ${rainfallReadings.length}개 관측소 모두 강수량 0mm`,
           timestamp: now.toISOString(),
           source: 'Rainfall Monitor',
         });
       }
     }
 
-    // 예보 정보
+    // 예보 정보 추가
     if (data.data.forecast?.general?.forecast) {
       const forecast = data.data.forecast.general.forecast;
+      let forecastIcon = '🌤️';
+      let forecastMessage = '';
+
+      if (forecast.includes('Thundery')) {
+        forecastIcon = '⛈️';
+        forecastMessage = '뇌우 예상. 야외활동 시 주의하세요';
+      } else if (forecast.includes('Shower') || forecast.includes('Rain')) {
+        forecastIcon = '🌧️';
+        forecastMessage = '강수 예상. 우산을 준비하세요';
+      } else if (forecast.includes('Cloudy')) {
+        forecastIcon = '☁️';
+        forecastMessage = '흐린 날씨 예상';
+      } else {
+        forecastIcon = '☀️';
+        forecastMessage = '맑은 날씨 예상';
+      }
+
+      alerts.push({
+        type: 'info',
+        priority: 'low',
+        icon: forecastIcon,
+        message: `${forecastMessage} - NEA Singapore 공식 예보`,
+        timestamp: now.toISOString(),
+        source: 'Weather Forecast',
+      });
+    }
+
+    console.log('✅ Generated alerts:', alerts.length, alerts.map(a => a.message));
+
+    return alerts;
+  }
       let forecastIcon = '🌤️';
       let forecastMessage = '';
 
