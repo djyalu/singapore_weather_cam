@@ -159,15 +159,24 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           });
         }
 
-        const overallData = getUnifiedWeatherData(actualWeatherData);
+        // 실제 데이터 직접 사용 (getUnifiedWeatherData 우회)
+        const overallData = {
+          temperature: forceCalculatedTemp !== null ? forceCalculatedTemp : actualWeatherData?.data?.temperature?.average,
+          humidity: forceCalculatedHumidity !== null ? forceCalculatedHumidity : actualWeatherData?.data?.humidity?.average,
+          rainfall: actualWeatherData?.data?.rainfall?.total || 0,
+          source: actualWeatherData?.source,
+          stationCount: actualWeatherData?.data?.temperature?.readings?.length || 0,
+          timestamp: actualWeatherData?.timestamp
+        };
         
-        // 강제 계산된 값으로 덮어쓰기
-        if (forceCalculatedTemp !== null) {
-          overallData.temperature = forceCalculatedTemp;
-        }
-        if (forceCalculatedHumidity !== null) {
-          overallData.humidity = forceCalculatedHumidity;
-        }
+        console.log('🔥 [AI 분석용 직접 데이터]:', {
+          temperature: overallData.temperature,
+          humidity: overallData.humidity,
+          rainfall: overallData.rainfall,
+          actualDataTemp: actualWeatherData?.data?.temperature?.average,
+          actualDataHumidity: actualWeatherData?.data?.humidity?.average,
+          source: overallData.source
+        });
         
         // 데이터 소스 분석 - 실시간 데이터와 기존 데이터 비교
         console.log('🔍 [DATA SOURCE ANALYSIS] 데이터 소스 비교:', {
