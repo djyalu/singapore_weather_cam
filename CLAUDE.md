@@ -168,10 +168,6 @@ npm run format       # Prettier 포맷팅
 ## 주요 파일 참조
 
 - **현재 아키텍처**: `ARCHITECTURE_GITHUB.md` (GitHub 중심 최종 설계)
-- **구현 가이드**: `IMPLEMENTATION_GUIDE.md` (단계별 구현 방법)
-- **기존 설계**: `DESIGN.md` (초기 JAMstack 아키텍처)
-- **AWS 대안**: `ARCHITECTURE_V2.md` (참고용, 미사용)
-- **API 명세**: `API_SPEC.md`
 - **README**: `README.md`
 
 ## 개발 가이드라인
@@ -433,4 +429,9 @@ npm run format       # Prettier 포맷팅
 - **전체 개선 보고서**: `docs/IMPROVEMENTS_SUMMARY.md` 
 - **동적 카메라 선택기**: `docs/DYNAMIC_CAMERA_SELECTOR.md`
 - **컴포넌트 문서**: `docs/COMPONENTS.md`
-- **태스크 관리 시스템**: `.github/TASKS.md`
+- **태스크 관리 시스템**: `.github/TASKS.md`## 체크포인트 1 - 2025-08-02 12:02
+- 내용: 지역 버튼과 카드 이름 일치성 확보 완료 - 8개 지역 displayName 통일
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: ad3007e7
+
