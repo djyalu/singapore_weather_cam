@@ -22,24 +22,14 @@ const Header = React.memo(({
   }, []);
 
   useEffect(() => {
-    let animationFrameId;
-    let lastUpdate = 0;
-
-    const updateTime = (timestamp) => {
-      if (timestamp - lastUpdate >= 1000) {
-        setCurrentTime(new Date());
-        lastUpdate = timestamp;
-      }
-      animationFrameId = requestAnimationFrame(updateTime);
-    };
-
-    animationFrameId = requestAnimationFrame(updateTime);
+    // 시간 업데이트 비활성화 (성능 최적화)
+    // 한 번만 설정하고 자동 업데이트 하지 않음
+    setCurrentTime(new Date());
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };

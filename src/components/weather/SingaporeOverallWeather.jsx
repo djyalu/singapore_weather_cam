@@ -15,14 +15,13 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
 
-  // 1초마다 현재 시간 업데이트
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
+  // 시간 업데이트 비활성화 (성능 최적화)
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setCurrentTime(new Date());
+  //   }, 30000);
+  //   return () => clearInterval(timer);
+  // }, []);
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
@@ -31,18 +30,13 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       
       setAiLoading(true);
       try {
-        console.log('🤖 Generating smart weather summary with real-time data...');
+        // Generating smart weather summary
         
         // 실시간 데이터 소스 확인 및 우선 처리
         const isRealTimeData = weatherData.source?.includes('Real-time') || weatherData.source?.includes('NEA Singapore');
         const dataAge = weatherData.timestamp ? (Date.now() - new Date(weatherData.timestamp).getTime()) / (1000 * 60) : 0; // 분 단위
         
-        console.log('📊 Data source analysis:', {
-          source: weatherData.source,
-          isRealTime: isRealTimeData,
-          dataAgeMinutes: Math.round(dataAge),
-          timestamp: weatherData.timestamp
-        });
+        // Data source analysis completed
         
         const overallData = getOverallWeatherData();
         const forecast = weatherData?.data?.forecast?.general;
@@ -62,9 +56,9 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
           dataAge: Math.round(dataAge)
         });
         
-        console.log('✅ Smart weather summary generated with real-time priority');
+        // Smart weather summary generated
       } catch (error) {
-        console.warn('⚠️ Failed to generate smart summary:', error);
+        // Failed to generate smart summary
         
         // 간단한 폴백
         setAiSummary({
@@ -93,7 +87,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     setCohereAnalysis(null);
 
     try {
-      console.log('🤖 실시간 Cohere AI 분석 실행 중...');
+      // Cohere AI 분석 실행 중
       
       // 1단계: 현재 분석 상태 표시
       setCohereAnalysis({
@@ -107,7 +101,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       setShowRealAI(true);
 
       // 2단계: GitHub Actions 최신 Cohere 데이터 우선 확인
-      console.log('🔄 GitHub Actions 최신 Cohere 분석 데이터 확인 중...');
+      // GitHub Actions 데이터 확인 중
       const basePath = import.meta.env.BASE_URL || '/';
       const timestamp = new Date().getTime();
       
@@ -116,7 +110,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
         
         if (response.ok) {
           const aiData = await response.json();
-          console.log('✅ GitHub Actions AI 데이터 로드 성공:', aiData);
+          // GitHub Actions AI 데이터 로드 성공
           
           // 실제 Cohere 데이터인지 확인
           if (aiData.ai_model === 'Cohere Command API' && aiData.raw_analysis) {
@@ -131,12 +125,12 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
           }
         }
       } catch (fetchError) {
-        console.warn('⚠️ GitHub Actions AI 데이터 로드 실패:', fetchError);
+        // GitHub Actions AI 데이터 로드 실패
       }
 
       // 3단계: 실시간 고급 분석 실행 (Cohere 데이터가 없는 경우)
       try {
-        console.log('🚀 실시간 고급 AI 분석 시작 (Cohere 데이터 없음)');
+        // 실시간 고급 AI 분석 시작
         const realTimeResult = await executeAdvancedRealTimeAnalysis();
         
         setCohereAnalysis(realTimeResult);
@@ -144,11 +138,11 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
         return; // 성공하면 여기서 종료
         
       } catch (analysisError) {
-        console.warn('⚠️ 실시간 분석 실패, 기본 분석으로 전환:', analysisError);
+        // 실시간 분석 실패, 기본 분석으로 전환
       }
       
       // 백업: 로컬 심화 분석
-      console.log('🔄 로컬 심화 데이터 분석 수행 중...');
+      // 로컬 심화 데이터 분석 수행 중
       
       const overallData = getOverallWeatherData();
       const analysisResult = generateAdvancedAnalysis(overallData, weatherData);
@@ -156,7 +150,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       setCohereAnalysis(analysisResult);
       setShowRealAI(true);
       
-      console.log('✅ 로컬 심화 분석 완료:', analysisResult);
+      // 로컬 심화 분석 완료
     } catch (error) {
       console.error('🚨 분석 실패:', error);
       
@@ -184,7 +178,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
   // 실시간 AI 분석 API 호출
   const executeRealTimeAIAnalysis = async () => {
     try {
-      console.log('🚀 실시간 AI 분석 API 호출 시작');
+      // 실시간 AI 분석 API 호출 시작
       
       const response = await fetch('/api/ai-analysis', {
         method: 'POST',
@@ -476,15 +470,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
 
   // 날씨 데이터에서 전체 평균값 추출
   const getOverallWeatherData = () => {
-    console.log('🔍 SingaporeOverallWeather weatherData structure check:', {
-      hasWeatherData: !!weatherData,
-      hasCurrent: !!weatherData?.current,
-      hasLocations: !!weatherData?.locations,
-      hasMeta: !!weatherData?.meta,
-      currentTemp: weatherData?.current?.temperature,
-      locationsCount: weatherData?.locations?.length,
-      metaStations: weatherData?.meta?.stations
-    });
+    // WeatherData structure check completed
     
     if (!weatherData?.current) {
       return {
