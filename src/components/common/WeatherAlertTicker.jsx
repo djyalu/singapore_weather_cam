@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { AlertTriangle, Info, X, RefreshCw } from 'lucide-react';
-import neaAlertService from '../../services/neaAlertService';
+import neaRealTimeService from '../../services/neaRealTimeService';
 import { useWeatherData } from '../../contexts/AppDataContextSimple';
 
 /**
@@ -31,15 +31,15 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // 경보 데이터 로드 - 메인 컨텍스트 데이터만 사용 (Single Source of Truth)
+  // 경보 데이터 로드 - 실시간 NEA 서비스 데이터 사용 (Single Source of Truth)
   const loadAlerts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Ticker: 메인 컨텍스트 데이터 사용 (독립적 fetch 제거)');
+      console.log('🔄 Ticker: Using real-time NEA service data (Single Source of Truth)');
 
-      // 메인 컨텍스트 데이터 사용 (독립적 fetch 완전 제거)
+      // Use real-time data from main context (already fetched via NEA service)
       const data = mainWeatherData;
       if (data?.data?.temperature?.readings?.length > 0) {
           console.log('📊 Real-time data loaded:', data);
@@ -309,9 +309,32 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     setIsPaused(!isPaused);
   };
 
-  // 수동 새로고침
-  const handleRefresh = () => {
-    loadAlerts();
+  // 수동 새로고침 - 실시간 NEA 서비스 사용
+  const handleRefresh = async () => {
+    try {
+      console.log('🔄 Ticker manual refresh: Using real-time NEA service');
+      setLoading(true);
+      
+      // Get fresh data from NEA service
+      const freshData = await neaRealTimeService.getRealTimeWeatherData();
+      
+      if (freshData) {
+        // Update global reference
+        window.weatherData = freshData;
+        console.log('✅ Ticker: Fresh real-time data loaded:', {
+          avgTemp: freshData.data?.temperature?.average?.toFixed(2),
+          stations: freshData.stations_used?.length
+        });
+      }
+      
+      // Regenerate alerts with fresh data
+      loadAlerts();
+    } catch (error) {
+      console.error('❌ Ticker manual refresh failed:', error);
+      setError('실시간 데이터 새로고침 실패');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 티커 숨김 처리 (경보가 없어도 로딩 상태 표시)

@@ -4,6 +4,7 @@ import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
+import neaRealTimeService from '../../services/neaRealTimeService';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -16,59 +17,56 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [showRealAI, setShowRealAI] = useState(false);
   const [independentWeatherData, setIndependentWeatherData] = useState(null);
 
-  // 메인 컨텍스트 데이터만 사용 (독립적 fetch 완전 제거)
+  // 실시간 NEA 서비스 데이터 사용 (독립적 fetch 완전 제거)
   useEffect(() => {
-    console.log('🚀 [SingaporeOverallWeather] 메인 컨텍스트 데이터 사용 (독립적 fetch 제거)');
+    console.log('🚀 [SingaporeOverallWeather] Using real-time NEA service data');
     
     if (weatherData?.data?.temperature?.readings?.length > 0) {
       const freshData = weatherData;
-          
-          // WeatherAlertTicker와 동일한 방식으로 즉시 계산
-          let calculatedTemp = null;
-          let calculatedHumidity = null;
-          
-          if (freshData.data?.temperature?.readings?.length > 0) {
-            const tempReadings = freshData.data.temperature.readings;
-            const tempFromReadings = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
-            const preCalculatedTemp = freshData.data.temperature.average;
-            calculatedTemp = (preCalculatedTemp !== undefined && preCalculatedTemp !== null)
-              ? preCalculatedTemp
-              : tempFromReadings;
-          }
-          
-          if (freshData.data?.humidity?.readings?.length > 0) {
-            const humidityReadings = freshData.data.humidity.readings;
-            const humidityFromReadings = humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length;
-            const preCalculatedHumidity = freshData.data.humidity.average;
-            calculatedHumidity = (preCalculatedHumidity !== undefined && preCalculatedHumidity !== null)
-              ? preCalculatedHumidity
-              : humidityFromReadings;
-          }
-          
-          console.log('✅ [SingaporeOverallWeather] 독립적 데이터 로딩 성공:', {
-            temperature_average: freshData.data?.temperature?.average,
-            humidity_average: freshData.data?.humidity?.average,
-            calculated_temp: calculatedTemp?.toFixed(2),
-            calculated_humidity: calculatedHumidity?.toFixed(2),
-            readings_count: freshData.data?.temperature?.readings?.length,
-            source: freshData.source,
-            timestamp: freshData.timestamp
-          });
-          
-          setIndependentWeatherData({
-            ...freshData,
-            calculated: {
-              temperature: calculatedTemp,
-              humidity: calculatedHumidity
-            }
-          });
-        } else {
-          console.log('⚠️ [SingaporeOverallWeather] 메인 컨텍스트 데이터 대기 중...');
+      
+      // Use pre-calculated averages from NEA service or calculate if needed
+      let calculatedTemp = null;
+      let calculatedHumidity = null;
+      
+      if (freshData.data?.temperature?.readings?.length > 0) {
+        const tempReadings = freshData.data.temperature.readings;
+        const tempFromReadings = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+        const preCalculatedTemp = freshData.data.temperature.average;
+        calculatedTemp = (preCalculatedTemp !== undefined && preCalculatedTemp !== null)
+          ? preCalculatedTemp
+          : tempFromReadings;
+      }
+      
+      if (freshData.data?.humidity?.readings?.length > 0) {
+        const humidityReadings = freshData.data.humidity.readings;
+        const humidityFromReadings = humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length;
+        const preCalculatedHumidity = freshData.data.humidity.average;
+        calculatedHumidity = (preCalculatedHumidity !== undefined && preCalculatedHumidity !== null)
+          ? preCalculatedHumidity
+          : humidityFromReadings;
+      }
+      
+      console.log('✅ [SingaporeOverallWeather] Real-time NEA data processed:', {
+        temperature_average: freshData.data?.temperature?.average,
+        humidity_average: freshData.data?.humidity?.average,
+        calculated_temp: calculatedTemp?.toFixed(2),
+        calculated_humidity: calculatedHumidity?.toFixed(2),
+        readings_count: freshData.data?.temperature?.readings?.length,
+        source: freshData.source,
+        timestamp: freshData.timestamp
+      });
+      
+      setIndependentWeatherData({
+        ...freshData,
+        calculated: {
+          temperature: calculatedTemp,
+          humidity: calculatedHumidity
         }
+      });
     } else {
-      console.log('⚠️ [SingaporeOverallWeather] 메인 컨텍스트에서 날씨 데이터 없음');
+      console.log('⚠️ [SingaporeOverallWeather] Waiting for real-time NEA data...');
     }
-  }, [weatherData, refreshTrigger]); // 메인 컨텍스트 데이터와 refreshTrigger에 의존
+  }, [weatherData, refreshTrigger]); // Depends on real-time data and refreshTrigger
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
@@ -89,12 +87,12 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           temperature: actualWeatherData?.data?.temperature?.average
         });
         
+        // Use real-time NEA service for fresh data if needed
         try {
-          console.log('🔄 [SingaporeOverallWeather] 티커와 동일한 데이터 소스 직접 로드...');
-          const response = await fetch('/singapore_weather_cam/data/weather/latest.json?t=' + Date.now());
-          if (response.ok) {
-            const freshData = await response.json();
-            console.log('✅ [SingaporeOverallWeather] 직접 로드 성공:', {
+          console.log('🔄 [SingaporeOverallWeather] Using NEA real-time service for fresh data...');
+          const freshData = await neaRealTimeService.getRealTimeWeatherData();
+          if (freshData) {
+            console.log('✅ [SingaporeOverallWeather] Real-time NEA data loaded:', {
               temperature_average: freshData.data?.temperature?.average,
               readings_count: freshData.data?.temperature?.readings?.length,
               source: freshData.source
@@ -102,7 +100,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
             actualWeatherData = freshData;
           }
         } catch (fetchError) {
-          console.warn('⚠️ [SingaporeOverallWeather] 직접 fetch 실패, 기존 데이터 사용:', fetchError);
+          console.warn('⚠️ [SingaporeOverallWeather] NEA service failed, using existing data:', fetchError);
         }
 
         // Generating smart weather summary
