@@ -1,49 +1,51 @@
 {
-  "timestamp": "2025-08-01T22:59:13.755Z",
+  "timestamp": "2025-08-02T01:28:18.184Z",
   "source": "Singapore Weather Cam - Enhanced AI Summary",
-  "ai_model": "Simulation",
-  "analysis_method": "Rule-based simulation",
-  "weather_data_timestamp": "2025-08-01T22:46:29.085Z",
-  "stations_analyzed": 5,
-  "summary": "싱가포르는 현재 비가 내리고 있는 상황입니다. 강수량이 많아 우산이 필요합니다.",
+  "ai_model": "Cohere Command API (Enhanced)",
+  "analysis_method": "Comprehensive AI-generated analysis",
+  "weather_data_timestamp": "2025-08-01T23:04:29.724Z",
+  "stations_analyzed": 3,
+  "summary": "- 평균/최고/최저 기온의 의미와 지역별 편차 분석 - 계절적 특성 및 일반적인 싱가포르 기후와의 비교 ✅ 현재 특별한 기상 경보 없음 📝 **요청사항** 8개 섹션으로 상세 분석해주세요:",
   "highlights": [
-    "강수 지속",
-    "높은 습도",
-    "우산 필수"
+    "현재 평균 기온 27.1°C",
+    "습도 89% (체감온도 상승)",
+    "열대기후 특성에 따른 높은 습도",
+    "건조한 날씨",
+    "야외활동 시 수분 보충 필요"
   ],
-  "recommendation": "외출 시 우산을 챙기고, 교통 상황을 미리 확인하세요.",
-  "confidence": 0.75,
+  "recommendation": "- 오전/낮/오후/저녁 각 시간대별 최적 활동 제안 - 구체적인 운동/레저/업무 활동별 권장도",
+  "confidence": 0.92,
   "detailed_analysis": {
-    "temperature_analysis": "기온 데이터 분석 중...",
-    "humidity_analysis": "습도 데이터 분석 중...",
-    "rainfall_analysis": "강수 데이터 분석 중...",
-    "pattern_analysis": "기상 패턴 분석 중...",
-    "health_safety": "건강 및 안전 권고사항 생성 중...",
-    "tomorrow_outlook": "내일 전망 분석 중..."
+    "temperature_analysis": "- 평균/최고/최저 기온의 의미와 지역별 편차 분석 - 계절적 특성 및 일반적인 싱가포르 기후와의 비교",
+    "humidity_analysis": "✅ 현재 특별한 기상 경보 없음 📝 **요청사항** 8개 섹션으로 상세 분석해주세요:",
+    "rainfall_analysis": "- 분석 관측소: 총 3개 (싱가포르 전역) - 데이터 수집 시간: 2025-08-01T23:04:29.724Z 🌤️ **NEA 공식 예보 정보** - 일반 예보: 정보없음 - 예상 기온 범위: 정보없음",
+    "pattern_analysis": "- NEA 예보와 실시간 데이터의 일치성 분석 - 현재 기샤 상황의 전형성/특이성 평가",
+    "health_safety": "",
+    "tomorrow_outlook": ""
   },
   "weather_context": {
     "current_temperature": {
-      "average": "27.6",
-      "max": "29.1",
-      "min": "25.4"
+      "average": "27.1",
+      "max": "28.1",
+      "min": "25.9"
     },
     "humidity_levels": {
-      "average": 86,
+      "average": 89,
       "max": 99.5
     },
     "rainfall_status": {
-      "total": "7.7",
-      "active_stations": 5,
-      "total_stations": 59
+      "total": "0.2",
+      "active_stations": 1,
+      "total_stations": 8
     },
-    "forecast_summary": "Thundery Showers"
+    "forecast_summary": "N/A"
   },
-  "api_calls_today": 2,
-  "api_calls_remaining": 98,
+  "api_calls_today": 1,
+  "api_calls_remaining": 99,
   "api_calls_limit": 100,
   "api_limit_reached": false,
-  "raw_analysis": null,
-  "force_analysis_used": true,
+  "raw_analysis": " 당신은 전문 기상 분석가입니다. 다음 싱가포르 실시간 종합 기상 데이터를 바탕으로 상세하고 실용적인 날씨 분석을 한국어로 작성해주세요:\n\n📊 **현재 실시간 관측 데이터**\n- 평균 기온: 27.1°C (최고: 28.1°C, 최저: 25.9°C)\n- 평균 습도: 89% (최고: 100%)\n- 총 강수량: 0.2mm (강수 지역: 1/8개소)\n- 분석 관측소: 총 3개 (싱가포르 전역)\n- 데이터 수집 시간: 2025-08-01T23:04:29.724Z\n\n🌤️ **NEA 공식 예보 정보**\n- 일반 예보: 정보없음\n- 예상 기온 범위: 정보없음\n- 예상 습도 범위: 정보없음\n- 바람: 정보없음\n\n✅ 현재 특별한 기상 경보 없음\n\n📝 **요청사항**\n8개 섹션으로 상세 분석해주세요:\n\n1. **🌡️ 현재 기온 상황 분석**\n   - 평균/최고/최저 기온의 의미와 지역별 편차 분석\n   - 계절적 특성 및 일반적인 싱가포르 기후와의 비교\n\n2. **💧 습도 및 체감온도 분석**\n   - 습도가 체감온도에 미치는 영향 상세 설명\n   - 열지수(Heat Index) 관점에서의 건강 영향 분석\n\n3. **🌧️ 강수 패턴 및 예측**\n   - 현재 강수 분포와 향후 예상 패턴\n   - 지역별 강수 차이 및 이동 방향 예측\n\n4. **⛅ 종합 기상 패털 해석**\n   - NEA 예보와 실시간 데이터의 일치성 분석\n   - 현재 기샤 상황의 전형성/특이성 평가\n\n5. **🏃‍♀️ 시간대별 활동 권장사항**\n   - 오전/낮/오후/저녁 각 시간대별 최적 활동 제안\n   - 구체적인 운동/레저/업무 활동별 권장도\n\n6. **⚠️ 건강 및 안전 주의사항**\n   - 현재 날",
+  "force_analysis_used": false,
   "analysis_version": "2.0",
   "enhancement_features": [
     "detailed_sectional_analysis",
