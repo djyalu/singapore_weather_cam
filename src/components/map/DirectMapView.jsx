@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import { STANDARD_REGIONS, getRegionalTemperature, getTemperatureColor, validateDataConsistency } from '../../utils/weatherDataUnifier';
 
 /**
  * 직접 Leaflet API를 사용하는 지도 컴포넌트
@@ -305,91 +306,22 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         console.error('기존 레이어 제거 실패:', error);
       }
 
-      // 실제 날씨 데이터 기반 온도 계산
-      const getRegionalTemp = (stationIds) => {
-        if (!weatherData?.locations) {
-          return null;
-        }
-        
-        const matchedStations = stationIds
-          .map(id => weatherData.locations.find(loc => loc.id === id))
-          .filter(Boolean);
-          
-        const temps = matchedStations
-          .map(loc => loc.temperature)
-          .filter(temp => typeof temp === 'number');
-        
-        if (temps.length > 0) {
-          return temps.reduce((sum, temp) => sum + temp, 0) / temps.length;
-        }
-        
-        return null;
-      };
-
-      const getColorForTemp = (temp) => {
-        if (temp >= 32) return '#EF4444'; // 빨간색
-        if (temp >= 30) return '#F97316'; // 주황색
-        if (temp >= 28) return '#EAB308'; // 노란색
-        if (temp >= 26) return '#22C55E'; // 초록색
-        return '#3B82F6'; // 파란색
-      };
-
-      // 실제 날씨 데이터 지역
-      const realRegions = [
-        { 
-          name: 'Hwa Chong Area', 
-          lat: 1.3437, 
-          lng: 103.7640, 
-          stationIds: ['S109', 'S104'], // Ang Mo Kio & Woodlands
-          emoji: '🏫'
-        },
-        { 
-          name: 'Central Singapore', 
-          lat: 1.3100, 
-          lng: 103.8300, 
-          stationIds: ['S109', 'S107'], // Newton & East Coast
-          emoji: '🏙️'
-        },
-        { 
-          name: 'Eastern Singapore', 
-          lat: 1.3600, 
-          lng: 103.9600, 
-          stationIds: ['S24', 'S107'], // Changi & East Coast
-          emoji: '✈️'
-        },
-        { 
-          name: 'Northern Singapore', 
-          lat: 1.4200, 
-          lng: 103.7900, 
-          stationIds: ['S24', 'S115'], // 북부 지역
-          emoji: '🌳'
-        }
-      ];
-
-      // 날씨 데이터 확인
-      if (!weatherData?.locations) {
-        console.log('날씨 데이터 없음 - fallback 온도 사용');
+      // 🎯 데이터 일치성 검증
+      const validation = validateDataConsistency(weatherData);
+      console.log('🔍 지도 히트맵 데이터 일치성 검증:', validation);
+      
+      if (!validation.isConsistent) {
+        console.warn('⚠️ 데이터 일치성 문제 발견:', validation.issues);
       }
 
-      realRegions.forEach((region, index) => {        
-        let avgTemp = getRegionalTemp(region.stationIds);
-        
-        // Fallback 온도 (실제 데이터 없을 때)
-        if (avgTemp === null) {
-          const fallbackTemps = {
-            'Hwa Chong Area': 29.5,
-            'Central Singapore': 30.2,
-            'Eastern Singapore': 28.8,
-            'Northern Singapore': 30.1
-          };
-          avgTemp = fallbackTemps[region.name] || 29.0;
-        }
-        
-        const tempColor = getColorForTemp(avgTemp);
+      // 통합된 지역 데이터 사용
+      STANDARD_REGIONS.forEach((region, index) => {        
+        const avgTemp = getRegionalTemperature(weatherData, region.id);
+        const tempColor = getTemperatureColor(avgTemp);
         
         try {
           // 온도 기반 히트맵 원형 생성
-          const circle = window.L.circle([region.lat, region.lng], {
+          const circle = window.L.circle([region.coordinates.lat, region.coordinates.lng], {
             color: tempColor,
             fillColor: tempColor,
             fillOpacity: 0.3,
@@ -402,13 +334,19 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
           circle.addTo(leafletMapRef.current);
           
+          // 데이터 소스 표시
+          const dataSource = validation.regionalTemps[region.id]?.source === 'real_data' ? '실시간 데이터' : 'Fallback 데이터';
+          
           // 온도 정보 팝업
           circle.bindPopup(`
             <div style="text-align: center; padding: 12px;">
-              <strong>${region.emoji} ${region.name}</strong><br>
+              <strong>${region.emoji} ${region.displayName}</strong><br>
               <div style="color: ${tempColor}; font-size: 16px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
               <div style="font-size: 12px; color: #666; margin-top: 4px;">
                 Stations: ${region.stationIds.join(', ')}
+              </div>
+              <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                ${dataSource}
               </div>
             </div>
           `);

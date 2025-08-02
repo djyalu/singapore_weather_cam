@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -38,7 +39,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
         
         // Data source analysis completed
         
-        const overallData = getOverallWeatherData();
+        const overallData = getUnifiedWeatherData(weatherData);
         const forecast = weatherData?.data?.forecast?.general;
         
         // 실시간 데이터를 강조하는 요약 생성
@@ -144,7 +145,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       // 백업: 로컬 심화 분석
       // 로컬 심화 데이터 분석 수행 중
       
-      const overallData = getOverallWeatherData();
+      const overallData = getUnifiedWeatherData(weatherData);
       const analysisResult = generateAdvancedAnalysis(overallData, weatherData);
       
       setCohereAnalysis(analysisResult);
@@ -155,7 +156,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       console.error('🚨 분석 실패:', error);
       
       // 최종 백업: 기본 분석
-      const overallData = getOverallWeatherData();
+      const overallData = getUnifiedWeatherData(weatherData);
       const fallbackResult = {
         analysis: `현재 데이터를 기반으로 한 기본 분석입니다.\n\n` +
                  `온도: ${overallData.temperature.toFixed(1)}°C (${overallData.temperature >= 30 ? '더운 날씨' : '쾌적한 날씨'})\n` +  
@@ -186,7 +187,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          weatherData: getOverallWeatherData()
+          weatherData: getUnifiedWeatherData(weatherData)
         })
       });
 
@@ -468,34 +469,14 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
     };
   };
 
-  // 날씨 데이터에서 전체 평균값 추출
-  const getOverallWeatherData = () => {
-    // WeatherData structure check completed
-    
-    if (!weatherData?.current) {
-      return {
-        temperature: 29.0,
-        humidity: 80,
-        rainfall: 0,
-        forecast: 'Partly Cloudy',
-        lastUpdate: new Date().toISOString(),
-        stationCount: 0
-      };
-    }
-
-    const { current, meta, locations } = weatherData;
-
-    return {
-      temperature: current.temperature || 29.0,
-      humidity: current.humidity || 80,
-      rainfall: current.rainfall || 0,
-      forecast: current.description || 'Partly Cloudy',
-      lastUpdate: weatherData.timestamp,
-      stationCount: meta?.stations || locations?.length || 0
-    };
-  };
-
-  const overallData = getOverallWeatherData();
+  // 통합된 날씨 데이터 사용
+  const overallData = getUnifiedWeatherData(weatherData);
+  
+  // 🎯 데이터 일치성 검증 추가
+  const validation = validateDataConsistency(weatherData);
+  if (!validation.isConsistent) {
+    console.warn('⚠️ 주요 날씨 정보와 히트맵 데이터 불일치:', validation.issues);
+  }
 
   // 스마트 요약 생성 함수들 - 실시간 데이터 우선 처리
   const generateIntelligentSummary = (data, forecast, isRealTime = false) => {

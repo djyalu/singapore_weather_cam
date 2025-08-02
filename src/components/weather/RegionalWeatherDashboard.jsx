@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import RegionalWeatherCard from './RegionalWeatherCard';
 import { getStationInfo } from '../../config/weatherStations';
+import { STANDARD_REGIONS, getRegionalTemperature } from '../../utils/weatherDataUnifier';
 
 // weatherDataTransformer.js에서 가져온 날씨 설명 및 아이콘 생성 함수들 (컴포넌트 외부)
 const getWeatherDescription = (temperature, rainfall) => {
@@ -48,56 +49,40 @@ const RegionalWeatherDashboard = React.memo(({
   onSelectedRegionsChange,
   className = ''
 }) => {
-  // 사용 가능한 모든 지역 (실제 온도 데이터가 있는 스테이션 기준)
-  const AVAILABLE_REGIONS = [
-    {
-      id: 'hwa-chong',
-      name: 'Hwa Chong',
-      stationIds: ['S109', 'S104'], // Ang Mo Kio & Woodlands (사용 가능한 스테이션)
-      description: 'Hwa Chong International School 지역',
-      emoji: '🏫'
-    },
-    {
-      id: 'newton',
-      name: 'Newton',
-      stationIds: ['S109', 'S107'], // Newton & East Coast (S102 없어서 S107로 대체)
-      description: 'Newton MRT 및 Central 지역',
-      emoji: '🏙️'
-    },
-    {
-      id: 'changi',
-      name: 'Changi',
-      stationIds: ['S24', 'S107'], // East Coast & Airport 지역
-      description: 'Changi Airport 및 동부 지역',
-      emoji: '✈️'
-    },
+  // 🎯 통합된 표준 지역 사용 (데이터 일치성 보장)
+  const AVAILABLE_REGIONS = STANDARD_REGIONS.slice(); // 표준 지역 복사
+  
+  // 추가 지역들 (옵션으로)
+  const ADDITIONAL_REGIONS = [
     {
       id: 'jurong',
-      name: 'Jurong',
+      name: 'Jurong Area',
+      displayName: 'Jurong',
       stationIds: ['S104', 'S60'], // Jurong West & Sentosa
-      description: 'Jurong 산업단지 및 서부 지역',
-      emoji: '🏭'
+      coordinates: { lat: 1.3496, lng: 103.7063 },
+      fallbackTemp: 29.8,
+      emoji: '🏭',
+      description: 'Jurong 산업단지 및 서부 지역'
     },
     {
       id: 'central',
-      name: 'Central',
-      stationIds: ['S109', 'S106'], // Newton & Tai Seng (S102 없어서 S106으로 대체)
-      description: 'Newton MRT 및 중부 도심 지역',
-      emoji: '🌆'
+      name: 'Central Business',
+      displayName: 'Central',
+      stationIds: ['S109', 'S106'], // Newton & Tai Seng 
+      coordinates: { lat: 1.3048, lng: 103.8318 },
+      fallbackTemp: 30.5,
+      emoji: '🌆',
+      description: 'Central 중부 도심 지역'
     },
     {
       id: 'east',
-      name: 'East',
-      stationIds: ['S107', 'S43'], // East Coast & Kim Chuan 동부 지역
-      description: 'East Coast Parkway 및 동부 산업 지역',
-      emoji: '🏖️'
-    },
-    {
-      id: 'north',
-      name: 'North',
-      stationIds: ['S24', 'S115'], // 북부 지역 (실제 북부 스테이션)
-      description: '북부 주거 및 산업 지역',
-      emoji: '🌳'
+      name: 'East Coast',
+      displayName: 'East',
+      stationIds: ['S107', 'S43'], // East Coast & Kim Chuan
+      coordinates: { lat: 1.3048, lng: 103.9318 },
+      fallbackTemp: 28.9,
+      emoji: '🏖️',
+      description: 'East Coast Parkway 및 동부 지역'
     },
     {
       id: 'south',
