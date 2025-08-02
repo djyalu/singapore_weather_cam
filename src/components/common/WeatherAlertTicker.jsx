@@ -88,9 +88,9 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     };
   }, [refreshInterval]);
 
-  // 경보 우선순위에 따른 스타일 결정 - 모바일 최적화 강화
+  // 경보 우선순위에 따른 스타일 결정 - 간격 최적화
   const getAlertStyle = (alert) => {
-    const baseClasses = 'flex items-center gap-1.5 sm:gap-2 md:gap-3 px-3 sm:px-4 md:px-5 py-2 sm:py-3 whitespace-nowrap min-h-[44px] sm:min-h-[48px] touch-manipulation';
+    const baseClasses = 'flex items-center gap-1.5 sm:gap-2 md:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap min-h-[36px] sm:min-h-[40px] touch-manipulation';
 
     switch (alert.priority) {
       case 'critical':
@@ -157,12 +157,10 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
   );
 
   return (
-    <div className={`bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-b border-gray-200/50 safe-area-inset ${className}`}>
-      <div className="relative overflow-hidden">
-        {/* 배경 패턴 제거 - 깔끔한 배경 */}
-
-        {/* 티커 헤더 - 모바일 최적화 */}
-        <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 bg-white/10 border-b border-gray-300/20">
+    <div className={`bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-b border-gray-200/50 ${className}`}>
+      <div className="relative">
+        {/* 티커 헤더 - 간격 최적화 */}
+        <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 border-b border-gray-300/20">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></div>
@@ -176,37 +174,37 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
             </span>
           </div>
 
-          <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+          <div className="flex items-center gap-0.5 flex-shrink-0">
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] p-2 sm:p-3 rounded-md hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-md hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
               title="새로고침"
               aria-label="날씨 경보 새로고침"
             >
-              <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={togglePause}
-              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] px-2 sm:px-3 py-2 text-sm sm:text-base rounded-md bg-white/20 hover:bg-white/30 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-white/20 hover:bg-white/30 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
               title={isPaused ? '재생' : '일시정지'}
               aria-label={isPaused ? '티커 재생' : '티커 일시정지'}
             >
-              <span className="text-sm sm:text-base">{isPaused ? '▶️' : '⏸️'}</span>
+              <span className="text-xs sm:text-sm">{isPaused ? '▶️' : '⏸️'}</span>
             </button>
             <button
               onClick={toggleVisibility}
-              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] p-2 sm:p-3 rounded-md hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-md hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
               title="닫기"
               aria-label="기상 경보 티커 닫기"
             >
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
 
-        {/* 스크롤 티커 영역 - 모바일 최적화 강화 */}
-        <div className="relative h-11 sm:h-14 overflow-hidden touch-manipulation">
+        {/* 스크롤 티커 영역 - 높이 최적화 */}
+        <div className="relative h-10 sm:h-12 overflow-hidden touch-manipulation">
           {loading ? (
             <div className="flex items-center justify-center h-full px-4">
               <div className="flex items-center gap-2 text-gray-700">
