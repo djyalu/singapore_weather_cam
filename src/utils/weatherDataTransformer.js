@@ -523,19 +523,55 @@ function calculateDataEfficiency(data, stationDetails) {
 }
 
 function calculateRegionalAverages(data, stationIds) {
-  const results = {};
+  const results = {
+    temperature: null,
+    humidity: null,
+    rainfall: null
+  };
   
-  Object.entries(data || {}).forEach(([dataType, typeData]) => {
-    const regionalReadings = typeData.readings?.filter(reading => 
-      stationIds.includes(reading.station)
-    ) || [];
-    
-    if (regionalReadings.length > 0) {
-      const values = regionalReadings.map(r => r.value).filter(v => v !== null && v !== undefined);
-      if (values.length > 0) {
-        results[dataType] = Math.round((values.reduce((sum, val) => sum + val, 0) / values.length) * 10) / 10;
-      }
+  // Temperature calculation
+  const tempReadings = data.temperature?.readings?.filter(reading => 
+    stationIds.includes(reading.station)
+  ) || [];
+  
+  if (tempReadings.length > 0) {
+    const tempValues = tempReadings.map(r => r.value).filter(v => v !== null && v !== undefined && !isNaN(v));
+    if (tempValues.length > 0) {
+      results.temperature = Math.round((tempValues.reduce((sum, val) => sum + val, 0) / tempValues.length) * 10) / 10;
     }
+  }
+  
+  // Humidity calculation
+  const humidityReadings = data.humidity?.readings?.filter(reading => 
+    stationIds.includes(reading.station)
+  ) || [];
+  
+  if (humidityReadings.length > 0) {
+    const humidityValues = humidityReadings.map(r => r.value).filter(v => v !== null && v !== undefined && !isNaN(v));
+    if (humidityValues.length > 0) {
+      results.humidity = Math.round(humidityValues.reduce((sum, val) => sum + val, 0) / humidityValues.length);
+    }
+  }
+  
+  // Rainfall calculation
+  const rainfallReadings = data.rainfall?.readings?.filter(reading => 
+    stationIds.includes(reading.station)
+  ) || [];
+  
+  if (rainfallReadings.length > 0) {
+    const rainfallValues = rainfallReadings.map(r => r.value).filter(v => v !== null && v !== undefined && !isNaN(v));
+    if (rainfallValues.length > 0) {
+      results.rainfall = Math.round((rainfallValues.reduce((sum, val) => sum + val, 0) / rainfallValues.length) * 10) / 10;
+    }
+  }
+  
+  console.log(`🔧 Regional calculation for stations [${stationIds.join(', ')}]:`, {
+    temperature: results.temperature,
+    humidity: results.humidity,
+    rainfall: results.rainfall,
+    tempReadings: tempReadings.length,
+    humidityReadings: humidityReadings.length,
+    rainfallReadings: rainfallReadings.length
   });
   
   return results;

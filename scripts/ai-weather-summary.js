@@ -20,17 +20,42 @@ const OUTPUT_FILE = path.join(OUTPUT_DIR, 'latest.json');
 const WEATHER_DATA_FILE = 'data/weather/latest.json';
 
 /**
- * 지역별 분석 데이터 생성 (59개 관측소 기반)
+ * Enhanced 59-Station Regional Analysis
  */
 function generateRegionalAnalysis(weatherData) {
   const regionData = {};
   const dataTypes = ['temperature', 'humidity', 'rainfall', 'wind_speed', 'wind_direction'];
   
-  // 모든 기상 데이터를 지역별로 분류
+  // Check if enhanced 59-station data is available
+  const hasEnhancedData = weatherData.stations_used && weatherData.station_details;
+  
+  if (hasEnhancedData) {
+    console.log(`🎯 Enhanced analysis using ${weatherData.stations_used.length} stations`);
+    
+    // Use enhanced station metadata for better analysis
+    weatherData.stations_used.forEach(stationId => {
+      const stationDetail = weatherData.station_details[stationId];
+      if (stationDetail) {
+        const region = stationDetail.region || determineRegionFromCoordinates(stationDetail.coordinates);
+        if (!regionData[region]) {
+          regionData[region] = { 
+            temperature: [], humidity: [], rainfall: [], 
+            wind_speed: [], wind_direction: [], stations: new Set() 
+          };
+        }
+        regionData[region].stations.add(stationDetail.name || stationId);
+      }
+    });
+  }
+  
+  // Process data readings
   dataTypes.forEach(dataType => {
     const readings = weatherData.data?.[dataType]?.readings || [];
     readings.forEach(reading => {
-      const region = determineRegionFromCoordinates(reading.coordinates);
+      const region = hasEnhancedData && weatherData.station_details[reading.station] 
+        ? weatherData.station_details[reading.station].region || determineRegionFromCoordinates(weatherData.station_details[reading.station].coordinates)
+        : determineRegionFromCoordinates(reading.coordinates);
+        
       if (!regionData[region]) {
         regionData[region] = { 
           temperature: [], humidity: [], rainfall: [], 
@@ -45,8 +70,14 @@ function generateRegionalAnalysis(weatherData) {
     });
   });
   
-  // 지역별 종합 요약 생성
-  let analysis = '';
+  // Enhanced regional summary generation
+  let analysis = `📊 **전체 관측소 현황** ${hasEnhancedData ? weatherData.stations_used.length : '정보 수집 중'}개 관측소`;
+  
+  // Add detailed statistics if available
+  if (hasEnhancedData && weatherData.geographic_coverage) {
+    analysis += ` (coverage: ${weatherData.geographic_coverage.coverage_percentage}%)`;
+  }
+  
   Object.entries(regionData).forEach(([region, data]) => {
     // 온도 분석
     const temperatures = data.temperature;
@@ -580,7 +611,7 @@ async function main() {
       ai_model: analysis.simulation ? 'Simulation' : 'Cohere Command API (Enhanced)',
       analysis_method: analysis.simulation ? 'Rule-based simulation' : 'Comprehensive AI-generated analysis',
       weather_data_timestamp: weatherData.timestamp,
-      stations_analyzed: weatherData.data?.temperature?.readings?.length || 0,
+      stations_analyzed: weatherData.stations_used?.length || weatherData.data?.temperature?.readings?.length || 0,
       
       // Enhanced AI Summary Results
       summary: analysis.summary,
