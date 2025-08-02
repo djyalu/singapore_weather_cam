@@ -88,9 +88,41 @@ export function transformWeatherData(rawData) {
 }
 
 function extractCurrentWeather(data) {
-  const temperature = calculateAverage(data.temperature?.readings);
-  const humidity = calculateAverage(data.humidity?.readings);
-  const rainfall = calculateAverage(data.rainfall?.readings);
+  // Use primary station data instead of averages
+  const priorityStations = ['S109', 'S24', 'S104', 'S115', 'S50'];
+  let primaryStationData = null;
+
+  // Find first available priority station with temperature data
+  for (const stationId of priorityStations) {
+    const tempReading = data.temperature?.readings?.find(r => r.station === stationId);
+    if (tempReading) {
+      primaryStationData = {
+        stationId: stationId,
+        temperature: tempReading.value,
+        stationName: tempReading.station_name
+      };
+      break;
+    }
+  }
+
+  // If no priority station found, use first available station
+  if (!primaryStationData && data.temperature?.readings?.length > 0) {
+    const firstReading = data.temperature.readings[0];
+    primaryStationData = {
+      stationId: firstReading.station,
+      temperature: firstReading.value,
+      stationName: firstReading.station_name
+    };
+  }
+
+  // Get station-specific data where available
+  const temperature = primaryStationData?.temperature || calculateAverage(data.temperature?.readings);
+  const humidity = primaryStationData ? 
+    findStationValue(data.humidity?.readings, primaryStationData.stationId) || calculateAverage(data.humidity?.readings) :
+    calculateAverage(data.humidity?.readings);
+  const rainfall = primaryStationData ? 
+    findStationValue(data.rainfall?.readings, primaryStationData.stationId) || calculateAverage(data.rainfall?.readings) :
+    calculateAverage(data.rainfall?.readings);
   const windSpeed = calculateAverage(data.wind_speed?.readings);
 
   return {
@@ -102,9 +134,12 @@ function extractCurrentWeather(data) {
     feelsLike: temperature ? Math.round(temperature * 10) / 10 + 2.0 : null, // 체감온도: 실제온도 + 2.0°C (고정)
     uvIndex: '--', // NEA에서 제공하지 않음
     visibility: '--', // NEA에서 제공하지 않음
-    location: 'Singapore',
+    location: primaryStationData?.stationName || 'Singapore',
     description: getWeatherDescription(temperature, rainfall),
     icon: getWeatherIcon(temperature, rainfall),
+    // Add station info for debugging
+    stationId: primaryStationData?.stationId,
+    stationName: primaryStationData?.stationName
   };
 }
 
