@@ -513,3 +513,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 180f698d
 
+## 체크포인트 15 - 2025-08-03 00:24
+- 내용: 모바일 Header 레이아웃 최적화 완료 - 반응형 시계 박스, gap 간격 조정, flex 레이아웃 안정화
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: b080b6b
+
