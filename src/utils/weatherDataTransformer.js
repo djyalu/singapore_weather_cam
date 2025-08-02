@@ -410,26 +410,50 @@ function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
     coverage: geographicCoverage
   });
   
-  // Add regional summaries if geographic coverage is available
-  if (geographicCoverage?.stations_by_region) {
-    Object.entries(geographicCoverage.stations_by_region).forEach(([region, stationIds]) => {
-      if (stationIds.length > 0) {
-        const regionData = calculateRegionalAverages(data, stationIds);
-        locations.push({
-          id: region,
-          name: `${region.charAt(0).toUpperCase() + region.slice(1)} Singapore`,
-          displayName: `${region.charAt(0).toUpperCase() + region.slice(1)} Region`,
-          description: `Average from ${stationIds.length} stations in ${region} Singapore`,
-          station_id: `${region}_avg`,
-          priority: 'secondary',
-          coordinates: getRegionalCoordinates(region),
-          ...regionData,
-          stationCount: stationIds.length,
-          region: region
-        });
-      }
-    });
-  }
+  // Create regional groupings based on actual station coordinates
+  const regionStations = {
+    north: [],
+    south: [],
+    east: [],
+    west: [],
+    central: []
+  };
+  
+  // Group stations by region based on coordinates
+  const tempReadings = data.temperature?.readings || [];
+  tempReadings.forEach(reading => {
+    const region = determineRegionFromStation(reading.station);
+    if (regionStations[region]) {
+      regionStations[region].push(reading.station);
+    }
+  });
+  
+  // Add regional summaries with actual differentiated temperatures
+  Object.entries(regionStations).forEach(([region, stationIds]) => {
+    if (stationIds.length > 0) {
+      const regionData = calculateRegionalAverages(data, stationIds);
+      
+      console.log(`🗺️ ${region} region calculation:`, {
+        stations: stationIds,
+        temperature: regionData.temperature,
+        humidity: regionData.humidity,
+        rainfall: regionData.rainfall
+      });
+      
+      locations.push({
+        id: region,
+        name: `${region.charAt(0).toUpperCase() + region.slice(1)} Singapore`,
+        displayName: `${region.charAt(0).toUpperCase() + region.slice(1)} Region`,
+        description: `Average from ${stationIds.length} stations in ${region} Singapore`,
+        station_id: `${region}_avg`,
+        priority: 'secondary',
+        coordinates: getRegionalCoordinates(region),
+        ...regionData,
+        stationCount: stationIds.length,
+        region: region
+      });
+    }
+  });
   
   // Add top priority individual stations
   const topStations = Object.values(stationDetails || {})
@@ -610,6 +634,34 @@ function calculateDataVariability(data) {
   });
   
   return variability;
+}
+
+function determineRegionFromStation(stationId) {
+  // Station-to-region mapping based on Singapore geography
+  const stationRegionMap = {
+    // North Singapore (Woodlands, Sembawang, Yishun area)
+    'S77': 'north', 'S108': 'north', 'S228': 'north', 'S229': 'north', 'S230': 'north',
+    'S66': 'north', 'S43': 'north', 'S71': 'north', 'S40': 'north',
+    
+    // South Singapore (Sentosa, Harbourfront, Marina area)  
+    'S24': 'south', 'S81': 'south', 'S94': 'south', 'S88': 'south', 'S92': 'south',
+    'S78': 'south', 'S119': 'south', 'S123': 'south',
+    
+    // East Singapore (Changi, Tampines, Pasir Ris area)
+    'S50': 'east', 'S29': 'east', 'S102': 'east', 'S60': 'east', 'S84': 'east',
+    'S214': 'east', 'S215': 'east', 'S216': 'east', 'S217': 'east',
+    
+    // West Singapore (Jurong, Tuas, Clementi area)
+    'S104': 'west', 'S106': 'west', 'S111': 'west', 'S112': 'west', 'S113': 'west',
+    'S115': 'west', 'S117': 'west', 'S44': 'west', 'S33': 'west',
+    
+    // Central Singapore (City, Newton, Bukit Timah area)
+    'S107': 'central', 'S109': 'central', 'S07': 'central', 'S08': 'central', 'S69': 'central',
+    'S79': 'central', 'S90': 'central', 'S220': 'central', 'S221': 'central', 'S222': 'central',
+    'S223': 'central', 'S224': 'central', 'S226': 'central', 'S227': 'central'
+  };
+  
+  return stationRegionMap[stationId] || 'central'; // Default to central if not found
 }
 
 export default {
