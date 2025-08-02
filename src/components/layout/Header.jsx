@@ -55,25 +55,24 @@ const Header = React.memo(({
 
   return (
     <>
-      <header className="bg-gradient-to-br from-purple-900 via-pink-800 to-red-800 text-white shadow-2xl border-b-4 border-pink-400/50 relative overflow-hidden">
-        {/* 애니메이션 배경 효과 */}
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-red-600/20 animate-pulse"></div>
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 animate-pulse"></div>
+      <header className="bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white shadow-2xl border-b border-blue-400/30 relative overflow-hidden">
+        {/* 차분한 애니메이션 배경 효과 */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 animate-pulse"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 opacity-60"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
           <div className="flex items-center justify-between">
             {/* 로고 및 타이틀 - 완전히 새로운 디자인 */}
-            <div className="flex items-center space-x-6 sm:space-x-8">
+            <div className="flex items-center space-x-4 sm:space-x-6">
               <div className="relative">
-                <div className="bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 p-4 sm:p-6 rounded-3xl shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                  <Camera className="w-10 h-10 sm:w-12 sm:h-12 text-white drop-shadow-lg" />
+                <div className="bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 p-3 sm:p-4 rounded-2xl shadow-xl">
+                  <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-md" />
                 </div>
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-3 border-white animate-bounce shadow-lg">
-                  <div className="absolute inset-1 bg-white rounded-full animate-ping"></div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse shadow-md">
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-gradient-to-r from-cyan-200 via-purple-200 to-pink-200 bg-clip-text font-display tracking-tight drop-shadow-2xl">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-transparent bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200 bg-clip-text font-display tracking-tight">
                   Singapore Weather Cam
                 </h1>
                 <div className="flex items-center mt-2 space-x-3">

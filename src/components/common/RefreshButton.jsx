@@ -148,8 +148,8 @@ const RefreshButton = React.memo(({
           className={`
             ${styles.button}
             ${variant === 'glass' 
-              ? 'bg-gradient-to-r from-cyan-500/30 to-purple-600/30 backdrop-blur-lg border-2 border-cyan-400/40 text-white hover:from-cyan-400/40 hover:to-purple-500/40 hover:border-purple-400/60 shadow-2xl' 
-              : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-400 hover:to-emerald-500 border-2 border-green-400/50 shadow-2xl hover:shadow-emerald-500/25'
+              ? 'bg-gradient-to-r from-blue-500/30 to-indigo-600/30 backdrop-blur-lg border-2 border-blue-400/40 text-white hover:from-blue-400/40 hover:to-indigo-500/40 hover:border-indigo-400/60 shadow-xl' 
+              : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-400 hover:to-indigo-500 border-2 border-blue-400/50 shadow-xl hover:shadow-blue-500/25'
             }
             transition-all duration-500 transform font-bold
             hover:scale-110 active:scale-95 touch-manipulation
@@ -177,7 +177,7 @@ const RefreshButton = React.memo(({
             className={`
               ${styles.icon} transition-all duration-500 relative z-10
               ${isRefreshing ? 'animate-spin text-yellow-300' : 'group-hover:text-yellow-200'}
-              filter group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]
+              filter group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]
             `}
             aria-hidden="true"
           />

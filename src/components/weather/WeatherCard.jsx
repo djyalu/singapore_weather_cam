@@ -17,15 +17,15 @@ const WeatherCard = ({ title, value, icon, description, trend, status = 'normal'
       "relative overflow-hidden backdrop-blur-lg transition-all duration-500 hover:scale-110 transform group hover:shadow-2xl border-2 hover:border-purple-400/50",
       getStatusColor()
     )}>
-      {/* 강화된 그라데이션 배경 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-pink-500/15 to-blue-600/20"></div>
-      <div className="absolute inset-0 bg-gradient-to-tr from-cyan-400/10 via-purple-400/10 to-pink-400/10"></div>
+      {/* 차분한 그라데이션 배경 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/15 via-indigo-500/10 to-purple-600/15"></div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-slate-400/5 via-blue-400/8 to-indigo-400/8"></div>
       
-      {/* 애니메이션 글로우 효과 강화 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 via-pink-400/20 to-cyan-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-pulse"></div>
+      {/* 부드러운 호버 효과 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-400/15 via-indigo-400/15 to-purple-400/15 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       
-      {/* 상단 네온 라인 */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      {/* 상단 액센트 라인 */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
 
       <CardContent className="relative z-10 p-6">
         <div className="flex items-start justify-between">
@@ -44,7 +44,7 @@ const WeatherCard = ({ title, value, icon, description, trend, status = 'normal'
               )}
             </div>
 
-            <p className="text-5xl font-black text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-500 bg-clip-text mb-2 group-hover:from-cyan-400 group-hover:via-purple-400 group-hover:to-pink-400 transition-all duration-500 drop-shadow-2xl">
+            <p className="text-4xl font-black text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text mb-2 group-hover:from-blue-500 group-hover:via-indigo-400 group-hover:to-purple-500 transition-all duration-500 drop-shadow-xl">
               {value}
             </p>
 
@@ -54,7 +54,7 @@ const WeatherCard = ({ title, value, icon, description, trend, status = 'normal'
           </div>
 
           <div className="ml-6 relative">
-            <div className="text-6xl transform group-hover:scale-150 group-hover:rotate-12 transition-all duration-700 drop-shadow-2xl filter group-hover:drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]">
+            <div className="text-5xl transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-xl filter group-hover:drop-shadow-[0_0_15px_rgba(79,70,229,0.6)]">
               {icon}
             </div>
             {status !== 'normal' && (
@@ -73,14 +73,11 @@ const WeatherCard = ({ title, value, icon, description, trend, status = 'normal'
           </div>
         </div>
 
-        {/* 강화된 하단 네온 액센트 */}
-        <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 rounded-full shadow-lg"></div>
+        {/* 차분한 하단 액센트 */}
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full"></div>
         
-        {/* 코너 글로우 효과 */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-400/20 via-pink-400/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        
-        {/* 추가 네온 효과 */}
-        <div className="absolute inset-0 border-2 border-transparent group-hover:border-gradient-to-r group-hover:from-cyan-400/50 group-hover:via-purple-400/50 group-hover:to-pink-400/50 rounded-lg transition-all duration-500"></div>
+        {/* 부드러운 코너 효과 */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-indigo-400/15 via-purple-400/8 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </CardContent>
     </Card>
   );
