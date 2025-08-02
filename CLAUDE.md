@@ -576,7 +576,10 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: a6e5c43
+
+## 체크포인트 24 - 2025-08-03 01:10
+- 내용: 데이터 소스 근본적 통일 완료 - Singapore Weather와 WeatherAlertTicker 동일한 직접 fetch 방식 적용
 - 상태: 활성
-- Git 브랜치: main
-- Git 커밋: e07be8c
+- Git 브랜치: main  
+- Git 커밋: 858ee86
 
