@@ -4,8 +4,6 @@ const RealtimeClock = ({ className = "text-blue-100 text-xs font-mono" }) => {
   const [time, setTime] = useState('');
 
   useEffect(() => {
-    console.log('🚀 RealtimeClock 마운트됨');
-    
     const updateTime = () => {
       const now = new Date();
       // 싱가포르 시간을 한국어 형식으로 표시
@@ -18,7 +16,6 @@ const RealtimeClock = ({ className = "text-blue-100 text-xs font-mono" }) => {
       });
       
       setTime(timeString);
-      console.log('🕘 Header 시계 업데이트:', timeString);
     };
 
     // 즉시 실행
