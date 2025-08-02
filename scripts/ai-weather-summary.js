@@ -20,6 +20,90 @@ const OUTPUT_FILE = path.join(OUTPUT_DIR, 'latest.json');
 const WEATHER_DATA_FILE = 'data/weather/latest.json';
 
 /**
+ * 지역별 분석 데이터 생성 (59개 관측소 기반)
+ */
+function generateRegionalAnalysis(weatherData) {
+  const regionData = {};
+  const dataTypes = ['temperature', 'humidity', 'rainfall', 'wind_speed', 'wind_direction'];
+  
+  // 모든 기상 데이터를 지역별로 분류
+  dataTypes.forEach(dataType => {
+    const readings = weatherData.data?.[dataType]?.readings || [];
+    readings.forEach(reading => {
+      const region = determineRegionFromCoordinates(reading.coordinates);
+      if (!regionData[region]) {
+        regionData[region] = { 
+          temperature: [], humidity: [], rainfall: [], 
+          wind_speed: [], wind_direction: [], stations: new Set() 
+        };
+      }
+      
+      if (reading.value !== null && reading.value !== undefined) {
+        regionData[region][dataType].push(reading.value);
+        regionData[region].stations.add(reading.station_name || reading.station);
+      }
+    });
+  });
+  
+  // 지역별 종합 요약 생성
+  let analysis = '';
+  Object.entries(regionData).forEach(([region, data]) => {
+    // 온도 분석
+    const temperatures = data.temperature;
+    const tempInfo = temperatures.length > 0 
+      ? `온도 ${(temperatures.reduce((sum, t) => sum + t, 0) / temperatures.length).toFixed(1)}°C (${Math.min(...temperatures).toFixed(1)}°C~${Math.max(...temperatures).toFixed(1)}°C)`
+      : '온도 N/A';
+    
+    // 습도 분석  
+    const humidity = data.humidity;
+    const humidityInfo = humidity.length > 0
+      ? `습도 ${Math.round(humidity.reduce((sum, h) => sum + h, 0) / humidity.length)}%`
+      : '습도 N/A';
+    
+    // 강수량 분석
+    const rainfall = data.rainfall;
+    const rainfallInfo = rainfall.length > 0
+      ? `강수 ${rainfall.reduce((sum, r) => sum + r, 0).toFixed(1)}mm`
+      : '강수 N/A';
+    
+    // 풍속 분석
+    const windSpeed = data.wind_speed;
+    const windInfo = windSpeed.length > 0
+      ? `풍속 ${(windSpeed.reduce((sum, w) => sum + w, 0) / windSpeed.length).toFixed(1)}km/h`
+      : '풍속 N/A';
+    
+    analysis += `- **${region}**: ${tempInfo} | ${humidityInfo} | ${rainfallInfo} | ${windInfo} | ${data.stations.size}개 관측소\n`;
+  });
+  
+  // 전체 관측소 현황 추가
+  const totalStations = weatherData.stations_used?.length || 0;
+  const dataTypeStats = dataTypes.map(type => {
+    const count = weatherData.data?.[type]?.readings?.length || 0;
+    return `${type.replace('_', ' ')}: ${count}개`;
+  }).join(', ');
+  
+  analysis += `\n📊 **전체 관측소 현황**: ${totalStations}개 관측소 (${dataTypeStats})\n`;
+  
+  return analysis || '- 지역별 분석 데이터 처리 중';
+}
+
+/**
+ * 좌표 기반 지역 분류
+ */
+function determineRegionFromCoordinates(coordinates) {
+  if (!coordinates?.lat || !coordinates?.lng) return 'Unknown';
+  
+  const { lat, lng } = coordinates;
+  
+  // 싱가포르 지역 분류 (대략적 경계)
+  if (lat > 1.38) return 'North';
+  if (lat < 1.28) return 'South';  
+  if (lng > 103.87) return 'East';
+  if (lng < 103.75) return 'West';
+  return 'Central';
+}
+
+/**
  * 실시간 기상경보 데이터 가져오기 (NEA 알림 시스템 연동)
  */
 async function getWeatherAlertsData() {
@@ -202,8 +286,11 @@ async function analyzeWeatherWithCohere(weatherData) {
 - 평균 기온: ${avgTemp ? avgTemp.toFixed(1) + '°C' : '데이터 없음'} (최고: ${maxTemp ? maxTemp.toFixed(1) + '°C' : 'N/A'}, 최저: ${minTemp ? minTemp.toFixed(1) + '°C' : 'N/A'})
 - 평균 습도: ${avgHumidity ? Math.round(avgHumidity) + '%' : '데이터 없음'} (최고: ${maxHumidity ? Math.round(maxHumidity) + '%' : 'N/A'})
 - 총 강수량: ${totalRainfall !== null ? totalRainfall.toFixed(1) + 'mm' : '데이터 없음'} (강수 지역: ${activeRainStations}/${rainfallReadings.length}개소)
-- 분석 관측소: 총 ${tempReadings.length}개 (싱가포르 전역)
+- 분석 관측소: 온도 ${tempReadings.length}개, 습도 ${humidityReadings.length}개, 강수량 ${rainfallReadings.length}개 (전체 ${weatherData.stations_used?.length || 0}개 관측소)
 - 데이터 수집 시간: ${weatherData.timestamp}
+
+🏛️ **지역별 상세 분석 데이터**:
+${generateRegionalAnalysis(weatherData)}
 
 🌤️ **NEA 공식 예보 정보**:
 - 일반 예보: ${generalForecast}
