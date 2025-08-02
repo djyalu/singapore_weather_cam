@@ -14,16 +14,55 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [cohereAnalysis, setCohereAnalysis] = useState(null);
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
+  const [independentWeatherData, setIndependentWeatherData] = useState(null);
+
+  // 독립적인 실시간 데이터 로딩 (WeatherAlertTicker와 완전히 동일한 방식)
+  useEffect(() => {
+    const loadIndependentData = async () => {
+      try {
+        console.log('🚀 [SingaporeOverallWeather] 독립적 데이터 로딩 시작...');
+        const response = await fetch('/singapore_weather_cam/data/weather/latest.json?t=' + Date.now());
+        if (response.ok) {
+          const freshData = await response.json();
+          console.log('✅ [SingaporeOverallWeather] 독립적 데이터 로딩 성공:', {
+            temperature_average: freshData.data?.temperature?.average,
+            humidity_average: freshData.data?.humidity?.average,
+            readings_count: freshData.data?.temperature?.readings?.length,
+            source: freshData.source,
+            timestamp: freshData.timestamp
+          });
+          setIndependentWeatherData(freshData);
+        }
+      } catch (error) {
+        console.error('❌ [SingaporeOverallWeather] 독립적 데이터 로딩 실패:', error);
+      }
+    };
+
+    loadIndependentData();
+    
+    // 30초마다 자동 새로고침
+    const interval = setInterval(loadIndependentData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
     const generateSmartWeatherSummary = async () => {
-      if (!weatherData) {return;}
+      // 독립적으로 로드된 데이터 우선 사용, 없으면 props로 받은 데이터 사용
+      const dataToUse = independentWeatherData || weatherData;
+      if (!dataToUse) {return;}
 
       setAiLoading(true);
       try {
-        // WeatherAlertTicker와 동일한 데이터 소스 사용 - 직접 fetch
-        let actualWeatherData = weatherData;
+        // 독립적 데이터가 있으면 그것을 사용, 없으면 추가 fetch 시도
+        let actualWeatherData = dataToUse;
+        
+        console.log('🎯 [SingaporeOverallWeather] 사용할 데이터 결정:', {
+          hasIndependentData: !!independentWeatherData,
+          hasPropsData: !!weatherData,
+          usingDataSource: independentWeatherData ? 'INDEPENDENT' : 'PROPS',
+          temperature: actualWeatherData?.data?.temperature?.average
+        });
         
         try {
           console.log('🔄 [SingaporeOverallWeather] 티커와 동일한 데이터 소스 직접 로드...');
@@ -162,7 +201,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     };
 
     generateSmartWeatherSummary();
-  }, [weatherData]); // refreshTrigger 제거로 무한루프 방지
+  }, [weatherData, independentWeatherData]); // independentWeatherData 추가
 
   // 실시간 AI 분석 실행
   const handleRealAIAnalysis = async () => {
@@ -1104,17 +1143,56 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
     return 'text-yellow-300';
   };
 
+  // 독립적 데이터로 overallData 계산 (UI 렌더링용)
+  const dataForUI = independentWeatherData || weatherData;
+  const overallDataForUI = dataForUI ? (() => {
+    // WeatherAlertTicker와 동일한 계산 방식 직접 적용
+    if (dataForUI.data?.temperature?.readings?.length > 0) {
+      const tempReadings = dataForUI.data.temperature.readings;
+      const calculatedAvgTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+      const preCalculatedAvgTemp = dataForUI.data.temperature.average;
+      const finalTemp = (preCalculatedAvgTemp !== undefined && preCalculatedAvgTemp !== null)
+        ? preCalculatedAvgTemp
+        : calculatedAvgTemp;
+
+      const humidityReadings = dataForUI.data?.humidity?.readings || [];
+      const calculatedAvgHumidity = humidityReadings.length > 0 
+        ? humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length 
+        : null;
+      const preCalculatedAvgHumidity = dataForUI.data?.humidity?.average;
+      const finalHumidity = (preCalculatedAvgHumidity !== undefined && preCalculatedAvgHumidity !== null)
+        ? preCalculatedAvgHumidity
+        : calculatedAvgHumidity;
+
+      console.log('🎯 [UI RENDERING] 최종 표시 데이터:', {
+        temperature: finalTemp?.toFixed(2),
+        humidity: finalHumidity?.toFixed(2),
+        source: dataForUI.source,
+        isUsingIndependentData: !!independentWeatherData
+      });
+
+      return {
+        temperature: finalTemp,
+        humidity: finalHumidity,
+        forecast: dataForUI.data?.forecast?.general?.forecast,
+        rainfall: dataForUI.data?.rainfall?.total || 0,
+        stationCount: tempReadings.length
+      };
+    }
+    return { temperature: null, humidity: null, forecast: null, rainfall: 0, stationCount: 0 };
+  })() : { temperature: null, humidity: null, forecast: null, rainfall: 0, stationCount: 0 };
+
   return (
     <Card className={`shadow-lg ${className}`}>
       {/* 심플한 헤더 - 그라데이션 배경 */}
       <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-xl p-3 sm:p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">{getWeatherIcon(overallData.forecast)}</span>
+            <span className="text-2xl">{getWeatherIcon(overallDataForUI.forecast)}</span>
             <div>
               <h2 className="text-lg font-bold">Singapore Weather</h2>
               <p className="text-blue-100 text-xs">
-                {weatherData?.source?.includes('Real-time') ? '🔴 실시간 NEA API' : '📊 최신 수집'} • {overallData.stationCount}개 관측소
+                {dataForUI?.source?.includes('Real-time') ? '🔴 실시간 NEA API' : '📊 최신 수집'} • {overallDataForUI.stationCount}개 관측소
               </p>
             </div>
           </div>
@@ -1123,12 +1201,12 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           <div className="text-right">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-white drop-shadow-lg">
-                {overallData.temperature !== null && overallData.temperature !== undefined && typeof overallData.temperature === 'number' ? (console.log('🏠 [SingaporeOverallWeather] 표시된 온도:', overallData.temperature.toFixed(1)), overallData.temperature.toFixed(1)) : '--'}
+                {overallDataForUI.temperature !== null && overallDataForUI.temperature !== undefined && typeof overallDataForUI.temperature === 'number' ? overallDataForUI.temperature.toFixed(1) : '--'}
               </span>
               <span className="text-sm text-blue-100">°C</span>
             </div>
             <div className="text-xs text-blue-100">
-              {overallData.stationCount}개 평균
+              {overallDataForUI.stationCount}개 평균
             </div>
           </div>
         </div>
@@ -1144,10 +1222,10 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <span className="text-xs text-gray-600 font-medium hidden sm:inline">습도</span>
             </div>
             <div className="text-lg sm:text-xl font-bold text-gray-800">
-              {overallData.humidity !== null && overallData.humidity !== undefined && typeof overallData.humidity === 'number' ? (console.log('🏠 [SingaporeOverallWeather] 표시된 습도:', Math.round(overallData.humidity)), Math.round(overallData.humidity)) : '--'}%
+              {overallDataForUI.humidity !== null && overallDataForUI.humidity !== undefined && typeof overallDataForUI.humidity === 'number' ? Math.round(overallDataForUI.humidity) : '--'}%
             </div>
             <div className="text-xs text-gray-500">
-              {overallData.humidity !== null && overallData.humidity !== undefined && typeof overallData.humidity === 'number' ? (overallData.humidity >= 80 ? '높음' : overallData.humidity >= 60 ? '보통' : '낮음') : '정보없음'}
+              {overallDataForUI.humidity !== null && overallDataForUI.humidity !== undefined && typeof overallDataForUI.humidity === 'number' ? (overallDataForUI.humidity >= 80 ? '높음' : overallDataForUI.humidity >= 60 ? '보통' : '낮음') : '정보없음'}
             </div>
           </div>
 
@@ -1158,7 +1236,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <span className="text-xs text-gray-600 font-medium hidden sm:inline">강수량</span>
             </div>
             <div className="text-lg sm:text-xl font-bold text-gray-800">
-              {overallData.rainfall !== null && overallData.rainfall !== undefined && typeof overallData.rainfall === 'number' ? overallData.rainfall.toFixed(1) : '--'}
+              {overallDataForUI.rainfall !== null && overallDataForUI.rainfall !== undefined && typeof overallDataForUI.rainfall === 'number' ? overallDataForUI.rainfall.toFixed(1) : '--'}
             </div>
             <div className="text-xs text-gray-500">mm</div>
           </div>
@@ -1166,15 +1244,15 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           {/* 날씨 상태 - 대형 화면에서만 표시 */}
           <div className="text-center hidden sm:block">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <span className="text-sm">{getWeatherIcon(overallData.forecast)}</span>
+              <span className="text-sm">{getWeatherIcon(overallDataForUI.forecast)}</span>
               <span className="text-xs text-gray-600 font-medium">상태</span>
             </div>
             <div className="text-sm font-semibold text-gray-800">
-              {overallData.forecast === 'Partly Cloudy (Day)' ? '부분흐림' :
-                overallData.forecast === 'Partly Cloudy (Night)' ? '부분흐림' :
-                  overallData.forecast === 'Fair (Day)' ? '맑음' :
-                    overallData.forecast === 'Fair (Night)' ? '맑음' :
-                      overallData.forecast}
+              {overallDataForUI.forecast === 'Partly Cloudy (Day)' ? '부분흐림' :
+                overallDataForUI.forecast === 'Partly Cloudy (Night)' ? '부분흐림' :
+                  overallDataForUI.forecast === 'Fair (Day)' ? '맑음' :
+                    overallDataForUI.forecast === 'Fair (Night)' ? '맑음' :
+                      overallDataForUI.forecast}
             </div>
           </div>
 
