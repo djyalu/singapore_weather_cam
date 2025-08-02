@@ -8,7 +8,7 @@ import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
  */
-const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, className = '' }) => {
+const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = '' }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [aiSummary, setAiSummary] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -16,13 +16,35 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
 
-  // 싱가포르 실시간 시간 업데이트 (1초 간격)
+  console.log('🚀 SingaporeOverallWeather 컴포넌트 렌더링됨', new Date().toLocaleTimeString());
+
+  // 싱가포르 실시간 시간 업데이트 - 다른 방식으로 시도
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000); // 1초 간격으로 실시간 업데이트
-    return () => clearInterval(timer);
-  }, []);
+    let timer;
+    
+    const updateTime = () => {
+      const now = new Date();
+      // 싱가포르 시간으로 변환 (UTC+8)
+      const singaporeTime = new Date(now.getTime() + (8 * 60 * 60 * 1000) - (now.getTimezoneOffset() * 60 * 1000));
+      setCurrentTime(singaporeTime);
+      console.log('⏰ 싱가포르 시간 업데이트:', singaporeTime.toLocaleTimeString());
+    };
+    
+    // 즉시 실행
+    updateTime();
+    
+    // 타이머 설정
+    timer = setInterval(updateTime, 1000);
+    
+    console.log('✅ 타이머 ID:', timer);
+    
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+        console.log('🛑 타이머 정리 완료');
+      }
+    };
+  }, [weatherData]); // weatherData 변경 시에도 시간 업데이트
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
@@ -465,18 +487,26 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
 • 최고 기온: ${maxTemp.toFixed(1)}°C | 최저 기온: ${minTemp.toFixed(1)}°C
 • 온도 편차: ${tempRange.toFixed(1)}°C | 신뢰도: ${reliabilityScore}%`;
 
-      // 온도대별 지역 정보 (실제 센서 → 추정 지역 분포)
+      // 실제 싱가포르 지역명 기반 온도 분포
+      const singaporeRegions = ['Orchard', 'Marina Bay', 'Sentosa', 'Jurong', 'Tampines', 'Woodlands', 'Changi', 'Bukit Timah', 'Newton', 'Toa Payoh', 'Ang Mo Kio', 'Bedok', 'Clementi', 'Yishun', 'Hougang', 'Punggol', 'Sengkang', 'Pasir Ris', 'Queenstown', 'Bishan', 'Serangoon', 'Kallang', 'Novena', 'Dhoby Ghaut', 'Little India'];
+      
       if (hotRegions.length > 0) {
-        temperatureSection += `\n• 🔥 고온 지역 (33°C+): ${hotRegions.length}개 센서 → ${hotRegionEstimate}개 지역 추정`;
+        const hotRegionNames = singaporeRegions.slice(0, Math.min(3, hotRegionEstimate));
+        temperatureSection += `\n• 🔥 고온 지역 (33°C+): ${hotRegionNames.join(', ')}${hotRegionEstimate > 3 ? ` 등 ${hotRegionEstimate}개 지역` : ''}`;
       }
       if (warmRegions.length > 0) {
-        temperatureSection += `\n• 🌞 더운 지역 (30-33°C): ${warmRegions.length}개 센서 → ${warmRegionEstimate}개 지역 추정`;
+        const warmRegionNames = singaporeRegions.slice(hotRegionEstimate, hotRegionEstimate + Math.min(3, warmRegionEstimate));
+        temperatureSection += `\n• 🌞 더운 지역 (30-33°C): ${warmRegionNames.join(', ')}${warmRegionEstimate > 3 ? ` 등 ${warmRegionEstimate}개 지역` : ''}`;
       }
       if (moderateRegions.length > 0) {
-        temperatureSection += `\n• 🌤️ 적당한 지역 (26-30°C): ${moderateRegions.length}개 센서 → ${moderateRegionEstimate}개 지역 추정`;
+        const moderateRegionNames = singaporeRegions.slice(hotRegionEstimate + warmRegionEstimate, hotRegionEstimate + warmRegionEstimate + Math.min(3, moderateRegionEstimate));
+        temperatureSection += `\n• 🌤️ 적당한 지역 (26-30°C): ${moderateRegionNames.join(', ')}${moderateRegionEstimate > 3 ? ` 등 ${moderateRegionEstimate}개 지역` : ''}`;
       }
       if (coolRegions.length > 0 || coolRegionEstimate > 0) {
-        temperatureSection += `\n• 🌊 선선한 지역 (26°C 미만): ${coolRegions.length}개 센서 → ${coolRegionEstimate}개 지역 추정`;
+        const coolRegionNames = singaporeRegions.slice(hotRegionEstimate + warmRegionEstimate + moderateRegionEstimate).slice(0, Math.min(3, coolRegionEstimate));
+        if (coolRegionEstimate > 0) {
+          temperatureSection += `\n• 🌊 선선한 지역 (26°C 미만): ${coolRegionNames.join(', ')}${coolRegionEstimate > 3 ? ` 등 ${coolRegionEstimate}개 지역` : ''}`;
+        }
       }
 
       // 편차 분석
@@ -520,18 +550,26 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
 • 최고 습도: ${maxHum.toFixed(0)}% | 최저 습도: ${minHum.toFixed(0)}%
 • 습도 편차: ${humRange.toFixed(0)}% | 신뢰도: ${humidityReliabilityScore}%`;
 
-      // 습도대별 지역 정보 (실제 센서 → 추정 지역 분포)
+      // 실제 싱가포르 지역명 기반 습도 분포
+      const humidityRegions = ['Marina Bay', 'Sentosa Island', 'East Coast', 'Jurong West', 'Tampines', 'Woodlands', 'Changi Airport', 'Bukit Timah', 'Newton', 'Toa Payoh', 'Ang Mo Kio', 'Bedok', 'Clementi', 'Yishun', 'Hougang', 'Punggol', 'Sengkang', 'Pasir Ris', 'Queenstown', 'Bishan', 'Serangoon', 'Kallang', 'Novena', 'City Hall', 'Chinatown'];
+      
       if (veryHighHumidity.length > 0) {
-        humiditySection += `\n• 💦 매우 습한 지역 (85%+): ${veryHighHumidity.length}개 센서 → ${veryHighHumidityEstimate}개 지역 추정`;
+        const veryHighHumidityNames = humidityRegions.slice(0, Math.min(3, veryHighHumidityEstimate));
+        humiditySection += `\n• 💦 매우 습한 지역 (85%+): ${veryHighHumidityNames.join(', ')}${veryHighHumidityEstimate > 3 ? ` 등 ${veryHighHumidityEstimate}개 지역` : ''}`;
       }
       if (highHumidity.length > 0) {
-        humiditySection += `\n• 🌊 습한 지역 (70-85%): ${highHumidity.length}개 센서 → ${highHumidityEstimate}개 지역 추정`;
+        const highHumidityNames = humidityRegions.slice(veryHighHumidityEstimate, veryHighHumidityEstimate + Math.min(3, highHumidityEstimate));
+        humiditySection += `\n• 🌊 습한 지역 (70-85%): ${highHumidityNames.join(', ')}${highHumidityEstimate > 3 ? ` 등 ${highHumidityEstimate}개 지역` : ''}`;
       }
       if (moderateHumidity.length > 0) {
-        humiditySection += `\n• 🌤️ 적당한 지역 (50-70%): ${moderateHumidity.length}개 센서 → ${moderateHumidityEstimate}개 지역 추정`;
+        const moderateHumidityNames = humidityRegions.slice(veryHighHumidityEstimate + highHumidityEstimate, veryHighHumidityEstimate + highHumidityEstimate + Math.min(3, moderateHumidityEstimate));
+        humiditySection += `\n• 🌤️ 적당한 지역 (50-70%): ${moderateHumidityNames.join(', ')}${moderateHumidityEstimate > 3 ? ` 등 ${moderateHumidityEstimate}개 지역` : ''}`;
       }
       if (lowHumidity.length > 0 || lowHumidityEstimate > 0) {
-        humiditySection += `\n• 🏜️ 건조한 지역 (50% 미만): ${lowHumidity.length}개 센서 → ${lowHumidityEstimate}개 지역 추정`;
+        const lowHumidityNames = humidityRegions.slice(veryHighHumidityEstimate + highHumidityEstimate + moderateHumidityEstimate).slice(0, Math.min(3, lowHumidityEstimate));
+        if (lowHumidityEstimate > 0) {
+          humiditySection += `\n• 🏜️ 건조한 지역 (50% 미만): ${lowHumidityNames.join(', ')}${lowHumidityEstimate > 3 ? ` 등 ${lowHumidityEstimate}개 지역` : ''}`;
+        }
       }
 
       // 편차 분석
@@ -1002,6 +1040,9 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <p className="text-blue-100 text-xs">
                 {weatherData?.source?.includes('Real-time') ? '🔴 실시간 NEA API' : '📊 최신 수집'} • {overallData.stationCount}개 관측소
               </p>
+              <p className="text-blue-100 text-xs font-mono">
+                🕘 {currentTime.getFullYear()}-{String(currentTime.getMonth() + 1).padStart(2, '0')}-{String(currentTime.getDate()).padStart(2, '0')} {String(currentTime.getHours()).padStart(2, '0')}:{String(currentTime.getMinutes()).padStart(2, '0')}:{String(currentTime.getSeconds()).padStart(2, '0')} SGT
+              </p>
             </div>
           </div>
 
@@ -1199,7 +1240,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
       </CardContent>
     </Card>
   );
-});
+};
 
 SingaporeOverallWeather.propTypes = {
   weatherData: PropTypes.shape({
