@@ -89,7 +89,7 @@ export const getRegionalTemperature = (weatherData, regionId) => {
   const region = STANDARD_REGIONS.find(r => r.id === regionId);
   if (!region) {
     console.warn(`Unknown region: ${regionId}`);
-    return 29.0;
+    return null;
   }
 
   // 실제 날씨 데이터에서 해당 지역 온도 계산

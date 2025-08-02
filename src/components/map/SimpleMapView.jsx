@@ -219,10 +219,10 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
     loadCameras();
   }, [showTrafficCameras]);
 
-  // 권역별 날씨 데이터 매칭 - 안전한 로직
+  // 권역별 날씨 데이터 매칭 - 실시간 데이터만 사용
   const getWeatherForRegion = (region) => {
-    // 안전한 기본값 설정
-    const defaultWeather = { temperature: 29.0, humidity: 80, rainfall: 0, stationCount: 0 };
+    // 실제 데이터가 없으면 null 반환 (하드코딩 제거)
+    const defaultWeather = { temperature: null, humidity: null, rainfall: null, stationCount: 0 };
 
     // 기본 검증
     if (!region || !region.stationIds || !Array.isArray(region.stationIds)) {
@@ -332,8 +332,8 @@ const SimpleMapView = ({ weatherData, selectedRegion = 'all', className = '', on
       };
     }
 
-    console.log(`🔄 ${region.name}: 기본값 29.0°C 사용`);
-    return { temperature: 29.0, humidity: 80, rainfall: 0, stationCount: 0 };
+    console.log(`🔄 ${region.name}: 실제 데이터 없음, null 반환`);
+    return { temperature: null, humidity: null, rainfall: null, stationCount: 0 };
   };
 
   // 온도별 색상 - WeatherOverlay와 동일
