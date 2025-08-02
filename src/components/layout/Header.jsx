@@ -63,20 +63,20 @@ const Header = React.memo(({
               </div>
             </div>
 
-            {/* 우측 컨트롤 - 간결한 디자인 */}
-            <div className="flex items-center gap-3 sm:gap-4">
+            {/* 우측 컨트롤 - 모바일 최적화 */}
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
               {/* 시스템 정보 - 큰 화면에서만 간단하게 */}
               <div className="hidden lg:block text-right">
                 <div className="text-xs text-white/70 mb-1">최근 업데이트</div>
                 <div className="text-sm text-white font-semibold">{systemStats.lastUpdate || '로딩 중...'}</div>
               </div>
 
-              {/* 현재 시간 - 심플하고 깔끔하게 */}
-              <div className="text-right">
-                <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20 w-[180px]">
-                  <div className="text-xs text-white/70 mb-1 hidden sm:block">Singapore</div>
-                  <div className="text-lg font-bold text-white">
-                    <RealtimeClock className="text-white text-lg font-bold" />
+              {/* 현재 시간 - 반응형 디자인 */}
+              <div className="text-right flex-shrink-0">
+                <div className="bg-white/10 backdrop-blur-sm px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 min-w-[120px] sm:min-w-[140px] lg:min-w-[180px]">
+                  <div className="text-xs text-white/70 mb-0.5 sm:mb-1 hidden sm:block">Singapore</div>
+                  <div className="text-sm sm:text-base lg:text-lg font-bold text-white tabular-nums">
+                    <RealtimeClock className="text-white text-sm sm:text-base lg:text-lg font-bold" />
                   </div>
                 </div>
               </div>
@@ -91,19 +91,19 @@ const Header = React.memo(({
                   variant="glass"
                   showStatus={false}
                   showTimer={false}
-                  className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+                  className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 flex-shrink-0"
                 />
               )}
             </div>
           </div>
 
           {/* 모바일용 간결한 상태 표시 */}
-          <div className="mt-4 flex justify-between items-center lg:hidden">
-            <div className="text-xs text-white/70">
+          <div className="mt-3 sm:mt-4 flex justify-between items-center lg:hidden">
+            <div className="text-xs sm:text-sm text-white/70 flex-1 mr-2">
               카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • {systemStats.lastUpdate || '로딩 중...'}
             </div>
-            <div className="text-sm text-white font-semibold w-[130px] text-right">
-              <RealtimeClock className="text-white text-sm font-semibold" />
+            <div className="text-xs sm:text-sm text-white font-semibold min-w-[100px] sm:min-w-[120px] text-right flex-shrink-0 tabular-nums">
+              <RealtimeClock className="text-white text-xs sm:text-sm font-semibold" />
             </div>
           </div>
         </div>

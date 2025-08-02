@@ -29,10 +29,11 @@ const RealtimeClock = ({ className = "text-blue-100 text-xs font-mono" }) => {
 
   return (
     <span 
-      className={`${className} inline-block w-[140px] text-center`}
+      className={`${className} inline-block text-center`}
       style={{ 
         fontVariantNumeric: 'tabular-nums',
-        fontFeatureSettings: '"tnum"'
+        fontFeatureSettings: '"tnum"',
+        minWidth: '90px' // 모바일용 최소 폭
       }}
     >
       {time}
