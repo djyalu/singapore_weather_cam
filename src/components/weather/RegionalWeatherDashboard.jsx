@@ -62,205 +62,69 @@ const RegionalWeatherDashboard = React.memo(({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 지역별 날씨 데이터 가져오기 (변환된 데이터 구조에 맞춤)
+  // 지역별 날씨 데이터 가져오기 - weatherDataUnifier 사용
   const getRegionalWeatherData = useMemo(() => {
     console.log('🔍 RegionalWeatherDashboard - Debug Info:');
     console.log('- weatherData exists:', !!weatherData);
-    console.log('- weatherData.locations exists:', !!weatherData?.locations);
-    console.log('- weatherData.locations length:', weatherData?.locations?.length);
-    console.log('- weatherData.current exists:', !!weatherData?.current);
+    console.log('- weatherData.data exists:', !!weatherData?.data);
+    console.log('- weatherData.data.temperature exists:', !!weatherData?.data?.temperature);
     console.log('- full weatherData structure:', weatherData);
 
-    if (weatherData?.locations) {
-      console.log('- First location sample:', weatherData.locations[0]);
-      console.log('- Available station IDs:', weatherData.locations.map(loc => loc.station_id));
+    if (weatherData?.data?.temperature?.readings) {
+      console.log('- Temperature readings count:', weatherData.data.temperature.readings.length);
+      console.log('- Temperature readings:', weatherData.data.temperature.readings);
     }
 
-    if (!weatherData?.locations || !weatherData?.current) {
-      console.log('⚠️ RegionalWeatherDashboard - No weatherData.locations found, using enhanced fallback');
-      // 기본 데이터가 없을 때 현실적인 기본값 반환
-      const fallbackData = {};
-      selectedRegions.forEach(regionId => {
-        const region = AVAILABLE_REGIONS.find(r => r.id === regionId);
-        if (region) {
-          const fallbackTemp = 29.5 + (Math.random() * 2); // 29.5-31.5°C
-          fallbackData[regionId] = {
-            region: region.displayName, // 버튼과 일치하도록 displayName 사용
-            temperature: fallbackTemp,
-            feelsLike: Math.round((fallbackTemp + 2.0) * 10) / 10, // 체감온도 추가
-            humidity: 75 + Math.floor(Math.random() * 10), // 75-85%
-            rainfall: 0,
-            windDirection: '--',
-            description: getWeatherDescription(fallbackTemp, 0), // 날씨 설명 추가
-            icon: getWeatherIcon(fallbackTemp, 0), // 날씨 아이콘 추가
-            stationName: '평균 데이터 (로딩 중)',
-            stationCount: 0,
-            lastUpdate: new Date().toISOString(),
-          };
-        }
-      });
-      console.log('🔄 Enhanced fallback data created:', fallbackData);
-      return fallbackData;
-    }
+    // weatherDataUnifier의 getRegionalTemperature 함수 사용
+    if (weatherData?.data?.temperature?.readings?.length > 0) {
+      console.log('✅ Using real temperature data from latest.json structure');
+      
+      const regionalData = {};
+      
+      // 선택된 지역만 처리
+      const selectedRegionConfigs = AVAILABLE_REGIONS.filter(region =>
+        selectedRegions.includes(region.id),
+      );
 
-    const regionalData = {};
-
-    // 선택된 지역만 처리
-    const selectedRegionConfigs = AVAILABLE_REGIONS.filter(region =>
-      selectedRegions.includes(region.id),
-    );
-
-    selectedRegionConfigs.forEach(region => {
-      console.log(`🔍 Processing region: ${region.name}, looking for stations:`, region.stationIds);
-
-      // 해당 지역의 스테이션 데이터 찾기
-      const stationData = region.stationIds
-        .map(stationId => {
-          const found = weatherData.locations.find(loc => loc.station_id === stationId);
-          console.log(`  - Station ${stationId}: ${found ? 'found' : 'not found'}`);
-          if (found) {
-            console.log(`    Temperature: ${found.temperature}, Humidity: ${found.humidity}`);
-          }
-          return found;
-        })
-        .filter(Boolean);
-
-      console.log(`  - Total stations found for ${region.name}: ${stationData.length}`);
-
-      if (stationData.length > 0) {
-        // 여러 스테이션의 평균값 계산
-        const avgTemperature = stationData.reduce((sum, station) => sum + (station.temperature || 0), 0) / stationData.length;
-        const avgHumidity = stationData.reduce((sum, station) => sum + (station.humidity || 0), 0) / stationData.length;
-        const totalRainfall = stationData.reduce((sum, station) => sum + (station.rainfall || 0), 0);
-
-        // 대표 스테이션 정보
-        const primaryStation = stationData[0];
-        const stationInfo = getStationInfo(primaryStation.station_id);
-
-        // 체감온도 계산 (실제온도 + 2도)
-        const calculatedFeelsLike = avgTemperature ? Math.round((avgTemperature + 2.0) * 10) / 10 : null;
-
-        // 날씨 설명과 아이콘 생성
-        const weatherDescription = getWeatherDescription(avgTemperature, totalRainfall);
-        const weatherIcon = getWeatherIcon(avgTemperature, totalRainfall);
-
+      selectedRegionConfigs.forEach(region => {
+        console.log(`🎯 Processing region: ${region.displayName} (${region.id}), stations: ${region.stationIds.join(', ')}`);
+        
+        // weatherDataUnifier의 getRegionalTemperature 사용
+        const regionalTemp = getRegionalTemperature(weatherData, region.id);
+        
+        // 습도는 전체 평균 사용 (지역별 습도 데이터가 없으므로)
+        const avgHumidity = weatherData.data?.humidity?.average || 
+          (weatherData.data?.humidity?.readings?.length > 0 
+            ? weatherData.data.humidity.readings.reduce((sum, r) => sum + r.value, 0) / weatherData.data.humidity.readings.length
+            : 75);
+        
+        const totalRainfall = weatherData.data?.rainfall?.total || 0;
+        
+        console.log(`  ✅ ${region.displayName}: ${regionalTemp.toFixed(1)}°C (stations: ${region.stationIds.join(', ')})`);
+        
         regionalData[region.id] = {
-          region: region.displayName, // 버튼과 일치하도록 displayName 사용
-          temperature: Math.round(avgTemperature * 10) / 10, // 소수점 1자리
-          feelsLike: calculatedFeelsLike, // 체감온도 추가
+          region: region.displayName,
+          temperature: Math.round(regionalTemp * 10) / 10,
+          feelsLike: Math.round((regionalTemp + 2.0) * 10) / 10,
           humidity: Math.round(avgHumidity),
           rainfall: Math.round(totalRainfall * 10) / 10,
-          windDirection: weatherData.current?.windDirection || '--',
-          description: weatherDescription, // 날씨 설명 추가
-          icon: weatherIcon, // 날씨 아이콘 추가
-          stationName: stationInfo?.displayName || primaryStation.name || primaryStation.displayName,
-          stationCount: stationData.length,
+          windDirection: '--',
+          description: getWeatherDescription(regionalTemp, totalRainfall),
+          icon: getWeatherIcon(regionalTemp, totalRainfall),
+          stationName: `${region.stationIds.length}개 관측소 평균`,
+          stationCount: region.stationIds.length,
           lastUpdate: weatherData.timestamp,
         };
+      });
+      
+      console.log('🎯 Regional data using weatherDataUnifier:', regionalData);
+      return regionalData;
+    }
 
-        console.log(`  ✅ ${region.name} data created:`, regionalData[region.id]);
-      } else {
-        // 데이터가 없는 경우 - 사용 가능한 다른 스테이션에서 대체 데이터 찾기
-        console.log(`  ⚠️ No specific stations found for ${region.name}, trying alternative approach`);
-
-        // 전체 스테이션 중에서 지역별로 다른 스테이션을 할당하여 실제로 다른 데이터 표시
-        if (weatherData.locations && weatherData.locations.length > 0) {
-          const availableStations = weatherData.locations.filter(loc =>
-            loc.temperature != null && loc.humidity != null,
-          );
-
-          if (availableStations.length > 0) {
-            // 지역별로 고정된 다른 스테이션 그룹 할당 (실제로 다른 온도가 나오도록)
-            const regionIndex = AVAILABLE_REGIONS.findIndex(r => r.id === region.id);
-            const stationsPerRegion = Math.max(1, Math.floor(availableStations.length / AVAILABLE_REGIONS.length));
-            const startIndex = (regionIndex * stationsPerRegion) % availableStations.length;
-            const endIndex = Math.min(startIndex + stationsPerRegion, availableStations.length);
-
-            const assignedStations = availableStations.slice(startIndex, endIndex);
-            if (assignedStations.length === 0) {
-              // fallback: 적어도 하나의 스테이션은 할당
-              assignedStations.push(availableStations[regionIndex % availableStations.length]);
-            }
-
-            console.log(`    - Assigned stations for ${region.name}:`, assignedStations.map(s => `${s.station_id}(${s.temperature}°C)`));
-
-            // 할당된 스테이션들로 평균 계산
-            const avgTemperature = assignedStations.reduce((sum, station) => sum + (station.temperature || 0), 0) / assignedStations.length;
-            const avgHumidity = assignedStations.reduce((sum, station) => sum + (station.humidity || 0), 0) / assignedStations.length;
-            const totalRainfall = assignedStations.reduce((sum, station) => sum + (station.rainfall || 0), 0);
-
-            const primaryStation = assignedStations[0];
-            const stationInfo = getStationInfo(primaryStation.station_id);
-            const calculatedFeelsLike = avgTemperature ? Math.round((avgTemperature + 2.0) * 10) / 10 : null;
-            const weatherDescription = getWeatherDescription(avgTemperature, totalRainfall);
-            const weatherIcon = getWeatherIcon(avgTemperature, totalRainfall);
-
-            regionalData[region.id] = {
-              region: region.displayName, // 버튼과 일치하도록 displayName 사용
-              temperature: Math.round(avgTemperature * 10) / 10,
-              feelsLike: calculatedFeelsLike,
-              humidity: Math.round(avgHumidity),
-              rainfall: Math.round(totalRainfall * 10) / 10,
-              windDirection: weatherData.current?.windDirection || '--',
-              description: weatherDescription,
-              icon: weatherIcon,
-              stationName: `${assignedStations.length}개 스테이션 평균`,
-              stationCount: assignedStations.length,
-              lastUpdate: weatherData.timestamp,
-            };
-
-            console.log(`    ✅ ${region.name} alternative data:`, {
-              temperature: regionalData[region.id].temperature,
-              humidity: regionalData[region.id].humidity,
-              stations: assignedStations.length,
-            });
-          } else {
-            console.log(`    ❌ No valid stations available for ${region.name}`);
-          }
-        } else {
-          // 최후의 폴백 - 전체 데이터도 없는 경우
-          const fallbackTemp = weatherData.current?.temperature || 29.5;
-          const fallbackRainfall = weatherData.current?.rainfall || 0;
-
-          regionalData[region.id] = {
-            region: region.displayName, // 버튼과 일치하도록 displayName 사용
-            temperature: fallbackTemp,
-            feelsLike: fallbackTemp ? Math.round((fallbackTemp + 2.0) * 10) / 10 : null, // 체감온도 추가
-            humidity: weatherData.current?.humidity || 78,
-            rainfall: fallbackRainfall,
-            windDirection: weatherData.current?.windDirection || '--',
-            description: getWeatherDescription(fallbackTemp, fallbackRainfall), // 날씨 설명 추가
-            icon: getWeatherIcon(fallbackTemp, fallbackRainfall), // 날씨 아이콘 추가
-            stationName: '전체 평균 데이터',
-            stationCount: 0,
-            lastUpdate: weatherData.timestamp,
-          };
-          console.log(`  🚨 Final fallback for ${region.name}`);
-        }
-      }
-
-      // 완전한 폴백 - 지역별 데이터가 생성되지 않은 경우
-      if (!regionalData[region.id]) {
-        console.log(`  🚨 Creating emergency fallback for ${region.name}`);
-        regionalData[region.id] = {
-          region: region.displayName, // 버튼과 일치하도록 displayName 사용
-          temperature: 29.5 + (AVAILABLE_REGIONS.findIndex(r => r.id === region.id) * 0.3), // 지역별로 약간씩 다른 온도
-          feelsLike: 31.5, // 체감온도 추가 (29.5 + 2.0)
-          humidity: 78,
-          rainfall: 0,
-          windDirection: '--',
-          description: getWeatherDescription(29.5, 0), // 날씨 설명 추가
-          icon: getWeatherIcon(29.5, 0), // 날씨 아이콘 추가
-          stationName: '기본 데이터',
-          stationCount: 0,
-          lastUpdate: new Date().toISOString(),
-        };
-        console.log(`  🔴 Complete fallback for ${region.name}`);
-      }
-    });
-
-    return regionalData;
-  }, [weatherData]);
+    console.log('⚠️ RegionalWeatherDashboard - No temperature readings found, returning empty data');
+    // 실제 데이터가 없으면 빈 객체 반환 (폴백 데이터 완전 제거)
+    return {};
+  }, [weatherData, selectedRegions]);
 
   // 업데이트 시간 포맷팅 (Asia/Singapore 시간대로 정확한 계산)
   const formatLastUpdate = (timestamp) => {
@@ -374,31 +238,32 @@ const RegionalWeatherDashboard = React.memo(({
         {selectedRegionConfigs.map(region => {
           const data = getRegionalWeatherData[region.id];
 
-          // 데이터가 없어도 현실적인 기본 카드 표시
-          const fallbackTemp = 29.3 + (Math.random() * 1); // 29.3-30.3°C
-          const cardData = data || {
-            region: region.displayName, // 버튼과 일치하도록 displayName 사용
-            temperature: fallbackTemp,
-            feelsLike: Math.round((fallbackTemp + 2.0) * 10) / 10, // 체감온도 추가
-            humidity: 76 + Math.floor(Math.random() * 8), // 76-83%
-            rainfall: 0,
-            windDirection: '--',
-            description: getWeatherDescription(fallbackTemp, 0), // 날씨 설명 추가
-            icon: getWeatherIcon(fallbackTemp, 0), // 날씨 아이콘 추가
-            stationName: '추정 데이터 (인근 스테이션 기준)',
-            stationCount: 1,
-            lastUpdate: new Date().toISOString(),
-          };
+          // 실제 데이터만 사용 (폴백 데이터 완전 제거)
+          const cardData = data;
 
           console.log(`🎯 Rendering card for ${region.id}:`, {
             hasData: !!data,
-            temperature: cardData.temperature,
-            feelsLike: cardData.feelsLike,
-            description: cardData.description,
-            icon: cardData.icon,
-            stationName: cardData.stationName,
-            lastUpdate: cardData.lastUpdate,
+            temperature: cardData?.temperature,
+            feelsLike: cardData?.feelsLike,
+            description: cardData?.description,
+            icon: cardData?.icon,
+            stationName: cardData?.stationName,
+            lastUpdate: cardData?.lastUpdate,
           });
+
+          // 실제 데이터가 없으면 카드를 표시하지 않음 (폴백 카드 완전 제거)
+          if (!cardData) {
+            console.log(`⚠️ No real data for ${region.displayName}, skipping card`);
+            return (
+              <div key={region.id} className="bg-gray-100 rounded-lg p-4 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-lg mb-2">{region.emoji}</div>
+                  <div className="text-sm font-medium">{region.displayName}</div>
+                  <div className="text-xs mt-1">실시간 데이터 로딩 중...</div>
+                </div>
+              </div>
+            );
+          }
 
           return (
             <RegionalWeatherCard

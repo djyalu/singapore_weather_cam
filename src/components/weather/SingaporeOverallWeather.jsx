@@ -1009,7 +1009,13 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
       humidityDesc = ', 건조한 편';
     }
 
-    // 59개 관측소 실시간 강수 상황 (지역별 상세 정보)
+    // 예보와 현재 강수량 비교 분석
+    const forecastAnalysis = forecast?.forecast || forecast || '';
+    const isThunderyForecast = forecastAnalysis.includes('Thundery') || forecastAnalysis.includes('Thunder');
+    const isShowerForecast = forecastAnalysis.includes('Shower') || forecastAnalysis.includes('Rain');
+    const currentlyDry = rainfallAnalysis ? rainfallAnalysis.activeRainStations === 0 : (rainfall === 0);
+
+    // 59개 관측소 실시간 강수 상황 (지역별 상세 정보 + 예보 비교)
     let rainDesc = '';
     if (rainfallAnalysis) {
       if (rainfallAnalysis.status === 'extreme_rain') {
@@ -1021,14 +1027,25 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
       } else if (rainfallAnalysis.status === 'light_rain') {
         rainDesc = isRealTime ? `. 🌦️ 지금 가벼운 소나기 - ${rainfallAnalysis.activeRainStations}개 지역에서 감지` : '. 🌦️ 가벼운 소나기 감지';
       } else {
-        rainDesc = isRealTime ? `. ☀️ 현재 전국 ${rainfallAnalysis.totalStations}개소 모두 건조` : '. ☀️ 전국적으로 건조한 상태';
+        // 현재 건조하지만 예보 분석
+        if (isThunderyForecast && currentlyDry) {
+          rainDesc = isRealTime ? `. ⚡ 현재 건조하나 뇌우성 소나기 예보 - ${rainfallAnalysis.totalStations}개소 모니터링 중` : '. ⚡ 뇌우성 소나기 예보 - 급변 가능';
+        } else if (isShowerForecast && currentlyDry) {
+          rainDesc = isRealTime ? `. 🌦️ 현재 건조하나 소나기 예보 - 우산 준비 권장` : '. 🌦️ 소나기 예보 - 우산 준비';
+        } else {
+          rainDesc = isRealTime ? `. ☀️ 현재 전국 ${rainfallAnalysis.totalStations}개소 모두 건조` : '. ☀️ 전국적으로 건조한 상태';
+        }
       }
     } else {
-      // 기존 방식 폴백
+      // 기존 방식 폴백 + 예보 고려
       if (rainfall > 5) {
         rainDesc = isRealTime ? `. 지금 ${rainfall}mm 비 - 우산 필수` : `. ${rainfall}mm의 비로 우산 필수`;
       } else if (rainfall > 0) {
         rainDesc = isRealTime ? `. 현재 약한 비 (${rainfall}mm)` : `. 약한 비 (${rainfall}mm) 주의`;
+      } else if (isThunderyForecast) {
+        rainDesc = isRealTime ? `. ⚡ 현재 건조하나 뇌우성 소나기 예보 - 급변 주의` : '. ⚡ 뇌우성 소나기 예보';
+      } else if (isShowerForecast) {
+        rainDesc = isRealTime ? `. 🌦️ 현재 건조하나 소나기 예보 - 우산 준비` : '. 🌦️ 소나기 예보';
       }
     }
 
