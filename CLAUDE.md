@@ -483,3 +483,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 501b8e0d
 
+## 체크포인트 10 - 2025-08-02 23:25
+- 내용: 최상단 Header에 싱가포르 실시간 시계 완전 구현 - Singapore Weather 컴포넌트에서 중복 시계 제거 및 Header 전용 시계 활성화
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 151425ac
+
