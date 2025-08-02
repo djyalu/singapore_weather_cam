@@ -24,14 +24,46 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         const response = await fetch('/singapore_weather_cam/data/weather/latest.json?t=' + Date.now());
         if (response.ok) {
           const freshData = await response.json();
+          
+          // WeatherAlertTicker와 동일한 방식으로 즉시 계산
+          let calculatedTemp = null;
+          let calculatedHumidity = null;
+          
+          if (freshData.data?.temperature?.readings?.length > 0) {
+            const tempReadings = freshData.data.temperature.readings;
+            const tempFromReadings = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+            const preCalculatedTemp = freshData.data.temperature.average;
+            calculatedTemp = (preCalculatedTemp !== undefined && preCalculatedTemp !== null)
+              ? preCalculatedTemp
+              : tempFromReadings;
+          }
+          
+          if (freshData.data?.humidity?.readings?.length > 0) {
+            const humidityReadings = freshData.data.humidity.readings;
+            const humidityFromReadings = humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length;
+            const preCalculatedHumidity = freshData.data.humidity.average;
+            calculatedHumidity = (preCalculatedHumidity !== undefined && preCalculatedHumidity !== null)
+              ? preCalculatedHumidity
+              : humidityFromReadings;
+          }
+          
           console.log('✅ [SingaporeOverallWeather] 독립적 데이터 로딩 성공:', {
             temperature_average: freshData.data?.temperature?.average,
             humidity_average: freshData.data?.humidity?.average,
+            calculated_temp: calculatedTemp?.toFixed(2),
+            calculated_humidity: calculatedHumidity?.toFixed(2),
             readings_count: freshData.data?.temperature?.readings?.length,
             source: freshData.source,
             timestamp: freshData.timestamp
           });
-          setIndependentWeatherData(freshData);
+          
+          setIndependentWeatherData({
+            ...freshData,
+            calculated: {
+              temperature: calculatedTemp,
+              humidity: calculatedHumidity
+            }
+          });
         }
       } catch (error) {
         console.error('❌ [SingaporeOverallWeather] 독립적 데이터 로딩 실패:', error);
@@ -40,8 +72,8 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
 
     loadIndependentData();
     
-    // 30초마다 자동 새로고침
-    const interval = setInterval(loadIndependentData, 30000);
+    // 10초마다 자동 새로고침 (더 빈번한 동기화)
+    const interval = setInterval(loadIndependentData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -1143,10 +1175,27 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
     return 'text-yellow-300';
   };
 
-  // 독립적 데이터로 overallData 계산 (UI 렌더링용)
+  // 독립적 데이터로 overallData 계산 (UI 렌더링용) - 미리 계산된 값 우선 사용
   const dataForUI = independentWeatherData || weatherData;
   const overallDataForUI = dataForUI ? (() => {
-    // WeatherAlertTicker와 동일한 계산 방식 직접 적용
+    // independentWeatherData에 미리 계산된 값이 있으면 우선 사용
+    if (independentWeatherData?.calculated) {
+      console.log('🎯 [UI RENDERING] 미리 계산된 값 사용:', {
+        temperature: independentWeatherData.calculated.temperature?.toFixed(2),
+        humidity: independentWeatherData.calculated.humidity?.toFixed(2),
+        source: 'PRECALCULATED_FROM_INDEPENDENT_DATA'
+      });
+
+      return {
+        temperature: independentWeatherData.calculated.temperature,
+        humidity: independentWeatherData.calculated.humidity,
+        forecast: dataForUI.data?.forecast?.general?.forecast,
+        rainfall: dataForUI.data?.rainfall?.total || 0,
+        stationCount: dataForUI.data?.temperature?.readings?.length || 0
+      };
+    }
+    
+    // 백업: WeatherAlertTicker와 동일한 계산 방식 직접 적용
     if (dataForUI.data?.temperature?.readings?.length > 0) {
       const tempReadings = dataForUI.data.temperature.readings;
       const calculatedAvgTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
@@ -1164,7 +1213,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
         ? preCalculatedAvgHumidity
         : calculatedAvgHumidity;
 
-      console.log('🎯 [UI RENDERING] 최종 표시 데이터:', {
+      console.log('🎯 [UI RENDERING] 백업 계산 방식 사용:', {
         temperature: finalTemp?.toFixed(2),
         humidity: finalHumidity?.toFixed(2),
         source: dataForUI.source,
