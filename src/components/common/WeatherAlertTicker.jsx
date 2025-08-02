@@ -37,17 +37,45 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
       setLoading(true);
       setError(null);
 
-      // 메인 앱의 실시간 데이터가 있으면 전역에 설정
+      console.log('🔄 Ticker: Starting alert loading...');
+
+      // 1순위: 메인 앱의 실시간 데이터
       if (mainWeatherData && !mainDataLoading) {
         console.log('📊 Ticker: Using main app real-time data');
-        // 메인 앱의 실시간 데이터를 전역 변수에 설정 (neaAlertService가 우선 사용)
         window.weatherData = mainWeatherData;
       }
 
-      const alertData = await neaAlertService.getWeatherAlerts();
-      setAlerts(alertData);
+      // 2순위: 전역 weatherData 확인
+      if (!window.weatherData) {
+        console.log('🔍 Ticker: No global data, fetching from API...');
+        try {
+          const response = await fetch(`${import.meta.env.BASE_URL || '/'}data/weather/latest.json?t=${Date.now()}`);
+          if (response.ok) {
+            window.weatherData = await response.json();
+            console.log('✅ Ticker: Fetched weather data directly');
+          }
+        } catch (fetchError) {
+          console.warn('⚠️ Ticker: Direct fetch failed:', fetchError);
+        }
+      }
 
-      console.log('📡 Ticker: Weather alerts loaded from real-time data:', alertData.length);
+      // 3순위: 강제로 기본 알림 생성
+      if (!window.weatherData) {
+        console.log('🔧 Ticker: Creating fallback alerts');
+        setAlerts([{
+          type: 'info',
+          priority: 'low',
+          icon: '📊',
+          message: 'GitHub Actions를 통해 최신 날씨 데이터를 자동 수집 중입니다.',
+          timestamp: new Date().toISOString(),
+          source: 'Automated System',
+        }]);
+        return;
+      }
+
+      const alertData = await neaAlertService.getWeatherAlerts();
+      console.log('📡 Ticker: Weather alerts generated:', alertData.length, alertData.map(a => a.message));
+      setAlerts(alertData);
     } catch (err) {
       console.error('🚨 Ticker: Failed to load weather alerts:', err);
       setError(err.message);
