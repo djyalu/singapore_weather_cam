@@ -118,7 +118,32 @@ export const getOverallWeatherData = (weatherData) => {
     };
   }
 
-  // 1순위: 전체 평균 데이터가 있는 경우
+  // 1순위: NEA API 직접 데이터 구조 (data.temperature.readings)
+  if (weatherData.data?.temperature?.readings && Array.isArray(weatherData.data.temperature.readings)) {
+    const readings = weatherData.data.temperature.readings;
+    const stationCount = readings.length;
+    
+    // stations_used 배열도 확인하여 더 정확한 관측소 수 계산
+    const totalStations = Math.max(
+      stationCount,
+      weatherData.stations_used?.length || 0,
+      weatherData.geographic_coverage?.total_stations || 0
+    );
+    
+    console.log(`📊 NEA API 관측소 정보: readings=${stationCount}, stations_used=${weatherData.stations_used?.length}, total=${weatherData.geographic_coverage?.total_stations}`);
+    
+    return {
+      temperature: weatherData.data.temperature.average || 29.0,
+      humidity: weatherData.data.humidity?.average || 80,
+      rainfall: weatherData.data.rainfall?.total || 0,
+      forecast: weatherData.data.forecast?.general?.forecast || 'Partly Cloudy',
+      lastUpdate: weatherData.timestamp,
+      stationCount: totalStations,
+      source: 'nea_api_direct'
+    };
+  }
+
+  // 2순위: 전체 평균 데이터가 있는 경우 (변환된 데이터)
   if (weatherData.current) {
     return {
       temperature: weatherData.current.temperature || 29.0,
@@ -126,12 +151,12 @@ export const getOverallWeatherData = (weatherData) => {
       rainfall: weatherData.current.rainfall || 0,
       forecast: weatherData.current.description || 'Partly Cloudy',
       lastUpdate: weatherData.timestamp,
-      stationCount: weatherData.meta?.stations || 0,
+      stationCount: weatherData.meta?.stations || weatherData.stations_used?.length || 0,
       source: 'current_average'
     };
   }
 
-  // 2순위: 지역별 데이터로부터 전체 평균 계산
+  // 3순위: 지역별 데이터로부터 전체 평균 계산
   if (weatherData.locations && Array.isArray(weatherData.locations)) {
     const allTemps = STANDARD_REGIONS
       .map(region => getRegionalTemperature(weatherData, region.id))
@@ -169,7 +194,7 @@ export const getOverallWeatherData = (weatherData) => {
     }
   }
 
-  // 3순위: Fallback 데이터
+  // 4순위: Fallback 데이터
   const fallbackAvg = STANDARD_REGIONS.reduce((sum, region) => sum + region.fallbackTemp, 0) / STANDARD_REGIONS.length;
   
   return {
