@@ -525,3 +525,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 0e13630
 
+## 체크포인트 17 - 2025-08-03 00:35
+- 내용: 모바일 Header 극도로 간결한 버전 구현 - 통합 UI 박스, 압축된 레이아웃, 'SG Weather' 단축 제목
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 89ae2de
+
