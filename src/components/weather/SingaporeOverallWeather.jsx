@@ -16,14 +16,12 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [showRealAI, setShowRealAI] = useState(false);
   const [independentWeatherData, setIndependentWeatherData] = useState(null);
 
-  // 독립적인 실시간 데이터 로딩 (WeatherAlertTicker와 완전히 동일한 방식)
+  // 메인 컨텍스트 데이터만 사용 (독립적 fetch 완전 제거)
   useEffect(() => {
-    const loadIndependentData = async () => {
-      try {
-        console.log('🚀 [SingaporeOverallWeather] 독립적 데이터 로딩 시작...');
-        const response = await fetch('/singapore_weather_cam/data/weather/latest.json?t=' + Date.now());
-        if (response.ok) {
-          const freshData = await response.json();
+    console.log('🚀 [SingaporeOverallWeather] 메인 컨텍스트 데이터 사용 (독립적 fetch 제거)');
+    
+    if (weatherData?.data?.temperature?.readings?.length > 0) {
+      const freshData = weatherData;
           
           // WeatherAlertTicker와 동일한 방식으로 즉시 계산
           let calculatedTemp = null;
@@ -64,18 +62,13 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
               humidity: calculatedHumidity
             }
           });
+        } else {
+          console.log('⚠️ [SingaporeOverallWeather] 메인 컨텍스트 데이터 대기 중...');
         }
-      } catch (error) {
-        console.error('❌ [SingaporeOverallWeather] 독립적 데이터 로딩 실패:', error);
-      }
-    };
-
-    loadIndependentData();
-    
-    // 10초마다 자동 새로고침 (더 빈번한 동기화)
-    const interval = setInterval(loadIndependentData, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    } else {
+      console.log('⚠️ [SingaporeOverallWeather] 메인 컨텍스트에서 날씨 데이터 없음');
+    }
+  }, [weatherData, refreshTrigger]); // 메인 컨텍스트 데이터와 refreshTrigger에 의존
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
