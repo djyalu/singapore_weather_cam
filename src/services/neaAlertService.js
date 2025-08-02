@@ -317,6 +317,30 @@ class NEAAlertService {
 
     console.log('✅ Generated alerts:', alerts.length, alerts.map(a => a.message));
 
+    // 디버깅: alerts가 비어있으면 기본 메시지 추가
+    if (alerts.length === 0) {
+      console.warn('⚠️ No alerts generated, adding fallback message');
+      const totalStations = data.stations_used?.length ||
+                           data.geographic_coverage?.total_stations ||
+                           tempReadings.length || 0;
+
+      const stationTypes = [];
+      if (tempReadings.length > 0) {stationTypes.push(`온도 ${tempReadings.length}개`);}
+      if (data.data?.humidity?.readings?.length > 0) {stationTypes.push(`습도 ${data.data.humidity.readings.length}개`);}
+      if (data.data?.rainfall?.readings?.length > 0) {stationTypes.push(`강수량 ${data.data.rainfall.readings.length}개`);}
+
+      const detailInfo = stationTypes.length > 0 ? ` (${stationTypes.join(', ')})` : '';
+
+      alerts.push({
+        type: 'info',
+        priority: 'low',
+        icon: '📊',
+        message: `현재 ${totalStations}개 관측소에서 정상적으로 데이터 수집 중입니다${detailInfo}.`,
+        timestamp: new Date().toISOString(),
+        source: 'System Status',
+      });
+    }
+
     return alerts;
   }
       let forecastIcon = '🌤️';

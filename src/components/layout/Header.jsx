@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Camera, Clock, CheckCircle } from 'lucide-react';
 import RefreshButton from '../common/RefreshButton';
+import RealtimeClock from '../common/RealtimeClock';
 
 const Header = React.memo(({
   systemStats = {},
@@ -10,7 +11,6 @@ const Header = React.memo(({
   isRefreshing = false,
   lastUpdate,
 }) => {
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   const handleOnline = useCallback(() => {
@@ -22,10 +22,6 @@ const Header = React.memo(({
   }, []);
 
   useEffect(() => {
-    // 시간 업데이트 비활성화 (성능 최적화)
-    // 한 번만 설정하고 자동 업데이트 하지 않음
-    setCurrentTime(new Date());
-
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
@@ -34,14 +30,6 @@ const Header = React.memo(({
       window.removeEventListener('offline', handleOffline);
     };
   }, [handleOnline, handleOffline]);
-
-  const formatTime = useCallback((date) => {
-    try {
-      return date.toLocaleTimeString('ko-KR');
-    } catch (error) {
-      return '--:--:--';
-    }
-  }, []);
 
   return (
     <>
@@ -87,8 +75,8 @@ const Header = React.memo(({
               <div className="text-right">
                 <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
                   <div className="text-xs text-white/70 mb-1 hidden sm:block">Singapore</div>
-                  <div className="text-lg font-bold text-white">
-                    {formatTime(currentTime)}
+                  <div className="text-sm font-bold text-white font-mono">
+                    <RealtimeClock className="text-white text-sm font-bold font-mono" />
                   </div>
                 </div>
               </div>
@@ -114,8 +102,8 @@ const Header = React.memo(({
             <div className="text-xs text-white/70">
               카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • {systemStats.lastUpdate || '로딩 중...'}
             </div>
-            <div className="text-sm text-white font-semibold">
-              {formatTime(currentTime)}
+            <div className="text-sm text-white font-semibold font-mono">
+              <RealtimeClock className="text-white text-sm font-semibold font-mono" />
             </div>
           </div>
         </div>

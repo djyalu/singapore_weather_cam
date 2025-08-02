@@ -4,7 +4,6 @@ import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
-import RealtimeClock from '../common/RealtimeClock';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -1009,9 +1008,6 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <h2 className="text-lg font-bold">Singapore Weather</h2>
               <p className="text-blue-100 text-xs">
                 {weatherData?.source?.includes('Real-time') ? '🔴 실시간 NEA API' : '📊 최신 수집'} • {overallData.stationCount}개 관측소
-              </p>
-              <p>
-                <RealtimeClock />
               </p>
             </div>
           </div>
