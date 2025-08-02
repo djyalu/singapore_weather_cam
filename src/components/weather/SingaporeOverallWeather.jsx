@@ -415,9 +415,9 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       }
     }
 
-    // 전국 온도 데이터 분석 섹션 추가 (NEA 5개 주요 센서 + 추정 지역 분포) - 항상 생성
+    // 전국 온도 데이터 분석 섹션 추가 - 실제 데이터가 있을 때만 생성
     let temperatureSection = '';
-    // 조건문 제거 - 항상 섹션 생성 (폴백 데이터 보장됨)
+    if (temperatureReadings.length > 0) {
       const tempReadings = temperatureReadings;
       const maxTemp = Math.max(...tempReadings.map(r => r.value));
       const minTemp = Math.min(...tempReadings.map(r => r.value));
@@ -477,10 +477,17 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       } else {
         temperatureSection += `\n• ✅ 전국 온도 균등 분포 (${tempRange.toFixed(1)}°C 차이)`;
       }
+    } else {
+      // 온도 데이터가 없으면 간단한 메시지
+      temperatureSection = `
 
-    // 전국 습도 데이터 분석 섹션 추가 (NEA 5개 주요 센서 + 추정 지역 분포) - 항상 생성
+🌡️ **실시간 온도 정보**
+• 온도 데이터 로딩 중입니다. 잠시 후 업데이트됩니다.`;
+    }
+
+    // 전국 습도 데이터 분석 섹션 추가 - 실제 데이터가 있을 때만 생성
     let humiditySection = '';
-    // 조건문 제거 - 항상 섹션 생성 (폴백 데이터 보장됨)
+    if (humidityReadings.length > 0) {
       const humReadings = humidityReadings;
       const maxHum = Math.max(...humReadings.map(r => r.value));
       const minHum = Math.min(...humReadings.map(r => r.value));
@@ -540,6 +547,13 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       } else {
         humiditySection += `\n• ✅ 전국 습도 균등 분포 (${humRange.toFixed(0)}% 차이)`;
       }
+    } else {
+      // 습도 데이터가 없으면 간단한 메시지
+      humiditySection = `
+
+💧 **실시간 습도 정보**
+• 습도 데이터 로딩 중입니다. 잠시 후 업데이트됩니다.`;
+    }
 
     const analysisText = `🌟 **실시간 고급 AI 날씨 분석**
 

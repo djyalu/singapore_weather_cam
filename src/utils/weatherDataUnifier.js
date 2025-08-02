@@ -65,7 +65,6 @@ export const STANDARD_REGIONS = [
     displayName: 'East',
     stationIds: ['S107', 'S43'], // East Coast & Kim Chuan
     coordinates: { lat: 1.3048, lng: 103.9318 },
-    fallbackTemp: 28.9,
     emoji: '🏖️',
     description: 'East Coast Parkway 및 동부 지역',
   },
@@ -75,7 +74,6 @@ export const STANDARD_REGIONS = [
     displayName: 'South',
     stationIds: ['S60', 'S104'], // Sentosa & Jurong (남서부)
     coordinates: { lat: 1.2700, lng: 103.8200 },
-    fallbackTemp: 29.2,
     description: 'Sentosa 및 남서부 지역',
     emoji: '🏝️',
   },

@@ -318,11 +318,27 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
   [isPaused, isBackgroundTab, displayAlerts.length],
   );
 
-  // 동적 애니메이션 지속 시간 계산
-  const animationDuration = useMemo(() =>
-    Math.max(12, displayAlerts.length * 3),
-  [displayAlerts.length],
-  );
+  // 동적 애니메이션 지속 시간 계산 - 메시지 길이 기반
+  const animationDuration = useMemo(() => {
+    if (displayAlerts.length === 0) return 12;
+    
+    // 각 메시지의 길이를 고려한 지속 시간 계산
+    const totalTextLength = displayAlerts.reduce((sum, alert) => sum + alert.message.length, 0);
+    const averageTextLength = totalTextLength / displayAlerts.length;
+    
+    // 기본 12초 + 메시지 길이에 따른 추가 시간
+    // 평균 메시지 길이가 50자일 때 약 3초 추가, 100자일 때 6초 추가
+    const lengthBasedDuration = Math.ceil(averageTextLength / 20);
+    const totalDuration = Math.max(15, 12 + lengthBasedDuration + displayAlerts.length * 2);
+    
+    console.log('🎬 Animation duration calculated:', {
+      alertCount: displayAlerts.length,
+      averageLength: Math.round(averageTextLength),
+      duration: totalDuration
+    });
+    
+    return totalDuration;
+  }, [displayAlerts]);
 
   return (
     <div className={`bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-b border-gray-200/50 ${className}`}>
