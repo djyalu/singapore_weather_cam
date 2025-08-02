@@ -11,7 +11,6 @@ export const STANDARD_REGIONS = [
     displayName: 'Hwa Chong',
     stationIds: ['S109', 'S104'], // Ang Mo Kio & Woodlands
     coordinates: { lat: 1.3437, lng: 103.7640 },
-    fallbackTemp: 29.5,
     emoji: '🏫',
     description: 'Hwa Chong International School 지역',
   },
@@ -21,7 +20,6 @@ export const STANDARD_REGIONS = [
     displayName: 'Newton',
     stationIds: ['S109', 'S107'], // Newton & East Coast
     coordinates: { lat: 1.3100, lng: 103.8300 },
-    fallbackTemp: 30.2,
     emoji: '🏙️',
     description: 'Newton MRT 및 Central 지역',
   },
@@ -31,7 +29,6 @@ export const STANDARD_REGIONS = [
     displayName: 'Changi',
     stationIds: ['S24', 'S107'], // Changi & East Coast
     coordinates: { lat: 1.3600, lng: 103.9600 },
-    fallbackTemp: 28.8,
     emoji: '✈️',
     description: 'Changi Airport 및 동부 지역',
   },
@@ -41,7 +38,6 @@ export const STANDARD_REGIONS = [
     displayName: 'North',
     stationIds: ['S24', 'S115'], // 북부 지역
     coordinates: { lat: 1.4200, lng: 103.7900 },
-    fallbackTemp: 30.1,
     emoji: '🌳',
     description: '북부 주거 및 산업 지역',
   },
@@ -51,7 +47,6 @@ export const STANDARD_REGIONS = [
     displayName: 'Jurong',
     stationIds: ['S104', 'S60'], // Jurong West & Sentosa
     coordinates: { lat: 1.3496, lng: 103.7063 },
-    fallbackTemp: 29.8,
     emoji: '🏭',
     description: 'Jurong 산업단지 및 서부 지역',
   },
@@ -61,7 +56,6 @@ export const STANDARD_REGIONS = [
     displayName: 'Central',
     stationIds: ['S109', 'S106'], // Newton & Tai Seng
     coordinates: { lat: 1.3048, lng: 103.8318 },
-    fallbackTemp: 30.5,
     emoji: '🌆',
     description: 'Central 중부 도심 지역',
   },
@@ -148,13 +142,13 @@ export const getRegionalTemperature = (weatherData, regionId) => {
 export const getOverallWeatherData = (weatherData) => {
   if (!weatherData) {
     return {
-      temperature: 29.0,
-      humidity: 80,
-      rainfall: 0,
-      forecast: 'Partly Cloudy',
+      temperature: null,
+      humidity: null,
+      rainfall: null,
+      forecast: null,
       lastUpdate: new Date().toISOString(),
       stationCount: 0,
-      source: 'fallback',
+      source: 'no_data',
     };
   }
 
@@ -177,21 +171,32 @@ export const getOverallWeatherData = (weatherData) => {
 
     const avgTemp = temps.length > 0
       ? temps.reduce((sum, temp) => sum + temp, 0) / temps.length
-      : 29.0;
+      : null;
 
-    const minTemp = temps.length > 0 ? Math.min(...temps) : 29.0;
-    const maxTemp = temps.length > 0 ? Math.max(...temps) : 29.0;
+    const minTemp = temps.length > 0 ? Math.min(...temps) : null;
+    const maxTemp = temps.length > 0 ? Math.max(...temps) : null;
+
+    // 습도 데이터 실시간 계산 (온도와 동일한 방식)
+    const humidityReadings = weatherData.data.humidity?.readings || [];
+    const humidities = humidityReadings
+      .map(reading => reading.value)
+      .filter(humidity => typeof humidity === 'number' && !isNaN(humidity));
+
+    const avgHumidity = humidities.length > 0
+      ? humidities.reduce((sum, humidity) => sum + humidity, 0) / humidities.length
+      : weatherData.data.humidity?.average;
 
     console.log(`📊 NEA API 실시간 온도 계산: readings=${stationCount}, stations_used=${weatherData.stations_used?.length}, total=${weatherData.geographic_coverage?.total_stations}`);
-    console.log(`🌡️ 온도 통계: 평균=${avgTemp.toFixed(1)}°C, 최저=${minTemp.toFixed(1)}°C, 최고=${maxTemp.toFixed(1)}°C`);
+    console.log(`🌡️ 온도 통계: 평균=${avgTemp?.toFixed(1) || 'null'}°C, 최저=${minTemp?.toFixed(1) || 'null'}°C, 최고=${maxTemp?.toFixed(1) || 'null'}°C`);
+    console.log(`💧 습도 통계: 평균=${avgHumidity?.toFixed(1) || 'null'}%, readings=${humidities.length}개, data.average=${weatherData.data.humidity?.average}`);
 
     return {
       temperature: avgTemp,
       minTemperature: minTemp,
       maxTemperature: maxTemp,
-      humidity: weatherData.data.humidity?.average || 80,
-      rainfall: weatherData.data.rainfall?.total || 0,
-      forecast: weatherData.data.forecast?.general?.forecast || 'Partly Cloudy',
+      humidity: avgHumidity,
+      rainfall: weatherData.data.rainfall?.total,
+      forecast: weatherData.data.forecast?.general?.forecast,
       lastUpdate: weatherData.timestamp,
       stationCount: totalStations,
       source: 'nea_api_direct',
@@ -201,10 +206,10 @@ export const getOverallWeatherData = (weatherData) => {
   // 2순위: 전체 평균 데이터가 있는 경우 (변환된 데이터)
   if (weatherData.current) {
     return {
-      temperature: weatherData.current.temperature || 29.0,
-      humidity: weatherData.current.humidity || 80,
-      rainfall: weatherData.current.rainfall || 0,
-      forecast: weatherData.current.description || 'Partly Cloudy',
+      temperature: weatherData.current.temperature,
+      humidity: weatherData.current.humidity,
+      rainfall: weatherData.current.rainfall,
+      forecast: weatherData.current.description,
       lastUpdate: weatherData.timestamp,
       stationCount: weatherData.meta?.stations || weatherData.stations_used?.length || 0,
       source: 'current_average',
@@ -226,14 +231,14 @@ export const getOverallWeatherData = (weatherData) => {
         .filter(h => typeof h === 'number' && !isNaN(h));
       const avgHumidity = allHumidity.length > 0
         ? allHumidity.reduce((sum, h) => sum + h, 0) / allHumidity.length
-        : 80;
+        : null;
 
       const allRainfall = weatherData.locations
         .map(loc => loc.rainfall)
         .filter(r => typeof r === 'number' && !isNaN(r));
       const avgRainfall = allRainfall.length > 0
         ? allRainfall.reduce((sum, r) => sum + r, 0) / allRainfall.length
-        : 0;
+        : null;
 
       console.log(`📊 전체 평균: ${avgTemp.toFixed(1)}°C (${allTemps.length}개 지역 기준)`);
 
@@ -241,7 +246,7 @@ export const getOverallWeatherData = (weatherData) => {
         temperature: avgTemp,
         humidity: avgHumidity,
         rainfall: avgRainfall,
-        forecast: 'Partly Cloudy',
+        forecast: null,
         lastUpdate: weatherData.timestamp,
         stationCount: weatherData.locations.length,
         source: 'regional_average',
@@ -249,17 +254,15 @@ export const getOverallWeatherData = (weatherData) => {
     }
   }
 
-  // 4순위: Fallback 데이터
-  const fallbackAvg = STANDARD_REGIONS.reduce((sum, region) => sum + region.fallbackTemp, 0) / STANDARD_REGIONS.length;
-
+  // 4순위: 데이터 없음 - 실제 데이터가 없으면 null 반환
   return {
-    temperature: fallbackAvg,
-    humidity: 80,
-    rainfall: 0,
-    forecast: 'Partly Cloudy',
+    temperature: null,
+    humidity: null,
+    rainfall: null,
+    forecast: null,
     lastUpdate: new Date().toISOString(),
     stationCount: 0,
-    source: 'fallback_average',
+    source: 'no_data_available',
   };
 };
 

@@ -291,35 +291,26 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     const humidity = data.humidity;
     const rainfall = data.rainfall;
     
-    // 온도 및 습도 세부 데이터 준비 - 실제 데이터 우선, 폴백 데이터 사용
+    // 온도 및 습도 세부 데이터 준비 - 실제 데이터만 사용, 하드코딩 제거
     let temperatureReadings = [];
     let humidityReadings = [];
     
-    // 실제 데이터 시도
+    // 실시간 온도 데이터 사용 - 폴백 없이 실제 데이터만
     if (rawWeatherData?.data?.temperature?.readings && Array.isArray(rawWeatherData.data.temperature.readings) && rawWeatherData.data.temperature.readings.length > 0) {
       temperatureReadings = rawWeatherData.data.temperature.readings;
-      } else {
-      // 폴백 데이터 (최신 데이터 기반)
-      temperatureReadings = [
-        { station: "S109", value: 34.8 },
-        { station: "S107", value: 31.6 },
-        { station: "S115", value: 31.7 },
-        { station: "S24", value: 33 },
-        { station: "S104", value: 33.6 }
-      ];
+      console.log(`🌡️ 실시간 온도 데이터 사용: ${temperatureReadings.length}개 관측소`);
+    } else {
+      // 데이터가 없으면 빈 배열로 처리 (하드코딩 제거)
+      console.warn('⚠️ 온도 데이터 없음 - 실시간 데이터 로드 중일 가능성');
     }
     
+    // 실시간 습도 데이터 사용 - 폴백 없이 실제 데이터만
     if (rawWeatherData?.data?.humidity?.readings && Array.isArray(rawWeatherData.data.humidity.readings) && rawWeatherData.data.humidity.readings.length > 0) {
       humidityReadings = rawWeatherData.data.humidity.readings;
+      console.log(`💧 실시간 습도 데이터 사용: ${humidityReadings.length}개 관측소`);
     } else {
-      // 폴백 데이터 (최신 데이터 기반)
-      humidityReadings = [
-        { station: "S109", value: 41.2 },
-        { station: "S107", value: 52.3 },
-        { station: "S115", value: 60.6 },
-        { station: "S24", value: 51.1 },
-        { station: "S104", value: 47.9 }
-      ];
+      // 데이터가 없으면 빈 배열로 처리 (하드코딩 제거)
+      console.warn('⚠️ 습도 데이터 없음 - 실시간 데이터 로드 중일 가능성');
     }
     
 
