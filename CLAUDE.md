@@ -565,3 +565,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 568c8f4
 
+## 체크포인트 22 - 2025-08-03 01:08
+- 내용: 티커 애니메이션 정밀 조정 시스템 구현 - 한글/영문 픽셀 계산 기반 스마트 Duration
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: e07be8c
+
