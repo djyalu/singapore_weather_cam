@@ -92,6 +92,12 @@ const RegionalWeatherDashboard = React.memo(({
         // weatherDataUnifier의 getRegionalTemperature 사용
         const regionalTemp = getRegionalTemperature(weatherData, region.id);
         
+        // 실제 온도 데이터가 없으면 건너뛰기 (null 체크 추가)
+        if (regionalTemp === null || typeof regionalTemp !== 'number' || isNaN(regionalTemp)) {
+          console.log(`⚠️ ${region.displayName}: 실제 온도 데이터 없음, 카드 생성 건너뛰기`);
+          return; // forEach에서 continue와 같은 역할
+        }
+        
         // 습도는 전체 평균 사용 (지역별 습도 데이터가 없으므로)
         const avgHumidity = weatherData.data?.humidity?.average || 
           (weatherData.data?.humidity?.readings?.length > 0 
