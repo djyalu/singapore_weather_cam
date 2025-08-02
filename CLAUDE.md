@@ -489,3 +489,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 151425ac
 
+## 체크포인트 11 - 2025-08-02 23:38
+- 내용: Header 시계 디자인 완성 - 12시간 오전/오후 형식으로 변경 및 Header 폰트 스타일과 통일
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 6b200557
+
