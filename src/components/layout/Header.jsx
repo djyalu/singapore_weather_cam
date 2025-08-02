@@ -58,7 +58,7 @@ const Header = React.memo(({
                 <div className="bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 p-3 sm:p-4 rounded-2xl shadow-xl">
                   <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-md" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse shadow-md">
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white shadow-md">
                 </div>
               </div>
               <div>
@@ -67,7 +67,7 @@ const Header = React.memo(({
                 </h1>
                 <div className="flex items-center mt-2 space-x-3">
                   <span className="bg-white/10 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium flex items-center space-x-1.5 border border-white/20">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                     <span>LIVE</span>
                   </span>
                   <span className="text-xs text-white/80 font-medium">실시간 날씨 · HD 카메라</span>

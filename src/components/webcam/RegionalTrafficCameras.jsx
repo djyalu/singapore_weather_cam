@@ -71,14 +71,14 @@ const RegionalCameraCard = React.memo(({ camera, region, onImageClick }) => {
       <div className="relative h-32 sm:h-48 bg-gray-100">
         {imageLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <div className="rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500 animate-spin"></div>
           </div>
         )}
         
         <img
           src={currentImageUrl}
           alt={`${region.name} 교통 카메라`}
-          className={`w-full h-full object-cover cursor-pointer transition-opacity duration-300 ${
+          className={`w-full h-full object-cover cursor-pointer ${
             imageLoading ? 'opacity-0' : 'opacity-100'
           }`}
           onLoad={handleImageLoad}
@@ -283,9 +283,9 @@ const RegionalTrafficCameras = React.memo(({ selectedRegions, onCameraClick }) =
   useEffect(() => {
     fetchCameras();
     
-    // 5분마다 자동 새로고침 시도
-    const interval = setInterval(() => fetchCameras(false), 5 * 60 * 1000);
-    return () => clearInterval(interval);
+    // 자동 새로고침 비활성화 - 수동 새로고침만 허용
+    // const interval = setInterval(() => fetchCameras(false), 5 * 60 * 1000);
+    // return () => clearInterval(interval);
   }, []);
 
   // 폴백 카메라 데이터 생성 - 현재 시간으로 최신화

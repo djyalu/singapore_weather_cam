@@ -288,12 +288,18 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         return;
       }
       
-      // 기존 날씨 레이어 제거
+      // 기존 날씨 레이어 제거 - 부드럽게 처리
       try {
+        const layersToRemove = [];
         leafletMapRef.current.eachLayer(layer => {
           if (layer.options && (layer.options.className === 'weather-layer' || layer.options.className === 'weather-icon')) {
-            leafletMapRef.current.removeLayer(layer);
+            layersToRemove.push(layer);
           }
+        });
+        
+        // 한 번에 제거하여 깜빡임 최소화
+        layersToRemove.forEach(layer => {
+          leafletMapRef.current.removeLayer(layer);
         });
       } catch (error) {
         console.error('기존 레이어 제거 실패:', error);
