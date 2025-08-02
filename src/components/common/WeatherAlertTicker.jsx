@@ -318,26 +318,57 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
   [isPaused, isBackgroundTab, displayAlerts.length],
   );
 
-  // 동적 애니메이션 지속 시간 계산 - 메시지 길이 기반
+  // 동적 애니메이션 지속 시간 계산 - 정확한 메시지 길이 기반
   const animationDuration = useMemo(() => {
-    if (displayAlerts.length === 0) return 12;
+    if (displayAlerts.length === 0) return 15;
     
-    // 각 메시지의 길이를 고려한 지속 시간 계산
-    const totalTextLength = displayAlerts.reduce((sum, alert) => sum + alert.message.length, 0);
-    const averageTextLength = totalTextLength / displayAlerts.length;
+    // 각 메시지의 실제 픽셀 너비 추정 (한글 및 영문 고려)
+    const estimateTextWidth = (text) => {
+      // 한글: 약 16px, 영문/숫자: 약 9px, 특수문자/아이콘: 약 14px
+      let width = 0;
+      for (const char of text) {
+        if (/[가-힣]/.test(char)) {
+          width += 16; // 한글
+        } else if (/[a-zA-Z0-9]/.test(char)) {
+          width += 9; // 영문/숫자
+        } else {
+          width += 14; // 특수문자/아이콘/공백
+        }
+      }
+      return width;
+    };
     
-    // 기본 12초 + 메시지 길이에 따른 추가 시간
-    // 평균 메시지 길이가 50자일 때 약 3초 추가, 100자일 때 6초 추가
-    const lengthBasedDuration = Math.ceil(averageTextLength / 20);
-    const totalDuration = Math.max(15, 12 + lengthBasedDuration + displayAlerts.length * 2);
+    // 전체 티커 콘텐츠 너비 계산 (아이콘 + 텍스트 + 간격 포함)
+    const totalWidth = displayAlerts.reduce((sum, alert) => {
+      const textWidth = estimateTextWidth(alert.message);
+      const iconWidth = 60; // 아이콘 + 패딩
+      const spacing = 32; // 메시지 간 간격 (mr-8)
+      return sum + iconWidth + textWidth + spacing;
+    }, 0);
     
-    console.log('🎬 Animation duration calculated:', {
+    // 화면 너비 추정 (대부분의 경우 1200px 이하)
+    const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    
+    // 애니메이션 속도: 약 150px/초 (적당한 읽기 속도)
+    const animationSpeed = 150;
+    
+    // 완전한 스크롤을 위해 전체 콘텐츠 + 화면 너비만큼 이동해야 함
+    const totalDistance = totalWidth + screenWidth;
+    const calculatedDuration = Math.ceil(totalDistance / animationSpeed);
+    
+    // 최소 15초, 최대 60초로 제한
+    const finalDuration = Math.max(15, Math.min(60, calculatedDuration));
+    
+    console.log('🎬 Enhanced animation duration calculated:', {
       alertCount: displayAlerts.length,
-      averageLength: Math.round(averageTextLength),
-      duration: totalDuration
+      totalWidth: Math.round(totalWidth),
+      screenWidth,
+      totalDistance: Math.round(totalDistance),
+      calculatedDuration,
+      finalDuration
     });
     
-    return totalDuration;
+    return finalDuration;
   }, [displayAlerts]);
 
   return (
