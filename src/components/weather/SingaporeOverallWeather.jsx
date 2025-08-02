@@ -159,7 +159,8 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       // 로컬 심화 데이터 분석 수행 중
 
       const overallData = getUnifiedWeatherData(weatherData);
-      const analysisResult = generateAdvancedAnalysis(overallData, weatherData);
+      const rainfallAnalysis = analyzeRealTimeRainfall(weatherData);
+      const analysisResult = generateAdvancedAIAnalysis(overallData, rainfallAnalysis, weatherData);
 
       setCohereAnalysis(analysisResult);
       setShowRealAI(true);
@@ -168,19 +169,14 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     } catch (error) {
       console.error('🚨 분석 실패:', error);
 
-      // 최종 백업: 기본 분석
+      // 최종 백업: 상세 분석
       const overallData = getUnifiedWeatherData(weatherData);
-      const fallbackResult = {
-        analysis: '현재 데이터를 기반으로 한 기본 분석입니다.\n\n' +
-                 `온도: ${overallData.temperature.toFixed(1)}°C (${overallData.temperature >= 30 ? '더운 날씨' : '쾌적한 날씨'})\n` +
-                 `습도: ${Math.round(overallData.humidity)}% (${overallData.humidity >= 80 ? '높음' : '보통'})\n` +
-                 `강수량: ${overallData.rainfall.toFixed(1)}mm\n\n` +
-                 `💡 추천: ${overallData.temperature >= 32 ? '야외활동 시 충분한 수분 섭취' : '야외활동하기 좋은 날씨'}`,
-        confidence: 0.75,
-        model: '데이터 기반 분석',
-        timestamp: new Date().toISOString(),
-        isRealAnalysis: false,
-      };
+      const rainfallAnalysis = analyzeRealTimeRainfall(weatherData);
+      const fallbackResult = generateAdvancedAIAnalysis(overallData, rainfallAnalysis, weatherData);
+      
+      // 백업 분석임을 표시
+      fallbackResult.model = '백업 상세 분석 엔진';
+      fallbackResult.confidence = 0.85;
 
       setCohereAnalysis(fallbackResult);
       setShowRealAI(true);
