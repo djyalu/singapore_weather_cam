@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { AlertTriangle, Info, X, RefreshCw } from 'lucide-react';
 import neaAlertService from '../../services/neaAlertService';
@@ -13,8 +13,19 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [isBackgroundTab, setIsBackgroundTab] = useState(false);
   const intervalRef = useRef(null);
   const tickerRef = useRef(null);
+
+  // 배터리 절약을 위한 백그라운드 탭 감지
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsBackgroundTab(document.hidden);
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   // 경보 데이터 로드
   const loadAlerts = async () => {
@@ -58,9 +69,9 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     };
   }, [refreshInterval]);
 
-  // 경보 우선순위에 따른 스타일 결정 - 배경과 조화되도록 수정
+  // 경보 우선순위에 따른 스타일 결정 - 모바일 최적화 포함
   const getAlertStyle = (alert) => {
-    const baseClasses = "flex items-center gap-3 px-4 py-2 whitespace-nowrap";
+    const baseClasses = "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 whitespace-nowrap text-sm sm:text-base";
     
     switch (alert.priority) {
       case 'critical':
@@ -78,12 +89,12 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     }
   };
 
-  // 경보 아이콘 결정
+  // 경보 아이콘 결정 - 모바일 최적화
   const getAlertIcon = (alert) => {
     if (alert.type === 'critical' || alert.type === 'warning') {
-      return <AlertTriangle className="w-4 h-4 animate-pulse text-red-600" />;
+      return <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse text-red-600 flex-shrink-0" />;
     }
-    return <Info className="w-4 h-4 text-blue-600" />;
+    return <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />;
   };
 
   // 티커 숨기기/보이기
@@ -107,9 +118,24 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
   }
 
   // 높은 우선순위 경보만 표시 (최대 5개)
-  const displayAlerts = alerts
-    .filter(alert => alert.priority !== 'low' || alerts.length === 1)
-    .slice(0, 5);
+  const displayAlerts = useMemo(() => 
+    alerts
+      .filter(alert => alert.priority !== 'low' || alerts.length === 1)
+      .slice(0, 5), 
+    [alerts]
+  );
+
+  // 애니메이션 활성화 조건 (배터리 절약)
+  const shouldAnimate = useMemo(() => 
+    !isPaused && !isBackgroundTab && displayAlerts.length > 0,
+    [isPaused, isBackgroundTab, displayAlerts.length]
+  );
+
+  // 동적 애니메이션 지속 시간 계산
+  const animationDuration = useMemo(() => 
+    Math.max(12, displayAlerts.length * 3), 
+    [displayAlerts.length]
+  );
 
   return (
     <div className={`bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-b border-gray-200/50 ${className}`}>
@@ -118,67 +144,74 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
         
         {/* 티커 헤더 */}
         <div className="flex items-center justify-between px-4 py-2 bg-white/10 border-b border-gray-300/20">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1 sm:gap-2">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-gray-800 font-semibold text-sm">🚨 기상 경보</span>
+              <span className="text-gray-800 font-semibold text-xs sm:text-sm">🚨 기상 경보</span>
             </div>
-            <span className="text-gray-600 text-xs">
+            <span className="text-gray-600 text-xs hidden sm:block">
               {loading ? 'Loading...' : `${displayAlerts.length}건 • NEA Singapore`}
+            </span>
+            <span className="text-gray-600 text-xs sm:hidden">
+              {loading ? '...' : `${displayAlerts.length}건`}
             </span>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="text-gray-600 hover:text-gray-800 transition-colors p-1 rounded"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-md hover:bg-white/20 active:scale-95"
               title="새로고침"
+              aria-label="날씨 경보 새로고침"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={togglePause}
-              className="text-gray-600 hover:text-gray-800 transition-colors px-2 py-1 text-xs rounded bg-white/20"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] px-3 py-2 text-xs sm:text-sm rounded-md bg-white/20 hover:bg-white/30 active:scale-95"
               title={isPaused ? "재생" : "일시정지"}
+              aria-label={isPaused ? "티커 재생" : "티커 일시정지"}
             >
-              {isPaused ? '▶️' : '⏸️'}
+              <span className="text-sm">{isPaused ? '▶️' : '⏸️'}</span>
             </button>
             <button
               onClick={toggleVisibility}
-              className="text-gray-600 hover:text-gray-800 transition-colors p-1 rounded"
+              className="text-gray-600 hover:text-gray-800 transition-colors touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-md hover:bg-white/20 active:scale-95"
               title="닫기"
+              aria-label="기상 경보 티커 닫기"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
-        {/* 스크롤 티커 영역 */}
-        <div className="relative h-12 overflow-hidden">
+        {/* 스크롤 티커 영역 - 모바일 최적화 */}
+        <div className="relative h-10 sm:h-12 overflow-hidden touch-manipulation">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex items-center gap-2 text-gray-700">
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span className="text-sm">기상 정보 업데이트 중...</span>
+                <span className="text-xs sm:text-sm">기상 정보 업데이트 중...</span>
               </div>
             </div>
           ) : (
             <div 
               ref={tickerRef}
-              className={`flex items-center h-full ${isPaused ? '' : 'animate-scroll-left'}`}
+              className={`flex items-center h-full will-change-transform ${shouldAnimate ? 'animate-scroll-left' : ''}`}
               style={{
-                animationDuration: `${Math.max(15, displayAlerts.length * 4)}s`, // 2배 속도로 변경
-                animationPlayState: isPaused ? 'paused' : 'running'
+                animationDuration: `${animationDuration}s`,
+                animationPlayState: shouldAnimate ? 'running' : 'paused',
+                transform: shouldAnimate ? 'translateZ(0)' : 'none' // GPU 레이어 활성화
               }}
             >
               {/* 원본 메시지들 */}
               {displayAlerts.map((alert, index) => (
-                <div key={`${alert.timestamp}-${index}`} className={`${getAlertStyle(alert)} mr-8`}>
-                  <span className="text-lg">{alert.icon}</span>
+                <div key={`${alert.timestamp}-${index}`} className={`${getAlertStyle(alert)} mr-6 sm:mr-8`}>
+                  <span className="text-sm sm:text-lg flex-shrink-0">{alert.icon}</span>
                   {getAlertIcon(alert)}
-                  <span className="font-medium">{alert.message}</span>
-                  <span className="text-xs opacity-70 ml-2">
+                  <span className="font-medium min-w-0 flex-1">{alert.message}</span>
+                  <span className="text-xs opacity-70 ml-1 sm:ml-2 flex-shrink-0 hidden sm:inline">
                     {new Date(alert.timestamp).toLocaleTimeString('ko-KR', {
                       hour: '2-digit',
                       minute: '2-digit'
@@ -189,11 +222,11 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               
               {/* 무한 스크롤을 위한 복제 - 간격 추가 */}
               {displayAlerts.map((alert, index) => (
-                <div key={`duplicate-${alert.timestamp}-${index}`} className={`${getAlertStyle(alert)} mr-8`}>
-                  <span className="text-lg">{alert.icon}</span>
+                <div key={`duplicate-${alert.timestamp}-${index}`} className={`${getAlertStyle(alert)} mr-6 sm:mr-8`}>
+                  <span className="text-sm sm:text-lg flex-shrink-0">{alert.icon}</span>
                   {getAlertIcon(alert)}
-                  <span className="font-medium">{alert.message}</span>
-                  <span className="text-xs opacity-70 ml-2">
+                  <span className="font-medium min-w-0 flex-1">{alert.message}</span>
+                  <span className="text-xs opacity-70 ml-1 sm:ml-2 flex-shrink-0 hidden sm:inline">
                     {new Date(alert.timestamp).toLocaleTimeString('ko-KR', {
                       hour: '2-digit',
                       minute: '2-digit'

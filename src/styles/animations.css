@@ -363,7 +363,7 @@
 .loading-dots > span:nth-child(2) { animation-delay: -0.16s; }
 .loading-dots > span:nth-child(3) { animation-delay: 0s; }
 
-/* 티커 스크롤 애니메이션 - 모바일 최적화 */
+/* 티커 스크롤 애니메이션 - 모바일 최적화 및 성능 개선 */
 @keyframes scroll-left {
   0% {
     transform: translate3d(100%, 0, 0);
@@ -376,6 +376,33 @@
 .animate-scroll-left {
   animation: scroll-left linear infinite;
   will-change: transform;
+  transform: translateZ(0); /* GPU 레이어 강제 활성화 */
+  backface-visibility: hidden; /* iOS Safari 최적화 */
+  perspective: 1000px; /* 3D 렌더링 성능 향상 */
+}
+
+/* 모바일 터치 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .animate-scroll-left {
+    animation-timing-function: ease-out; /* 모바일에서 부드러운 애니메이션 */
+  }
+}
+
+/* 배터리 절약 모드 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-left {
+    animation: none !important;
+    transform: translateX(0) !important;
+  }
+}
+
+/* iOS Safari 특별 최적화 */
+@supports (-webkit-touch-callout: none) {
+  .animate-scroll-left {
+    -webkit-transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+  }
 }
 
 /* 티커 페이드 효과 */
