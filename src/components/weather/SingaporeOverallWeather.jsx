@@ -30,10 +30,58 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
 
         // Data source analysis completed
 
+        // 강제로 최신 데이터 직접 계산 (WeatherAlertTicker와 동일한 방식)
+        let forceCalculatedTemp = null;
+        let forceCalculatedHumidity = null;
+        
+        if (weatherData?.data?.temperature?.readings?.length > 0) {
+          const tempReadings = weatherData.data.temperature.readings;
+          const calculatedAvgTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+          const preCalculatedAvgTemp = weatherData.data.temperature.average;
+          
+          forceCalculatedTemp = (preCalculatedAvgTemp !== undefined && preCalculatedAvgTemp !== null)
+            ? preCalculatedAvgTemp
+            : calculatedAvgTemp;
+            
+          console.log('🔥 [SingaporeOverallWeather] 강제 온도 계산:', {
+            readings: tempReadings.map(r => `${r.station}: ${r.value}°C`),
+            calculatedAvgTemp: calculatedAvgTemp.toFixed(2),
+            preCalculatedAvgTemp,
+            finalTemp: forceCalculatedTemp.toFixed(2)
+          });
+        }
+        
+        if (weatherData?.data?.humidity?.readings?.length > 0) {
+          const humidityReadings = weatherData.data.humidity.readings;
+          const calculatedAvgHumidity = humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length;
+          const preCalculatedAvgHumidity = weatherData.data.humidity.average;
+          
+          forceCalculatedHumidity = (preCalculatedAvgHumidity !== undefined && preCalculatedAvgHumidity !== null)
+            ? preCalculatedAvgHumidity
+            : calculatedAvgHumidity;
+            
+          console.log('💧 [SingaporeOverallWeather] 강제 습도 계산:', {
+            calculatedAvgHumidity: calculatedAvgHumidity.toFixed(2),
+            preCalculatedAvgHumidity,
+            finalHumidity: forceCalculatedHumidity.toFixed(2)
+          });
+        }
+
         const overallData = getUnifiedWeatherData(weatherData);
-        console.log('📊 [SingaporeOverallWeather] 통합 데이터 결과:', {
-          temperature: overallData.temperature?.toFixed(2),
-          humidity: overallData.humidity?.toFixed(2),
+        
+        // 강제 계산된 값으로 덮어쓰기
+        if (forceCalculatedTemp !== null) {
+          overallData.temperature = forceCalculatedTemp;
+        }
+        if (forceCalculatedHumidity !== null) {
+          overallData.humidity = forceCalculatedHumidity;
+        }
+        
+        console.log('📊 [SingaporeOverallWeather] 최종 데이터:', {
+          originalTemp: getUnifiedWeatherData(weatherData).temperature?.toFixed(2),
+          forcedTemp: overallData.temperature?.toFixed(2),
+          originalHumidity: getUnifiedWeatherData(weatherData).humidity?.toFixed(2),
+          forcedHumidity: overallData.humidity?.toFixed(2),
           source: overallData.source,
           stationCount: overallData.stationCount
         });
