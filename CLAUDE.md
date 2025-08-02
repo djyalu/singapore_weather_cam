@@ -589,13 +589,20 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 9411ddc
 
-## 체크포인트 15 - 2025-08-03 10:30
+## 체크포인트 26 - 2025-08-03 10:30
 - 내용: 모든 폴백/하드코딩 데이터 완전 제거 완료 - RegionalWeatherDashboard와 weatherDataUnifier에서 하드코딩된 온도값 제거하여 실시간 NEA API 데이터만 사용
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: 01eb747
-## 체크포인트 16 - 2025-08-03 10:39
+
+## 체크포인트 27 - 2025-08-03 10:39
 - 내용: 모든 하드코딩/폴백 데이터 완전 제거 완료 및 AI 분석 디버깅 로그 추가 - SimpleMapView.jsx와 weatherDataUnifier.js에서 29.0°C 하드코딩 제거, AI 분석 데이터 추적을 위한 상세 로그 추가
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: c125a3f
+
+## 체크포인트 28 - 2025-08-03 11:14
+- 내용: 티커 온도 데이터 불일치 해결 완료 - WeatherAlertTicker가 원본 NEA 데이터 직접 사용하여 32.9°C 정확 표시, Single Source of Truth 구현
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 665d596
