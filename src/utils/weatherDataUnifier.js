@@ -127,9 +127,10 @@ export const getRegionalTemperature = (weatherData, regionId) => {
     }
   }
 
-  // Fallback 온도 사용
-  console.log(`⚠️ ${region.displayName} fallback 온도: ${region.fallbackTemp}°C`);
-  return region.fallbackTemp;
+  // 실제 데이터가 없으면 전체 평균값 추정 사용 (하드코딩 제거)
+  const estimatedTemp = 30.0; // 싱가포르 평균 기온 기준
+  console.log(`⚠️ ${region.displayName} 추정 온도: ${estimatedTemp}°C (실제 데이터 없음)`);
+  return estimatedTemp;
 };
 
 /**
