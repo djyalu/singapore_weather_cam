@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { RefreshCw, Zap, Wifi, WifiOff, Clock } from 'lucide-react';
 import { announceToScreenReader } from '../../utils/accessibility.js';
+import { Button } from '@/components/ui/button';
 
 /**
  * 독립적인 새로고침 버튼 컴포넌트
@@ -135,21 +136,24 @@ const RefreshButton = React.memo(({
         </div>
       )}
 
-      {/* 실시간 새로고침 버튼 (단일 버튼) */}
+      {/* 실시간 새로고침 버튼 (shadcn/ui Button 사용) */}
       {onRefresh && (
-        <button
+        <Button
           ref={refreshButtonRef}
           onClick={handleRefresh}
           onKeyDown={handleKeyDown}
           disabled={!canRefresh}
+          variant={variant === 'glass' ? 'ghost' : 'secondary'}
+          size={variant === 'compact' ? 'sm' : 'default'}
           className={`
-            flex items-center justify-center ${styles.button}
-            text-green-600 bg-green-50/80 hover:bg-green-100/90 border-green-200/50
-            disabled:opacity-50 disabled:cursor-not-allowed
+            ${styles.button}
+            ${variant === 'glass' 
+              ? 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20' 
+              : 'text-green-600 bg-green-50/80 hover:bg-green-100/90 border-green-200/50'
+            }
             transition-all duration-300
             hover:scale-105 active:scale-95 touch-manipulation
-            focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-            disabled:focus:ring-0 disabled:hover:scale-100
+            disabled:hover:scale-100
           `}
           title={
             !isOnline 
@@ -183,7 +187,7 @@ const RefreshButton = React.memo(({
                 : 'NEA Singapore API에서 실시간 최신 데이터를 가져옵니다'
             }
           </span>
-        </button>
+        </Button>
       )}
 
       {/* 새로고침 피드백 (variant에 따라) */}

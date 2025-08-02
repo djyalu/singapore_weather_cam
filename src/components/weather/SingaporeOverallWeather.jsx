@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -683,9 +685,9 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg border border-gray-100 ${className}`}>
+    <Card className={`shadow-lg ${className}`}>
       {/* 심플한 헤더 - 그라데이션 배경 */}
-      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-xl p-4">
+      <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-xl p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{getWeatherIcon(overallData.forecast)}</span>
@@ -710,10 +712,10 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             </div>
           </div>
         </div>
-      </div>
+      </CardHeader>
 
       {/* 핵심 정보만 간결하게 표시 */}
-      <div className="p-4">
+      <CardContent className="p-4">
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
           {/* 습도 */}
           <div className="text-center">
@@ -776,16 +778,12 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <Brain className="w-4 h-4 text-purple-500" />
               <span className="text-xs text-gray-600 font-medium">AI 분석</span>
             </div>
-            <button
+            <Button
               onClick={handleRealAIAnalysis}
               disabled={cohereLoading || !weatherData}
-              className={`text-sm font-semibold px-3 py-1 rounded-full transition-all focus:ring-2 focus:ring-purple-500 focus:outline-none ${
-                cohereLoading 
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : !weatherData
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-purple-100 text-purple-800 hover:bg-purple-200 active:scale-95'
-              }`}
+              variant="secondary"
+              size="sm"
+              className="text-purple-800 bg-purple-100 hover:bg-purple-200 rounded-full transition-all active:scale-95"
               aria-label="Cohere AI 고급 분석 실행 - 현재 날씨 데이터를 바탕으로 상세한 AI 분석 결과를 제공합니다"
             >
               {cohereLoading ? (
@@ -799,7 +797,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
                   <span>실행</span>
                 </div>
               )}
-            </button>
+            </Button>
             <div className="text-xs text-gray-500 mt-0.5">
               클릭하여 실행
             </div>
@@ -892,8 +890,8 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 });
 
