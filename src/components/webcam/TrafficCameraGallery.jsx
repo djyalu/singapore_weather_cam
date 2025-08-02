@@ -12,6 +12,8 @@ import LoadingSkeleton from './LoadingSkeleton';
 import ErrorState from './ErrorState';
 import WebcamModal from './WebcamModal';
 import { formatDateSafely } from '../common/SafeDateFormatter';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 /**
  * Individual Camera Card Component with enhanced mobile touch interactions
@@ -418,17 +420,15 @@ const TrafficCameraGallery = () => {
           {/* View Mode Buttons - Simplified to 3 modes */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-2">
-              <button
+              <Button
                 onClick={() => setViewMode('nearby')}
-                className={`
-                  px-4 py-3 sm:px-3 sm:py-2 rounded-lg text-sm sm:text-sm 
-                  font-medium transition-all duration-200 touch-manipulation
-                  min-h-[44px] sm:min-h-[auto] flex items-center justify-center
-                  ${viewMode === 'nearby'
-      ? 'bg-green-600 text-white shadow-md transform scale-105'
-      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
-    }
-                `}
+                variant={viewMode === 'nearby' ? 'default' : 'secondary'}
+                size="sm"
+                className={cn(
+                  "min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200",
+                  viewMode === 'nearby' && "bg-green-600 hover:bg-green-700 shadow-md transform scale-105",
+                  viewMode !== 'nearby' && "active:scale-95"
+                )}
                 aria-pressed={viewMode === 'nearby'}
               >
                 <span className="flex items-center gap-1">
@@ -436,18 +436,16 @@ const TrafficCameraGallery = () => {
                   <span className="hidden xs:inline">Hwa Chong 근처</span>
                   <span className="xs:hidden">근처</span>
                 </span>
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setViewMode('featured')}
-                className={`
-                  px-4 py-3 sm:px-3 sm:py-2 rounded-lg text-sm sm:text-sm 
-                  font-medium transition-all duration-200 touch-manipulation
-                  min-h-[44px] sm:min-h-[auto] flex items-center justify-center
-                  ${viewMode === 'featured'
-      ? 'bg-blue-600 text-white shadow-md transform scale-105'
-      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
-    }
-                `}
+                variant={viewMode === 'featured' ? 'default' : 'secondary'}
+                size="sm"
+                className={cn(
+                  "min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200",
+                  viewMode === 'featured' && "bg-blue-600 hover:bg-blue-700 shadow-md transform scale-105",
+                  viewMode !== 'featured' && "active:scale-95"
+                )}
                 aria-pressed={viewMode === 'featured'}
               >
                 <span className="flex items-center gap-1">
@@ -455,18 +453,16 @@ const TrafficCameraGallery = () => {
                   <span className="hidden xs:inline">주요 지점</span>
                   <span className="xs:hidden">주요</span>
                 </span>
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setViewMode('all')}
-                className={`
-                  px-4 py-3 sm:px-3 sm:py-2 rounded-lg text-sm sm:text-sm 
-                  font-medium transition-all duration-200 touch-manipulation
-                  min-h-[44px] sm:min-h-[auto] flex items-center justify-center
-                  ${viewMode === 'all'
-      ? 'bg-blue-600 text-white shadow-md transform scale-105'
-      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:scale-95'
-    }
-                `}
+                variant={viewMode === 'all' ? 'default' : 'secondary'}
+                size="sm"
+                className={cn(
+                  "min-h-[44px] sm:min-h-[auto] flex items-center justify-center touch-manipulation transition-all duration-200",
+                  viewMode === 'all' && "bg-blue-600 hover:bg-blue-700 shadow-md transform scale-105",
+                  viewMode !== 'all' && "active:scale-95"
+                )}
                 aria-pressed={viewMode === 'all'}
               >
                 <span className="flex items-center gap-1">
@@ -474,7 +470,7 @@ const TrafficCameraGallery = () => {
                   <span className="hidden xs:inline">전체</span>
                   <span className="xs:hidden">전체</span>
                 </span>
-              </button>
+              </Button>
             </div>
 
             {/* Swipe hint for mobile */}

@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { MapPin, Thermometer, Droplet, Wind, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 /**
  * 지역별 날씨 정보 카드 컴포넌트
@@ -81,14 +83,12 @@ const RegionalWeatherCard = React.memo(({
   const tempColor = getTemperatureColor(temperature);
 
   return (
-    <div
-      className={`
-        relative overflow-hidden rounded-xl shadow-lg border border-gray-100
-        transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-xl
-        ${isActive ? 'ring-2 ring-blue-500 shadow-xl scale-[1.02]' : ''}
-        bg-white
-        ${className}
-      `}
+    <Card
+      className={cn(
+        "relative overflow-hidden transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-xl",
+        isActive && "ring-2 ring-primary shadow-xl scale-[1.02]",
+        className
+      )}
       onClick={onClick}
       role="button"
       tabIndex="0"
@@ -107,7 +107,7 @@ const RegionalWeatherCard = React.memo(({
         </div>
       )}
 
-      <div className="relative p-4">
+      <CardContent className="relative p-4">
         {/* 헤더: 지역명과 날씨 아이콘 */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -182,8 +182,8 @@ const RegionalWeatherCard = React.memo(({
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 });
 
