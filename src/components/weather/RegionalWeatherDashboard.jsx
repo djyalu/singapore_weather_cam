@@ -85,7 +85,7 @@ const RegionalWeatherDashboard = React.memo(({
         if (region) {
           const fallbackTemp = 29.5 + (Math.random() * 2); // 29.5-31.5°C
           fallbackData[regionId] = {
-            region: region.name,
+            region: region.displayName, // 버튼과 일치하도록 displayName 사용
             temperature: fallbackTemp,
             feelsLike: Math.round((fallbackTemp + 2.0) * 10) / 10, // 체감온도 추가
             humidity: 75 + Math.floor(Math.random() * 10), // 75-85%
@@ -145,7 +145,7 @@ const RegionalWeatherDashboard = React.memo(({
         const weatherIcon = getWeatherIcon(avgTemperature, totalRainfall);
 
         regionalData[region.id] = {
-          region: region.name,
+          region: region.displayName, // 버튼과 일치하도록 displayName 사용
           temperature: Math.round(avgTemperature * 10) / 10, // 소수점 1자리
           feelsLike: calculatedFeelsLike, // 체감온도 추가
           humidity: Math.round(avgHumidity),
@@ -196,7 +196,7 @@ const RegionalWeatherDashboard = React.memo(({
             const weatherIcon = getWeatherIcon(avgTemperature, totalRainfall);
             
             regionalData[region.id] = {
-              region: region.name,
+              region: region.displayName, // 버튼과 일치하도록 displayName 사용
               temperature: Math.round(avgTemperature * 10) / 10,
               feelsLike: calculatedFeelsLike,
               humidity: Math.round(avgHumidity),
@@ -223,7 +223,7 @@ const RegionalWeatherDashboard = React.memo(({
           const fallbackRainfall = weatherData.current?.rainfall || 0;
             
             regionalData[region.id] = {
-              region: region.name,
+              region: region.displayName, // 버튼과 일치하도록 displayName 사용
               temperature: fallbackTemp,
               feelsLike: fallbackTemp ? Math.round((fallbackTemp + 2.0) * 10) / 10 : null, // 체감온도 추가
               humidity: weatherData.current?.humidity || 78,
@@ -243,7 +243,7 @@ const RegionalWeatherDashboard = React.memo(({
         if (!regionalData[region.id]) {
           console.log(`  🚨 Creating emergency fallback for ${region.name}`);
           regionalData[region.id] = {
-            region: region.name,
+            region: region.displayName, // 버튼과 일치하도록 displayName 사용
             temperature: 29.5 + (AVAILABLE_REGIONS.findIndex(r => r.id === region.id) * 0.3), // 지역별로 약간씩 다른 온도
             feelsLike: 31.5, // 체감온도 추가 (29.5 + 2.0)
             humidity: 78,
@@ -377,7 +377,7 @@ const RegionalWeatherDashboard = React.memo(({
           // 데이터가 없어도 현실적인 기본 카드 표시
           const fallbackTemp = 29.3 + (Math.random() * 1); // 29.3-30.3°C
           const cardData = data || {
-            region: region.name,
+            region: region.displayName, // 버튼과 일치하도록 displayName 사용
             temperature: fallbackTemp,
             feelsLike: Math.round((fallbackTemp + 2.0) * 10) / 10, // 체감온도 추가
             humidity: 76 + Math.floor(Math.random() * 8), // 76-83%

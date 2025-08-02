@@ -170,10 +170,25 @@ export const getOverallWeatherData = (weatherData) => {
       weatherData.geographic_coverage?.total_stations || 0
     );
     
-    console.log(`📊 NEA API 관측소 정보: readings=${stationCount}, stations_used=${weatherData.stations_used?.length}, total=${weatherData.geographic_coverage?.total_stations}`);
+    // 실시간 온도 데이터로부터 평균 계산 (기존 average 대신 readings 기반)
+    const temps = readings
+      .map(reading => reading.value)
+      .filter(temp => typeof temp === 'number' && !isNaN(temp));
+    
+    const avgTemp = temps.length > 0 
+      ? temps.reduce((sum, temp) => sum + temp, 0) / temps.length
+      : 29.0;
+    
+    const minTemp = temps.length > 0 ? Math.min(...temps) : 29.0;
+    const maxTemp = temps.length > 0 ? Math.max(...temps) : 29.0;
+    
+    console.log(`📊 NEA API 실시간 온도 계산: readings=${stationCount}, stations_used=${weatherData.stations_used?.length}, total=${weatherData.geographic_coverage?.total_stations}`);
+    console.log(`🌡️ 온도 통계: 평균=${avgTemp.toFixed(1)}°C, 최저=${minTemp.toFixed(1)}°C, 최고=${maxTemp.toFixed(1)}°C`);
     
     return {
-      temperature: weatherData.data.temperature.average || 29.0,
+      temperature: avgTemp,
+      minTemperature: minTemp,
+      maxTemperature: maxTemp,
       humidity: weatherData.data.humidity?.average || 80,
       rainfall: weatherData.data.rainfall?.total || 0,
       forecast: weatherData.data.forecast?.general?.forecast || 'Partly Cloudy',
