@@ -441,3 +441,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: ac0de3b1
 
+## 체크포인트 3 - 2025-08-02 12:50
+- 내용: Map heatmap refresh functionality confirmed and 11-persona documentation organization completed
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 2b190c75
+
