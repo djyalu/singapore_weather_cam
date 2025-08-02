@@ -251,7 +251,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
 
   // 실시간 고급 AI 분석 실행
   const executeAdvancedRealTimeAnalysis = async () => {
-    const overallData = getOverallWeatherData();
+    const overallData = getUnifiedWeatherData(weatherData);
     
     const stages = [
       {
