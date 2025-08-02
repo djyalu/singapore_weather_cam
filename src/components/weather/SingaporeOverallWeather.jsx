@@ -124,10 +124,10 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           stationCount: overallData.stationCount
         });
         
-        const forecast = weatherData?.data?.forecast?.general;
+        const forecast = actualWeatherData?.data?.forecast?.general;
 
         // 실시간 강수량 데이터로 지역별 소나기/폭우 정보 분석
-        const rainfallAnalysis = analyzeRealTimeRainfall(weatherData);
+        const rainfallAnalysis = analyzeRealTimeRainfall(actualWeatherData);
 
         // 실시간 데이터를 강조하는 요약 생성 (강수 정보 포함)
         const summary = generateIntelligentSummary(overallData, forecast, isRealTimeData, rainfallAnalysis);
@@ -138,9 +138,9 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           highlights,
           confidence: isRealTimeData ? 0.95 : 0.85,
           aiModel: isRealTimeData ? 'Real-time NEA Data Engine' : 'Smart Data Engine',
-          timestamp: weatherData.timestamp || new Date().toISOString(),
+          timestamp: actualWeatherData.timestamp || new Date().toISOString(),
           isRealAnalysis: false,
-          dataSource: weatherData.source || 'Unknown',
+          dataSource: actualWeatherData.source || 'Unknown',
           dataAge: Math.round(dataAge),
         });
 
