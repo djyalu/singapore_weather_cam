@@ -170,6 +170,10 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         };
         
         console.log('🔥 [AI 분석용 직접 데이터] DETAILED DEBUG:', {
+          RAW_actualWeatherData_temp_average: actualWeatherData?.data?.temperature?.average,
+          RAW_actualWeatherData_humidity_average: actualWeatherData?.data?.humidity?.average,
+          forceCalculatedTemp_final: forceCalculatedTemp,
+          forceCalculatedHumidity_final: forceCalculatedHumidity,
           temperature: overallData.temperature,
           humidity: overallData.humidity,
           rainfall: overallData.rainfall,
@@ -179,6 +183,16 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           forceCalculatedHumidity,
           temperatureReadings: actualWeatherData?.data?.temperature?.readings,
           source: overallData.source
+        });
+
+        // 🚨 TICKER vs AI 데이터 비교 로그
+        console.log('🚨 [TICKER vs AI 데이터 비교]:', {
+          AI_temperature: overallData.temperature,
+          AI_humidity: overallData.humidity,
+          TICKER_should_use_same_data: 'WeatherAlertTicker는 동일한 latest.json 파일 사용',
+          data_source_path: '/singapore_weather_cam/data/weather/latest.json',
+          timestamp: actualWeatherData?.timestamp,
+          readings_count: actualWeatherData?.data?.temperature?.readings?.length
         });
         
         // 데이터 소스 분석 - 실시간 데이터와 기존 데이터 비교
