@@ -163,14 +163,15 @@ export const getOverallWeatherData = (weatherData) => {
       weatherData.geographic_coverage?.total_stations || 0,
     );
 
-    // 실시간 온도 데이터로부터 평균 계산 (기존 average 대신 readings 기반)
+    // 실시간 온도 데이터 - 이미 계산된 average 우선 사용
     const temps = readings
       .map(reading => reading.value)
       .filter(temp => typeof temp === 'number' && !isNaN(temp));
 
-    const avgTemp = temps.length > 0
-      ? temps.reduce((sum, temp) => sum + temp, 0) / temps.length
-      : null;
+    // 이미 계산된 average가 있으면 우선 사용, 없으면 직접 계산
+    const avgTemp = weatherData.data.temperature.average !== undefined && weatherData.data.temperature.average !== null
+      ? weatherData.data.temperature.average
+      : (temps.length > 0 ? temps.reduce((sum, temp) => sum + temp, 0) / temps.length : null);
 
     const minTemp = temps.length > 0 ? Math.min(...temps) : null;
     const maxTemp = temps.length > 0 ? Math.max(...temps) : null;
@@ -181,9 +182,10 @@ export const getOverallWeatherData = (weatherData) => {
       .map(reading => reading.value)
       .filter(humidity => typeof humidity === 'number' && !isNaN(humidity));
 
-    const avgHumidity = humidities.length > 0
-      ? humidities.reduce((sum, humidity) => sum + humidity, 0) / humidities.length
-      : weatherData.data.humidity?.average;
+    // 이미 계산된 average가 있으면 우선 사용, 없으면 직접 계산
+    const avgHumidity = weatherData.data.humidity?.average !== undefined && weatherData.data.humidity?.average !== null
+      ? weatherData.data.humidity.average
+      : (humidities.length > 0 ? humidities.reduce((sum, humidity) => sum + humidity, 0) / humidities.length : null);
 
     console.log(`📊 NEA API 실시간 온도 계산: readings=${stationCount}, stations_used=${weatherData.stations_used?.length}, total=${weatherData.geographic_coverage?.total_stations}`);
     console.log(`🌡️ 온도 통계: 평균=${avgTemp?.toFixed(1) || 'null'}°C, 최저=${minTemp?.toFixed(1) || 'null'}°C, 최고=${maxTemp?.toFixed(1) || 'null'}°C`);
