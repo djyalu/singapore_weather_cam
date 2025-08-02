@@ -49,49 +49,8 @@ const RegionalWeatherDashboard = React.memo(({
   onSelectedRegionsChange,
   className = ''
 }) => {
-  // 🎯 통합된 표준 지역 사용 (데이터 일치성 보장)
-  const AVAILABLE_REGIONS = STANDARD_REGIONS.slice(); // 표준 지역 복사
-  
-  // 추가 지역들 (옵션으로)
-  const ADDITIONAL_REGIONS = [
-    {
-      id: 'jurong',
-      name: 'Jurong Area',
-      displayName: 'Jurong',
-      stationIds: ['S104', 'S60'], // Jurong West & Sentosa
-      coordinates: { lat: 1.3496, lng: 103.7063 },
-      fallbackTemp: 29.8,
-      emoji: '🏭',
-      description: 'Jurong 산업단지 및 서부 지역'
-    },
-    {
-      id: 'central',
-      name: 'Central Business',
-      displayName: 'Central',
-      stationIds: ['S109', 'S106'], // Newton & Tai Seng 
-      coordinates: { lat: 1.3048, lng: 103.8318 },
-      fallbackTemp: 30.5,
-      emoji: '🌆',
-      description: 'Central 중부 도심 지역'
-    },
-    {
-      id: 'east',
-      name: 'East Coast',
-      displayName: 'East',
-      stationIds: ['S107', 'S43'], // East Coast & Kim Chuan
-      coordinates: { lat: 1.3048, lng: 103.9318 },
-      fallbackTemp: 28.9,
-      emoji: '🏖️',
-      description: 'East Coast Parkway 및 동부 지역'
-    },
-    {
-      id: 'south',
-      name: 'South',
-      stationIds: ['S60', 'S104'], // Sentosa & Jurong (남서부)
-      description: 'Sentosa 및 남서부 지역',
-      emoji: '🏝️'
-    }
-  ];
+  // 🎯 통합된 표준 지역 사용 (데이터 일치성 보장) - 8개 전체 지역
+  const AVAILABLE_REGIONS = STANDARD_REGIONS.slice(); // 8개 표준 지역 전체 사용
 
   // 선택된 지역 상태 (기본값: Hwa Chong, Newton, Changi)
   const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']);
@@ -371,9 +330,9 @@ const RegionalWeatherDashboard = React.memo(({
           </p>
         </div>
         
-        {/* 지역 선택 버튼들 - 모바일 최적화 레이아웃 */}
+        {/* 지역 선택 버튼들 - 8개 전체 지역 표시 (모바일 최적화) */}
         <div className="bg-gray-50 p-2 sm:p-4 rounded-lg mb-4 sm:mb-6">
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3">
             {AVAILABLE_REGIONS.map(region => (
               <button
                 key={region.id}
@@ -388,8 +347,8 @@ const RegionalWeatherDashboard = React.memo(({
                 }}
                 title={region.description}
                 className={`
-                  px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200
-                  flex flex-col items-center gap-1 cursor-pointer min-h-[50px] sm:min-h-[60px] touch-manipulation
+                  px-1 sm:px-2 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200
+                  flex flex-col items-center gap-1 cursor-pointer min-h-[48px] sm:min-h-[60px] touch-manipulation
                   active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
                   ${selectedRegions.includes(region.id)
                     ? 'bg-blue-500 text-white shadow-md ring-2 ring-blue-300 scale-105'
@@ -398,13 +357,13 @@ const RegionalWeatherDashboard = React.memo(({
                 `}
               >
                 <span className="text-sm sm:text-lg">{region.emoji}</span>
-                <span className="text-xs font-medium leading-tight">{region.name}</span>
+                <span className="text-xs font-medium leading-tight">{region.displayName}</span>
               </button>
             ))}
           </div>
           <div className="mt-2 sm:mt-3 text-xs text-gray-500 text-center px-1">
-            현재 선택된 지역: {selectedRegions.map(id => 
-              AVAILABLE_REGIONS.find(r => r.id === id)?.name
+            현재 선택된 지역 ({selectedRegions.length}/3): {selectedRegions.map(id => 
+              AVAILABLE_REGIONS.find(r => r.id === id)?.displayName
             ).join(', ')}
           </div>
         </div>
