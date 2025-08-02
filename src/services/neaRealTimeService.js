@@ -241,14 +241,20 @@ class NEARealTimeService {
     console.log(`📡 [NEA Real-Time] Fetching ${endpointKey} from: ${url}`);
 
     try {
+      // Create AbortController for timeout (cross-browser compatible)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'User-Agent': 'Singapore-Weather-Cam/1.0',
         },
-        signal: AbortSignal.timeout(this.requestTimeout),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);

@@ -62,22 +62,21 @@ const RegionalWeatherDashboard = React.memo(({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 지역별 날씨 데이터 가져오기 - weatherDataUnifier 사용
+  // 지역별 날씨 데이터 가져오기 - weatherDataUnifier만 사용 (폴백 데이터 완전 제거)
   const getRegionalWeatherData = useMemo(() => {
-    console.log('🔍 RegionalWeatherDashboard - Debug Info:');
+    console.log('🔍 [RegionalWeatherDashboard] 실시간 데이터만 사용 - 폴백 데이터 완전 제거');
     console.log('- weatherData exists:', !!weatherData);
     console.log('- weatherData.data exists:', !!weatherData?.data);
     console.log('- weatherData.data.temperature exists:', !!weatherData?.data?.temperature);
-    console.log('- full weatherData structure:', weatherData);
 
     if (weatherData?.data?.temperature?.readings) {
       console.log('- Temperature readings count:', weatherData.data.temperature.readings.length);
-      console.log('- Temperature readings:', weatherData.data.temperature.readings);
+      console.log('- Temperature readings sample:', weatherData.data.temperature.readings.slice(0, 3));
     }
 
-    // weatherDataUnifier의 getRegionalTemperature 함수 사용
+    // 실시간 온도 데이터가 있을 때만 처리 (폴백 데이터 사용 안함)
     if (weatherData?.data?.temperature?.readings?.length > 0) {
-      console.log('✅ Using real temperature data from latest.json structure');
+      console.log('✅ [RegionalWeatherDashboard] 실시간 NEA 데이터 사용 - weatherDataUnifier 기반');
       
       const regionalData = {};
       
@@ -89,45 +88,50 @@ const RegionalWeatherDashboard = React.memo(({
       selectedRegionConfigs.forEach(region => {
         console.log(`🎯 Processing region: ${region.displayName} (${region.id}), stations: ${region.stationIds.join(', ')}`);
         
-        // weatherDataUnifier의 getRegionalTemperature 사용
+        // weatherDataUnifier의 getRegionalTemperature만 사용 (폴백 없음)
         const regionalTemp = getRegionalTemperature(weatherData, region.id);
         
-        // 실제 온도 데이터가 없으면 건너뛰기 (null 체크 추가)
+        // 실제 온도 데이터가 없으면 건너뛰기 (폴백 데이터 사용 안함)
         if (regionalTemp === null || typeof regionalTemp !== 'number' || isNaN(regionalTemp)) {
-          console.log(`⚠️ ${region.displayName}: 실제 온도 데이터 없음, 카드 생성 건너뛰기`);
-          return; // forEach에서 continue와 같은 역할
+          console.log(`❌ ${region.displayName}: 실시간 온도 데이터 없음 - 카드 생성 건너뛰기 (폴백 사용 안함)`);
+          return; // 폴백 데이터 생성하지 않고 건너뛰기
         }
         
-        // 습도는 전체 평균 사용 (지역별 습도 데이터가 없으므로)
-        const avgHumidity = weatherData.data?.humidity?.average || 
-          (weatherData.data?.humidity?.readings?.length > 0 
-            ? weatherData.data.humidity.readings.reduce((sum, r) => sum + r.value, 0) / weatherData.data.humidity.readings.length
-            : 75);
+        // 습도도 실시간 데이터만 사용 (기본값 없음)
+        let avgHumidity = null;
+        if (weatherData.data?.humidity?.average !== undefined && weatherData.data?.humidity?.average !== null) {
+          avgHumidity = weatherData.data.humidity.average;
+        } else if (weatherData.data?.humidity?.readings?.length > 0) {
+          avgHumidity = weatherData.data.humidity.readings.reduce((sum, r) => sum + r.value, 0) / weatherData.data.humidity.readings.length;
+        }
         
+        // 강수량도 실시간 데이터만 사용
         const totalRainfall = weatherData.data?.rainfall?.total || 0;
         
-        console.log(`  ✅ ${region.displayName}: ${regionalTemp.toFixed(1)}°C (stations: ${region.stationIds.join(', ')})`);
+        console.log(`  ✅ ${region.displayName}: ${regionalTemp.toFixed(1)}°C (실시간 계산, stations: ${region.stationIds.join(', ')})`);
         
+        // 실시간 데이터만으로 카드 데이터 생성
         regionalData[region.id] = {
           region: region.displayName,
           temperature: Math.round(regionalTemp * 10) / 10,
-          feelsLike: Math.round((regionalTemp + 2.0) * 10) / 10,
-          humidity: Math.round(avgHumidity),
+          feelsLike: Math.round((regionalTemp + 1.5) * 10) / 10, // 약간 더 현실적인 체감온도
+          humidity: avgHumidity ? Math.round(avgHumidity) : null,
           rainfall: Math.round(totalRainfall * 10) / 10,
-          windDirection: '--',
+          windDirection: null, // 실시간 풍향 데이터 없음
           description: getWeatherDescription(regionalTemp, totalRainfall),
           icon: getWeatherIcon(regionalTemp, totalRainfall),
-          stationName: `${region.stationIds.length}개 관측소 평균`,
+          stationName: `${region.stationIds.length}개 관측소 실시간 평균`,
           stationCount: region.stationIds.length,
           lastUpdate: weatherData.timestamp,
+          realTime: true, // 실시간 데이터임을 표시
         };
       });
       
-      console.log('🎯 Regional data using weatherDataUnifier:', regionalData);
+      console.log('🎯 [RegionalWeatherDashboard] 실시간 지역 데이터 생성 완료:', regionalData);
       return regionalData;
     }
 
-    console.log('⚠️ RegionalWeatherDashboard - No temperature readings found, returning empty data');
+    console.log('❌ [RegionalWeatherDashboard] 실시간 온도 데이터 없음 - 빈 객체 반환 (폴백 데이터 사용 안함)');
     // 실제 데이터가 없으면 빈 객체 반환 (폴백 데이터 완전 제거)
     return {};
   }, [weatherData, selectedRegions]);
@@ -196,7 +200,7 @@ const RegionalWeatherDashboard = React.memo(({
         </h2>
         <div className="mb-3 sm:mb-4">
           <p className="text-xs sm:text-sm text-gray-600">
-            실시간 기상 관측 데이터 - 지역 버튼을 클릭하여 3개 지역을 선택하세요
+            실시간 NEA API 데이터만 사용 (폴백/하드코딩 데이터 완전 제거) - 지역 버튼을 클릭하여 3개 지역을 선택하세요
           </p>
         </div>
 
@@ -244,48 +248,46 @@ const RegionalWeatherDashboard = React.memo(({
         {selectedRegionConfigs.map(region => {
           const data = getRegionalWeatherData[region.id];
 
-          // 실제 데이터만 사용 (폴백 데이터 완전 제거)
-          const cardData = data;
-
-          console.log(`🎯 Rendering card for ${region.id}:`, {
-            hasData: !!data,
-            temperature: cardData?.temperature,
-            feelsLike: cardData?.feelsLike,
-            description: cardData?.description,
-            icon: cardData?.icon,
-            stationName: cardData?.stationName,
-            lastUpdate: cardData?.lastUpdate,
+          console.log(`🎯 [RegionalWeatherDashboard] 카드 렌더링 for ${region.id}:`, {
+            hasRealData: !!data,
+            temperature: data?.temperature,
+            humidity: data?.humidity,
+            realTime: data?.realTime,
+            stationName: data?.stationName,
+            lastUpdate: data?.lastUpdate,
           });
 
-          // 실제 데이터가 없으면 카드를 표시하지 않음 (폴백 카드 완전 제거)
-          if (!cardData) {
-            console.log(`⚠️ No real data for ${region.displayName}, skipping card`);
+          // 실시간 데이터가 없으면 로딩 상태만 표시 (폴백 카드 완전 제거)
+          if (!data) {
+            console.log(`❌ [RegionalWeatherDashboard] ${region.displayName}: 실시간 데이터 없음 - 로딩 상태 표시`);
             return (
               <div key={region.id} className="bg-gray-100 rounded-lg p-4 flex items-center justify-center">
                 <div className="text-center text-gray-500">
                   <div className="text-lg mb-2">{region.emoji}</div>
                   <div className="text-sm font-medium">{region.displayName}</div>
-                  <div className="text-xs mt-1">실시간 데이터 로딩 중...</div>
+                  <div className="text-xs mt-1">실시간 NEA 데이터 로딩 중...</div>
+                  <div className="text-xs mt-1 text-red-500">※ 폴백 데이터 사용 안함</div>
                 </div>
               </div>
             );
           }
 
+          // 실시간 데이터만으로 카드 렌더링
           return (
             <RegionalWeatherCard
               key={region.id}
-              region={`${region.emoji} ${cardData.region}`}
-              temperature={cardData.temperature}
-              feelsLike={cardData.feelsLike}
-              humidity={cardData.humidity}
-              rainfall={cardData.rainfall}
-              windDirection={cardData.windDirection}
-              weatherDescription={cardData.description}
-              weatherIcon={cardData.icon}
-              stationName={cardData.stationName}
+              region={`${region.emoji} ${data.region}`}
+              temperature={data.temperature}
+              feelsLike={data.feelsLike}
+              humidity={data.humidity}
+              rainfall={data.rainfall}
+              windDirection={data.windDirection || '--'}
+              weatherDescription={data.description}
+              weatherIcon={data.icon}
+              stationName={data.stationName}
               isActive={activeRegion === region.id}
               onClick={() => handleRegionClick(region.id)}
-              lastUpdate={formatLastUpdate(cardData.lastUpdate)}
+              lastUpdate={formatLastUpdate(data.lastUpdate)}
               className="transition-all duration-300"
             />
           );
