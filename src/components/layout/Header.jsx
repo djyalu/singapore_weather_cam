@@ -75,8 +75,8 @@ const Header = React.memo(({
               <div className="text-right">
                 <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
                   <div className="text-xs text-white/70 mb-1 hidden sm:block">Singapore</div>
-                  <div className="text-sm font-bold text-white font-mono">
-                    <RealtimeClock className="text-white text-sm font-bold font-mono" />
+                  <div className="text-lg font-bold text-white">
+                    <RealtimeClock className="text-white text-lg font-bold" />
                   </div>
                 </div>
               </div>
@@ -102,8 +102,8 @@ const Header = React.memo(({
             <div className="text-xs text-white/70">
               카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • {systemStats.lastUpdate || '로딩 중...'}
             </div>
-            <div className="text-sm text-white font-semibold font-mono">
-              <RealtimeClock className="text-white text-sm font-semibold font-mono" />
+            <div className="text-sm text-white font-semibold">
+              <RealtimeClock className="text-white text-sm font-semibold" />
             </div>
           </div>
         </div>
