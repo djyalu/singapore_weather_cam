@@ -18,8 +18,13 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
   const intervalRef = useRef(null);
   const tickerRef = useRef(null);
 
-  // 메인 앱의 실시간 날씨 데이터 컨텍스트 활용
+  // 메인 앱의 실시간 날씨 데이터 컨텍스트 활용 + 원본 NEA 데이터 접근
   const { weatherData: mainWeatherData, isLoading: mainDataLoading } = useWeatherData();
+  
+  // 글로벌 window.weatherData에서 원본 NEA 데이터 직접 접근 (Single Source of Truth)
+  const getOriginalNeaData = () => {
+    return window.weatherData || null;
+  };
 
   // 배터리 절약을 위한 백그라운드 탭 감지
   useEffect(() => {
@@ -37,11 +42,12 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Ticker: Using real-time NEA service data (Single Source of Truth)');
+      console.log('🔄 Ticker: Using original NEA data (Single Source of Truth)');
 
-      // Use real-time data from main context (already fetched via NEA service)
-      const data = mainWeatherData;
-      if (data?.data?.temperature?.readings?.length > 0) {
+      // Use original NEA data directly from global reference (NOT transformed data)
+      const originalNeaData = getOriginalNeaData();
+      if (originalNeaData?.data?.temperature?.readings?.length > 0) {
+        const data = originalNeaData; // Use original NEA data structure
           console.log('📊 Real-time data loaded:', data);
           console.log('🔍 Data structure check:', {
             hasTemperature: !!data.data?.temperature?.readings?.length,
@@ -225,17 +231,17 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
           
           setAlerts(realAlerts);
         } else {
-          // 메인 컨텍스트 데이터가 없으면 로딩 메시지 표시
+          // 원본 NEA 데이터가 없으면 로딩 메시지 표시
           const loadingAlerts = [{
             type: 'info',
             priority: 'low',
             icon: '📡',
-            message: '메인 앱에서 실시간 날씨 데이터를 로딩 중입니다...',
+            message: '실시간 NEA Singapore API에서 날씨 데이터를 로딩 중입니다...',
             timestamp: new Date().toISOString(),
-            source: 'Main Context Loading',
+            source: 'Original NEA Data Loading',
           }];
           
-          console.log('🔄 Main context data not ready, showing loading message');
+          console.log('🔄 Original NEA data not ready, showing loading message');
           setAlerts(loadingAlerts);
         }
     } catch (err) {
@@ -256,17 +262,19 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     }
   };
 
-  // 메인 앱 데이터가 변경될 때마다 티커 업데이트
+  // 원본 NEA 데이터가 변경될 때마다 티커 업데이트 (window.weatherData 감지)
   useEffect(() => {
-    if (mainWeatherData && !mainDataLoading) {
-      console.log('🔄 Ticker: Main app data updated, refreshing alerts...');
+    const originalData = getOriginalNeaData();
+    if (originalData && !mainDataLoading) {
+      console.log('🔄 Ticker: Original NEA data updated, refreshing alerts...');
       loadAlerts();
     }
-  }, [mainWeatherData, mainDataLoading]);
+  }, [mainWeatherData, mainDataLoading]); // mainWeatherData 변경은 원본 데이터 변경을 의미
 
-  // 컴포넌트 마운트 시 초기 로드 (주기적 업데이트 제거 - 메인 컨텍스트 의존)
+  // 컴포넌트 마운트 시 초기 로드 (원본 NEA 데이터 확인)
   useEffect(() => {
-    if (mainWeatherData && !mainDataLoading) {
+    const originalData = getOriginalNeaData();
+    if (originalData && !mainDataLoading) {
       loadAlerts();
     }
   }, []); // 초기 마운트 시에만 실행
