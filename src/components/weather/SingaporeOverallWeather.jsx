@@ -16,11 +16,11 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
 
-  // 싱가포르 실시간 시간 업데이트 (1분 간격)
+  // 싱가포르 실시간 시간 업데이트 (1초 간격)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // 1분(60초) 간격으로 업데이트
+    }, 1000); // 1초 간격으로 실시간 업데이트
     return () => clearInterval(timer);
   }, []);
 
