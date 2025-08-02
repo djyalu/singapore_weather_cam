@@ -169,12 +169,15 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           timestamp: actualWeatherData?.timestamp
         };
         
-        console.log('🔥 [AI 분석용 직접 데이터]:', {
+        console.log('🔥 [AI 분석용 직접 데이터] DETAILED DEBUG:', {
           temperature: overallData.temperature,
           humidity: overallData.humidity,
           rainfall: overallData.rainfall,
           actualDataTemp: actualWeatherData?.data?.temperature?.average,
           actualDataHumidity: actualWeatherData?.data?.humidity?.average,
+          forceCalculatedTemp,
+          forceCalculatedHumidity,
+          temperatureReadings: actualWeatherData?.data?.temperature?.readings,
           source: overallData.source
         });
         
