@@ -112,8 +112,8 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     loadAlerts();
   };
 
-  // 경보가 없으면 렌더링하지 않음
-  if (!isVisible || alerts.length === 0) {
+  // 티커 숨김 처리 (경보가 없어도 로딩 상태 표시)
+  if (!isVisible) {
     return null;
   }
 
@@ -193,6 +193,13 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               <div className="flex items-center gap-2 text-gray-700">
                 <RefreshCw className="w-4 h-4 animate-spin" />
                 <span className="text-sm sm:text-base">기상 정보 업데이트 중...</span>
+              </div>
+            </div>
+          ) : displayAlerts.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex items-center gap-2 text-gray-600">
+                <Info className="w-4 h-4" />
+                <span className="text-sm sm:text-base">기상 정보를 불러오는 중입니다...</span>
               </div>
             </div>
           ) : (
