@@ -60,7 +60,7 @@ const Header = React.memo(({
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-red-600/20 animate-pulse"></div>
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 animate-pulse"></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
           <div className="flex items-center justify-between">
             {/* 로고 및 타이틀 - 완전히 새로운 디자인 */}
             <div className="flex items-center space-x-6 sm:space-x-8">
@@ -76,45 +76,31 @@ const Header = React.memo(({
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-gradient-to-r from-cyan-200 via-purple-200 to-pink-200 bg-clip-text font-display tracking-tight drop-shadow-2xl">
                   Singapore Weather Cam
                 </h1>
-                <div className="flex items-center mt-3 space-x-4">
-                  <span className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center space-x-2 shadow-xl transform hover:scale-105 transition-transform duration-200">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>🔴 LIVE</span>
+                <div className="flex items-center mt-2 space-x-3">
+                  <span className="bg-white/10 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-medium flex items-center space-x-1.5 border border-white/20">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span>LIVE</span>
                   </span>
-                  <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-xl transform hover:scale-105 transition-transform duration-200">
-                    <span>🌡️ 실시간 날씨</span>
-                  </span>
-                  <span className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-xl transform hover:scale-105 transition-transform duration-200">
-                    <span>📹 HD 카메라</span>
-                  </span>
+                  <span className="text-xs text-white/80 font-medium">실시간 날씨 · HD 카메라</span>
                 </div>
               </div>
             </div>
 
-            {/* 우측 컨트롤 - 새로운 디자인 */}
-            <div className="flex items-center gap-4 sm:gap-6">
-              {/* 시스템 정보 - 큰 화면에서만 표시 */}
-              <div className="hidden xl:block text-right">
-                <div className="bg-gradient-to-r from-indigo-500/20 to-purple-600/20 backdrop-blur-lg p-4 rounded-2xl border-2 border-purple-400/30 shadow-xl">
-                  <div className="flex items-center space-x-2 text-sm text-purple-100 mb-2 font-display font-bold">
-                    <Clock className="w-5 h-5 text-cyan-300" />
-                    <span>데이터 업데이트</span>
-                  </div>
-                  <div className="text-sm text-white font-display font-bold">
-                    <div className="text-cyan-200">{systemStats.lastUpdate || '로딩 중...'}</div>
-                    <div className="text-pink-200">📹 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 LIVE</div>
-                  </div>
-                </div>
+            {/* 우측 컨트롤 - 간결한 디자인 */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              {/* 시스템 정보 - 큰 화면에서만 간단하게 */}
+              <div className="hidden lg:block text-right">
+                <div className="text-xs text-white/70 mb-1">최근 업데이트</div>
+                <div className="text-sm text-white font-semibold">{systemStats.lastUpdate || '로딩 중...'}</div>
               </div>
 
-              {/* 현재 시간 표시 - 눈에 띄는 디자인 */}
+              {/* 현재 시간 - 심플하고 깔끔하게 */}
               <div className="text-right">
-                <div className="bg-gradient-to-r from-cyan-500/30 to-blue-600/30 backdrop-blur-lg p-5 rounded-2xl border-2 border-cyan-400/40 shadow-2xl transform hover:scale-105 transition-transform duration-300">
-                  <div className="text-sm text-cyan-100 mb-2 hidden sm:block font-display font-bold">🇸🇬 싱가포르 시간</div>
-                  <div className="text-xl sm:text-2xl font-display font-black text-white drop-shadow-lg">
+                <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                  <div className="text-xs text-white/70 mb-1 hidden sm:block">Singapore</div>
+                  <div className="text-lg font-bold text-white">
                     {formatTime(currentTime)}
                   </div>
-                  <div className="text-xs text-cyan-200 mt-1 font-bold">LIVE TIME</div>
                 </div>
               </div>
 
@@ -134,17 +120,13 @@ const Header = React.memo(({
             </div>
           </div>
 
-          {/* 모바일용 현대적 상태 표시 */}
-          <div className="mt-6 flex justify-between items-center lg:hidden">
-            <div className="bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-400/30">
-              <div className="text-sm text-white font-display font-bold">
-                📹 카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • {systemStats.lastUpdate || '로딩 중...'}
-              </div>
+          {/* 모바일용 간결한 상태 표시 */}
+          <div className="mt-4 flex justify-between items-center lg:hidden">
+            <div className="text-xs text-white/70">
+              카메라 {systemStats.totalWebcams || systemStats.totalCameras || 0}개 • {systemStats.lastUpdate || '로딩 중...'}
             </div>
-            <div className="bg-gradient-to-r from-cyan-600/30 to-blue-600/30 backdrop-blur-sm px-4 py-2 rounded-full border border-cyan-400/30">
-              <div className="text-sm text-white font-display font-bold tracking-wide">
-                🕒 {formatTime(currentTime)}
-              </div>
+            <div className="text-sm text-white font-semibold">
+              {formatTime(currentTime)}
             </div>
           </div>
         </div>
