@@ -589,3 +589,8 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 9411ddc
 
+## 체크포인트 15 - 2025-08-03 10:30
+- 내용: 모든 폴백/하드코딩 데이터 완전 제거 완료 - RegionalWeatherDashboard와 weatherDataUnifier에서 하드코딩된 온도값 제거하여 실시간 NEA API 데이터만 사용
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 01eb747
