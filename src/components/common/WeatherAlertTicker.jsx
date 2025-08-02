@@ -58,12 +58,28 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
           const realAlerts = [];
           const now = new Date();
           
-          // 온도 데이터
+          // 온도 데이터 - weatherDataUnifier와 동일한 방식 사용
           if (data.data?.temperature?.readings?.length > 0) {
             const tempReadings = data.data.temperature.readings;
-            const avgTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+            
+            // weatherDataUnifier.js와 동일한 방식으로 계산
+            const calculatedAvgTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+            const preCalculatedAvgTemp = data.data.temperature.average;
+            
+            // 이미 계산된 average가 있으면 우선 사용 (weatherDataUnifier와 동일한 로직)
+            const avgTemp = (preCalculatedAvgTemp !== undefined && preCalculatedAvgTemp !== null)
+              ? preCalculatedAvgTemp
+              : calculatedAvgTemp;
+            
             const minTemp = Math.min(...tempReadings.map(r => r.value));
             const maxTemp = Math.max(...tempReadings.map(r => r.value));
+            
+            console.log('🌡️ [WeatherAlertTicker] 온도 계산 결과:', {
+              preCalculatedAvgTemp,
+              calculatedAvgTemp: calculatedAvgTemp.toFixed(2),
+              finalAvgTemp: avgTemp.toFixed(2),
+              readingsCount: tempReadings.length
+            });
             
             let tempStatus = '정상';
             if (avgTemp >= 35) tempStatus = '매우 높음';
@@ -80,12 +96,28 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
             });
           }
           
-          // 습도 데이터
+          // 습도 데이터 - weatherDataUnifier와 동일한 방식 사용
           if (data.data?.humidity?.readings?.length > 0) {
             const humidityReadings = data.data.humidity.readings;
-            const avgHumidity = humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length;
+            
+            // weatherDataUnifier.js와 동일한 방식으로 계산
+            const calculatedAvgHumidity = humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length;
+            const preCalculatedAvgHumidity = data.data.humidity.average;
+            
+            // 이미 계산된 average가 있으면 우선 사용 (weatherDataUnifier와 동일한 로직)
+            const avgHumidity = (preCalculatedAvgHumidity !== undefined && preCalculatedAvgHumidity !== null)
+              ? preCalculatedAvgHumidity
+              : calculatedAvgHumidity;
+            
             const minHumidity = Math.min(...humidityReadings.map(r => r.value));
             const maxHumidity = Math.max(...humidityReadings.map(r => r.value));
+            
+            console.log('💧 [WeatherAlertTicker] 습도 계산 결과:', {
+              preCalculatedAvgHumidity,
+              calculatedAvgHumidity: calculatedAvgHumidity.toFixed(2),
+              finalAvgHumidity: avgHumidity.toFixed(2),
+              readingsCount: humidityReadings.length
+            });
             
             let humidityStatus = '정상';
             if (avgHumidity >= 90) humidityStatus = '매우 높음';

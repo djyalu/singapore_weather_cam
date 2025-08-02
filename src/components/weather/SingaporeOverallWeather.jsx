@@ -31,6 +31,13 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         // Data source analysis completed
 
         const overallData = getUnifiedWeatherData(weatherData);
+        console.log('📊 [SingaporeOverallWeather] 통합 데이터 결과:', {
+          temperature: overallData.temperature?.toFixed(2),
+          humidity: overallData.humidity?.toFixed(2),
+          source: overallData.source,
+          stationCount: overallData.stationCount
+        });
+        
         const forecast = weatherData?.data?.forecast?.general;
 
         // 실시간 강수량 데이터로 지역별 소나기/폭우 정보 분석
@@ -1030,7 +1037,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
           <div className="text-right">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-white drop-shadow-lg">
-                {overallData.temperature !== null && overallData.temperature !== undefined && typeof overallData.temperature === 'number' ? overallData.temperature.toFixed(1) : '--'}
+                {overallData.temperature !== null && overallData.temperature !== undefined && typeof overallData.temperature === 'number' ? (console.log('🏠 [SingaporeOverallWeather] 표시된 온도:', overallData.temperature.toFixed(1)), overallData.temperature.toFixed(1)) : '--'}
               </span>
               <span className="text-sm text-blue-100">°C</span>
             </div>
@@ -1051,7 +1058,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <span className="text-xs text-gray-600 font-medium hidden sm:inline">습도</span>
             </div>
             <div className="text-lg sm:text-xl font-bold text-gray-800">
-              {overallData.humidity !== null && overallData.humidity !== undefined && typeof overallData.humidity === 'number' ? Math.round(overallData.humidity) : '--'}%
+              {overallData.humidity !== null && overallData.humidity !== undefined && typeof overallData.humidity === 'number' ? (console.log('🏠 [SingaporeOverallWeather] 표시된 습도:', Math.round(overallData.humidity)), Math.round(overallData.humidity)) : '--'}%
             </div>
             <div className="text-xs text-gray-500">
               {overallData.humidity !== null && overallData.humidity !== undefined && typeof overallData.humidity === 'number' ? (overallData.humidity >= 80 ? '높음' : overallData.humidity >= 60 ? '보통' : '낮음') : '정보없음'}
