@@ -447,3 +447,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: 2b190c75
 
+## 체크포인트 4 - 2025-08-02 21:52
+- 내용: 한국 시간 설정 테스트
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: da2c0b73
+
