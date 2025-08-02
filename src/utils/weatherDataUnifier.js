@@ -187,7 +187,16 @@ export const getOverallWeatherData = (weatherData) => {
       ? weatherData.data.humidity.average
       : (humidities.length > 0 ? humidities.reduce((sum, humidity) => sum + humidity, 0) / humidities.length : null);
 
-    console.log(`📊 NEA API 실시간 온도 계산: readings=${stationCount}, stations_used=${weatherData.stations_used?.length}, total=${weatherData.geographic_coverage?.total_stations}`);
+    console.log(`📊 [getOverallWeatherData] NEA API 데이터 처리:`, {
+      readings: stationCount,
+      stations_used: weatherData.stations_used?.length,
+      total: weatherData.geographic_coverage?.total_stations,
+      data_temp_average: weatherData.data.temperature.average,
+      calculated_temp_average: temps.length > 0 ? (temps.reduce((sum, temp) => sum + temp, 0) / temps.length).toFixed(1) : 'null',
+      final_avgTemp: avgTemp?.toFixed(1),
+      data_humidity_average: weatherData.data.humidity?.average,
+      final_avgHumidity: avgHumidity?.toFixed(1),
+    });
     console.log(`🌡️ 온도 통계: 평균=${avgTemp?.toFixed(1) || 'null'}°C, 최저=${minTemp?.toFixed(1) || 'null'}°C, 최고=${maxTemp?.toFixed(1) || 'null'}°C`);
     console.log(`💧 습도 통계: 평균=${avgHumidity?.toFixed(1) || 'null'}%, readings=${humidities.length}개, data.average=${weatherData.data.humidity?.average}`);
 

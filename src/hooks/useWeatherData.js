@@ -21,16 +21,23 @@ export const useWeatherData = () => {
       setIsLoading(true);
       setError(null);
 
-      // Try to fetch from data files - Enhanced 59-station data
+      // Try to fetch from data files - Enhanced 59-station data with aggressive cache busting
       try {
-        const cacheParam = forceRefresh ? `?bust=${Date.now()}` : `?t=${Date.now()}`;
-        const response = await fetch(`/data/weather/latest.json${cacheParam}`, {
-          cache: forceRefresh ? 'no-cache' : 'default',
-          headers: forceRefresh ? {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
+        const timestamp = Date.now();
+        const cacheParam = `?bust=${timestamp}&v=${Math.random()}`;
+        const basePath = import.meta.env.BASE_URL || '/';
+        const fullPath = `${basePath}data/weather/latest.json${cacheParam}`;
+        
+        console.log('🔄 Fetching weather data from:', fullPath);
+        
+        const response = await fetch(fullPath, {
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
             'Pragma': 'no-cache',
             'Expires': '0',
-          } : {},
+            'If-Modified-Since': 'Thu, 01 Jan 1970 00:00:00 GMT',
+          },
         });
 
         if (response.ok) {
