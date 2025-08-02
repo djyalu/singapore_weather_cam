@@ -21,70 +21,93 @@ const useSimpleDataLoader = (refreshInterval) => {
       const basePath = import.meta.env.BASE_URL || '/';
       const timestamp = new Date().getTime();
 
-      // Load weather data - 실시간 강제 새로고침 시 NEA API 직접 호출
+      // Load weather data - 항상 실시간 NEA API 우선 호출
       try {
         let weatherJson = null;
         
-        if (forceRealtime) {
-          console.log('🔄 Force refresh: Attempting real-time NEA API call...');
+        console.log('🔄 Loading weather data: Attempting real-time NEA API call...');
+        
+        // 1순위: NEA Singapore API 직접 호출 (항상 시도)
+        try {
+          const neaApiUrl = 'https://api.data.gov.sg/v1/environment/air-temperature';
+          const neaResponse = await fetch(neaApiUrl, {
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'Singapore-Weather-Cam/1.0'
+            },
+            timeout: 10000
+          });
           
-          // NEA Singapore API 직접 호출 시도
-          try {
-            const neaApiUrl = 'https://api.data.gov.sg/v1/environment/air-temperature';
-            const neaResponse = await fetch(neaApiUrl, {
-              headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'Singapore-Weather-Cam/1.0'
-              },
-              timeout: 10000
+          if (neaResponse.ok) {
+            const neaData = await neaResponse.json();
+            console.log('✅ Real-time NEA data fetched successfully');
+            
+            // NEA API 응답을 우리 형식으로 변환
+            const temperatureReadings = neaData.items?.[0]?.readings?.map(reading => ({
+              station: reading.station_id,
+              value: reading.value
+            })) || [];
+            
+            console.log('📊 Real-time NEA API response details:', {
+              totalItems: neaData.items?.length,
+              latestItemTimestamp: neaData.items?.[0]?.timestamp,
+              totalStations: temperatureReadings.length,
+              sampleStations: temperatureReadings.slice(0, 3),
+              allStationIds: temperatureReadings.map(r => r.station),
+              avgTemperature: temperatureReadings.reduce((sum, r) => sum + r.value, 0) / temperatureReadings.length
             });
             
-            if (neaResponse.ok) {
-              const neaData = await neaResponse.json();
-              console.log('✅ Real-time NEA data fetched successfully');
-              
-              // NEA API 응답을 우리 형식으로 변환
-              const temperatureReadings = neaData.items?.[0]?.readings?.map(reading => ({
-                station: reading.station_id,
-                value: reading.value
-              })) || [];
-              
-              console.log('📊 Real-time NEA API response details:', {
-                totalItems: neaData.items?.length,
-                latestItemTimestamp: neaData.items?.[0]?.timestamp,
-                totalStations: temperatureReadings.length,
-                sampleStations: temperatureReadings.slice(0, 3),
-                allStationIds: temperatureReadings.map(r => r.station)
-              });
-              
-              weatherJson = {
-                timestamp: new Date().toISOString(),
-                source: "NEA Singapore (Real-time)",
-                collection_time_ms: Date.now() - timestamp,
-                api_calls: 1,
-                successful_calls: 1,
-                failed_calls: 0,
-                data: {
-                  temperature: {
-                    readings: temperatureReadings
-                  },
-                  humidity: { readings: [] },
-                  rainfall: { readings: [] },
-                  wind: { readings: [] }
-                }
-              };
-            } else {
-              throw new Error(`NEA API responded with ${neaResponse.status}`);
-            }
-          } catch (neaError) {
-            console.warn('⚠️ Real-time NEA API failed:', neaError.message);
-            throw neaError;
+            // 실시간 NEA API 데이터를 완전한 형식으로 변환
+            weatherJson = {
+              timestamp: new Date().toISOString(),
+              source: "NEA Singapore (Real-time)",
+              collection_time_ms: Date.now() - timestamp,
+              api_calls: 1,
+              successful_calls: 1,
+              failed_calls: 0,
+              data: {
+                temperature: {
+                  readings: temperatureReadings
+                },
+                humidity: { readings: [] },
+                rainfall: { readings: [] },
+                wind: { readings: [] }
+              },
+              // 변환 함수가 필요로 하는 메타데이터 추가
+              stations_used: temperatureReadings.map(r => r.station),
+              station_details: temperatureReadings.reduce((acc, reading) => {
+                acc[reading.station] = {
+                  id: reading.station,
+                  temperature: reading.value,
+                  status: 'active',
+                  data_available: ['temperature']
+                };
+                return acc;
+              }, {}),
+              geographic_coverage: {
+                total_stations: temperatureReadings.length,
+                coverage_percentage: Math.min(100, (temperatureReadings.length / 59) * 100),
+                regions_covered: ['singapore'] // 전체 싱가포르
+              }
+            };
+          } else {
+            throw new Error(`NEA API responded with ${neaResponse.status}`);
           }
-        } else {
-          // 일반 로딩: 로컬 파일 사용
-          const weatherResponse = await fetch(`${basePath}data/weather/latest.json?t=${timestamp}`);
-          if (weatherResponse.ok) {
-            weatherJson = await weatherResponse.json();
+        } catch (neaError) {
+          console.warn('⚠️ Real-time NEA API failed, falling back to local data:', neaError.message);
+          
+          // 2순위: 로컬 파일 폴백 (실시간 API 실패 시에만)
+          try {
+            const weatherResponse = await fetch(`${basePath}data/weather/latest.json?t=${timestamp}`);
+            if (weatherResponse.ok) {
+              weatherJson = await weatherResponse.json();
+              console.log('📁 Fallback to local data successful');
+            } else {
+              throw new Error(`Local data fetch failed: ${weatherResponse.status}`);
+            }
+          } catch (localError) {
+            console.error('❌ Both real-time API and local data failed:', localError.message);
+            throw new Error('All data sources failed');
           }
         }
         

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { AlertTriangle, Info, X, RefreshCw } from 'lucide-react';
 import neaAlertService from '../../services/neaAlertService';
+import { useWeatherData } from '../../contexts/AppDataContextSimple';
 
 /**
  * 실시간 기상 경보 티커 컴포넌트
@@ -16,6 +17,9 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
   const [isBackgroundTab, setIsBackgroundTab] = useState(false);
   const intervalRef = useRef(null);
   const tickerRef = useRef(null);
+  
+  // 메인 앱의 실시간 날씨 데이터 컨텍스트 활용
+  const { weatherData: mainWeatherData, isLoading: mainDataLoading } = useWeatherData();
 
   // 배터리 절약을 위한 백그라운드 탭 감지
   useEffect(() => {
@@ -27,18 +31,25 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // 경보 데이터 로드
+  // 경보 데이터 로드 - 실시간 데이터 우선 사용
   const loadAlerts = async () => {
     try {
       setLoading(true);
       setError(null);
       
+      // 메인 앱의 실시간 데이터가 있으면 전역에 설정
+      if (mainWeatherData && !mainDataLoading) {
+        console.log('📊 Ticker: Using main app real-time data');
+        // 메인 앱의 실시간 데이터를 전역 변수에 설정 (neaAlertService가 우선 사용)
+        window.weatherData = mainWeatherData;
+      }
+      
       const alertData = await neaAlertService.getWeatherAlerts();
       setAlerts(alertData);
       
-      console.log('📡 Weather alerts loaded:', alertData.length);
+      console.log('📡 Ticker: Weather alerts loaded from real-time data:', alertData.length);
     } catch (err) {
-      console.error('🚨 Failed to load weather alerts:', err);
+      console.error('🚨 Ticker: Failed to load weather alerts:', err);
       setError(err.message);
       
       // 에러 시 기본 메시지 표시
@@ -46,20 +57,28 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
         type: 'error',
         priority: 'low',
         icon: '⚠️',
-        message: '기상 경보 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.',
+        message: '기상 경보 정보를 불러올 수 없습니다. 실시간 데이터 수집 중입니다.',
         timestamp: new Date().toISOString(),
-        source: 'System'
+        source: 'Real-time System'
       }]);
     } finally {
       setLoading(false);
     }
   };
 
+  // 메인 앱 데이터가 변경될 때마다 티커 업데이트
+  useEffect(() => {
+    if (mainWeatherData && !mainDataLoading) {
+      console.log('🔄 Ticker: Main app data updated, refreshing alerts...');
+      loadAlerts();
+    }
+  }, [mainWeatherData, mainDataLoading]);
+
   // 컴포넌트 마운트 시 데이터 로드 및 주기적 업데이트
   useEffect(() => {
     loadAlerts();
 
-    // 주기적 업데이트 설정
+    // 주기적 업데이트 설정 (메인 앱과 동기화)
     intervalRef.current = setInterval(loadAlerts, refreshInterval);
 
     return () => {
@@ -150,7 +169,7 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
               <span className="text-gray-800 font-semibold text-xs sm:text-sm">🚨 기상 경보</span>
             </div>
             <span className="text-gray-600 text-xs hidden sm:block">
-              {loading ? 'Loading...' : `${displayAlerts.length}건 • NEA Singapore`}
+              {loading ? 'Loading...' : `${displayAlerts.length}건 • NEA Singapore (실시간)`}
             </span>
             <span className="text-gray-600 text-xs sm:hidden">
               {loading ? '...' : `${displayAlerts.length}건`}
