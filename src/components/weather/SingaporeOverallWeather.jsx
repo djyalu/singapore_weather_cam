@@ -558,10 +558,10 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     const analysisText = `🌟 **실시간 고급 AI 날씨 분석**
 
 📊 **정밀 기상 분석 결과**
-• 실제 기온: ${temp.toFixed(1)}°C
-• AI 계산 체감온도: ${heatIndex.toFixed(1)}°C
-• 습도: ${Math.round(humidity)}% (${humidity >= 80 ? '매우 높음' : humidity >= 60 ? '보통' : '낮음'})
-• 강수량: ${rainfall.toFixed(1)}mm${temperatureSection}${humiditySection}${rainfallSection}
+• 실제 기온: ${temp !== null && typeof temp === 'number' ? temp.toFixed(1) : '--'}°C
+• AI 계산 체감온도: ${heatIndex !== null && typeof heatIndex === 'number' ? heatIndex.toFixed(1) : '--'}°C
+• 습도: ${humidity !== null && typeof humidity === 'number' ? Math.round(humidity) : '--'}% (${humidity !== null && typeof humidity === 'number' ? (humidity >= 80 ? '매우 높음' : humidity >= 60 ? '보통' : '낮음') : '정보없음'})
+• 강수량: ${rainfall !== null && typeof rainfall === 'number' ? rainfall.toFixed(1) : '--'}mm${temperatureSection}${humiditySection}${rainfallSection}
 
 🧠 **AI 기상 패턴 분류**
 현재 **${weatherPattern}**이 감지되었습니다.
@@ -628,21 +628,29 @@ ${rainfallAnalysis && rainfallAnalysis.alertLevel !== 'none' ? ` ${rainfallAnaly
     const temperatureReadings = rawData?.data?.temperature?.readings || [];
     const humidityReadings = rawData?.data?.humidity?.readings || [];
 
-    // 체감온도 계산 (Heat Index 간소화 버전)
-    const heatIndex = temp + (humidity - 60) * 0.1;
+    // 체감온도 계산 (Heat Index 간소화 버전) - null safety 추가
+    const heatIndex = (temp !== null && humidity !== null && typeof temp === 'number' && typeof humidity === 'number') 
+      ? temp + (humidity - 60) * 0.1 
+      : null;
 
-    // 날씨 패턴 분석
+    // 날씨 패턴 분석 - null safety 추가
     let weatherPattern = '';
-    if (temp >= 32 && humidity >= 80) {
+    const validTemp = temp !== null && typeof temp === 'number';
+    const validHumidity = humidity !== null && typeof humidity === 'number';
+    const validRainfall = rainfall !== null && typeof rainfall === 'number';
+    
+    if (validTemp && validHumidity && temp >= 32 && humidity >= 80) {
       weatherPattern = '고온다습한 열대성 기후';
-    } else if (temp >= 30 && rainfall > 2) {
+    } else if (validTemp && validRainfall && temp >= 30 && rainfall > 2) {
       weatherPattern = '소나기성 강수가 있는 더운 날씨';
-    } else if (temp >= 28 && humidity < 70) {
+    } else if (validTemp && validHumidity && temp >= 28 && humidity < 70) {
       weatherPattern = '쾌적한 아열대성 기후';
-    } else if (rainfall > 5) {
+    } else if (validRainfall && rainfall > 5) {
       weatherPattern = '강수 중심의 습한 날씨';
-    } else {
+    } else if (validTemp || validHumidity || validRainfall) {
       weatherPattern = '전형적인 싱가포르 기후';
+    } else {
+      weatherPattern = '데이터 수집 중';
     }
 
     // 시간대별 예상
@@ -669,8 +677,8 @@ ${rainfallAnalysis && rainfallAnalysis.alertLevel !== 'none' ? ` ${rainfallAnaly
       tempDetailSection = `
 
 🌡️ **지역별 온도 현황 (${temperatureReadings.length}개소)**
-• 최고: ${maxTemp.toFixed(1)}°C | 최저: ${minTemp.toFixed(1)}°C (편차 ${tempRange.toFixed(1)}°C)
-• 고온지역: ${hotRegions}곳 (33°C+) | 전체 평균: ${temp.toFixed(1)}°C`;
+• 최고: ${maxTemp && typeof maxTemp === 'number' ? maxTemp.toFixed(1) : '--'}°C | 최저: ${minTemp && typeof minTemp === 'number' ? minTemp.toFixed(1) : '--'}°C (편차 ${tempRange && typeof tempRange === 'number' ? tempRange.toFixed(1) : '--'}°C)
+• 고온지역: ${hotRegions}곳 (33°C+) | 전체 평균: ${temp && typeof temp === 'number' ? temp.toFixed(1) : '--'}°C`;
     }
 
     // 습도 세부 정보 추가
@@ -684,13 +692,13 @@ ${rainfallAnalysis && rainfallAnalysis.alertLevel !== 'none' ? ` ${rainfallAnaly
       humDetailSection = `
 
 💧 **지역별 습도 현황 (${humidityReadings.length}개소)**
-• 최고: ${maxHum.toFixed(0)}% | 최저: ${minHum.toFixed(0)}% (편차 ${humRange.toFixed(0)}%)
-• 매우습한지역: ${highHumidityRegions}곳 (85%+) | 전체 평균: ${humidity.toFixed(0)}%`;
+• 최고: ${maxHum && typeof maxHum === 'number' ? maxHum.toFixed(0) : '--'}% | 최저: ${minHum && typeof minHum === 'number' ? minHum.toFixed(0) : '--'}% (편차 ${humRange && typeof humRange === 'number' ? humRange.toFixed(0) : '--'}%)
+• 매우습한지역: ${highHumidityRegions}곳 (85%+) | 전체 평균: ${humidity && typeof humidity === 'number' ? humidity.toFixed(0) : '--'}%`;
     }
 
     const analysis = `🌡️ **체감온도 분석**
-실제온도 ${temp.toFixed(1)}°C → 체감온도 약 ${heatIndex.toFixed(1)}°C
-습도 ${Math.round(humidity)}%로 인한 끈적함 ${humidity >= 80 ? '높음' : humidity >= 60 ? '보통' : '낮음'}${tempDetailSection}${humDetailSection}
+실제온도 ${temp && typeof temp === 'number' ? temp.toFixed(1) : '--'}°C → 체감온도 약 ${heatIndex && typeof heatIndex === 'number' ? heatIndex.toFixed(1) : '--'}°C
+습도 ${humidity && typeof humidity === 'number' ? Math.round(humidity) : '--'}%로 인한 끈적함 ${humidity && typeof humidity === 'number' ? (humidity >= 80 ? '높음' : humidity >= 60 ? '보통' : '낮음') : '정보없음'}${tempDetailSection}${humDetailSection}
 
 🌦️ **날씨 패턴**
 현재 ${weatherPattern} 상태입니다.
