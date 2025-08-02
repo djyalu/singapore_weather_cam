@@ -594,3 +594,8 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: 01eb747
+## 체크포인트 16 - 2025-08-03 10:39
+- 내용: 모든 하드코딩/폴백 데이터 완전 제거 완료 및 AI 분석 디버깅 로그 추가 - SimpleMapView.jsx와 weatherDataUnifier.js에서 29.0°C 하드코딩 제거, AI 분석 데이터 추적을 위한 상세 로그 추가
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: c125a3f
