@@ -39,60 +39,164 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
 
       console.log('🔄 Ticker: FORCED loading starting...');
 
-      // 무조건 실행되는 기본 알림 생성
-      const forceAlerts = [{
-        type: 'info',
-        priority: 'low',
-        icon: '🌡️',
-        message: '현재 기온 32.9°C (정상) • 5개 관측소 평균',
-        timestamp: new Date().toISOString(),
-        source: 'Force Load',
-      }, {
-        type: 'info',
-        priority: 'low',
-        icon: '💧',
-        message: '현재 습도 51% (정상)',
-        timestamp: new Date().toISOString(),
-        source: 'Force Load',
-      }, {
-        type: 'info',
-        priority: 'low',
-        icon: '☀️',
-        message: '전국 건조 상태 • 59개 관측소 모두 강수량 0mm',
-        timestamp: new Date().toISOString(),
-        source: 'Force Load',
-      }];
-
-      console.log('✅ FORCED alerts created:', forceAlerts.length);
-      setAlerts(forceAlerts);
-
-      // 백그라운드에서 실제 데이터 시도
+      // 즉시 실시간 데이터 로드 및 표시
       try {
         const response = await fetch('/singapore_weather_cam/data/weather/latest.json?t=' + Date.now());
         if (response.ok) {
           const data = await response.json();
-          console.log('📊 Background data loaded:', data);
+          console.log('📊 Real-time data loaded:', data);
           
+          const realAlerts = [];
+          const now = new Date();
+          
+          // 온도 데이터
           if (data.data?.temperature?.readings?.length > 0) {
             const tempReadings = data.data.temperature.readings;
             const avgTemp = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+            const minTemp = Math.min(...tempReadings.map(r => r.value));
+            const maxTemp = Math.max(...tempReadings.map(r => r.value));
             
-            const realAlerts = [{
+            let tempStatus = '정상';
+            if (avgTemp >= 35) tempStatus = '매우 높음';
+            else if (avgTemp >= 33) tempStatus = '높음';
+            else if (avgTemp <= 25) tempStatus = '낮음';
+            
+            realAlerts.push({
+              type: 'info',
+              priority: avgTemp >= 35 ? 'medium' : 'low',
+              icon: avgTemp >= 35 ? '🔥' : avgTemp <= 25 ? '❄️' : '🌡️',
+              message: `현재 기온 ${avgTemp.toFixed(1)}°C (${tempStatus}) • ${tempReadings.length}개 관측소 평균 • 최저 ${minTemp.toFixed(1)}°C 최고 ${maxTemp.toFixed(1)}°C`,
+              timestamp: now.toISOString(),
+              source: 'NEA Singapore',
+            });
+          }
+          
+          // 습도 데이터
+          if (data.data?.humidity?.readings?.length > 0) {
+            const humidityReadings = data.data.humidity.readings;
+            const avgHumidity = humidityReadings.reduce((sum, r) => sum + r.value, 0) / humidityReadings.length;
+            const minHumidity = Math.min(...humidityReadings.map(r => r.value));
+            const maxHumidity = Math.max(...humidityReadings.map(r => r.value));
+            
+            let humidityStatus = '정상';
+            if (avgHumidity >= 90) humidityStatus = '매우 높음';
+            else if (avgHumidity >= 80) humidityStatus = '높음';
+            else if (avgHumidity <= 40) humidityStatus = '낮음';
+            
+            realAlerts.push({
               type: 'info',
               priority: 'low',
-              icon: '🌡️',
-              message: `현재 기온 ${avgTemp.toFixed(1)}°C • ${tempReadings.length}개 관측소 평균`,
-              timestamp: new Date().toISOString(),
-              source: 'Real Data',
-            }];
-            
-            console.log('🎯 Real alerts updated:', realAlerts);
-            setAlerts(realAlerts);
+              icon: avgHumidity >= 90 ? '💦' : avgHumidity <= 40 ? '🏜️' : '💧',
+              message: `현재 습도 ${avgHumidity.toFixed(0)}% (${humidityStatus}) • ${humidityReadings.length}개 관측소 평균 • 최저 ${minHumidity.toFixed(0)}% 최고 ${maxHumidity.toFixed(0)}%`,
+              timestamp: now.toISOString(),
+              source: 'NEA Singapore',
+            });
           }
+          
+          // 강수량 데이터
+          if (data.data?.rainfall?.readings?.length > 0) {
+            const rainfallReadings = data.data.rainfall.readings;
+            const activeRainStations = rainfallReadings.filter(r => r.value > 0).length;
+            const totalRainfall = rainfallReadings.reduce((sum, r) => sum + r.value, 0);
+            const maxRainfall = Math.max(...rainfallReadings.map(r => r.value));
+            
+            if (activeRainStations > 0) {
+              let rainIcon = '🌧️';
+              let rainStatus = '소나기';
+              if (maxRainfall >= 20) {
+                rainIcon = '⛈️';
+                rainStatus = '집중호우';
+              } else if (maxRainfall >= 10) {
+                rainIcon = '🌦️';
+                rainStatus = '강한 비';
+              }
+              
+              realAlerts.push({
+                type: 'info',
+                priority: maxRainfall >= 20 ? 'high' : maxRainfall >= 10 ? 'medium' : 'low',
+                icon: rainIcon,
+                message: `${rainStatus} 진행 중 • ${activeRainStations}개 지역에서 강수 • 최대 ${maxRainfall.toFixed(1)}mm • 총 ${totalRainfall.toFixed(1)}mm 기록`,
+                timestamp: now.toISOString(),
+                source: 'NEA Singapore',
+              });
+            } else {
+              realAlerts.push({
+                type: 'info',
+                priority: 'low',
+                icon: '☀️',
+                message: `전국 건조 상태 • ${rainfallReadings.length}개 관측소 모두 강수량 0mm • 맑은 날씨 지속`,
+                timestamp: now.toISOString(),
+                source: 'NEA Singapore',
+              });
+            }
+          }
+          
+          // 예보 정보
+          if (data.data?.forecast?.general?.forecast) {
+            const forecast = data.data.forecast.general.forecast;
+            const tempRange = data.data.forecast.general.temperature;
+            const humidityRange = data.data.forecast.general.relative_humidity;
+            
+            let forecastIcon = '🌤️';
+            let forecastMessage = forecast;
+            
+            if (forecast.includes('Thundery')) {
+              forecastIcon = '⛈️';
+              forecastMessage = '뇌우성 소나기 예상';
+            } else if (forecast.includes('Shower') || forecast.includes('Rain')) {
+              forecastIcon = '🌧️';
+              forecastMessage = '소나기 예상';
+            } else if (forecast.includes('Cloudy')) {
+              forecastIcon = '☁️';
+              forecastMessage = '흐린 날씨';
+            } else if (forecast.includes('Fair')) {
+              forecastIcon = '☀️';
+              forecastMessage = '맑은 날씨';
+            }
+            
+            realAlerts.push({
+              type: 'info',
+              priority: 'low',
+              icon: forecastIcon,
+              message: `${forecastMessage} • 예상기온 ${tempRange?.low || 25}-${tempRange?.high || 34}°C • 습도 ${humidityRange?.low || 60}-${humidityRange?.high || 95}% • NEA 공식예보`,
+              timestamp: now.toISOString(),
+              source: 'NEA Singapore',
+            });
+          }
+          
+          // 데이터 수집 현황
+          const totalStations = data.stations_used?.length || 0;
+          const dataAge = data.timestamp ? Math.round((Date.now() - new Date(data.timestamp).getTime()) / (1000 * 60)) : 0;
+          
+          realAlerts.push({
+            type: 'info',
+            priority: 'low',
+            icon: '📊',
+            message: `실시간 데이터 수집 완료 • 총 ${totalStations}개 관측소 연동 • ${dataAge}분 전 업데이트 • 데이터 품질 ${Math.round((data.data_quality_score || 0.95) * 100)}%`,
+            timestamp: now.toISOString(),
+            source: 'System Status',
+          });
+          
+          console.log('🎯 Complete real-time alerts generated:', realAlerts.length);
+          setAlerts(realAlerts);
+          return;
         }
-      } catch (bgError) {
-        console.warn('⚠️ Background fetch failed, keeping forced alerts:', bgError);
+      } catch (fetchError) {
+        console.warn('⚠️ Failed to fetch real-time data:', fetchError);
       }
+      
+      // 폴백: 기본 메시지
+      const fallbackAlerts = [{
+        type: 'info',
+        priority: 'low',
+        icon: '📡',
+        message: 'NEA Singapore API에서 실시간 날씨 데이터를 수집 중입니다. 잠시 후 자동으로 업데이트됩니다.',
+        timestamp: new Date().toISOString(),
+        source: 'Loading System',
+      }];
+      
+      console.log('🔄 Using fallback alerts');
+      setAlerts(fallbackAlerts);
     } catch (err) {
       console.error('🚨 Ticker: Failed to load weather alerts:', err);
       setError(err.message);
