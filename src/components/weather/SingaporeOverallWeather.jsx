@@ -260,7 +260,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     
     const stages = [
       {
-        message: '🤖 새로운 AI 분석을 시작합니다...\n\n📊 최신 기상 데이터 수집 중\n🔍 4개 관측소 데이터 실시간 통합',
+        message: '🤖 새로운 AI 분석을 시작합니다...\n\n📊 최신 기상 데이터 수집 중\n🔍 59개 관측소 데이터 실시간 통합',
         duration: 1500
       },
       {
@@ -387,7 +387,7 @@ ${humidity >= 80 ? ' 높은 습도로 인해 실제보다 더 덥게 느껴질 �
   const simulateRealTimeAnalysis = async () => {
     const stages = [
       {
-        message: '🤖 Cohere AI가 최신 날씨 데이터를 분석하고 있습니다...\n\n📊 NEA Singapore API 데이터 수집 중\n🔍 4개 기상 관측소 데이터 통합 중',
+        message: '🤖 Cohere AI가 최신 날씨 데이터를 분석하고 있습니다...\n\n📊 NEA Singapore API 데이터 수집 중\n🔍 59개 기상 관측소 데이터 통합 중',
         duration: 2000
       },
       {
