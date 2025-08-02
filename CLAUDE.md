@@ -547,3 +547,9 @@ npm run format       # Prettier 포맷팅
 - Git 커밋: 73bee13
 - Git 태그: v3.0.0
 
+## 체크포인트 19 - 2025-08-03 00:48
+- 내용: 하드코딩된 날씨 데이터 완전 제거 및 실시간 동기화 구현 - 100% NEA Singapore API 데이터 사용
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 3e76057
+
