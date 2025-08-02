@@ -902,6 +902,31 @@ body.pull-to-refresh-ready {
     font-weight: 600;
   }
 
+  /* 티커 전용 모바일 최적화 */
+  .ticker-mobile-optimized {
+    font-size: 12px;
+    line-height: 1.3;
+    padding: 8px 12px;
+  }
+
+  .ticker-mobile-optimized .ticker-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .ticker-mobile-optimized .ticker-emoji {
+    font-size: 12px;
+  }
+
+  /* 모바일 터치 영역 최적화 */
+  .ticker-touch-area {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   /* Enhanced mobile spacing for weather cards */
   .weather-card-mobile {
     min-height: 100px;
