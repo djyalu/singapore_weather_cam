@@ -61,9 +61,10 @@ export const getRegionalTemperature = (weatherData, regionId) => {
   }
 
   // 실제 날씨 데이터에서 해당 지역 온도 계산
+  // 1순위: locations 배열에서 찾기 (RegionalWeatherDashboard용)
   if (weatherData?.locations && Array.isArray(weatherData.locations)) {
     const matchedStations = region.stationIds
-      .map(id => weatherData.locations.find(loc => loc.id === id))
+      .map(id => weatherData.locations.find(loc => loc.id === id || loc.station_id === id))
       .filter(Boolean);
       
     const temps = matchedStations
@@ -72,7 +73,24 @@ export const getRegionalTemperature = (weatherData, regionId) => {
     
     if (temps.length > 0) {
       const avgTemp = temps.reduce((sum, temp) => sum + temp, 0) / temps.length;
-      console.log(`✅ ${region.displayName} 실제 온도: ${avgTemp.toFixed(1)}°C (Stations: ${region.stationIds.join(', ')})`);
+      console.log(`✅ ${region.displayName} 실제 온도 (locations): ${avgTemp.toFixed(1)}°C (Stations: ${region.stationIds.join(', ')})`);
+      return avgTemp;
+    }
+  }
+
+  // 2순위: data.temperature.readings에서 찾기 (DirectMapView용)
+  if (weatherData?.data?.temperature?.readings && Array.isArray(weatherData.data.temperature.readings)) {
+    const matchedReadings = region.stationIds
+      .map(stationId => weatherData.data.temperature.readings.find(reading => reading.station === stationId))
+      .filter(Boolean);
+      
+    const temps = matchedReadings
+      .map(reading => reading.value)
+      .filter(temp => typeof temp === 'number' && !isNaN(temp));
+    
+    if (temps.length > 0) {
+      const avgTemp = temps.reduce((sum, temp) => sum + temp, 0) / temps.length;
+      console.log(`✅ ${region.displayName} 실제 온도 (readings): ${avgTemp.toFixed(1)}°C (Stations: ${region.stationIds.join(', ')})`);
       return avgTemp;
     }
   }
