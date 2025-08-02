@@ -89,10 +89,10 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     }
   };
 
-  // 경보 아이콘 결정 - 모바일 최적화
+  // 경보 아이콘 결정 - 모바일 최적화 (깜박거림 제거)
   const getAlertIcon = (alert) => {
     if (alert.type === 'critical' || alert.type === 'warning') {
-      return <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse text-red-600 flex-shrink-0" />;
+      return <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />;
     }
     return <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />;
   };
@@ -146,7 +146,7 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
         <div className="flex items-center justify-between px-4 py-2 bg-white/10 border-b border-gray-300/20">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="flex items-center gap-1 sm:gap-2">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
               <span className="text-gray-800 font-semibold text-xs sm:text-sm">🚨 기상 경보</span>
             </div>
             <span className="text-gray-600 text-xs hidden sm:block">

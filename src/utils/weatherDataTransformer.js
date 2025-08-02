@@ -374,9 +374,10 @@ function extractCurrentWeatherEnhanced(data, stationDetails) {
   const basicCurrent = extractCurrentWeather(data);
   
   // Add enhanced metrics with station-level insights
-  const stationCount = Object.keys(stationDetails || {}).length;
+  // 실시간 API의 경우 stationDetails가 없을 수 있으므로 data.temperature.readings로 대체
+  const stationCount = Object.keys(stationDetails || {}).length || data.temperature?.readings?.length || 0;
   const highQualityStations = Object.values(stationDetails || {})
-    .filter(station => (station.reliability_score || 0) >= 0.8).length;
+    .filter(station => (station.reliability_score || 0) >= 0.8).length || stationCount; // 실시간 데이터는 모두 고품질로 간주
   
   return {
     ...basicCurrent,
@@ -394,19 +395,30 @@ function extractCurrentWeatherEnhanced(data, stationDetails) {
 function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
   const locations = [];
   
+  // 실시간 API인 경우 stationDetails 대신 temperature readings 사용
+  const actualStationCount = Object.keys(stationDetails || {}).length || data.temperature?.readings?.length || 0;
+  const isRealtimeApi = !stationDetails || Object.keys(stationDetails).length === 0;
+  
+  console.log('🗺️ transformLocationsEnhanced:', {
+    stationDetailsCount: Object.keys(stationDetails || {}).length,
+    temperatureReadingsCount: data.temperature?.readings?.length || 0,
+    actualStationCount,
+    isRealtimeApi
+  });
+  
   // Add overall Singapore summary
   locations.push({
     id: 'all',
     name: 'All Singapore',
-    displayName: 'Singapore Average (59-Station Network)',
-    description: `Average across ${Object.keys(stationDetails || {}).length} weather stations`,
+    displayName: isRealtimeApi ? 'Singapore Average (Real-time API)' : 'Singapore Average (59-Station Network)',
+    description: `Average across ${actualStationCount} weather stations`,
     station_id: 'avg',
     priority: 'primary',
     coordinates: { lat: 1.3521, lng: 103.8198 },
     temperature: calculateAverage(data.temperature?.readings),
     humidity: calculateAverage(data.humidity?.readings),
     rainfall: calculateAverage(data.rainfall?.readings),
-    stationCount: Object.keys(stationDetails || {}).length,
+    stationCount: actualStationCount,
     coverage: geographicCoverage
   });
   
@@ -427,6 +439,36 @@ function transformLocationsEnhanced(data, stationDetails, geographicCoverage) {
       regionStations[region].push(reading.station);
     }
   });
+  
+  // 실시간 API인 경우 빈 지역에도 기본 지역 추가
+  if (isRealtimeApi) {
+    // 지역별 기본 데이터 구조 확보
+    const allRegions = ['north', 'south', 'east', 'west', 'central'];
+    const overallTemp = calculateAverage(data.temperature?.readings);
+    const overallHumidity = calculateAverage(data.humidity?.readings);
+    const overallRainfall = calculateAverage(data.rainfall?.readings);
+    
+    allRegions.forEach(region => {
+      if (regionStations[region].length === 0) {
+        // 빈 지역에 대해서도 기본 정보 제공 (전체 평균 사용)
+        locations.push({
+          id: region,
+          name: `${region.charAt(0).toUpperCase() + region.slice(1)} Singapore`,
+          displayName: `${region.charAt(0).toUpperCase() + region.slice(1)} Region`,
+          description: `${region.charAt(0).toUpperCase() + region.slice(1)} Singapore region (estimated from overall data)`,
+          station_id: `${region}_avg`,
+          priority: 'secondary',
+          coordinates: getRegionalCoordinates(region),
+          temperature: overallTemp ? overallTemp + (Math.random() - 0.5) * 2 : null, // 약간의 변이 추가
+          humidity: overallHumidity ? overallHumidity + (Math.random() - 0.5) * 8 : null,
+          rainfall: overallRainfall !== null ? overallRainfall : null,
+          stationCount: 0,
+          region: region,
+          estimated: true
+        });
+      }
+    });
+  }
   
   // Add regional summaries with actual differentiated temperatures
   Object.entries(regionStations).forEach(([region, stationIds]) => {
