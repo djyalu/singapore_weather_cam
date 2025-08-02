@@ -414,7 +414,7 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
 
       // 히트맵 생성 완료
     }
-  }, [isMapReady, refreshTrigger, weatherData]); // 지도 준비 상태, 새로고침 트리거, 날씨 데이터에 의존
+  }, [isMapReady, weatherData]); // refreshTrigger 제거로 무한루프 방지
 
   if (mapError) {
     return (
