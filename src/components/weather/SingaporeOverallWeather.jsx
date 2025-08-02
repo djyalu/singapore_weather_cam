@@ -74,7 +74,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     };
 
     generateSmartWeatherSummary();
-  }, [weatherData, refreshTrigger]);
+  }, [weatherData]); // refreshTrigger 제거로 무한루프 방지
 
   // 실시간 AI 분석 실행
   const handleRealAIAnalysis = async () => {
