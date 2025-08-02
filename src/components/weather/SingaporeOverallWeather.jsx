@@ -107,14 +107,16 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       const timestamp = new Date().getTime();
       
       try {
+        console.log('🔍 GitHub Actions Cohere 데이터 확인 중...');
         const response = await fetch(`${basePath}data/weather-summary/latest.json?t=${timestamp}`);
         
         if (response.ok) {
           const aiData = await response.json();
-          // GitHub Actions AI 데이터 로드 성공
+          console.log('✅ GitHub Actions AI 데이터 로드:', aiData.ai_model);
           
-          // 실제 Cohere 데이터인지 확인
-          if (aiData.ai_model === 'Cohere Command API' && aiData.raw_analysis) {
+          // 실제 Cohere 데이터인지 확인 (Enhanced 버전 포함)
+          if (aiData.ai_model && aiData.ai_model.includes('Cohere Command API') && aiData.raw_analysis) {
+            console.log('🎯 Cohere AI 데이터 발견! 분석 결과 표시');
             setCohereAnalysis({
               analysis: `🤖 **실제 Cohere AI 분석 결과**\n\n${aiData.raw_analysis}\n\n📊 **분석 메타데이터**\n• 모델: ${aiData.ai_model}\n• 신뢰도: ${Math.round((aiData.confidence || 0.85) * 100)}%\n• 분석 시간: ${new Date(aiData.timestamp).toLocaleString('ko-KR')}\n• API 호출: ${aiData.api_calls_today}/${aiData.api_calls_limit}회`,
               confidence: aiData.confidence || 0.85,
@@ -123,10 +125,18 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
               isRealAnalysis: true
             });
             return;
+          } else {
+            console.log('⚠️ Cohere 데이터 조건 불만족:', {
+              hasModel: !!aiData.ai_model,
+              includesCohere: aiData.ai_model?.includes('Cohere Command API'),
+              hasAnalysis: !!aiData.raw_analysis
+            });
           }
+        } else {
+          console.log('❌ GitHub Actions 데이터 응답 실패:', response.status);
         }
       } catch (fetchError) {
-        // GitHub Actions AI 데이터 로드 실패
+        console.error('❌ GitHub Actions AI 데이터 로드 실패:', fetchError);
       }
 
       // 3단계: 실시간 고급 분석 실행 (Cohere 데이터가 없는 경우)
