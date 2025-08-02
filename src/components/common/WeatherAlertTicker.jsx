@@ -31,19 +31,17 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // 경보 데이터 로드 - 단순화된 강제 로딩
+  // 경보 데이터 로드 - 메인 컨텍스트 데이터만 사용 (Single Source of Truth)
   const loadAlerts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Ticker: FORCED loading starting...');
+      console.log('🔄 Ticker: 메인 컨텍스트 데이터 사용 (독립적 fetch 제거)');
 
-      // 즉시 실시간 데이터 로드 및 표시
-      try {
-        const response = await fetch('/singapore_weather_cam/data/weather/latest.json?t=' + Date.now());
-        if (response.ok) {
-          const data = await response.json();
+      // 메인 컨텍스트 데이터 사용 (독립적 fetch 완전 제거)
+      const data = mainWeatherData;
+      if (data?.data?.temperature?.readings?.length > 0) {
           console.log('📊 Real-time data loaded:', data);
           console.log('🔍 Data structure check:', {
             hasTemperature: !!data.data?.temperature?.readings?.length,
@@ -226,24 +224,20 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
           }
           
           setAlerts(realAlerts);
-          return;
+        } else {
+          // 메인 컨텍스트 데이터가 없으면 로딩 메시지 표시
+          const loadingAlerts = [{
+            type: 'info',
+            priority: 'low',
+            icon: '📡',
+            message: '메인 앱에서 실시간 날씨 데이터를 로딩 중입니다...',
+            timestamp: new Date().toISOString(),
+            source: 'Main Context Loading',
+          }];
+          
+          console.log('🔄 Main context data not ready, showing loading message');
+          setAlerts(loadingAlerts);
         }
-      } catch (fetchError) {
-        console.warn('⚠️ Failed to fetch real-time data:', fetchError);
-      }
-      
-      // 폴백: 기본 메시지
-      const fallbackAlerts = [{
-        type: 'info',
-        priority: 'low',
-        icon: '📡',
-        message: 'NEA Singapore API에서 실시간 날씨 데이터를 수집 중입니다. 잠시 후 자동으로 업데이트됩니다.',
-        timestamp: new Date().toISOString(),
-        source: 'Loading System',
-      }];
-      
-      console.log('🔄 Using fallback alerts');
-      setAlerts(fallbackAlerts);
     } catch (err) {
       console.error('🚨 Ticker: Failed to load weather alerts:', err);
       setError(err.message);
@@ -270,19 +264,12 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     }
   }, [mainWeatherData, mainDataLoading]);
 
-  // 컴포넌트 마운트 시 데이터 로드 및 주기적 업데이트
+  // 컴포넌트 마운트 시 초기 로드 (주기적 업데이트 제거 - 메인 컨텍스트 의존)
   useEffect(() => {
-    loadAlerts();
-
-    // 주기적 업데이트 설정 (메인 앱과 동기화)
-    intervalRef.current = setInterval(loadAlerts, refreshInterval);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [refreshInterval]);
+    if (mainWeatherData && !mainDataLoading) {
+      loadAlerts();
+    }
+  }, []); // 초기 마운트 시에만 실행
 
   // 경보 우선순위에 따른 스타일 결정 - 간격 최적화
   const getAlertStyle = (alert) => {
