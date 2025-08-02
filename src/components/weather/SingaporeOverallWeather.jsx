@@ -978,6 +978,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
 
   // 날씨 상태에 따른 아이콘
   const getWeatherIcon = (forecast) => {
+    if (!forecast || typeof forecast !== 'string') return '🌤️';
     if (forecast.includes('Rain') || forecast.includes('Shower')) {return '🌧️';}
     if (forecast.includes('Thunder')) {return '⛈️';}
     if (forecast.includes('Cloudy')) {return '☁️';}
