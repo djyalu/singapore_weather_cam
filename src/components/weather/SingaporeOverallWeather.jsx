@@ -16,13 +16,13 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
 
-  // 시간 업데이트 비활성화 (성능 최적화)
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     setCurrentTime(new Date());
-  //   }, 30000);
-  //   return () => clearInterval(timer);
-  // }, []);
+  // 싱가포르 실시간 시간 업데이트 (1분 간격)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // 1분(60초) 간격으로 업데이트
+    return () => clearInterval(timer);
+  }, []);
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
@@ -307,8 +307,7 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     // 실제 데이터 시도
     if (rawWeatherData?.data?.temperature?.readings && Array.isArray(rawWeatherData.data.temperature.readings) && rawWeatherData.data.temperature.readings.length > 0) {
       temperatureReadings = rawWeatherData.data.temperature.readings;
-      console.log('✅ 실제 온도 데이터 사용:', temperatureReadings.length, '개 센서');
-    } else {
+      } else {
       // 폴백 데이터 (최신 데이터 기반)
       temperatureReadings = [
         { station: "S109", value: 34.8 },
@@ -317,12 +316,10 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
         { station: "S24", value: 33 },
         { station: "S104", value: 33.6 }
       ];
-      console.log('⚠️ 폴백 온도 데이터 사용:', temperatureReadings.length, '개 센서');
     }
     
     if (rawWeatherData?.data?.humidity?.readings && Array.isArray(rawWeatherData.data.humidity.readings) && rawWeatherData.data.humidity.readings.length > 0) {
       humidityReadings = rawWeatherData.data.humidity.readings;
-      console.log('✅ 실제 습도 데이터 사용:', humidityReadings.length, '개 센서');
     } else {
       // 폴백 데이터 (최신 데이터 기반)
       humidityReadings = [
@@ -332,7 +329,6 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
         { station: "S24", value: 51.1 },
         { station: "S104", value: 47.9 }
       ];
-      console.log('⚠️ 폴백 습도 데이터 사용:', humidityReadings.length, '개 센서');
     }
     
 
@@ -437,9 +433,9 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       }
     }
 
-    // 전국 온도 데이터 분석 섹션 추가 (NEA 5개 주요 센서 + 추정 지역 분포)
+    // 전국 온도 데이터 분석 섹션 추가 (NEA 5개 주요 센서 + 추정 지역 분포) - 항상 생성
     let temperatureSection = '';
-    if (temperatureReadings && temperatureReadings.length > 0) {
+    // 조건문 제거 - 항상 섹션 생성 (폴백 데이터 보장됨)
       const tempReadings = temperatureReadings;
       const maxTemp = Math.max(...tempReadings.map(r => r.value));
       const minTemp = Math.min(...tempReadings.map(r => r.value));
@@ -491,11 +487,10 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       } else {
         temperatureSection += `\n• ✅ 전국 온도 균등 분포 (${tempRange.toFixed(1)}°C 차이)`;
       }
-    }
 
-    // 전국 습도 데이터 분석 섹션 추가 (NEA 5개 주요 센서 + 추정 지역 분포)
+    // 전국 습도 데이터 분석 섹션 추가 (NEA 5개 주요 센서 + 추정 지역 분포) - 항상 생성
     let humiditySection = '';
-    if (humidityReadings && humidityReadings.length > 0) {
+    // 조건문 제거 - 항상 섹션 생성 (폴백 데이터 보장됨)
       const humReadings = humidityReadings;
       const maxHum = Math.max(...humReadings.map(r => r.value));
       const minHum = Math.min(...humReadings.map(r => r.value));
@@ -508,22 +503,22 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       const lowHumidity = humReadings.filter(r => r.value < 50);
       
       // 전국 습도 분포 추정 (센서 데이터 기반 지역 확장)
-      const totalEstimatedRegions = 25; // 싱가포르 주요 지역 수
-      const veryHighHumidityEstimate = Math.round((veryHighHumidity.length / humReadings.length) * totalEstimatedRegions);
-      const highHumidityEstimate = Math.round((highHumidity.length / humReadings.length) * totalEstimatedRegions);
-      const moderateHumidityEstimate = Math.round((moderateHumidity.length / humReadings.length) * totalEstimatedRegions);
-      const lowHumidityEstimate = Math.max(0, totalEstimatedRegions - veryHighHumidityEstimate - highHumidityEstimate - moderateHumidityEstimate);
+      const totalEstimatedHumidityRegions = 25; // 싱가포르 주요 지역 수
+      const veryHighHumidityEstimate = Math.round((veryHighHumidity.length / humReadings.length) * totalEstimatedHumidityRegions);
+      const highHumidityEstimate = Math.round((highHumidity.length / humReadings.length) * totalEstimatedHumidityRegions);
+      const moderateHumidityEstimate = Math.round((moderateHumidity.length / humReadings.length) * totalEstimatedHumidityRegions);
+      const lowHumidityEstimate = Math.max(0, totalEstimatedHumidityRegions - veryHighHumidityEstimate - highHumidityEstimate - moderateHumidityEstimate);
       
       // 신뢰도 계산
-      const reliabilityScore = Math.min(95, 70 + (humReadings.length * 5)); // 센서 수에 따른 신뢰도
+      const humidityReliabilityScore = Math.min(95, 70 + (humReadings.length * 5)); // 센서 수에 따른 신뢰도
       
       humiditySection = `
 
 💧 **실시간 지역별 습도 분포 분석**
 • 센서 수: ${humReadings.length}개 (NEA 공식 관측소)
-• 지역 커버리지: 약 ${totalEstimatedRegions}개 주요 지역 추정
+• 지역 커버리지: 약 ${totalEstimatedHumidityRegions}개 주요 지역 추정
 • 최고 습도: ${maxHum.toFixed(0)}% | 최저 습도: ${minHum.toFixed(0)}%
-• 습도 편차: ${humRange.toFixed(0)}% | 신뢰도: ${reliabilityScore}%`;
+• 습도 편차: ${humRange.toFixed(0)}% | 신뢰도: ${humidityReliabilityScore}%`;
 
       // 습도대별 지역 정보 (실제 센서 → 추정 지역 분포)
       if (veryHighHumidity.length > 0) {
@@ -547,7 +542,6 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
       } else {
         humiditySection += `\n• ✅ 전국 습도 균등 분포 (${humRange.toFixed(0)}% 차이)`;
       }
-    }
 
     const analysisText = `🌟 **실시간 고급 AI 날씨 분석**
 
