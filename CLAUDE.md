@@ -453,3 +453,9 @@ npm run format       # Prettier 포맷팅
 - Git 브랜치: main
 - Git 커밋: da2c0b73
 
+## 체크포인트 5 - 2025-08-02 21:53
+- 내용: Claude Code 체크포인트 시스템 한국 시간(KST) 설정 완료
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: e58d966f
+

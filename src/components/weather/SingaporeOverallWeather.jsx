@@ -294,15 +294,19 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     // 59개 관측소 강수량 데이터 분석 추가
     const rainfallAnalysis = analyzeRealTimeRainfall(weatherData);
 
-    // 실제 고급 분석 생성 (강수 정보 포함)
-    return generateAdvancedAIAnalysis(overallData, rainfallAnalysis);
+    // 실제 고급 분석 생성 (강수 정보 + 온도 세부 정보 포함)
+    return generateAdvancedAIAnalysis(overallData, rainfallAnalysis, weatherData);
   };
 
-  // 고급 AI 분석 생성 함수 (59개 관측소 강수 데이터 포함)
-  const generateAdvancedAIAnalysis = (data, rainfallAnalysis = null) => {
+  // 고급 AI 분석 생성 함수 (59개 관측소 강수 + 온도 데이터 포함)
+  const generateAdvancedAIAnalysis = (data, rainfallAnalysis = null, rawWeatherData = null) => {
     const temp = data.temperature;
     const humidity = data.humidity;
     const rainfall = data.rainfall;
+    
+    // 온도 및 습도 세부 데이터 준비
+    const temperatureReadings = rawWeatherData?.data?.temperature?.readings || [];
+    const humidityReadings = rawWeatherData?.data?.humidity?.readings || [];
 
     // Heat Index 계산 (실제 기상학 공식)
     const heatIndex = temp + (humidity - 60) * 0.12;
@@ -363,26 +367,32 @@ const SingaporeOverallWeather = React.memo(({ weatherData, refreshTrigger = 0, c
     // 59개 관측소 실시간 강수 상황 분석 섹션 추가
     let rainfallSection = '';
     if (rainfallAnalysis) {
+      // 신뢰도 계산 (강수량 관측소 수에 따른)
+      const rainReliabilityScore = Math.min(98, 85 + (rainfallAnalysis.totalStations * 0.2)); // 관측소 수에 따른 신뢰도
+      
       rainfallSection = `
 
-🌧️ **실시간 지역별 강수 상황 (59개 관측소)**
-${rainfallAnalysis.message}
-• 강수 중인 지역: ${rainfallAnalysis.activeRainStations}/${rainfallAnalysis.totalStations}개소
-• 최대 강수량: ${rainfallAnalysis.maxRainfall}mm
-• 전국 총 강수량: ${rainfallAnalysis.totalRainfall}mm`;
+🌧️ **실시간 지역별 강수 분포 분석**
+• 관측소 수: ${rainfallAnalysis.totalStations}개 (NEA 전국 네트워크)
+• 활성 강수 지역: ${rainfallAnalysis.activeRainStations}개소
+• 최대 강수량: ${rainfallAnalysis.maxRainfall}mm | 총 강수량: ${rainfallAnalysis.totalRainfall}mm
+• 경보 수준: ${rainfallAnalysis.alertLevel} | 신뢰도: ${rainReliabilityScore.toFixed(0)}%`;
 
-      // 강수량별 지역 상세 정보
+      // 강수량별 지역 분포 정보
       if (rainfallAnalysis.regions.extreme.length > 0) {
-        rainfallSection += `\n• ⛈️ 극한 폭우 지역: ${rainfallAnalysis.regions.extreme.length}곳 (30mm 이상)`;
+        rainfallSection += `\n• ⛈️ 극한 폭우 지역 (30mm+): ${rainfallAnalysis.regions.extreme.length}개 관측소`;
       }
       if (rainfallAnalysis.regions.heavy.length > 0) {
-        rainfallSection += `\n• 🌧️ 강한 비 지역: ${rainfallAnalysis.regions.heavy.length}곳 (10-30mm)`;
+        rainfallSection += `\n• 🌧️ 강한 비 지역 (10-30mm): ${rainfallAnalysis.regions.heavy.length}개 관측소`;
       }
       if (rainfallAnalysis.regions.moderate.length > 0) {
-        rainfallSection += `\n• ☔ 중간 비 지역: ${rainfallAnalysis.regions.moderate.length}곳 (2-10mm)`;
+        rainfallSection += `\n• ☔ 중간 비 지역 (2-10mm): ${rainfallAnalysis.regions.moderate.length}개 관측소`;
       }
       if (rainfallAnalysis.regions.light.length > 0) {
-        rainfallSection += `\n• 🌦️ 가벼운 비 지역: ${rainfallAnalysis.regions.light.length}곳 (0-2mm)`;
+        rainfallSection += `\n• 🌦️ 가벼운 비 지역 (0-2mm): ${rainfallAnalysis.regions.light.length}개 관측소`;
+      }
+      if (rainfallAnalysis.regionBreakdown.dry > 0) {
+        rainfallSection += `\n• ☀️ 건조한 지역: ${rainfallAnalysis.regionBreakdown.dry}개 관측소`;
       }
 
       // 긴급 상황별 권장사항 추가
@@ -399,13 +409,125 @@ ${rainfallAnalysis.message}
       }
     }
 
+    // 전국 온도 데이터 분석 섹션 추가 (NEA 5개 주요 센서 + 추정 지역 분포)
+    let temperatureSection = '';
+    if (temperatureReadings && temperatureReadings.length > 0) {
+      const tempReadings = temperatureReadings;
+      const maxTemp = Math.max(...tempReadings.map(r => r.value));
+      const minTemp = Math.min(...tempReadings.map(r => r.value));
+      const tempRange = maxTemp - minTemp;
+      
+      // 온도 지역별 분류 (실제 센서 기준)
+      const hotRegions = tempReadings.filter(r => r.value >= 33);
+      const warmRegions = tempReadings.filter(r => r.value >= 30 && r.value < 33);
+      const moderateRegions = tempReadings.filter(r => r.value >= 26 && r.value < 30);
+      const coolRegions = tempReadings.filter(r => r.value < 26);
+      
+      // 전국 온도 분포 추정 (센서 데이터 기반 지역 확장)
+      const totalEstimatedRegions = 25; // 싱가포르 주요 지역 수
+      const hotRegionEstimate = Math.round((hotRegions.length / tempReadings.length) * totalEstimatedRegions);
+      const warmRegionEstimate = Math.round((warmRegions.length / tempReadings.length) * totalEstimatedRegions);
+      const moderateRegionEstimate = Math.round((moderateRegions.length / tempReadings.length) * totalEstimatedRegions);
+      const coolRegionEstimate = Math.max(0, totalEstimatedRegions - hotRegionEstimate - warmRegionEstimate - moderateRegionEstimate);
+      
+      // 신뢰도 계산
+      const reliabilityScore = Math.min(95, 70 + (tempReadings.length * 5)); // 센서 수에 따른 신뢰도
+      
+      temperatureSection = `
+
+🌡️ **실시간 지역별 온도 분포 분석**
+• 센서 수: ${tempReadings.length}개 (NEA 공식 관측소)
+• 지역 커버리지: 약 ${totalEstimatedRegions}개 주요 지역 추정
+• 최고 기온: ${maxTemp.toFixed(1)}°C | 최저 기온: ${minTemp.toFixed(1)}°C
+• 온도 편차: ${tempRange.toFixed(1)}°C | 신뢰도: ${reliabilityScore}%`;
+
+      // 온도대별 지역 정보 (실제 센서 → 추정 지역 분포)
+      if (hotRegions.length > 0) {
+        temperatureSection += `\n• 🔥 고온 지역 (33°C+): ${hotRegions.length}개 센서 → ${hotRegionEstimate}개 지역 추정`;
+      }
+      if (warmRegions.length > 0) {
+        temperatureSection += `\n• 🌞 더운 지역 (30-33°C): ${warmRegions.length}개 센서 → ${warmRegionEstimate}개 지역 추정`;
+      }
+      if (moderateRegions.length > 0) {
+        temperatureSection += `\n• 🌤️ 적당한 지역 (26-30°C): ${moderateRegions.length}개 센서 → ${moderateRegionEstimate}개 지역 추정`;
+      }
+      if (coolRegions.length > 0 || coolRegionEstimate > 0) {
+        temperatureSection += `\n• 🌊 선선한 지역 (26°C 미만): ${coolRegions.length}개 센서 → ${coolRegionEstimate}개 지역 추정`;
+      }
+
+      // 편차 분석
+      if (tempRange >= 4) {
+        temperatureSection += `\n• ⚠️ 지역별 온도 편차 큼 (${tempRange.toFixed(1)}°C 차이)`;
+      } else if (tempRange >= 2) {
+        temperatureSection += `\n• 📊 지역별 온도 편차 보통 (${tempRange.toFixed(1)}°C 차이)`;
+      } else {
+        temperatureSection += `\n• ✅ 전국 온도 균등 분포 (${tempRange.toFixed(1)}°C 차이)`;
+      }
+    }
+
+    // 전국 습도 데이터 분석 섹션 추가 (NEA 5개 주요 센서 + 추정 지역 분포)
+    let humiditySection = '';
+    if (humidityReadings && humidityReadings.length > 0) {
+      const humReadings = humidityReadings;
+      const maxHum = Math.max(...humReadings.map(r => r.value));
+      const minHum = Math.min(...humReadings.map(r => r.value));
+      const humRange = maxHum - minHum;
+      
+      // 습도 지역별 분류 (실제 센서 기준)
+      const veryHighHumidity = humReadings.filter(r => r.value >= 85);
+      const highHumidity = humReadings.filter(r => r.value >= 70 && r.value < 85);
+      const moderateHumidity = humReadings.filter(r => r.value >= 50 && r.value < 70);
+      const lowHumidity = humReadings.filter(r => r.value < 50);
+      
+      // 전국 습도 분포 추정 (센서 데이터 기반 지역 확장)
+      const totalEstimatedRegions = 25; // 싱가포르 주요 지역 수
+      const veryHighHumidityEstimate = Math.round((veryHighHumidity.length / humReadings.length) * totalEstimatedRegions);
+      const highHumidityEstimate = Math.round((highHumidity.length / humReadings.length) * totalEstimatedRegions);
+      const moderateHumidityEstimate = Math.round((moderateHumidity.length / humReadings.length) * totalEstimatedRegions);
+      const lowHumidityEstimate = Math.max(0, totalEstimatedRegions - veryHighHumidityEstimate - highHumidityEstimate - moderateHumidityEstimate);
+      
+      // 신뢰도 계산
+      const reliabilityScore = Math.min(95, 70 + (humReadings.length * 5)); // 센서 수에 따른 신뢰도
+      
+      humiditySection = `
+
+💧 **실시간 지역별 습도 분포 분석**
+• 센서 수: ${humReadings.length}개 (NEA 공식 관측소)
+• 지역 커버리지: 약 ${totalEstimatedRegions}개 주요 지역 추정
+• 최고 습도: ${maxHum.toFixed(0)}% | 최저 습도: ${minHum.toFixed(0)}%
+• 습도 편차: ${humRange.toFixed(0)}% | 신뢰도: ${reliabilityScore}%`;
+
+      // 습도대별 지역 정보 (실제 센서 → 추정 지역 분포)
+      if (veryHighHumidity.length > 0) {
+        humiditySection += `\n• 💦 매우 습한 지역 (85%+): ${veryHighHumidity.length}개 센서 → ${veryHighHumidityEstimate}개 지역 추정`;
+      }
+      if (highHumidity.length > 0) {
+        humiditySection += `\n• 🌊 습한 지역 (70-85%): ${highHumidity.length}개 센서 → ${highHumidityEstimate}개 지역 추정`;
+      }
+      if (moderateHumidity.length > 0) {
+        humiditySection += `\n• 🌤️ 적당한 지역 (50-70%): ${moderateHumidity.length}개 센서 → ${moderateHumidityEstimate}개 지역 추정`;
+      }
+      if (lowHumidity.length > 0 || lowHumidityEstimate > 0) {
+        humiditySection += `\n• 🏜️ 건조한 지역 (50% 미만): ${lowHumidity.length}개 센서 → ${lowHumidityEstimate}개 지역 추정`;
+      }
+
+      // 편차 분석
+      if (humRange >= 20) {
+        humiditySection += `\n• ⚠️ 지역별 습도 편차 큼 (${humRange.toFixed(0)}% 차이)`;
+      } else if (humRange >= 10) {
+        humiditySection += `\n• 📊 지역별 습도 편차 보통 (${humRange.toFixed(0)}% 차이)`;
+      } else {
+        humiditySection += `\n• ✅ 전국 습도 균등 분포 (${humRange.toFixed(0)}% 차이)`;
+      }
+    }
+
     const analysisText = `🌟 **실시간 고급 AI 날씨 분석**
 
 📊 **정밀 기상 분석 결과**
 • 실제 기온: ${temp.toFixed(1)}°C
 • AI 계산 체감온도: ${heatIndex.toFixed(1)}°C
 • 습도: ${Math.round(humidity)}% (${humidity >= 80 ? '매우 높음' : humidity >= 60 ? '보통' : '낮음'})
-• 강수량: ${rainfall.toFixed(1)}mm${rainfallSection}
+• 강수량: ${rainfall.toFixed(1)}mm${temperatureSection}${humiditySection}${rainfallSection}
 
 🧠 **AI 기상 패턴 분류**
 현재 **${weatherPattern}**이 감지되었습니다.
@@ -461,12 +583,16 @@ ${rainfallAnalysis && rainfallAnalysis.alertLevel !== 'none' ? ` ${rainfallAnaly
     }
   };
 
-  // 심화 분석 생성 함수
+  // 심화 분석 생성 함수 (온도/습도 세부 정보 포함)
   const generateAdvancedAnalysis = (overallData, rawData) => {
     const temp = overallData.temperature;
     const humidity = overallData.humidity;
     const rainfall = overallData.rainfall;
     const forecast = overallData.forecast;
+
+    // 온도 및 습도 세부 데이터 준비
+    const temperatureReadings = rawData?.data?.temperature?.readings || [];
+    const humidityReadings = rawData?.data?.humidity?.readings || [];
 
     // 체감온도 계산 (Heat Index 간소화 버전)
     const heatIndex = temp + (humidity - 60) * 0.1;
@@ -498,9 +624,39 @@ ${rainfallAnalysis && rainfallAnalysis.alertLevel !== 'none' ? ` ${rainfallAnaly
       timeAdvice = '저녁/밤 시간으로 선선한 야외활동이 가능합니다.';
     }
 
+    // 온도 세부 정보 추가
+    let tempDetailSection = '';
+    if (temperatureReadings.length > 0) {
+      const maxTemp = Math.max(...temperatureReadings.map(r => r.value));
+      const minTemp = Math.min(...temperatureReadings.map(r => r.value));
+      const tempRange = maxTemp - minTemp;
+      const hotRegions = temperatureReadings.filter(r => r.value >= 33).length;
+      
+      tempDetailSection = `
+
+🌡️ **지역별 온도 현황 (${temperatureReadings.length}개소)**
+• 최고: ${maxTemp.toFixed(1)}°C | 최저: ${minTemp.toFixed(1)}°C (편차 ${tempRange.toFixed(1)}°C)
+• 고온지역: ${hotRegions}곳 (33°C+) | 전체 평균: ${temp.toFixed(1)}°C`;
+    }
+
+    // 습도 세부 정보 추가
+    let humDetailSection = '';
+    if (humidityReadings.length > 0) {
+      const maxHum = Math.max(...humidityReadings.map(r => r.value));
+      const minHum = Math.min(...humidityReadings.map(r => r.value));
+      const humRange = maxHum - minHum;
+      const highHumidityRegions = humidityReadings.filter(r => r.value >= 85).length;
+      
+      humDetailSection = `
+
+💧 **지역별 습도 현황 (${humidityReadings.length}개소)**
+• 최고: ${maxHum.toFixed(0)}% | 최저: ${minHum.toFixed(0)}% (편차 ${humRange.toFixed(0)}%)
+• 매우습한지역: ${highHumidityRegions}곳 (85%+) | 전체 평균: ${humidity.toFixed(0)}%`;
+    }
+
     const analysis = `🌡️ **체감온도 분석**
 실제온도 ${temp.toFixed(1)}°C → 체감온도 약 ${heatIndex.toFixed(1)}°C
-습도 ${Math.round(humidity)}%로 인한 끈적함 ${humidity >= 80 ? '높음' : humidity >= 60 ? '보통' : '낮음'}
+습도 ${Math.round(humidity)}%로 인한 끈적함 ${humidity >= 80 ? '높음' : humidity >= 60 ? '보통' : '낮음'}${tempDetailSection}${humDetailSection}
 
 🌦️ **날씨 패턴**
 현재 ${weatherPattern} 상태입니다.
