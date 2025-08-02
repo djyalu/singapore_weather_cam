@@ -45,6 +45,15 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
         if (response.ok) {
           const data = await response.json();
           console.log('📊 Real-time data loaded:', data);
+          console.log('🔍 Data structure check:', {
+            hasTemperature: !!data.data?.temperature?.readings?.length,
+            hasHumidity: !!data.data?.humidity?.readings?.length,
+            hasRainfall: !!data.data?.rainfall?.readings?.length,
+            hasForecast: !!data.data?.forecast?.general?.forecast,
+            tempCount: data.data?.temperature?.readings?.length || 0,
+            humidityCount: data.data?.humidity?.readings?.length || 0,
+            rainfallCount: data.data?.rainfall?.readings?.length || 0
+          });
           
           const realAlerts = [];
           const now = new Date();
@@ -178,6 +187,12 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
           });
           
           console.log('🎯 Complete real-time alerts generated:', realAlerts.length);
+          console.log('📋 Generated alerts:', realAlerts.map(a => a.message.substring(0, 50) + '...'));
+          
+          if (realAlerts.length === 0) {
+            console.warn('⚠️ No alerts generated despite having data - this is unexpected!');
+          }
+          
           setAlerts(realAlerts);
           return;
         }
@@ -285,13 +300,17 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     return null;
   }
 
-  // 높은 우선순위 경보만 표시 (최대 5개)
-  const displayAlerts = useMemo(() =>
-    alerts
-      .filter(alert => alert.priority !== 'low' || alerts.length === 1)
-      .slice(0, 5),
-  [alerts],
-  );
+  // 높은 우선순위 경보만 표시 (최대 5개) - 강제로 모든 알림 표시하도록 수정
+  const displayAlerts = useMemo(() => {
+    console.log('🎭 Display alerts filtering:', {
+      totalAlerts: alerts.length,
+      alertPriorities: alerts.map(a => a.priority),
+      filtered: alerts.slice(0, 5).length
+    });
+    
+    // 모든 알림을 표시하도록 임시 수정 (우선순위 필터링 비활성화)
+    return alerts.slice(0, 5);
+  }, [alerts]);
 
   // 애니메이션 활성화 조건 (배터리 절약)
   const shouldAnimate = useMemo(() =>
@@ -365,7 +384,9 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
             <div className="flex items-center justify-center h-full px-4">
               <div className="flex items-center gap-2 text-gray-600">
                 <Info className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span className="text-xs sm:text-sm md:text-base truncate">기상 정보를 불러오는 중입니다...</span>
+                <span className="text-xs sm:text-sm md:text-base truncate">
+                  기상 정보를 불러오는 중입니다... (alerts: {alerts.length}, display: {displayAlerts.length})
+                </span>
               </div>
             </div>
           ) : (

@@ -1,13 +1,14 @@
 {
-  "timestamp": "2025-08-02T15:10:04.287Z",
+  "timestamp": "2025-08-02T06:44:12.941Z",
   "source": "NEA Singapore (Enhanced with Intelligent Station Selection)",
-  "collection_time_ms": 4694,
+  "collection_time_ms": 4804,
   "api_calls": 4,
   "successful_calls": 4,
   "failed_calls": 0,
   "stations_used": [
     "S109",
     "S107",
+    "S115",
     "S24",
     "S104",
     "S224",
@@ -57,7 +58,6 @@
     "S214",
     "S88",
     "S123",
-    "S115",
     "S69",
     "S08",
     "S230",
@@ -83,43 +83,51 @@
       "readings": [
         {
           "station": "S109",
-          "value": 29.7
+          "value": 34.8
         },
         {
           "station": "S107",
-          "value": 29.6
+          "value": 31.6
+        },
+        {
+          "station": "S115",
+          "value": 31.7
         },
         {
           "station": "S24",
-          "value": 29.5
+          "value": 33
         },
         {
           "station": "S104",
-          "value": 29.2
+          "value": 33.6
         }
       ],
-      "average": 29.5
+      "average": 32.940000000000005
     },
     "humidity": {
       "readings": [
         {
           "station": "S109",
-          "value": 77.6
+          "value": 41.2
         },
         {
           "station": "S107",
-          "value": 80.1
+          "value": 52.3
+        },
+        {
+          "station": "S115",
+          "value": 60.6
         },
         {
           "station": "S24",
-          "value": 75.6
+          "value": 51.1
         },
         {
           "station": "S104",
-          "value": 95.9
+          "value": 47.9
         }
       ],
-      "average": 82.3
+      "average": 50.62
     },
     "rainfall": {
       "readings": [
@@ -370,18 +378,31 @@
           "high": 95
         },
         "temperature": {
-          "low": 25,
+          "low": 26,
           "high": 34
         },
         "wind": {
           "speed": {
             "low": 10,
-            "high": 15
+            "high": 20
           },
           "direction": "SSE"
         }
       },
       "periods": [
+        {
+          "time": {
+            "start": "2025-08-02T12:00:00+08:00",
+            "end": "2025-08-02T18:00:00+08:00"
+          },
+          "regions": {
+            "west": "Partly Cloudy (Day)",
+            "east": "Partly Cloudy (Day)",
+            "central": "Partly Cloudy (Day)",
+            "south": "Partly Cloudy (Day)",
+            "north": "Partly Cloudy (Day)"
+          }
+        },
         {
           "time": {
             "start": "2025-08-02T18:00:00+08:00",
@@ -402,23 +423,10 @@
           },
           "regions": {
             "west": "Thundery Showers",
-            "east": "Cloudy",
-            "central": "Cloudy",
-            "south": "Cloudy",
+            "east": "Thundery Showers",
+            "central": "Thundery Showers",
+            "south": "Thundery Showers",
             "north": "Thundery Showers"
-          }
-        },
-        {
-          "time": {
-            "start": "2025-08-03T12:00:00+08:00",
-            "end": "2025-08-03T18:00:00+08:00"
-          },
-          "regions": {
-            "west": "Partly Cloudy (Day)",
-            "east": "Partly Cloudy (Day)",
-            "central": "Partly Cloudy (Day)",
-            "south": "Partly Cloudy (Day)",
-            "north": "Partly Cloudy (Day)"
           }
         }
       ]
