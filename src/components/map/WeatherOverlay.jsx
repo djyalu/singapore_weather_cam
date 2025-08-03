@@ -37,7 +37,9 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
       propsTemp: weatherData?.data?.temperature?.average,
       usingTemp: dataToUse?.data?.temperature?.average,
       globalTimestamp: globalWeatherData?.timestamp,
-      propsTimestamp: weatherData?.timestamp
+      propsTimestamp: weatherData?.timestamp,
+      globalReadings: globalWeatherData?.data?.temperature?.readings?.length,
+      propsReadings: weatherData?.data?.temperature?.readings?.length
     });
     
     if (!dataToUse?.locations) {return [];}
@@ -122,7 +124,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         const weatherDescription = getWeatherDescription(avgTemperature, totalRainfall);
         const weatherIcon = getWeatherIcon(avgTemperature, totalRainfall);
 
-        return {
+        const regionResult = {
           ...region,
           coordinates: region.center,
           temperature: Math.round(avgTemperature * 10) / 10,
@@ -136,6 +138,9 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
           radius: region.radius,
           intensity: getTemperatureIntensity(avgTemperature),
         };
+        
+        console.log(`🗺️ [WeatherOverlay] ${region.name} 지역 온도: ${regionResult.temperature}°C (${regionStations.length}개 스테이션)`);
+        return regionResult;
       }
 
       // 해당 지역에 스테이션이 없으면 null 반환 (필터링됨)
@@ -151,17 +156,25 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
     setWeatherRegions(regions);
   }, [calculateWeatherRegions, showTemperatureLayer, showWeatherIcons]); // 레이어 설정 변경 시에도 업데이트
 
-  // 글로벌 데이터 변경 감지 (5초마다 체크)
+  // 글로벌 데이터 변경 감지 (2초마다 체크)
   useEffect(() => {
     const interval = setInterval(() => {
       const newRegions = calculateWeatherRegions();
+      console.log('🗺️ [WeatherOverlay] 정기 체크 - 지역 수:', newRegions.length);
       if (newRegions.length > 0) {
         console.log('🗺️ [WeatherOverlay] 글로벌 데이터 변경 감지 - 히트맵 업데이트');
         setWeatherRegions(newRegions);
       }
-    }, 5000);
+    }, 2000); // 2초로 단축
 
     return () => clearInterval(interval);
+  }, [calculateWeatherRegions]);
+
+  // 컴포넌트 마운트 시 즉시 실행
+  useEffect(() => {
+    console.log('🗺️ [WeatherOverlay] 컴포넌트 마운트 - 즉시 데이터 로드');
+    const regions = calculateWeatherRegions();
+    setWeatherRegions(regions);
   }, [calculateWeatherRegions]);
 
   // 온도별 색상 반환 - 더 생동감 있는 색상
