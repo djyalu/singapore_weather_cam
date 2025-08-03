@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Circle, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -10,6 +10,26 @@ import L from 'leaflet';
  * - 인터랙티브 팝업
  */
 const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, showWeatherIcons = true, className = '' }) => {
+
+  // 글로벌 데이터 변경 감지를 위한 상태
+  const [globalDataTimestamp, setGlobalDataTimestamp] = useState(null);
+
+  // 글로벌 데이터 변경 감지
+  useEffect(() => {
+    const checkGlobalData = () => {
+      try {
+        if (typeof window !== 'undefined' && window.weatherData) {
+          setGlobalDataTimestamp(window.weatherData.timestamp);
+        }
+      } catch (error) {
+        // 무시
+      }
+    };
+
+    checkGlobalData();
+    const interval = setInterval(checkGlobalData, 1000); // 1초마다 체크
+    return () => clearInterval(interval);
+  }, []);
 
   // 지역별 날씨 정보를 지도 표시용으로 변환 - Single Source of Truth 사용
   const weatherRegions = useMemo(() => {
@@ -128,7 +148,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
       // 해당 지역에 스테이션이 없으면 null 반환 (필터링됨)
       return null;
     }).filter(Boolean); // null 값 제거
-  }, [weatherData]);
+  }, [weatherData, globalDataTimestamp]); // 글로벌 데이터 변경도 감지
 
   // 온도별 색상 반환 - 더 생동감 있는 색상
   const getTemperatureColor = (temp) => {
