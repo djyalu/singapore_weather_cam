@@ -26,8 +26,14 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   useEffect(() => {
     console.log('🚀 [SingaporeOverallWeather] Using global Single Source of Truth (same as ticker)');
     
-    // 글로벌 window.weatherData 사용 (티커와 동일한 소스)
-    const globalWeatherData = window.weatherData;
+    // 안전하게 글로벌 window.weatherData 사용 (티커와 동일한 소스)
+    let globalWeatherData = null;
+    try {
+      globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+    } catch (error) {
+      console.warn('⚠️ [SingaporeOverallWeather] Global data access failed:', error);
+      globalWeatherData = null;
+    }
     
     if (globalWeatherData?.data?.temperature?.readings?.length > 0) {
       const freshData = globalWeatherData;
@@ -123,7 +129,13 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         // Use global Single Source of Truth - 티커와 동일한 데이터 소스 사용
         try {
           console.log('🔄 [SingaporeOverallWeather] Using global Single Source of Truth (same as ticker)...');
-          const globalWeatherData = window.weatherData;
+          let globalWeatherData = null;
+          try {
+            globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+          } catch (error) {
+            console.warn('⚠️ [SingaporeOverallWeather] AI analysis global data access failed:', error);
+            globalWeatherData = null;
+          }
           if (globalWeatherData) {
             console.log('✅ [SingaporeOverallWeather] Using same data source as ticker:', {
               temperature_average: globalWeatherData.data?.temperature?.average,

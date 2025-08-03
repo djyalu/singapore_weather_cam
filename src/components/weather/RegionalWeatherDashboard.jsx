@@ -66,8 +66,15 @@ const RegionalWeatherDashboard = React.memo(({
   const getRegionalWeatherData = useMemo(() => {
     console.log('🔍 [RegionalWeatherDashboard] Single Source of Truth 사용 (티커와 동일한 소스)');
     
-    // 글로벌 window.weatherData 사용 (티커와 동일한 소스)
-    const globalWeatherData = window.weatherData;
+    // 안전하게 글로벌 window.weatherData 접근 (티커와 동일한 소스)
+    let globalWeatherData = null;
+    try {
+      globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+    } catch (error) {
+      console.warn('⚠️ [RegionalWeatherDashboard] Global data access failed:', error);
+      globalWeatherData = null;
+    }
+    
     const dataToUse = globalWeatherData || weatherData; // 글로벌 데이터 우선, 없으면 props 사용
     
     console.log('- 데이터 소스:', globalWeatherData ? 'GLOBAL (티커와 동일)' : 'PROPS (폴백)');
