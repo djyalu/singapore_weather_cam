@@ -618,3 +618,9 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: 2c50598
+
+## 체크포인트 31 - 2025-08-03 15:22
+- 내용: Singapore Weather와 티커 데이터 불일치 완전 해결 - SingaporeOverallWeather의 독립 API 호출 제거, Single Source of Truth (window.weatherData) 사용으로 26.7°C 일치성 보장
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: ea19924

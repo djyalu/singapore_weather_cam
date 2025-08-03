@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
 import neaRealTimeService from '../../services/neaRealTimeService';
 // import DataValidationIndicator from '../common/DataValidationIndicator'; // 임시 비활성화
-// import { useWeatherData } from '../../contexts/AppDataContextSimple'; // 임시 비활성화
+import { useWeatherData } from '../../contexts/AppDataContextSimple';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -19,8 +19,8 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [showRealAI, setShowRealAI] = useState(false);
   const [independentWeatherData, setIndependentWeatherData] = useState(null);
 
-  // 검증 결과 가져오기 (임시 비활성화)
-  // const { validationResults } = useWeatherData();
+  // WeatherAlertTicker와 동일한 데이터 감지 시스템 사용
+  const { weatherData: mainWeatherData, isLoading: mainDataLoading } = useWeatherData();
 
   // 글로벌 Single Source of Truth 사용 (티커와 동일한 데이터)
   useEffect(() => {
@@ -99,7 +99,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     } else {
       console.log('⚠️ [SingaporeOverallWeather] Waiting for global NEA data...');
     }
-  }, [weatherData, refreshTrigger]); // Depends on real-time data and refreshTrigger
+  }, [mainWeatherData, mainDataLoading]); // WeatherAlertTicker와 동일한 업데이트 트리거 사용
 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
