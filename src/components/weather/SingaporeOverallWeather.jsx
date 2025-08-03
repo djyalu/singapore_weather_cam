@@ -110,48 +110,33 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   // AI 날씨 요약 데이터 생성 (새로고침 시에도 업데이트) - 실시간 데이터 우선 사용
   useEffect(() => {
     const generateSmartWeatherSummary = async () => {
-      // 독립적으로 로드된 데이터 우선 사용, 없으면 props로 받은 데이터 사용
-      const dataToUse = independentWeatherData || weatherData;
-      if (!dataToUse) {return;}
+      // 🎯 강제로 글로벌 데이터만 사용 (티커, 지도와 완전 동일한 소스)
+      let globalWeatherData = null;
+      try {
+        globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+      } catch (error) {
+        console.warn('⚠️ [SingaporeOverallWeather] AI analysis global data access failed:', error);
+        globalWeatherData = null;
+      }
+      
+      if (!globalWeatherData) {
+        console.warn('🤖 [AI Analysis] 글로벌 데이터 없음 - AI 분석 스킵');
+        setAiLoading(false);
+        return;
+      }
 
       setAiLoading(true);
       try {
-        // 독립적 데이터가 있으면 그것을 사용, 없으면 추가 fetch 시도
-        let actualWeatherData = dataToUse;
+        // 강제로 글로벌 데이터만 사용
+        const actualWeatherData = globalWeatherData;
         
-        console.log('🎯 [SingaporeOverallWeather] 사용할 데이터 결정:', {
-          hasIndependentData: !!independentWeatherData,
-          hasPropsData: !!weatherData,
-          usingDataSource: independentWeatherData ? 'INDEPENDENT' : 'PROPS',
-          temperature: actualWeatherData?.data?.temperature?.average
+        console.log('🤖 [AI Analysis] 티커와 동일한 데이터 사용:', {
+          temperature_average: globalWeatherData.data?.temperature?.average,
+          readings_count: globalWeatherData.data?.temperature?.readings?.length,
+          source: globalWeatherData.source,
+          timestamp: globalWeatherData.timestamp,
+          dataConsistency: 'IDENTICAL_TO_TICKER_AND_MAP'
         });
-        
-        // Use global Single Source of Truth - 티커와 동일한 데이터 소스 사용
-        try {
-          console.log('🔄 [SingaporeOverallWeather] Using global Single Source of Truth (same as ticker)...');
-          let globalWeatherData = null;
-          try {
-            globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
-          } catch (error) {
-            console.warn('⚠️ [SingaporeOverallWeather] AI analysis global data access failed:', error);
-            globalWeatherData = null;
-          }
-          if (globalWeatherData) {
-            console.log('✅ [SingaporeOverallWeather] Using same data source as ticker:', {
-              temperature_average: globalWeatherData.data?.temperature?.average,
-              readings_count: globalWeatherData.data?.temperature?.readings?.length,
-              source: globalWeatherData.source,
-              timestamp: globalWeatherData.timestamp
-            });
-            actualWeatherData = globalWeatherData;
-          } else {
-            console.log('⚠️ [SingaporeOverallWeather] No global data, using props data');
-            actualWeatherData = dataToUse;
-          }
-        } catch (fetchError) {
-          console.warn('⚠️ [SingaporeOverallWeather] Failed to access global data, using props:', fetchError);
-          actualWeatherData = dataToUse;
-        }
 
         // Generating smart weather summary
 
@@ -300,7 +285,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     };
 
     generateSmartWeatherSummary();
-  }, [weatherData, independentWeatherData]); // independentWeatherData 추가
+  }, [refreshTrigger]); // refreshTrigger 변경 시에만 AI 분석 실행 (글로벌 데이터 사용)
 
   // 실시간 AI 분석 실행
   const handleRealAIAnalysis = async () => {

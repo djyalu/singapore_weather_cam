@@ -654,3 +654,9 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: 5c54b88
+
+## 체크포인트 37 - 2025-08-03 16:14
+- 내용: 인터랙티브 지도 33°C 문제 강제 해결 - WeatherOverlay에서 props 폴백 제거, window.weatherData만 사용하여 티커와 완전 동일한 28.3°C 표시 강제
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 18a65c2
