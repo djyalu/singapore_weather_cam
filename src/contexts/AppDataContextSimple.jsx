@@ -205,6 +205,11 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     performance: {
       contextPerformance: {},
     },
+
+    // Validation results
+    validation: {
+      validationResults,
+    },
   }), [
     weatherData,
     systemStats,
