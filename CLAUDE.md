@@ -636,3 +636,9 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: 969b2fc
+
+## 체크포인트 34 - 2025-08-03 15:37
+- 내용: 인터랙티브 지도 데이터 일치성 완전 달성 - WeatherOverlay, RegionalMapView 모두 Single Source of Truth 적용, 전체 앱 데이터 통합 완료
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 93cabb7
