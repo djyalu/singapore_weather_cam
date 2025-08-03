@@ -22,14 +22,17 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   // 검증 결과 가져오기 (임시 비활성화)
   // const { validationResults } = useWeatherData();
 
-  // 실시간 NEA 서비스 데이터 사용 (독립적 fetch 완전 제거)
+  // 글로벌 Single Source of Truth 사용 (티커와 동일한 데이터)
   useEffect(() => {
-    console.log('🚀 [SingaporeOverallWeather] Using real-time NEA service data');
+    console.log('🚀 [SingaporeOverallWeather] Using global Single Source of Truth (same as ticker)');
     
-    if (weatherData?.data?.temperature?.readings?.length > 0) {
-      const freshData = weatherData;
+    // 글로벌 window.weatherData 사용 (티커와 동일한 소스)
+    const globalWeatherData = window.weatherData;
+    
+    if (globalWeatherData?.data?.temperature?.readings?.length > 0) {
+      const freshData = globalWeatherData;
       
-      // Use pre-calculated averages from NEA service or calculate if needed
+      // Use pre-calculated averages from NEA service or calculate if needed (티커와 동일한 로직)
       let calculatedTemp = null;
       let calculatedHumidity = null;
       
@@ -51,14 +54,15 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           : humidityFromReadings;
       }
       
-      console.log('✅ [SingaporeOverallWeather] Real-time NEA data processed:', {
+      console.log('✅ [SingaporeOverallWeather] Using same data source as ticker:', {
         temperature_average: freshData.data?.temperature?.average,
         humidity_average: freshData.data?.humidity?.average,
         calculated_temp: calculatedTemp?.toFixed(2),
         calculated_humidity: calculatedHumidity?.toFixed(2),
         readings_count: freshData.data?.temperature?.readings?.length,
         source: freshData.source,
-        timestamp: freshData.timestamp
+        timestamp: freshData.timestamp,
+        dataConsistency: 'IDENTICAL_TO_TICKER'
       });
       
       setIndependentWeatherData({
@@ -68,8 +72,32 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           humidity: calculatedHumidity
         }
       });
+    } else if (weatherData?.data?.temperature?.readings?.length > 0) {
+      // Fallback to props data if global data not available
+      console.log('⚠️ [SingaporeOverallWeather] Using fallback props data');
+      const freshData = weatherData;
+      
+      let calculatedTemp = null;
+      let calculatedHumidity = null;
+      
+      if (freshData.data?.temperature?.readings?.length > 0) {
+        const tempReadings = freshData.data.temperature.readings;
+        const tempFromReadings = tempReadings.reduce((sum, r) => sum + r.value, 0) / tempReadings.length;
+        const preCalculatedTemp = freshData.data.temperature.average;
+        calculatedTemp = (preCalculatedTemp !== undefined && preCalculatedTemp !== null)
+          ? preCalculatedTemp
+          : tempFromReadings;
+      }
+      
+      setIndependentWeatherData({
+        ...freshData,
+        calculated: {
+          temperature: calculatedTemp,
+          humidity: calculatedHumidity
+        }
+      });
     } else {
-      console.log('⚠️ [SingaporeOverallWeather] Waiting for real-time NEA data...');
+      console.log('⚠️ [SingaporeOverallWeather] Waiting for global NEA data...');
     }
   }, [weatherData, refreshTrigger]); // Depends on real-time data and refreshTrigger
 
@@ -92,20 +120,25 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           temperature: actualWeatherData?.data?.temperature?.average
         });
         
-        // Use real-time NEA service for fresh data if needed
+        // Use global Single Source of Truth - 티커와 동일한 데이터 소스 사용
         try {
-          console.log('🔄 [SingaporeOverallWeather] Using NEA real-time service for fresh data...');
-          const freshData = await neaRealTimeService.getRealTimeWeatherData();
-          if (freshData) {
-            console.log('✅ [SingaporeOverallWeather] Real-time NEA data loaded:', {
-              temperature_average: freshData.data?.temperature?.average,
-              readings_count: freshData.data?.temperature?.readings?.length,
-              source: freshData.source
+          console.log('🔄 [SingaporeOverallWeather] Using global Single Source of Truth (same as ticker)...');
+          const globalWeatherData = window.weatherData;
+          if (globalWeatherData) {
+            console.log('✅ [SingaporeOverallWeather] Using same data source as ticker:', {
+              temperature_average: globalWeatherData.data?.temperature?.average,
+              readings_count: globalWeatherData.data?.temperature?.readings?.length,
+              source: globalWeatherData.source,
+              timestamp: globalWeatherData.timestamp
             });
-            actualWeatherData = freshData;
+            actualWeatherData = globalWeatherData;
+          } else {
+            console.log('⚠️ [SingaporeOverallWeather] No global data, using props data');
+            actualWeatherData = dataToUse;
           }
         } catch (fetchError) {
-          console.warn('⚠️ [SingaporeOverallWeather] NEA service failed, using existing data:', fetchError);
+          console.warn('⚠️ [SingaporeOverallWeather] Failed to access global data, using props:', fetchError);
+          actualWeatherData = dataToUse;
         }
 
         // Generating smart weather summary
