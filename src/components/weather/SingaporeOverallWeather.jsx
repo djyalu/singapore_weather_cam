@@ -119,15 +119,16 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         globalWeatherData = null;
       }
       
-      if (!globalWeatherData) {
-        console.warn('🤖 [AI Analysis] 글로벌 데이터 없음 - AI 분석 스킵');
+      if (!globalWeatherData || !globalWeatherData.data?.temperature?.readings?.length) {
+        console.warn('🤖 [AI Analysis] 글로벌 데이터 없음 또는 불완전 - AI 분석 스킵');
         setAiLoading(false);
+        setAiSummary(null);
         return;
       }
 
       setAiLoading(true);
       try {
-        // 강제로 글로벌 데이터만 사용
+        // 강제로 글로벌 데이터만 사용 - 절대 다른 소스 사용 금지
         const actualWeatherData = globalWeatherData;
         
         console.log('🤖 [AI Analysis] 티커와 동일한 데이터 사용:', {
@@ -185,14 +186,14 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           });
         }
 
-        // 실제 데이터 직접 사용 (getUnifiedWeatherData 우회)
+        // 실제 데이터 직접 사용 (getUnifiedWeatherData 우회) - 글로벌 데이터만 사용
         const overallData = {
-          temperature: forceCalculatedTemp !== null ? forceCalculatedTemp : actualWeatherData?.data?.temperature?.average,
-          humidity: forceCalculatedHumidity !== null ? forceCalculatedHumidity : actualWeatherData?.data?.humidity?.average,
-          rainfall: actualWeatherData?.data?.rainfall?.total || 0,
-          source: actualWeatherData?.source,
-          stationCount: actualWeatherData?.data?.temperature?.readings?.length || 0,
-          timestamp: actualWeatherData?.timestamp
+          temperature: forceCalculatedTemp !== null ? forceCalculatedTemp : globalWeatherData?.data?.temperature?.average,
+          humidity: forceCalculatedHumidity !== null ? forceCalculatedHumidity : globalWeatherData?.data?.humidity?.average,
+          rainfall: globalWeatherData?.data?.rainfall?.total || 0,
+          source: globalWeatherData?.source,
+          stationCount: globalWeatherData?.data?.temperature?.readings?.length || 0,
+          timestamp: globalWeatherData?.timestamp
         };
         
         console.log('🔥 [AI 분석용 직접 데이터] DETAILED DEBUG:', {
@@ -238,21 +239,28 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           isUsingSameData: weatherData === actualWeatherData
         });
         
-        console.log('📊 [SingaporeOverallWeather] 최종 데이터:', {
-          originalTemp: getUnifiedWeatherData(weatherData).temperature?.toFixed(2),
-          forcedTemp: overallData.temperature?.toFixed(2),
-          originalHumidity: getUnifiedWeatherData(weatherData).humidity?.toFixed(2),
-          forcedHumidity: overallData.humidity?.toFixed(2),
+        console.log('📊 [SingaporeOverallWeather] 최종 데이터 (글로벌만 사용):', {
+          globalData_temp: globalWeatherData.data?.temperature?.average,
+          finalAI_temp: overallData.temperature?.toFixed(2),
+          globalData_humidity: globalWeatherData.data?.humidity?.average,
+          finalAI_humidity: overallData.humidity?.toFixed(2),
           source: overallData.source,
-          stationCount: overallData.stationCount
+          stationCount: overallData.stationCount,
+          data_consistency: 'GLOBAL_ONLY_NO_PROPS'
         });
         
         const forecast = actualWeatherData?.data?.forecast?.general;
 
-        // 실시간 강수량 데이터로 지역별 소나기/폭우 정보 분석
-        const rainfallAnalysis = analyzeRealTimeRainfall(actualWeatherData);
+        // 실시간 강수량 데이터로 지역별 소나기/폭우 정보 분석 - 글로벌 데이터 사용
+        const rainfallAnalysis = analyzeRealTimeRainfall(globalWeatherData);
 
-        // 실시간 데이터를 강조하는 요약 생성 (강수 정보 포함)
+        // 실시간 데이터를 강조하는 요약 생성 (강수 정보 포함) - 글로벌 데이터만 사용
+        console.log('🤖 [AI 분석] 최종 데이터 확인:', {
+          overallData_temp: overallData.temperature,
+          overallData_humidity: overallData.humidity,
+          globalWeatherData_temp: globalWeatherData.data?.temperature?.average,
+          globalWeatherData_humidity: globalWeatherData.data?.humidity?.average
+        });
         const summary = generateIntelligentSummary(overallData, forecast, isRealTimeData, rainfallAnalysis);
         const highlights = generateHighlights(overallData, forecast, isRealTimeData, rainfallAnalysis);
 
@@ -289,7 +297,16 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
 
   // 실시간 AI 분석 실행
   const handleRealAIAnalysis = async () => {
-    if (!weatherData) {
+    // 글로벌 데이터 체크
+    let globalWeatherData = null;
+    try {
+      globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+    } catch (error) {
+      console.warn('⚠️ [handleRealAIAnalysis] Global data access failed:', error);
+      globalWeatherData = null;
+    }
+    
+    if (!globalWeatherData) {
       alert('날씨 데이터를 먼저 로드해주세요.');
       return;
     }
@@ -465,9 +482,30 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   };
 
-  // 실시간 고급 AI 분석 실행
+  // 실시간 고급 AI 분석 실행 - 글로벌 데이터만 사용
   const executeAdvancedRealTimeAnalysis = async () => {
-    const overallData = getUnifiedWeatherData(weatherData);
+    // 🎯 강제로 글로벌 데이터만 사용 (티커와 동일한 소스)
+    let globalWeatherData = null;
+    try {
+      globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+    } catch (error) {
+      console.warn('⚠️ [executeAdvancedRealTimeAnalysis] Global data access failed:', error);
+      globalWeatherData = null;
+    }
+    
+    if (!globalWeatherData) {
+      throw new Error('실시간 글로벌 데이터에 접근할 수 없습니다.');
+    }
+
+    // 글로벌 데이터를 직접 처리 (getUnifiedWeatherData 우회)
+    const overallData = {
+      temperature: globalWeatherData?.data?.temperature?.average,
+      humidity: globalWeatherData?.data?.humidity?.average,
+      rainfall: globalWeatherData?.data?.rainfall?.total || 0,
+      source: globalWeatherData?.source,
+      stationCount: globalWeatherData?.data?.temperature?.readings?.length || 0,
+      timestamp: globalWeatherData?.timestamp
+    };
 
     const stages = [
       {
@@ -494,11 +532,11 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       await new Promise(resolve => setTimeout(resolve, stage.duration));
     }
 
-    // 59개 관측소 강수량 데이터 분석 추가
-    const rainfallAnalysis = analyzeRealTimeRainfall(weatherData);
+    // 59개 관측소 강수량 데이터 분석 추가 - 글로벌 데이터 사용
+    const rainfallAnalysis = analyzeRealTimeRainfall(globalWeatherData);
 
-    // 실제 고급 분석 생성 (강수 정보 + 온도 세부 정보 포함)
-    return generateAdvancedAIAnalysis(overallData, rainfallAnalysis, weatherData);
+    // 실제 고급 분석 생성 (강수 정보 + 온도 세부 정보 포함) - 글로벌 데이터 사용
+    return generateAdvancedAIAnalysis(overallData, rainfallAnalysis, globalWeatherData);
   };
 
   // 고급 AI 분석 생성 함수 (59개 관측소 강수 + 온도 데이터 포함)
