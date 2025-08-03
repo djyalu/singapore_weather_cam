@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Circle, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -10,9 +10,10 @@ import L from 'leaflet';
  * - 인터랙티브 팝업
  */
 const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, showWeatherIcons = true, className = '' }) => {
+  const [weatherRegions, setWeatherRegions] = useState([]);
 
-  // 지역별 날씨 정보를 지도 표시용으로 변환 - Single Source of Truth 사용 (안전한 방식)
-  const weatherRegions = useMemo(() => {
+  // 지역 데이터 계산 함수
+  const calculateWeatherRegions = () => {
     // 안전하게 글로벌 window.weatherData 접근 (티커와 동일한 소스)
     let globalWeatherData = null;
     try {
@@ -51,14 +52,14 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
 
     if (availableStations.length === 0) {return [];}
 
-    // 지리적 위치 기반 지역 정의 (실제 싱가포르 지역 기준)
+    // 지리적 위치 기반 지역 정의 (중복 제거된 명확한 경계)
     const regionalGroups = [
       {
         id: 'north',
         name: 'Northern Singapore',
-        center: { lat: 1.42, lng: 103.79 },
+        center: { lat: 1.43, lng: 103.79 },
         emoji: '🌳',
-        bounds: { north: 1.50, south: 1.38, east: 103.85, west: 103.68 },
+        bounds: { north: 1.50, south: 1.40, east: 103.85, west: 103.68 },
         radius: 4000,
       },
       {
@@ -66,24 +67,24 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
         name: 'Northwest (Bukit Timah)',
         center: { lat: 1.35, lng: 103.76 },
         emoji: '🏫',
-        bounds: { north: 1.38, south: 1.32, east: 103.82, west: 103.70 },
+        bounds: { north: 1.40, south: 1.32, east: 103.80, west: 103.68 },
         radius: 3500,
+      },
+      {
+        id: 'west',
+        name: 'Western Singapore',
+        center: { lat: 1.33, lng: 103.65 },
+        emoji: '🏭',
+        bounds: { north: 1.40, south: 1.26, east: 103.68, west: 103.60 },
+        radius: 4500,
       },
       {
         id: 'central',
         name: 'Central Singapore',
         center: { lat: 1.31, lng: 103.83 },
         emoji: '🏙️',
-        bounds: { north: 1.35, south: 1.27, east: 103.88, west: 103.78 },
+        bounds: { north: 1.35, south: 1.26, east: 103.88, west: 103.80 },
         radius: 3000,
-      },
-      {
-        id: 'west',
-        name: 'Western Singapore',
-        center: { lat: 1.33, lng: 103.70 },
-        emoji: '🏭',
-        bounds: { north: 1.38, south: 1.28, east: 103.75, west: 103.60 },
-        radius: 4500,
       },
       {
         id: 'east',
@@ -96,9 +97,9 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
       {
         id: 'south',
         name: 'Southern Singapore',
-        center: { lat: 1.27, lng: 103.85 },
+        center: { lat: 1.25, lng: 103.85 },
         emoji: '🌊',
-        bounds: { north: 1.30, south: 1.22, east: 103.95, west: 103.75 },
+        bounds: { north: 1.30, south: 1.20, east: 103.95, west: 103.75 },
         radius: 3000,
       },
     ];
@@ -140,7 +141,28 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
       // 해당 지역에 스테이션이 없으면 null 반환 (필터링됨)
       return null;
     }).filter(Boolean); // null 값 제거
-  }, [weatherData]); // props 변경에 의존 (안전한 방식)
+    
+    return regions;
+  };
+
+  // 지역별 날씨 정보를 지도 표시용으로 변환 - Single Source of Truth 사용
+  useEffect(() => {
+    const regions = calculateWeatherRegions();
+    setWeatherRegions(regions);
+  }, [showTemperatureLayer, showWeatherIcons]); // 레이어 설정 변경 시에도 업데이트
+
+  // 글로벌 데이터 변경 감지 (5초마다 체크)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newRegions = calculateWeatherRegions();
+      if (newRegions.length > 0) {
+        console.log('🗺️ [WeatherOverlay] 글로벌 데이터 변경 감지 - 히트맵 업데이트');
+        setWeatherRegions(newRegions);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // 온도별 색상 반환 - 더 생동감 있는 색상
   const getTemperatureColor = (temp) => {
