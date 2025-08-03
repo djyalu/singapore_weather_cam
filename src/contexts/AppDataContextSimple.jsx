@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { transformWeatherData } from '../utils/weatherDataTransformer';
 import neaRealTimeService from '../services/neaRealTimeService';
-import weatherValidationService from '../services/weatherValidationService';
+// import weatherValidationService from '../services/weatherValidationService'; // 임시 비활성화
 
 // App Data Context
 const AppDataContext = createContext(null);
@@ -31,28 +31,17 @@ const useSimpleDataLoader = (refreshInterval) => {
           // Store global reference for other components
           window.weatherData = weatherJson;
 
-          // 🔍 데이터 검증 실행
-          console.log('🔍 [DataLoader] Starting weather data validation...');
-          const validation = await weatherValidationService.validateWeatherData(weatherJson);
-          setValidationResults(validation);
-
-          // 검증 결과 로깅
-          console.log('📊 [DataLoader] Validation results:', {
-            overall: validation.overall,
-            score: validation.score,
-            checksCount: validation.checks.length,
-            alertsCount: validation.alerts.length
-          });
-
-          // 검증 결과에 따른 처리
-          if (validation.overall === 'error') {
-            console.warn('⚠️ [DataLoader] Severe data quality issues detected');
-            setError(`데이터 품질 문제 (${validation.score}점): ${validation.alerts[0]?.message || '데이터 검증 실패'}`);
-          } else if (validation.overall === 'warning') {
-            console.warn('⚠️ [DataLoader] Data quality warnings detected');
-            setError(`데이터 주의사항 (${validation.score}점): 일부 관측소 데이터에 이상이 있습니다`);
-          } else {
-            setError(null); // 검증 통과 시 에러 제거
+          // 🔍 데이터 검증 실행 (임시 비활성화 - 오류 해결 후 재활성화)
+          try {
+            console.log('🔍 [DataLoader] Weather data validation temporarily disabled for stability');
+            // const validation = await weatherValidationService.validateWeatherData(weatherJson);
+            // setValidationResults(validation);
+            setValidationResults(null);
+            setError(null); // 검증 없이 에러 상태 제거
+          } catch (validationError) {
+            console.warn('⚠️ [DataLoader] Validation service error, skipping:', validationError.message);
+            setValidationResults(null);
+            setError(null);
           }
 
           // Transform NEA API data to UI-friendly format

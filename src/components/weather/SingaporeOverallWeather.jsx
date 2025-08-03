@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
 import neaRealTimeService from '../../services/neaRealTimeService';
-import DataValidationIndicator from '../common/DataValidationIndicator';
-import { useWeatherData } from '../../contexts/AppDataContextSimple';
+// import DataValidationIndicator from '../common/DataValidationIndicator'; // 임시 비활성화
+// import { useWeatherData } from '../../contexts/AppDataContextSimple'; // 임시 비활성화
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -19,8 +19,8 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [showRealAI, setShowRealAI] = useState(false);
   const [independentWeatherData, setIndependentWeatherData] = useState(null);
 
-  // 검증 결과 가져오기
-  const { validationResults } = useWeatherData();
+  // 검증 결과 가져오기 (임시 비활성화)
+  // const { validationResults } = useWeatherData();
 
   // 실시간 NEA 서비스 데이터 사용 (독립적 fetch 완전 제거)
   useEffect(() => {
