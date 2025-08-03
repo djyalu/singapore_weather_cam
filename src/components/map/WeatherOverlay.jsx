@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Circle, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -13,7 +13,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
   const [weatherRegions, setWeatherRegions] = useState([]);
 
   // 지역 데이터 계산 함수
-  const calculateWeatherRegions = () => {
+  const calculateWeatherRegions = useCallback(() => {
     // 안전하게 글로벌 window.weatherData 접근 (티커와 동일한 소스)
     let globalWeatherData = null;
     try {
@@ -143,13 +143,13 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
     }).filter(Boolean); // null 값 제거
     
     return regions;
-  };
+  }, []);
 
   // 지역별 날씨 정보를 지도 표시용으로 변환 - Single Source of Truth 사용
   useEffect(() => {
     const regions = calculateWeatherRegions();
     setWeatherRegions(regions);
-  }, [showTemperatureLayer, showWeatherIcons]); // 레이어 설정 변경 시에도 업데이트
+  }, [calculateWeatherRegions, showTemperatureLayer, showWeatherIcons]); // 레이어 설정 변경 시에도 업데이트
 
   // 글로벌 데이터 변경 감지 (5초마다 체크)
   useEffect(() => {
@@ -162,7 +162,7 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [calculateWeatherRegions]);
 
   // 온도별 색상 반환 - 더 생동감 있는 색상
   const getTemperatureColor = (temp) => {
