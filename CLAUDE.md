@@ -606,3 +606,9 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: 665d596
+
+## 체크포인트 29 - 2025-08-03 11:40
+- 내용: 모바일 AI 분석 버튼 표시 문제 완전 해결 - SingaporeOverallWeather 컴포넌트 모바일 최적화, WCAG 2.1 AA 준수, 데이터 검증 시스템 개선
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: cd961ac

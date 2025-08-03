@@ -408,7 +408,7 @@ class WeatherValidationService {
   }
 
   /**
-   * 외부 소스와 교차 검증 (OpenWeatherMap API)
+   * 외부 소스와 교차 검증 (OpenWeatherMap API) - Node.js 환경에서만 실행
    */
   async validateWithExternalSource(neaData) {
     const check = {
@@ -419,7 +419,15 @@ class WeatherValidationService {
     };
 
     try {
-      // OpenWeatherMap API 키가 있는 경우에만 실행
+      // 브라우저 환경에서는 CORS 문제로 인해 건너뛰기
+      if (typeof window !== 'undefined') {
+        check.status = 'info';
+        check.score = 95;
+        check.details.push('브라우저 환경에서는 외부 검증을 건너뜁니다 (CORS 제한)');
+        return check;
+      }
+
+      // OpenWeatherMap API 키가 있는 경우에만 실행 (Node.js 환경)
       const owmApiKey = process.env.OPENWEATHER_API_KEY;
       if (!owmApiKey) {
         check.status = 'info';
@@ -434,7 +442,20 @@ class WeatherValidationService {
       
       const owmUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${owmApiKey}&units=metric`;
       
-      const response = await fetch(owmUrl, { timeout: 5000 });
+      // Node.js 환경에서만 fetch 실행
+      const AbortController = globalThis.AbortController;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(owmUrl, { 
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Singapore-Weather-Validation/1.0'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
         throw new Error(`OpenWeatherMap API error: ${response.status}`);
       }

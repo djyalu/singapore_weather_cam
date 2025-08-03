@@ -220,6 +220,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     lastFetch,
     refresh,
     forceRefresh,
+    validationResults,
   ]);
 
   return (
@@ -254,6 +255,7 @@ export const useWeatherData = () => {
     refresh: context.actions.refresh,
     forceRefresh: context.actions.forceRefresh,
     dataFreshness: context.freshness.dataFreshness,
+    validationResults: context.validation?.validationResults,
   }));
 };
 
