@@ -306,18 +306,39 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
         console.error('기존 레이어 제거 실패:', error);
       }
 
-      // 🎯 데이터 일치성 검증
-      const validation = validateDataConsistency(weatherData);
+      // 🎯 강제로 글로벌 데이터 사용 (티커와 동일한 소스)
+      let globalWeatherData = null;
+      try {
+        globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+      } catch (error) {
+        console.warn('⚠️ [DirectMapView] Global data access failed:', error);
+        globalWeatherData = null;
+      }
+
+      // 글로벌 데이터 우선, 없으면 props 사용
+      const dataToUse = globalWeatherData || weatherData;
+      
+      console.log('🗺️ [DirectMapView] 히트맵 데이터 소스:', {
+        usingGlobal: !!globalWeatherData,
+        globalTemp: globalWeatherData?.data?.temperature?.average,
+        propsTemp: weatherData?.data?.temperature?.average,
+        finalTemp: dataToUse?.data?.temperature?.average
+      });
+
+      // 🎯 데이터 일치성 검증 - 글로벌 데이터 사용
+      const validation = validateDataConsistency(dataToUse);
       console.log('🔍 지도 히트맵 데이터 일치성 검증:', validation);
 
       if (!validation.isConsistent) {
         console.warn('⚠️ 데이터 일치성 문제 발견:', validation.issues);
       }
 
-      // 통합된 지역 데이터 사용
+      // 통합된 지역 데이터 사용 - 글로벌 데이터 사용
       STANDARD_REGIONS.forEach((region, index) => {
-        const avgTemp = getRegionalTemperature(weatherData, region.id);
+        const avgTemp = getRegionalTemperature(dataToUse, region.id);
         const tempColor = getTemperatureColor(avgTemp);
+        
+        console.log(`🗺️ [DirectMapView] ${region.displayName} 히트맵 온도: ${avgTemp?.toFixed(1)}°C`);
 
         try {
           // 온도 기반 히트맵 원형 생성
