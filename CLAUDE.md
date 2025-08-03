@@ -624,3 +624,9 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: ea19924
+
+## 체크포인트 32 - 2025-08-03 15:27
+- 내용: 모든 컴포넌트 데이터 일치성 완전 달성 - 지역 날씨(RegionalWeatherDashboard)도 Single Source of Truth 적용, 티커·Singapore Weather·지역 날씨 모두 26.7°C 동일 표시
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: ced2043
