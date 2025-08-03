@@ -173,22 +173,36 @@ const RegionalMapView = ({
     }
   }, [retryCount, onRetry]);
 
-  // Filter data based on selected region with error handling
+  // Filter data based on selected region with error handling - Single Source of Truth 사용
   const filteredData = useMemo(() => {
     try {
+      // 안전하게 글로벌 window.weatherData 접근 (티커와 동일한 소스)
+      let globalWeatherData = null;
+      try {
+        globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+      } catch (error) {
+        console.warn('⚠️ [RegionalMapView] Global data access failed:', error);
+        globalWeatherData = null;
+      }
+      
+      // 글로벌 데이터 우선, 없으면 props 사용
+      const dataToUse = globalWeatherData || weatherData;
+      
+      console.log('🗺️ [RegionalMapView] 데이터 소스:', globalWeatherData ? 'GLOBAL (티커와 동일)' : 'PROPS (폴백)');
+      
       if (selectedRegion === 'all') {
-        return { weatherData, webcamData };
+        return { weatherData: dataToUse, webcamData };
       }
 
       const region = REGIONS[selectedRegion];
       if (!region || !region.bounds) {
-        return { weatherData, webcamData };
+        return { weatherData: dataToUse, webcamData };
       }
 
-      // Filter weather data
-      const filteredWeatherData = weatherData ? {
-        ...weatherData,
-        locations: weatherData.locations?.filter(location => {
+      // Filter weather data - 티커와 동일한 데이터 사용
+      const filteredWeatherData = dataToUse ? {
+        ...dataToUse,
+        locations: dataToUse.locations?.filter(location => {
           if (!location.coordinates) {return false;}
 
           const { lat, lng } = location.coordinates;

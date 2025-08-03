@@ -11,15 +11,29 @@ import L from 'leaflet';
  */
 const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, showWeatherIcons = true, className = '' }) => {
 
-  // 지역별 날씨 정보를 지도 표시용으로 변환
+  // 지역별 날씨 정보를 지도 표시용으로 변환 - Single Source of Truth 사용
   const weatherRegions = useMemo(() => {
-    if (!weatherData?.locations) {return [];}
+    // 안전하게 글로벌 window.weatherData 접근 (티커와 동일한 소스)
+    let globalWeatherData = null;
+    try {
+      globalWeatherData = typeof window !== 'undefined' ? window.weatherData : null;
+    } catch (error) {
+      console.warn('⚠️ [WeatherOverlay] Global data access failed:', error);
+      globalWeatherData = null;
+    }
+    
+    // 글로벌 데이터 우선, 없으면 props 사용
+    const dataToUse = globalWeatherData || weatherData;
+    
+    console.log('🗺️ [WeatherOverlay] 데이터 소스:', globalWeatherData ? 'GLOBAL (티커와 동일)' : 'PROPS (폴백)');
+    
+    if (!dataToUse?.locations) {return [];}
 
     // 실제 데이터 기반 동적 지역 생성 - 좌표를 기준으로 자동 그룹핑
     const regions = [];
 
-    // 실제 사용 가능한 스테이션들을 지역별로 그룹핑
-    const availableStations = weatherData.locations.filter(
+    // 실제 사용 가능한 스테이션들을 지역별로 그룹핑 - 티커와 동일한 데이터
+    const availableStations = dataToUse.locations.filter(
       loc => loc.coordinates && loc.temperature !== null && loc.temperature !== undefined,
     );
 

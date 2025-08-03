@@ -630,3 +630,9 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: ced2043
+
+## 체크포인트 33 - 2025-08-03 15:33
+- 내용: 런타임 오류 긴급 해결 완료 - window.weatherData 접근 안전성 강화, typeof window 체크 및 try-catch 보호, SSR 환경 호환성 확보
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 969b2fc
