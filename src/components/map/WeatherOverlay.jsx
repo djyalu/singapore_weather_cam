@@ -22,10 +22,22 @@ const WeatherOverlay = React.memo(({ weatherData, showTemperatureLayer = true, s
       globalWeatherData = null;
     }
     
-    // 글로벌 데이터 우선, 없으면 props 사용
-    const dataToUse = globalWeatherData || weatherData;
+    // 강제로 글로벌 데이터만 사용 (티커와 완전 동일한 소스)
+    const dataToUse = globalWeatherData;
+    
+    if (!globalWeatherData) {
+      console.warn('🗺️ [WeatherOverlay] 글로벌 데이터 없음 - 지도 표시 안함');
+      return [];
+    }
     
     console.log('🗺️ [WeatherOverlay] 데이터 소스:', globalWeatherData ? 'GLOBAL (티커와 동일)' : 'PROPS (폴백)');
+    console.log('🗺️ [WeatherOverlay] 온도 데이터 확인:', {
+      globalTemp: globalWeatherData?.data?.temperature?.average,
+      propsTemp: weatherData?.data?.temperature?.average,
+      usingTemp: dataToUse?.data?.temperature?.average,
+      globalTimestamp: globalWeatherData?.timestamp,
+      propsTimestamp: weatherData?.timestamp
+    });
     
     if (!dataToUse?.locations) {return [];}
 

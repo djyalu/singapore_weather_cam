@@ -648,3 +648,9 @@ npm run format       # Prettier 포맷팅
 - 상태: 활성
 - Git 브랜치: main
 - Git 커밋: 0e0eb02
+
+## 체크포인트 36 - 2025-08-03 16:02
+- 내용: WeatherOverlay 성능 문제 긴급 해결 - 1초 간격 interval 제거로 런타임 오류 해결, props 기반 안전한 업데이트로 앱 안정성 복구
+- 상태: 활성
+- Git 브랜치: main
+- Git 커밋: 5c54b88
