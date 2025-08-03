@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
 import neaRealTimeService from '../../services/neaRealTimeService';
+import DataValidationIndicator from '../common/DataValidationIndicator';
+import { useWeatherData } from '../../contexts/AppDataContextSimple';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -16,6 +18,9 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
   const [independentWeatherData, setIndependentWeatherData] = useState(null);
+
+  // 검증 결과 가져오기
+  const { validationResults } = useWeatherData();
 
   // 실시간 NEA 서비스 데이터 사용 (독립적 fetch 완전 제거)
   useEffect(() => {
@@ -1353,33 +1358,33 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
             </div>
           </div>
 
-          {/* AI 분석 버튼 - 대형 화면에서만 표시 */}
-          <div className="text-center hidden lg:block">
+          {/* AI 분석 버튼 - 모바일 최적화 */}
+          <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <Brain className="w-4 h-4 text-purple-500" />
-              <span className="text-xs text-gray-600 font-medium">AI 분석</span>
+              <Brain className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
+              <span className="text-xs sm:text-sm text-gray-600 font-medium">AI 분석</span>
             </div>
             <Button
               onClick={handleRealAIAnalysis}
               disabled={cohereLoading || !weatherData}
               variant="secondary"
               size="sm"
-              className="text-purple-800 bg-purple-100 hover:bg-purple-200 rounded-full transition-all active:scale-95"
+              className="text-purple-800 bg-purple-100 hover:bg-purple-200 rounded-full transition-all active:scale-95 touch-manipulation min-h-[44px] min-w-[80px] px-3 py-2 sm:px-4 sm:py-2"
               aria-label="Cohere AI 고급 분석 실행 - 현재 날씨 데이터를 바탕으로 상세한 AI 분석 결과를 제공합니다"
             >
               {cohereLoading ? (
                 <div className="flex items-center gap-1">
                   <div className="animate-spin rounded-full h-3 w-3 border border-purple-300 border-t-purple-600"></div>
-                  <span>분석중</span>
+                  <span className="text-xs sm:text-sm">분석중</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
                   <Zap className="w-3 h-3" />
-                  <span>실행</span>
+                  <span className="text-xs sm:text-sm">실행</span>
                 </div>
               )}
             </Button>
-            <div className="text-xs text-gray-500 mt-0.5">
+            <div className="text-xs text-gray-500 mt-0.5 hidden sm:block">
               클릭하여 실행
             </div>
           </div>
