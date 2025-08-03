@@ -62,21 +62,28 @@ const RegionalWeatherDashboard = React.memo(({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 지역별 날씨 데이터 가져오기 - weatherDataUnifier만 사용 (폴백 데이터 완전 제거)
+  // 지역별 날씨 데이터 가져오기 - Single Source of Truth 사용 (티커와 동일한 소스)
   const getRegionalWeatherData = useMemo(() => {
-    console.log('🔍 [RegionalWeatherDashboard] 실시간 데이터만 사용 - 폴백 데이터 완전 제거');
-    console.log('- weatherData exists:', !!weatherData);
-    console.log('- weatherData.data exists:', !!weatherData?.data);
-    console.log('- weatherData.data.temperature exists:', !!weatherData?.data?.temperature);
+    console.log('🔍 [RegionalWeatherDashboard] Single Source of Truth 사용 (티커와 동일한 소스)');
+    
+    // 글로벌 window.weatherData 사용 (티커와 동일한 소스)
+    const globalWeatherData = window.weatherData;
+    const dataToUse = globalWeatherData || weatherData; // 글로벌 데이터 우선, 없으면 props 사용
+    
+    console.log('- 데이터 소스:', globalWeatherData ? 'GLOBAL (티커와 동일)' : 'PROPS (폴백)');
+    console.log('- dataToUse exists:', !!dataToUse);
+    console.log('- dataToUse.data exists:', !!dataToUse?.data);
+    console.log('- dataToUse.data.temperature exists:', !!dataToUse?.data?.temperature);
 
-    if (weatherData?.data?.temperature?.readings) {
-      console.log('- Temperature readings count:', weatherData.data.temperature.readings.length);
-      console.log('- Temperature readings sample:', weatherData.data.temperature.readings.slice(0, 3));
+    if (dataToUse?.data?.temperature?.readings) {
+      console.log('- Temperature readings count:', dataToUse.data.temperature.readings.length);
+      console.log('- Temperature readings sample:', dataToUse.data.temperature.readings.slice(0, 3));
+      console.log('- 평균 온도 (티커와 동일):', dataToUse.data.temperature.average);
     }
 
     // 실시간 온도 데이터가 있을 때만 처리 (폴백 데이터 사용 안함)
-    if (weatherData?.data?.temperature?.readings?.length > 0) {
-      console.log('✅ [RegionalWeatherDashboard] 실시간 NEA 데이터 사용 - weatherDataUnifier 기반');
+    if (dataToUse?.data?.temperature?.readings?.length > 0) {
+      console.log('✅ [RegionalWeatherDashboard] 티커와 동일한 NEA 데이터 사용 - weatherDataUnifier 기반');
       
       const regionalData = {};
       
@@ -88,8 +95,8 @@ const RegionalWeatherDashboard = React.memo(({
       selectedRegionConfigs.forEach(region => {
         console.log(`🎯 Processing region: ${region.displayName} (${region.id}), stations: ${region.stationIds.join(', ')}`);
         
-        // weatherDataUnifier의 getRegionalTemperature만 사용 (폴백 없음)
-        const regionalTemp = getRegionalTemperature(weatherData, region.id);
+        // weatherDataUnifier의 getRegionalTemperature만 사용 (티커와 동일한 데이터)
+        const regionalTemp = getRegionalTemperature(dataToUse, region.id);
         
         // 실제 온도 데이터가 없으면 건너뛰기 (폴백 데이터 사용 안함)
         if (regionalTemp === null || typeof regionalTemp !== 'number' || isNaN(regionalTemp)) {
@@ -97,16 +104,16 @@ const RegionalWeatherDashboard = React.memo(({
           return; // 폴백 데이터 생성하지 않고 건너뛰기
         }
         
-        // 습도도 실시간 데이터만 사용 (기본값 없음)
+        // 습도도 실시간 데이터만 사용 (기본값 없음) - 티커와 동일한 소스
         let avgHumidity = null;
-        if (weatherData.data?.humidity?.average !== undefined && weatherData.data?.humidity?.average !== null) {
-          avgHumidity = weatherData.data.humidity.average;
-        } else if (weatherData.data?.humidity?.readings?.length > 0) {
-          avgHumidity = weatherData.data.humidity.readings.reduce((sum, r) => sum + r.value, 0) / weatherData.data.humidity.readings.length;
+        if (dataToUse.data?.humidity?.average !== undefined && dataToUse.data?.humidity?.average !== null) {
+          avgHumidity = dataToUse.data.humidity.average;
+        } else if (dataToUse.data?.humidity?.readings?.length > 0) {
+          avgHumidity = dataToUse.data.humidity.readings.reduce((sum, r) => sum + r.value, 0) / dataToUse.data.humidity.readings.length;
         }
         
-        // 강수량도 실시간 데이터만 사용
-        const totalRainfall = weatherData.data?.rainfall?.total || 0;
+        // 강수량도 실시간 데이터만 사용 - 티커와 동일한 소스
+        const totalRainfall = dataToUse.data?.rainfall?.total || 0;
         
         console.log(`  ✅ ${region.displayName}: ${regionalTemp.toFixed(1)}°C (실시간 계산, stations: ${region.stationIds.join(', ')})`);
         
@@ -122,12 +129,12 @@ const RegionalWeatherDashboard = React.memo(({
           icon: getWeatherIcon(regionalTemp, totalRainfall),
           stationName: `${region.stationIds.length}개 관측소 실시간 평균`,
           stationCount: region.stationIds.length,
-          lastUpdate: weatherData.timestamp,
+          lastUpdate: dataToUse.timestamp,
           realTime: true, // 실시간 데이터임을 표시
         };
       });
       
-      console.log('🎯 [RegionalWeatherDashboard] 실시간 지역 데이터 생성 완료:', regionalData);
+      console.log('🎯 [RegionalWeatherDashboard] 티커와 동일한 소스로 지역 데이터 생성 완료:', regionalData);
       return regionalData;
     }
 
