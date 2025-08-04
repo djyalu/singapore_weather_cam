@@ -142,6 +142,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     const lines = analysisSection.split('\n').filter(line => line.trim());
     let summary = '';
     let highlights = [];
+    let fullContent = rawText; // 전체 내용 저장
     
     // 첫 번째 문단을 요약으로 추출 (Current Weather Situation: 다음 라인)
     for (let i = 1; i < lines.length && i < 5; i++) {
