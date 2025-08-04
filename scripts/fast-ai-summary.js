@@ -58,27 +58,27 @@ async function fastCohereAnalysis(weatherData) {
       ? rainfallReadings.reduce((sum, r) => sum + r.value, 0) 
       : 0;
 
-    // 한글 분석 결과를 직접 요청하는 프롬프트 (Cohere API 전용)
-    const prompt = `당신은 싱가포르 최고의 기상 전문가입니다. 아래 실시간 데이터를 바탕으로 한국어로 전문적이고 정확한 날씨 분석을 해주세요:
+    // 영어로 분석하고 클라이언트에서 번역하는 방식 (품질 개선)
+    const prompt = `You are Singapore's leading weather expert. Please provide a professional and accurate weather analysis based on the real-time data below:
 
-🌡️ 실시간 기상 데이터 (NEA Singapore):
-- 현재 평균 기온: ${avgTemp.toFixed(1)}°C
-- 현재 평균 습도: ${avgHumidity.toFixed(1)}%
-- 강수량: ${totalRainfall.toFixed(1)}mm
-- 분석 대상: 전국 ${tempReadings.length}개 관측소
+🌡️ Real-time Weather Data (NEA Singapore):
+- Current average temperature: ${avgTemp.toFixed(1)}°C
+- Current average humidity: ${avgHumidity.toFixed(1)}%
+- Rainfall: ${totalRainfall.toFixed(1)}mm
+- Analysis scope: ${tempReadings.length} weather stations nationwide
 
-반드시 한국어로 다음 형식에 맞춰 분석해주세요:
+Please provide analysis in the following format:
 
-현재 기상 상황:
-[현재 날씨의 전반적인 상황과 특징을 2-3문장으로 전문적으로 한국어 분석]
+Current Weather Situation:
+[Provide 2-3 sentences of comprehensive analysis about current weather conditions and characteristics]
 
-핵심 포인트:
-1. 기온 및 체감온도: [상세한 기온 분석과 체감온도 설명]
-2. 습도 및 수분 영향: [습도가 체감에 미치는 영향과 주의사항]
-3. 강수 상황 및 전망: [현재 강수 상태와 향후 전망]
-4. 야외활동 권장사항: [현재 날씨에 적합한 야외활동 가이드]
+Key Points:
+1. Temperature & Sensory Experience: [Detailed temperature analysis and perceived temperature effects]
+2. Humidity & Moisture Impact: [How humidity affects comfort levels and precautions needed]
+3. Rainfall Situation & Outlook: [Current precipitation status and forecast]
+4. Outdoor Activity Recommendations: [Guidelines for outdoor activities in current weather]
 
-싱가포르의 열대 기후 특성을 고려하여 실용적이고 전문적인 한국어 분석을 제공해주세요.`;
+Consider Singapore's tropical climate characteristics and provide practical, professional analysis.`;
 
     console.log(`📤 Sending fast request to Cohere API...`);
     

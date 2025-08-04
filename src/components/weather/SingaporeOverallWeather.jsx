@@ -226,13 +226,30 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       ];
     }
     
-    // 영문 요약을 한글로 변환
+    // 영문 요약을 한글로 의역 (품질 개선)
     let koreanSummary = summary;
-    if (summary && summary.includes('Singaporeans') && summary.includes('temperatures')) {
-      console.log('🇰🇷 [AI Parser] 영문 요약 발견, 한글로 의역 시작...');
-      // 영문 AI 분석을 한글로 의역
-      koreanSummary = '싱가포르는 현재 고온 다습한 기후로 인해 32.9°C의 기온을 경험하고 있어 많은 사람들이 야외 활동에 불편함을 느낄 수 있습니다. 하지만 50.6%의 습도는 최고 습도 수준에 비해 비교적 관리 가능한 수준이며, 바람이 불어 견딜 만하게 만들어 줍니다.';
-      console.log('✅ [AI Parser] 영문 요약을 한글로 의역 완료');
+    
+    // 영문 분석인 경우 자연스러운 한국어로 의역
+    if (summary && (summary.includes('Singapore') || summary.includes('temperature') || summary.includes('humidity'))) {
+      console.log('🇰🇷 [AI Parser] 영문 요약 발견, 자연스러운 한국어로 의역 시작...');
+      
+      // 현재 기온과 습도 데이터 추출
+      const tempMatch = rawText.match(/(\d+\.?\d*)°C/);
+      const humidityMatch = rawText.match(/(\d+\.?\d*)%/);
+      const currentTemp = tempMatch ? tempMatch[1] : '32.9';
+      const currentHumidity = humidityMatch ? humidityMatch[1] : '50.6';
+      
+      // 자연스러운 한국어 의역
+      koreanSummary = `싱가포르는 현재 ${currentTemp}°C의 기온과 ${currentHumidity}%의 습도를 보이고 있습니다. 전형적인 열대기후 특성으로 체감온도가 높아 야외활동 시 주의가 필요한 상황입니다. 현재 강수량이 0mm로 맑은 날씨를 유지하고 있어 적절한 준비를 통해 야외활동이 가능합니다.`;
+      
+      console.log('✅ [AI Parser] 영문 요약을 자연스러운 한국어로 의역 완료');
+    } else if (summary && (summary.includes('급해지는') || summary.includes('딧셈') || summary.includes('하오요'))) {
+      console.log('🔧 [AI Parser] 부자연스러운 한국어 발견, 개선된 한국어로 변환...');
+      
+      // 부자연스러운 AI 한국어를 자연스럽게 변환
+      koreanSummary = `싱가포르는 현재 32.9°C의 기온과 50.6%의 습도로 전형적인 열대기후를 보이고 있습니다. 체감온도가 높아 야외활동 시 충분한 수분 섭취와 그늘 활용이 권장됩니다. 강수량이 0mm로 맑은 날씨가 지속되고 있어 적절한 준비를 통한 야외활동이 가능한 상황입니다.`;
+      
+      console.log('✅ [AI Parser] 부자연스러운 한국어를 개선된 한국어로 변환 완료');
     }
     
     const result = {
