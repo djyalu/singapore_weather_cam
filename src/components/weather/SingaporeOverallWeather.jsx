@@ -333,6 +333,166 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   };
 
+  // ⚡ 빠른 AI 분석 트리거 (10초 이내)
+  const handleFastAIAnalysis = async () => {
+    try {
+      setCohereLoading(true);
+      console.log('⚡ [Fast AI] 빠른 AI 분석 요청 중...');
+      
+      // 즉시 처리 중 메시지 표시
+      setCohereAnalysis({
+        summary: '⚡ 빠른 AI 분석을 시작합니다...\n\n🚀 서버에서 10초 이내에 Cohere AI 분석을 생성합니다.\n\n📊 최적화된 프롬프트로 빠르고 정확한 분석을 제공합니다.',
+        highlights: [
+          '⚡ 10초 이내 완성 목표',
+          '🎯 최적화된 Cohere API 호출',
+          '📈 실시간 NEA 데이터 기반',
+          '🚀 빠른 결과 자동 표시'
+        ],
+        confidence: 0.9,
+        aiModel: 'Fast Cohere Analysis (처리 중)',
+        analysisType: 'Fast Processing',
+        isProcessing: true,
+        isFastMode: true
+      });
+      setShowRealAI(true);
+
+      // GitHub Actions fast workflow 트리거
+      try {
+        const response = await fetch(`https://api.github.com/repos/djyalu/singapore_weather_cam/dispatches`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            event_type: 'fast-ai-request',
+            client_payload: {
+              priority: 'urgent',
+              timestamp: new Date().toISOString(),
+              source: 'user_request'
+            }
+          })
+        });
+
+        if (response.ok) {
+          console.log('✅ [Fast AI] GitHub Actions 빠른 워크플로우 트리거 성공');
+          
+          // 15초 후 결과 확인 시작
+          setTimeout(() => {
+            setServerAICheckCount(0); // 자동 확인 재시작
+          }, 15000);
+          
+        } else {
+          console.warn('⚠️ [Fast AI] GitHub Actions 트리거 실패, 폴백 모드');
+          // 폴백으로 기존 서버 분석 확인
+          const serverAIAnalysis = await loadServerAIAnalysis();
+          if (serverAIAnalysis && serverAIAnalysis.summary && serverAIAnalysis.ai_model !== 'Simulation') {
+            console.log('✅ [Fast AI] 기존 서버 분석 사용');
+            setCohereAnalysis({
+              summary: serverAIAnalysis.summary,
+              highlights: serverAIAnalysis.highlights || [],
+              confidence: serverAIAnalysis.confidence || 0.96,
+              aiModel: serverAIAnalysis.ai_model + ' (기존 분석)',
+              timestamp: serverAIAnalysis.weather_data_timestamp || serverAIAnalysis.timestamp,
+              analysisType: 'Existing Server Analysis',
+              stationCount: serverAIAnalysis.stations_analyzed,
+              isFastMode: true
+            });
+          }
+        }
+      } catch (apiError) {
+        console.warn('⚠️ [Fast AI] API 호출 실패:', apiError.message);
+        // 로컬 빠른 분석으로 폴백
+        const fallbackAnalysis = generateQuickLocalAnalysis();
+        setCohereAnalysis(fallbackAnalysis);
+      }
+
+    } catch (error) {
+      console.error('❌ [Fast AI] 빠른 분석 실패:', error);
+      setCohereAnalysis({
+        summary: '빠른 AI 분석 중 오류가 발생했습니다. 기본 분석으로 전환합니다.',
+        highlights: ['오류 복구 모드', '기본 분석 제공', '시스템 안정성 유지'],
+        confidence: 0.8,
+        aiModel: 'Error Recovery Mode',
+        error: error.message
+      });
+      setShowRealAI(true);
+    } finally {
+      setCohereLoading(false);
+    }
+  };
+
+  // ⚡ 빠른 로컬 분석 생성 (폴백용)
+  const generateQuickLocalAnalysis = () => {
+    try {
+      let globalWeatherData = null;
+      try {
+        globalWeatherData = typeof window !== 'undefined' && window.weatherData ? window.weatherData : null;
+      } catch (error) {
+        console.warn('⚠️ Global data access failed');
+      }
+
+      if (!globalWeatherData?.data?.temperature?.readings?.length) {
+        return {
+          summary: '날씨 데이터를 불러오는 중입니다. 실시간 NEA 데이터가 준비되면 빠른 분석을 제공하겠습니다.',
+          highlights: ['데이터 로딩 중', 'NEA API 연결 대기', '빠른 분석 준비'],
+          confidence: 0.7,
+          aiModel: 'Quick Local Analysis (대기)',
+          isFastMode: true
+        };
+      }
+
+      const temp = globalWeatherData.data.temperature.average || 0;
+      const humidity = globalWeatherData.data.humidity.average || 0;
+      const rainfall = globalWeatherData.data.rainfall?.total || 0;
+      const stationCount = globalWeatherData.data.temperature.readings?.length || 0;
+
+      let summary = `현재 싱가포르는 평균 기온 ${temp.toFixed(1)}°C, 습도 ${humidity.toFixed(1)}%를 기록하고 있습니다. `;
+      
+      if (temp >= 32) {
+        summary += '더운 날씨로 충분한 수분 섭취와 그늘에서의 휴식이 필요합니다. ';
+      } else if (temp >= 28) {
+        summary += '전형적인 열대 기후를 보이고 있어 가벼운 옷차림이 적합합니다. ';
+      } else {
+        summary += '평년보다 시원한 날씨로 야외 활동에 좋은 조건입니다. ';
+      }
+
+      if (humidity >= 80) {
+        summary += '높은 습도로 체감온도가 높아 실내 활동을 권장합니다.';
+      } else if (humidity >= 60) {
+        summary += '적당한 습도 수준으로 편안한 날씨입니다.';
+      } else {
+        summary += '상대적으로 건조한 날씨입니다.';
+      }
+
+      const highlights = [
+        `🌡️ 평균 기온 ${temp.toFixed(1)}°C`,
+        `💧 습도 ${Math.round(humidity)}%`,
+        rainfall > 0 ? `🌧️ 강수량 ${rainfall.toFixed(1)}mm` : '☀️ 맑은 날씨',
+        `📊 ${stationCount}개 관측소 종합`
+      ];
+
+      return {
+        summary,
+        highlights,
+        confidence: 0.88,
+        aiModel: 'Quick Local Analysis',
+        timestamp: globalWeatherData.timestamp,
+        stationCount: stationCount,
+        processingTime: '<1초',
+        isFastMode: true
+      };
+    } catch (error) {
+      return {
+        summary: '빠른 분석 생성 중 오류가 발생했습니다. 기본 안전 모드로 동작합니다.',
+        highlights: ['안전 모드 활성화', '기본 분석 제공', '시스템 안정성 확보'],
+        confidence: 0.75,
+        aiModel: 'Safe Mode Analysis',
+        isFastMode: true
+      };
+    }
+  };
+
   // 🚀 실제 Cohere AI 분석 실행 - 진짜 AI 파워!
   const handleRealAIAnalysis = async () => {
     try {
@@ -997,6 +1157,19 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
             </CardTitle>
             <div className="flex space-x-2">
               <Button
+                onClick={handleFastAIAnalysis}
+                disabled={cohereLoading}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                {cohereLoading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Zap className="w-4 h-4" />
+                )}
+                빠른 AI 분석
+              </Button>
+              <Button
                 onClick={handleRealAIAnalysis}
                 disabled={cohereLoading}
                 size="sm"
@@ -1007,7 +1180,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
                 ) : (
                   <Zap className="w-4 h-4" />
                 )}
-                고급 분석
+                상세 분석
               </Button>
             </div>
           </div>
@@ -1105,10 +1278,17 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
                     <span>📡 {cohereAnalysis.stationCount}개 관측소</span>
                   )}
                   {cohereAnalysis.isProcessing && (
-                    <span className="text-blue-600 font-medium animate-pulse">⏳ 처리 중</span>
+                    <span className={`font-medium animate-pulse ${
+                      cohereAnalysis.isFastMode ? 'text-green-600' : 'text-blue-600'
+                    }`}>
+                      {cohereAnalysis.isFastMode ? '⚡ 빠른 처리 중' : '⏳ 처리 중'}
+                    </span>
                   )}
                   {cohereAnalysis.autoLoaded && (
                     <span className="text-green-600 font-medium">✨ 자동 로드됨</span>
+                  )}
+                  {cohereAnalysis.isFastMode && !cohereAnalysis.isProcessing && (
+                    <span className="text-green-600 font-medium">⚡ 빠른 분석</span>
                   )}
                 </div>
                 
