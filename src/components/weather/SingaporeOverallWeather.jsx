@@ -491,25 +491,47 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   };
 
-  // 🚀 확실한 Cohere AI 분석 실행 - 실제 서버 AI 파워!
-  const handleRealCohereAnalysis = async () => {
+  // 🚀 최적화된 AI 분석 - 가장 효율적인 통합 AI 분석
+  const handleOptimizedAIAnalysis = async () => {
     try {
       setCohereLoading(true);
-      console.log('🚀 [Real Cohere] 확실한 Cohere AI 분석 시작...');
+      console.log('🚀 [Optimized AI] 최적화된 AI 분석 시작...');
       
-      // 간결한 처리 상태 표시
+      // 1. 즉시 기존 서버 분석이 있는지 확인
+      const existingAnalysis = await loadServerAIAnalysis();
+      if (existingAnalysis && existingAnalysis.summary && 
+          existingAnalysis.ai_model !== 'Simulation' &&
+          new Date(existingAnalysis.timestamp).getTime() > Date.now() - 1800000) { // 30분 이내
+        
+        console.log('✅ [Optimized AI] 최신 서버 분석 발견, 즉시 제공');
+        setCohereAnalysis({
+          summary: existingAnalysis.summary,
+          highlights: existingAnalysis.highlights || [],
+          confidence: existingAnalysis.confidence || 0.96,
+          aiModel: existingAnalysis.ai_model,
+          analysisType: 'Recent AI Analysis',
+          timestamp: existingAnalysis.timestamp,
+          weather_context: existingAnalysis.weather_context,
+          processing_time: existingAnalysis.processing_time,
+          stations_analyzed: existingAnalysis.stations_analyzed,
+          isRecentAnalysis: true
+        });
+        setCohereLoading(false);
+        setShowRealAI(true);
+        return;
+      }
+      
+      // 2. 기존 분석이 없거나 오래된 경우 새로 생성
       setCohereAnalysis({
-        summary: 'Cohere AI가 날씨 분석을 생성하고 있습니다...',
+        summary: 'AI가 최신 날씨 분석을 생성하고 있습니다...',
         highlights: [
-          '🤖 서버에서 AI 분석 중',
-          '📊 실시간 데이터 기반',
-          '⏱️ 약 1분 소요'
+          '🤖 서버 AI 분석 중',
+          '📊 최신 데이터 기반'
         ],
         confidence: 0.95,
-        aiModel: 'Cohere AI (처리 중)',
+        aiModel: 'AI 분석 중',
         analysisType: 'AI Analysis',
-        isProcessing: true,
-        isRealCohere: true
+        isProcessing: true
       });
       setShowRealAI(true);
 
@@ -1304,45 +1326,19 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
               <Brain className="w-5 h-5 text-purple-500" />
               <span>AI 날씨 분석</span>
             </CardTitle>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex justify-center">
               <Button
-                onClick={handleRealCohereAnalysis}
+                onClick={handleOptimizedAIAnalysis}
                 disabled={cohereLoading}
                 size="sm"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-6"
               >
                 {cohereLoading ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
                   <Brain className="w-4 h-4" />
                 )}
-                Cohere AI 분석
-              </Button>
-              <Button
-                onClick={handleFastAIAnalysis}
-                disabled={cohereLoading}
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                {cohereLoading ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Zap className="w-4 h-4" />
-                )}
-                빠른 분석
-              </Button>
-              <Button
-                onClick={handleRealAIAnalysis}
-                disabled={cohereLoading}
-                size="sm"
-                className="bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                {cohereLoading ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Zap className="w-4 h-4" />
-                )}
-                상세 분석
+                AI 분석
               </Button>
             </div>
           </div>
