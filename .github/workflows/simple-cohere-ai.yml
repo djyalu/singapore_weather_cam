@@ -1,0 +1,62 @@
+name: Simple Cohere AI Analysis
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/simple-cohere-ai.yml'
+      - 'scripts/fast-ai-summary.js'
+
+jobs:
+  cohere-analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci --production
+
+      - name: Create directories
+        run: |
+          mkdir -p data/weather-summary
+          mkdir -p public/data/weather-summary
+
+      - name: Generate Cohere AI Analysis
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+        run: |
+          echo "🤖 Starting Cohere AI analysis..."
+          echo "API Key Status: ${{ secrets.COHERE_API_KEY && 'SET' || 'NOT_SET' }}"
+          
+          node scripts/fast-ai-summary.js
+          
+          # Copy to public directory
+          cp data/weather-summary/latest.json public/data/weather-summary/latest.json
+          
+          echo "✅ Cohere AI analysis completed"
+
+      - name: Commit results
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add data/weather-summary/ public/data/weather-summary/
+          
+          if ! git diff --staged --quiet; then
+            git commit -m "feat: Cohere AI analysis generated - $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+            echo "✅ Results committed"
+          else
+            echo "ℹ️ No changes to commit"
+          fi
