@@ -116,19 +116,20 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         
         const serverAIAnalysis = await loadServerAIAnalysis();
         
-        if (serverAIAnalysis && serverAIAnalysis.analysis) {
-          console.log('✅ [Auto Check] 서버 AI 분석 발견! 자동 로드 중...');
+        if (serverAIAnalysis && serverAIAnalysis.summary && serverAIAnalysis.ai_model !== 'Simulation') {
+          console.log('✅ [Auto Check] 실제 서버 AI 분석 발견! 자동 로드 중...');
           
           setCohereAnalysis({
-            summary: serverAIAnalysis.analysis.summary,
-            highlights: serverAIAnalysis.analysis.highlights,
-            confidence: serverAIAnalysis.analysis.confidence || 0.96,
+            summary: serverAIAnalysis.summary,
+            highlights: serverAIAnalysis.highlights || [],
+            confidence: serverAIAnalysis.confidence || 0.96,
             aiModel: serverAIAnalysis.ai_model || 'Cohere Command API (Server)',
-            timestamp: serverAIAnalysis.weather_data_timestamp,
+            timestamp: serverAIAnalysis.weather_data_timestamp || serverAIAnalysis.timestamp,
             analysisType: 'Server AI Analysis',
             stationCount: serverAIAnalysis.stations_analyzed,
             detailed_analysis: serverAIAnalysis.detailed_analysis,
             weather_context: serverAIAnalysis.weather_context,
+            raw_analysis: serverAIAnalysis.raw_analysis,
             tokensUsed: 0,
             autoLoaded: true // 자동 로드 표시
           });
@@ -429,18 +430,19 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         // 서버에서 생성된 AI 분석 결과 먼저 확인
         const serverAIAnalysis = await loadServerAIAnalysis();
         
-        if (serverAIAnalysis && serverAIAnalysis.analysis) {
+        if (serverAIAnalysis && serverAIAnalysis.summary && serverAIAnalysis.ai_model !== 'Simulation') {
           console.log('✅ [Server AI] Using server-generated Cohere AI analysis');
           setCohereAnalysis({
-            summary: serverAIAnalysis.analysis.summary,
-            highlights: serverAIAnalysis.analysis.highlights,
-            confidence: serverAIAnalysis.analysis.confidence || 0.96,
+            summary: serverAIAnalysis.summary,
+            highlights: serverAIAnalysis.highlights || [],
+            confidence: serverAIAnalysis.confidence || 0.96,
             aiModel: serverAIAnalysis.ai_model || 'Cohere Command API (Server)',
-            timestamp: serverAIAnalysis.weather_data_timestamp,
+            timestamp: serverAIAnalysis.weather_data_timestamp || serverAIAnalysis.timestamp,
             analysisType: 'Server AI Analysis',
             stationCount: serverAIAnalysis.stations_analyzed,
             detailed_analysis: serverAIAnalysis.detailed_analysis,
             weather_context: serverAIAnalysis.weather_context,
+            raw_analysis: serverAIAnalysis.raw_analysis,
             tokensUsed: 0 // 서버에서 처리됨
           });
           
