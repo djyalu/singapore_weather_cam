@@ -115,7 +115,9 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const parseRawAnalysis = (rawText) => {
     if (!rawText) return { summary: '분석 내용 없음', highlights: [], fullContent: '' };
     
-    console.log('🔧 [AI Parser] raw_analysis 파싱 시작:', rawText.substring(0, 100) + '...');
+    console.log('🚀 [AI Parser] 실제 Cohere AI 분석 파싱 시작!');
+    console.log('📝 [AI Parser] raw_analysis 길이:', rawText.length);
+    console.log('🔍 [AI Parser] 미리보기:', rawText.substring(0, 200) + '...');
     
     // 실제 AI 분석 내용에서 의미있는 부분 추출
     const lines = rawText.split('\n').filter(line => line.trim());
