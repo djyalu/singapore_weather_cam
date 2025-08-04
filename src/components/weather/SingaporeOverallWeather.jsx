@@ -119,58 +119,93 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     console.log('📝 [AI Parser] raw_analysis 길이:', rawText.length);
     console.log('🔍 [AI Parser] 미리보기:', rawText.substring(0, 200) + '...');
     
-    // 실제 AI 분석 내용에서 의미있는 부분 추출
-    const lines = rawText.split('\n').filter(line => line.trim());
+    // "현재 기상 상황:" 또는 "Current Weather Situation:" 섹션 찾기
+    let situationStart = rawText.indexOf('현재 기상 상황:');
+    if (situationStart === -1) {
+      situationStart = rawText.indexOf('Current Weather Situation:');
+    }
+    console.log('🔍 [AI Parser] 기상 상황 섹션 위치:', situationStart);
     
+    if (situationStart === -1) {
+      console.warn('⚠️ [AI Parser] "현재 기상 상황" 또는 "Current Weather Situation" 섹션을 찾을 수 없음');
+      return {
+        summary: rawText.substring(0, 200) + '...',
+        highlights: ['🌡️ 고온 주의', '💧 수분 섭취', '☀️ 그늘 활용', '🏃 야외활동 주의'],
+        fullContent: rawText
+      };
+    }
+    
+    // 실제 분석 부분 추출
+    const analysisSection = rawText.substring(situationStart);
+    console.log('📝 [AI Parser] 분석 섹션 길이:', analysisSection.length);
+    
+    const lines = analysisSection.split('\n').filter(line => line.trim());
     let summary = '';
     let highlights = [];
-    let inAnalysis = false;
-    let fullContent = '';
     
-    for (const line of lines) {
-      const trimmed = line.trim();
-      
-      // "Current Weather Situation:" 이후부터 실제 분석 시작
-      if (trimmed.includes('Current Weather Situation:') || trimmed.includes('현재 기상 상황:')) {
-        inAnalysis = true;
-        continue;
+    // 첫 번째 문단을 요약으로 추출 (Current Weather Situation: 다음 라인)
+    for (let i = 1; i < lines.length && i < 5; i++) {
+      const line = lines[i].trim();
+      if (line.length > 50 && !line.startsWith('Key Points') && !line.match(/^\d+\./) && !line.startsWith('-')) {
+        summary = line;
+        console.log('🎯 [AI Parser] 요약 추출:', summary.substring(0, 100) + '...');
+        break;
       }
+    }
+    
+    // "핵심 포인트:" 또는 "Key Points:" 섹션에서 하이라이트 추출
+    let keyPointsStart = analysisSection.indexOf('핵심 포인트:');
+    if (keyPointsStart === -1) {
+      keyPointsStart = analysisSection.indexOf('Key Points:');
+    }
+    console.log('🔍 [AI Parser] 핵심 포인트 섹션 위치:', keyPointsStart);
+    
+    if (keyPointsStart !== -1) {
+      const keyPointsSection = analysisSection.substring(keyPointsStart);
+      const pointLines = keyPointsSection.split('\n');
       
-      if (inAnalysis) {
-        fullContent += line + '\n';
-        
-        // 첫 번째 의미있는 문단을 요약으로 사용
-        if (!summary && trimmed.length > 30 && 
-            !trimmed.startsWith('Key Points') && 
-            !trimmed.match(/^\d+\./) && 
-            !trimmed.startsWith('-') &&
-            !trimmed.startsWith('**')) {
-          summary = trimmed;
-        }
-        
-        // 핵심 포인트들을 상세하게 추출하고 한글로 번역
-        if (trimmed.match(/^\d+\..+/) && trimmed.includes(':')) {
+      console.log('🔑 [AI Parser] Key Points 섹션 발견, 라인 수:', pointLines.length);
+      
+      for (const line of pointLines) {
+        const trimmed = line.trim();
+        if (trimmed.match(/^\d+\..+/) && trimmed.includes(':') && highlights.length < 4) {
+          console.log('🔎 [AI Parser] Key Point 발견:', trimmed.substring(0, 50) + '...');
+          
           const parts = trimmed.split(':');
           const title = parts[0].replace(/^\d+\.\s*/, '').trim();
-          const content = parts.slice(1).join(':').trim(); // 전체 내용 포함
+          const content = parts.slice(1).join(':').trim();
           
-          if (title && content && highlights.length < 4) {
-            // 영문 Key Points를 상세한 한글로 번역
+          if (title && content) {
+            // 이미 한국어인 경우 그대로 사용, 영문인 경우에만 번역
             let koreanTitle = title;
             let koreanContent = content;
             
+            // 영문 Key Points인 경우 한글로 번역 (기존 호환성)
             if (title.includes('Temperature') || title.includes('Sensory')) {
               koreanTitle = '🌡️ 기온 및 체감 온도';
-              koreanContent = '고온으로 인해 체감온도가 비해 많은 땅을 흘리고 격렬한 활동이 어려워집니다. 수영 같은 물 활동이나 에어컨이 있는 실내 공간을 이용하세요.';
+              koreanContent = '고온으로 인해 체감온도가 높아 많은 땀을 흘리고 격렬한 활동이 어려워집니다. 수영 같은 물 활동이나 에어컨이 있는 실내 공간을 이용하세요.';
             } else if (title.includes('Humidity') || title.includes('Moisture')) {
               koreanTitle = '💧 습도 및 수분 영향';
-              koreanContent = '50.6%의 습도로 대기가 끔적하고 흐릿해 보일 수 있습니다. 열기와 습도의 조합으로 햄빛 효과가 심해져 장시간 야외 활동이 더욱 힘들어집니다. 수분 섭취를 충분히 하세요.';
+              koreanContent = '50.6%의 습도로 대기가 끈적하고 흐릿해 보일 수 있습니다. 열기와 습도의 조합으로 햇빛 효과가 심해져 장시간 야외 활동이 더욱 힘들어집니다. 수분 섭취를 충분히 하세요.';
             } else if (title.includes('Rainfall') || title.includes('Outlook')) {
               koreanTitle = '☀️ 강수 및 전망';
-              koreanContent = '현재 강수가 없어 비에 젠을 걱정 없이 야외 활동을 즐길 수 있는 좋은 날입니다. 하지만 건조한 날씨로 수상 활동에는 영향을 줄 수 있습니다.';
+              koreanContent = '현재 강수가 없어 비에 젖을 걱정 없이 야외 활동을 즐길 수 있는 좋은 날입니다. 하지만 건조한 날씨로 수상 활동에는 영향을 줄 수 있습니다.';
             } else if (title.includes('Outdoor') || title.includes('Activities')) {
               koreanTitle = '🏃 야외 활동 및 권장사항';
               koreanContent = '고온과 습도로 인해 격렬한 운동은 부적합하므로 그늘을 찾고 수분 섭취를 충분히 하는 것이 중요합니다. 대안으로 야간 활동을 고려해보세요.';
+            } else {
+              // 이미 한국어인 경우 이모지만 추가 (필요시)
+              if (!koreanTitle.match(/^[🌡️💧☀️🏃]/)) {
+                if (koreanTitle.includes('기온') || koreanTitle.includes('체감')) {
+                  koreanTitle = '🌡️ ' + koreanTitle;
+                } else if (koreanTitle.includes('습도') || koreanTitle.includes('수분')) {
+                  koreanTitle = '💧 ' + koreanTitle;
+                } else if (koreanTitle.includes('강수') || koreanTitle.includes('전망')) {
+                  koreanTitle = '☀️ ' + koreanTitle;
+                } else if (koreanTitle.includes('야외') || koreanTitle.includes('활동')) {
+                  koreanTitle = '🏃 ' + koreanTitle;
+                }
+              }
             }
             
             highlights.push(`${koreanTitle}: ${koreanContent}`);
