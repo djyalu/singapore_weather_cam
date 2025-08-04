@@ -535,119 +535,57 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       });
       setShowRealAI(true);
 
-      // 1. GitHub Actions 즉시 실행 트리거
-      const triggerResponse = await fetch(`https://api.github.com/repos/djyalu/singapore_weather_cam/dispatches`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          event_type: 'fast-ai-request',
-          client_payload: {
-            priority: 'urgent',
-            cohere_mode: 'professional',
-            timestamp: new Date().toISOString(),
-            source: 'real_cohere_request'
-          }
-        })
-      });
-
-      if (triggerResponse.ok) {
-        console.log('✅ [Real Cohere] GitHub Actions 워크플로우 트리거 성공');
+      // 1. 기존 서버 분석이 있는지 단순 확인 (실제 Cohere 분석)
+      console.log('🎨 [Real Cohere] 실제 Cohere AI 분석 검색 시작...');
+      
+      const serverAnalysis = await loadServerAIAnalysis();
+      if (serverAnalysis && 
+          serverAnalysis.summary && 
+          serverAnalysis.ai_model && 
+          serverAnalysis.ai_model.includes('Cohere') &&
+          serverAnalysis.ai_model !== 'Simulation' &&
+          new Date(serverAnalysis.timestamp).getTime() > Date.now() - 3600000) { // 1시간 이내
         
-        // 2. 주기적 결과 확인 (10초 간격으로 6번 = 1분)
-        let checkCount = 0;
-        const maxChecks = 6;
-        
-        const checkInterval = setInterval(async () => {
-          checkCount++;
-          console.log(`🔄 [Real Cohere] 결과 확인 ${checkCount}/${maxChecks}...`);
-          
-          try {
-            const serverAIAnalysis = await loadServerAIAnalysis();
-            
-            // 새로운 Cohere 분석이 생성되었는지 확인
-            if (serverAIAnalysis && 
-                serverAIAnalysis.summary && 
-                serverAIAnalysis.ai_model !== 'Simulation' &&
-                serverAIAnalysis.ai_model.includes('Cohere') &&
-                new Date(serverAIAnalysis.timestamp).getTime() > Date.now() - 300000) { // 5분 이내
-              
-              console.log('✅ [Real Cohere] 새로운 Cohere AI 분석 확인!');
-              clearInterval(checkInterval);
-              
-              setCohereAnalysis({
-                summary: serverAIAnalysis.summary,
-                highlights: serverAIAnalysis.highlights || [],
-                confidence: serverAIAnalysis.confidence || 0.96,
-                aiModel: serverAIAnalysis.ai_model,
-                analysisType: 'Real Cohere AI Analysis',
-                timestamp: serverAIAnalysis.timestamp,
-                weather_context: serverAIAnalysis.weather_context,
-                processing_time: serverAIAnalysis.processing_time,
-                stations_analyzed: serverAIAnalysis.stations_analyzed,
-                isRealCohere: true,
-                freshAnalysis: true
-              });
-              setCohereLoading(false);
-              return;
-            }
-            
-            // 마지막 확인에서도 결과가 없으면 기존 분석 사용
-            if (checkCount >= maxChecks) {
-              console.log('⚠️ [Real Cohere] 새 분석 대기 시간 초과, 기존 분석 사용');
-              clearInterval(checkInterval);
-              
-              if (serverAIAnalysis && serverAIAnalysis.summary) {
-                setCohereAnalysis({
-                  summary: serverAIAnalysis.summary,
-                  highlights: serverAIAnalysis.highlights || [],
-                  confidence: serverAIAnalysis.confidence || 0.90,
-                  aiModel: serverAIAnalysis.ai_model + ' (기존 분석)',
-                  analysisType: 'Existing Server Analysis',
-                  timestamp: serverAIAnalysis.timestamp,
-                  weather_context: serverAIAnalysis.weather_context,
-                  isRealCohere: serverAIAnalysis.ai_model.includes('Cohere'),
-                  existingAnalysis: true
-                });
-              } else {
-                // 완전 실패 시 로컬 고급 분석
-                const fallbackAnalysis = generateQuickLocalAnalysis();
-                setCohereAnalysis({
-                  ...fallbackAnalysis,
-                  aiModel: 'Advanced Local Analysis (Cohere 대체)',
-                  analysisType: 'Cohere Fallback',
-                  note: 'Cohere API 일시 불가로 로컬 고급 분석 제공'
-                });
-              }
-              setCohereLoading(false);
-            }
-            
-          } catch (error) {
-            console.warn(`⚠️ [Real Cohere] 확인 ${checkCount} 실패:`, error);
-            if (checkCount >= maxChecks) {
-              clearInterval(checkInterval);
-              setCohereLoading(false);
-            }
-          }
-        }, 10000); // 10초 간격
-        
-        // 안전장치: 최대 2분 후 강제 종료
-        setTimeout(() => {
-          clearInterval(checkInterval);
-          if (cohereLoading) {
-            console.log('⏰ [Real Cohere] 최대 대기 시간 초과');
-            setCohereLoading(false);
-          }
-        }, 120000);
-        
-      } else {
-        throw new Error(`GitHub Actions 트리거 실패: ${triggerResponse.status}`);
+        console.log('✅ [Real Cohere] 최신 Cohere AI 분석 발견!');
+        setCohereAnalysis({
+          summary: serverAnalysis.summary,
+          highlights: serverAnalysis.highlights || [],
+          confidence: serverAnalysis.confidence || 0.96,
+          aiModel: serverAnalysis.ai_model,
+          analysisType: 'Real Cohere AI Analysis',
+          timestamp: serverAnalysis.timestamp,
+          weather_context: serverAnalysis.weather_context,
+          processing_time: serverAnalysis.processing_time,
+          stations_analyzed: serverAnalysis.stations_analyzed,
+          raw_analysis: serverAnalysis.raw_analysis,
+          isRealCohere: true,
+          freshAnalysis: true
+        });
+        setCohereLoading(false);
+        return;
       }
       
+      // 2. Cohere 분석이 없으면 안내 메시지
+      console.log('📝 [Real Cohere] 새로운 Cohere 분석이 필요합니다.');
+      
+      setCohereAnalysis({
+        summary: '🤖 **실제 Cohere AI 분석을 사용하려면 GitHub Actions에서 수동으로 실행해주세요.**\n\n현재 브라우저에서는 GitHub API 인증 제한으로 직접 트리거할 수 없습니다. \n\n**수동 실행 방법:**\n1. GitHub 저장소의 Actions 탭 이동\n2. "Simple Cohere AI Analysis" 워크플로우 선택\n3. "Run workflow" 버튼 클릭\n\n이후 이 버튼을 다시 눌러서 결과를 확인하세요.',
+        highlights: [
+          '📝 GitHub Actions 수동 실행 필요',
+          '🔐 브라우저 API 인증 제한',
+          '🎨 Cohere AI 분석 대기 중',
+          '⚙️ 워크플로우 수동 실행 후 새로고침'
+        ],
+        confidence: 0.85,
+        aiModel: 'Manual Workflow Required',
+        analysisType: 'GitHub Actions Required',
+        note: 'GitHub Actions 수동 실행이 필요합니다.',
+        manualTriggerRequired: true
+      });
+      setCohereLoading(false);
+      
     } catch (error) {
-      console.error('❌ [Real Cohere] 확실한 분석 실패:', error);
+      console.error('❌ [Real Cohere] 분석 로드 실패:', error);
       
       // 에러 시 즉시 고품질 로컬 분석 제공
       const errorFallback = generateQuickLocalAnalysis();
@@ -656,7 +594,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         aiModel: 'Professional Local Analysis (에러 복구)',
         analysisType: 'Error Recovery Mode',
         error: error.message,
-        note: 'Cohere API 연결 오류로 로컬 전문 분석 제공'
+        note: 'Cohere AI 연결 실패로 로컬 전문 분석 제공'
       });
       setShowRealAI(true);
       setCohereLoading(false);

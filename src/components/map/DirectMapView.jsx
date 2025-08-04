@@ -358,11 +358,12 @@ const DirectMapView = ({ weatherData, selectedRegion = 'all', className = '', on
           // 데이터 소스 표시
           const dataSource = validation.regionalTemps[region.id]?.source === 'real_data' ? '실시간 데이터' : 'Fallback 데이터';
 
-          // 온도 정보 팝업
+          // 온도 정보 팝업 (null 체크 추가)
+          const tempDisplay = avgTemp !== null ? `${avgTemp.toFixed(1)}°C` : 'N/A';
           circle.bindPopup(`
             <div style="text-align: center; padding: 12px;">
               <strong>${region.emoji} ${region.displayName}</strong><br>
-              <div style="color: ${tempColor}; font-size: 16px; font-weight: bold;">🌡️ ${avgTemp.toFixed(1)}°C</div>
+              <div style="color: ${tempColor}; font-size: 16px; font-weight: bold;">🌡️ ${tempDisplay}</div>
               <div style="font-size: 12px; color: #666; margin-top: 4px;">
                 Stations: ${region.stationIds.join(', ')}
               </div>
