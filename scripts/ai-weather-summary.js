@@ -6,6 +6,7 @@
  * Analyzes Singapore weather data using Cohere AI API
  * Generates AI summaries for overall weather conditions across Singapore
  * Server execution test - API key verified working
+ * Enhanced for maximum creative AI analysis with 2000 tokens
  */
 
 import fs from 'fs/promises';
