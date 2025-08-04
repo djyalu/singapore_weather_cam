@@ -292,6 +292,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           confidence: 0.5,
           aiModel: 'Error Recovery Mode'
         });
+        setShowRealAI(true); // 에러 메시지도 표시
         return;
       }
       
@@ -302,6 +303,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           confidence: 0.6,
           aiModel: 'Data Loading Mode'
         });
+        setShowRealAI(true); // 대기 메시지도 표시
         return;
       }
 
@@ -334,6 +336,9 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         stationCount: stationCount
       });
       
+      // 고급 분석 결과 표시
+      setShowRealAI(true);
+      
     } catch (error) {
       console.error('🚨 [Real AI Analysis] 오류:', error);
       setCohereAnalysis({
@@ -342,6 +347,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         confidence: 0.7,
         aiModel: 'Safe Mode AI'
       });
+      setShowRealAI(true); // 오류 메시지도 표시
     } finally {
       setCohereLoading(false);
     }
