@@ -18,6 +18,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [cohereLoading, setCohereLoading] = useState(false);
   const [showRealAI, setShowRealAI] = useState(false);
   const [independentWeatherData, setIndependentWeatherData] = useState(null);
+  const [serverAICheckCount, setServerAICheckCount] = useState(0);
 
   // WeatherAlertTicker와 동일한 데이터 감지 시스템 사용
   const { weatherData: mainWeatherData, isLoading: mainDataLoading } = useWeatherData();
@@ -106,6 +107,60 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       console.log('⚠️ [SingaporeOverallWeather] Waiting for global NEA data...');
     }
   }, [mainWeatherData, mainDataLoading]); // WeatherAlertTicker와 동일한 업데이트 트리거 사용
+
+  // 🔄 자동 서버 AI 분석 결과 확인 시스템
+  useEffect(() => {
+    const checkServerAIAnalysis = async () => {
+      try {
+        console.log(`🔍 [Auto Check] 서버 AI 분석 확인 중... (시도 ${serverAICheckCount + 1})`);
+        
+        const serverAIAnalysis = await loadServerAIAnalysis();
+        
+        if (serverAIAnalysis && serverAIAnalysis.analysis) {
+          console.log('✅ [Auto Check] 서버 AI 분석 발견! 자동 로드 중...');
+          
+          setCohereAnalysis({
+            summary: serverAIAnalysis.analysis.summary,
+            highlights: serverAIAnalysis.analysis.highlights,
+            confidence: serverAIAnalysis.analysis.confidence || 0.96,
+            aiModel: serverAIAnalysis.ai_model || 'Cohere Command API (Server)',
+            timestamp: serverAIAnalysis.weather_data_timestamp,
+            analysisType: 'Server AI Analysis',
+            stationCount: serverAIAnalysis.stations_analyzed,
+            detailed_analysis: serverAIAnalysis.detailed_analysis,
+            weather_context: serverAIAnalysis.weather_context,
+            tokensUsed: 0,
+            autoLoaded: true // 자동 로드 표시
+          });
+          
+          setShowRealAI(true);
+          console.log('🎉 [Auto Check] 서버 AI 분석 자동 표시 완료!');
+          return; // 성공하면 더 이상 확인하지 않음
+        } else {
+          console.log(`ℹ️ [Auto Check] 서버 AI 분석 아직 준비 안됨 (시도 ${serverAICheckCount + 1})`);
+          setServerAICheckCount(prev => prev + 1);
+        }
+      } catch (error) {
+        console.log(`ℹ️ [Auto Check] 서버 AI 분석 확인 실패 (시도 ${serverAICheckCount + 1}):`, error.message);
+        setServerAICheckCount(prev => prev + 1);
+      }
+    };
+
+    // 초기 로드 시 즉시 확인
+    if (serverAICheckCount === 0 && independentWeatherData) {
+      checkServerAIAnalysis();
+    }
+    
+    // 최대 10회까지 30초마다 자동 확인
+    if (serverAICheckCount > 0 && serverAICheckCount < 10 && !cohereAnalysis?.autoLoaded) {
+      const interval = setTimeout(() => {
+        checkServerAIAnalysis();
+      }, 30000); // 30초 간격
+
+      return () => clearTimeout(interval);
+    }
+    
+  }, [serverAICheckCount, independentWeatherData, cohereAnalysis?.autoLoaded]);
 
   // AI 날씨 요약 데이터 생성 - 안전하고 강력한 버전
   useEffect(() => {
@@ -1013,10 +1068,19 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
                       <RefreshCw className="w-5 h-5 animate-spin text-blue-600" />
                       <span className="font-semibold text-blue-800">서버에서 AI 분석 생성 중</span>
                     </div>
-                    <div className="text-sm text-blue-700">
+                    <div className="text-sm text-blue-700 mb-2">
                       GitHub Actions가 Cohere AI를 통해 풍부한 분석을 준비하고 있습니다. 
-                      곧 완성된 결과를 보실 수 있습니다.
+                      {serverAICheckCount > 0 && (
+                        <span className="block mt-1">
+                          🔍 자동 확인 중... ({serverAICheckCount}/10회) · 30초마다 자동 업데이트
+                        </span>
+                      )}
                     </div>
+                    {serverAICheckCount > 0 && serverAICheckCount < 10 && (
+                      <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                        💡 분석이 완료되면 자동으로 이 화면에 표시됩니다. 새로고침할 필요가 없습니다!
+                      </div>
+                    )}
                   </div>
                 )}
                 
@@ -1041,7 +1105,25 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
                   {cohereAnalysis.isProcessing && (
                     <span className="text-blue-600 font-medium animate-pulse">⏳ 처리 중</span>
                   )}
+                  {cohereAnalysis.autoLoaded && (
+                    <span className="text-green-600 font-medium">✨ 자동 로드됨</span>
+                  )}
                 </div>
+                
+                {/* 자동 로드 성공 알림 */}
+                {cohereAnalysis.autoLoaded && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-green-800 font-medium">
+                        서버에서 생성된 AI 분석이 자동으로 로드되었습니다!
+                      </span>
+                    </div>
+                    <div className="text-xs text-green-600 mt-1">
+                      GitHub Actions를 통해 Cohere AI가 생성한 풍부한 분석 결과입니다.
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
