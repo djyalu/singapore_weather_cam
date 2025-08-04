@@ -1282,8 +1282,22 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
     return 'text-yellow-300';
   };
 
-  // 독립적 데이터로 overallData 계산 (UI 렌더링용) - 미리 계산된 값 우선 사용
-  const dataForUI = independentWeatherData || weatherData;
+  // 독립적 데이터로 overallData 계산 (UI 렌더링용) - 글로벌 데이터 우선 사용
+  let globalDataForUI = null;
+  try {
+    globalDataForUI = typeof window !== 'undefined' ? window.weatherData : null;
+  } catch (error) {
+    console.warn('⚠️ [SingaporeOverallWeather UI] Global data access failed:', error);
+    globalDataForUI = null;
+  }
+  
+  const dataForUI = globalDataForUI || independentWeatherData || weatherData;
+  console.log('🎯 [UI RENDERING] 데이터 소스:', {
+    usingGlobal: !!globalDataForUI,
+    usingIndependent: !!independentWeatherData,
+    usingProps: !globalDataForUI && !independentWeatherData,
+    finalSource: globalDataForUI ? 'GLOBAL' : independentWeatherData ? 'INDEPENDENT' : 'PROPS'
+  });
   const overallDataForUI = dataForUI ? (() => {
     // independentWeatherData에 미리 계산된 값이 있으면 우선 사용
     if (independentWeatherData?.calculated) {
@@ -1419,7 +1433,7 @@ ${rainfall > 2 ? '\n• 우산 지참 필수' : ''}`;
               <span className="text-xs text-gray-600 font-medium">업데이트</span>
             </div>
             <div className="text-sm font-semibold text-gray-800">
-              {formatLastUpdate(overallData.lastUpdate)}
+              {formatLastUpdate(dataForUI?.timestamp || overallDataForUI?.timestamp)}
             </div>
             <div className="text-xs text-gray-500">
               {weatherData?.source?.includes('Real-time') ? '🔴 실시간 API' : '📊 자동 수집'}
