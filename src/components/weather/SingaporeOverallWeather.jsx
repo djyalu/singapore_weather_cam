@@ -339,18 +339,16 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       setCohereLoading(true);
       console.log('⚡ [Fast AI] 빠른 AI 분석 요청 중...');
       
-      // 즉시 처리 중 메시지 표시
+      // 간결한 처리 중 메시지 표시
       setCohereAnalysis({
-        summary: '⚡ 빠른 AI 분석을 시작합니다...\n\n🚀 서버에서 10초 이내에 Cohere AI 분석을 생성합니다.\n\n📊 최적화된 프롬프트로 빠르고 정확한 분석을 제공합니다.',
+        summary: '빠른 AI 분석을 진행하고 있습니다...',
         highlights: [
-          '⚡ 10초 이내 완성 목표',
-          '🎯 최적화된 Cohere API 호출',
-          '📈 실시간 NEA 데이터 기반',
-          '🚀 빠른 결과 자동 표시'
+          '⚡ 빠른 처리 모드',
+          '🚀 자동 결과 표시'
         ],
         confidence: 0.9,
-        aiModel: 'Fast Cohere Analysis (처리 중)',
-        analysisType: 'Fast Processing',
+        aiModel: 'AI 분석 중',
+        analysisType: 'Fast Analysis',
         isProcessing: true,
         isFastMode: true
       });
@@ -499,18 +497,17 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       setCohereLoading(true);
       console.log('🚀 [Real Cohere] 확실한 Cohere AI 분석 시작...');
       
-      // 즉시 처리 상태 표시
+      // 간결한 처리 상태 표시
       setCohereAnalysis({
-        summary: '🚀 Cohere AI가 전문적인 날씨 분석을 시작합니다...\n\n⚡ 서버에서 실제 AI 분석을 생성하고 있습니다.\n\n📊 NEA 실시간 데이터를 바탕으로 고품질 분석을 제공합니다.',
+        summary: 'Cohere AI가 날씨 분석을 생성하고 있습니다...',
         highlights: [
-          '🤖 실제 Cohere Command API 실행',
-          '⚡ 최적화된 빠른 처리',
-          '🎯 전문 기상 분석가 수준',
-          '📈 실시간 NEA 데이터 활용'
+          '🤖 서버에서 AI 분석 중',
+          '📊 실시간 데이터 기반',
+          '⏱️ 약 1분 소요'
         ],
         confidence: 0.95,
-        aiModel: 'Cohere Command API (처리 중)',
-        analysisType: 'Professional AI Analysis',
+        aiModel: 'Cohere AI (처리 중)',
+        analysisType: 'AI Analysis',
         isProcessing: true,
         isRealCohere: true
       });
@@ -1393,34 +1390,21 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           <CardContent className="pt-0">
             {cohereLoading ? (
               <div className="flex flex-col items-center space-y-3 text-emerald-600 py-6">
-                <RefreshCw className="w-8 h-8 animate-spin" />
-                <span className="text-lg font-medium">고급 AI 분석 진행 중...</span>
-                <div className="text-sm text-gray-500 text-center">
-                  Cohere AI가 실시간 기상 데이터를 분석하고 있습니다
-                </div>
+                <RefreshCw className="w-6 h-6 animate-spin" />
+                <span className="text-base font-medium">AI 분석 중...</span>
               </div>
             ) : (
               <div className="space-y-3">
-                {/* 처리 중인 경우 특별한 표시 */}
+                {/* 간결한 처리 중 표시 */}
                 {cohereAnalysis.isProcessing && (
-                  <div className="bg-gradient-to-r from-blue-100 to-purple-100 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <RefreshCw className="w-5 h-5 animate-spin text-blue-600" />
-                      <span className="font-semibold text-blue-800">서버에서 AI 분석 생성 중</span>
-                    </div>
-                    <div className="text-sm text-blue-700 mb-2">
-                      GitHub Actions가 Cohere AI를 통해 풍부한 분석을 준비하고 있습니다. 
+                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-4">
+                    <div className="flex items-center space-x-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+                      <span className="text-blue-800 font-medium">AI 분석 진행 중</span>
                       {serverAICheckCount > 0 && (
-                        <span className="block mt-1">
-                          🔍 자동 확인 중... ({serverAICheckCount}/10회) · 30초마다 자동 업데이트
-                        </span>
+                        <span className="text-sm text-blue-600">({serverAICheckCount}/6)</span>
                       )}
                     </div>
-                    {serverAICheckCount > 0 && serverAICheckCount < 10 && (
-                      <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                        💡 분석이 완료되면 자동으로 이 화면에 표시됩니다. 새로고침할 필요가 없습니다!
-                      </div>
-                    )}
                   </div>
                 )}
                 
@@ -1436,38 +1420,20 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
                     </div>
                   ))}
                 </div>
-                <div className="text-xs text-gray-500 flex items-center space-x-4">
-                  <span>🚀 {cohereAnalysis.aiModel}</span>
-                  <span>🎯 신뢰도 {Math.round(cohereAnalysis.confidence * 100)}%</span>
+                <div className="text-xs text-gray-500 flex items-center space-x-3">
+                  <span>{cohereAnalysis.aiModel}</span>
+                  <span>신뢰도 {Math.round(cohereAnalysis.confidence * 100)}%</span>
                   {cohereAnalysis.stationCount && (
-                    <span>📡 {cohereAnalysis.stationCount}개 관측소</span>
-                  )}
-                  {cohereAnalysis.isProcessing && (
-                    <span className={`font-medium animate-pulse ${
-                      cohereAnalysis.isFastMode ? 'text-green-600' : 'text-blue-600'
-                    }`}>
-                      {cohereAnalysis.isFastMode ? '⚡ 빠른 처리 중' : '⏳ 처리 중'}
-                    </span>
-                  )}
-                  {cohereAnalysis.autoLoaded && (
-                    <span className="text-green-600 font-medium">✨ 자동 로드됨</span>
-                  )}
-                  {cohereAnalysis.isFastMode && !cohereAnalysis.isProcessing && (
-                    <span className="text-green-600 font-medium">⚡ 빠른 분석</span>
+                    <span>{cohereAnalysis.stationCount}개 관측소</span>
                   )}
                 </div>
                 
-                {/* 자동 로드 성공 알림 */}
+                {/* 간결한 완료 알림 */}
                 {cohereAnalysis.autoLoaded && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-2 mt-3">
                     <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm text-green-800 font-medium">
-                        서버에서 생성된 AI 분석이 자동으로 로드되었습니다!
-                      </span>
-                    </div>
-                    <div className="text-xs text-green-600 mt-1">
-                      GitHub Actions를 통해 Cohere AI가 생성한 풍부한 분석 결과입니다.
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-green-800">AI 분석 완료</span>
                     </div>
                   </div>
                 )}
