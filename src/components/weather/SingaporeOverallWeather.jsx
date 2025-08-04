@@ -371,27 +371,46 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
 
 자연스럽고 전문적인 톤으로 2-3문단 정도의 상세한 분석을 제공해주세요.`;
 
-        // 실제 Cohere AI API 호출
-        const cohereResponse = await callCohereAPI(weatherPrompt);
+        // 서버에서 생성된 AI 분석 결과 먼저 확인
+        const serverAIAnalysis = await loadServerAIAnalysis();
         
-        if (cohereResponse.success) {
-          // AI 생성 하이라이트 추출
-          const aiHighlights = extractHighlights(cohereResponse.text, temp, humidity, rainfall);
-          
+        if (serverAIAnalysis && serverAIAnalysis.analysis) {
+          console.log('✅ [Server AI] Using server-generated Cohere AI analysis');
           setCohereAnalysis({
-            summary: cohereResponse.text,
-            highlights: aiHighlights,
-            confidence: 0.95,
-            aiModel: 'Cohere Command API',
-            timestamp: globalWeatherData.timestamp,
-            analysisType: 'Real AI Analysis',
-            stationCount: stationCount,
-            tokensUsed: cohereResponse.tokensUsed || 0
+            summary: serverAIAnalysis.analysis.summary,
+            highlights: serverAIAnalysis.analysis.highlights,
+            confidence: serverAIAnalysis.analysis.confidence || 0.96,
+            aiModel: serverAIAnalysis.ai_model || 'Cohere Command API (Server)',
+            timestamp: serverAIAnalysis.weather_data_timestamp,
+            analysisType: 'Server AI Analysis',
+            stationCount: serverAIAnalysis.stations_analyzed,
+            detailed_analysis: serverAIAnalysis.detailed_analysis,
+            weather_context: serverAIAnalysis.weather_context,
+            tokensUsed: 0 // 서버에서 처리됨
           });
           
-          console.log('✅ [Cohere AI] Analysis completed successfully');
+          console.log('✅ [Server AI] Rich server analysis loaded successfully');
         } else {
-          throw new Error(cohereResponse.error || 'Cohere API 호출 실패');
+          // 서버 분석이 없을 때만 클라이언트 API 호출 (백업)
+          console.log('⚠️ [Server AI] No server analysis available, falling back to client API');
+          const cohereResponse = await callCohereAPI(weatherPrompt);
+          
+          if (cohereResponse.success) {
+            const aiHighlights = extractHighlights(cohereResponse.text, temp, humidity, rainfall);
+            
+            setCohereAnalysis({
+              summary: cohereResponse.text,
+              highlights: aiHighlights,
+              confidence: 0.95,
+              aiModel: 'Cohere Command API (Client Fallback)',
+              timestamp: globalWeatherData.timestamp,
+              analysisType: 'Client Fallback Analysis',
+              stationCount: stationCount,
+              tokensUsed: cohereResponse.tokensUsed || 0
+            });
+          } else {
+            throw new Error(cohereResponse.error || 'Cohere API 호출 실패');
+          }
         }
         
       } catch (cohereError) {
@@ -427,6 +446,35 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       setShowRealAI(true);
     } finally {
       setCohereLoading(false);
+    }
+  };
+
+  // 🏢 서버에서 생성된 AI 분석 결과 로드
+  const loadServerAIAnalysis = async () => {
+    try {
+      console.log('🏢 [Server AI] Loading server-generated AI analysis...');
+      
+      const basePath = import.meta.env.BASE_URL || '/';
+      const timestamp = new Date().getTime();
+      const response = await fetch(`${basePath}data/weather-summary/latest.json?t=${timestamp}`);
+      
+      if (response.ok) {
+        const serverAnalysis = await response.json();
+        console.log('✅ [Server AI] Server analysis loaded:', {
+          source: serverAnalysis.source,
+          aiModel: serverAnalysis.ai_model,
+          confidence: serverAnalysis.analysis?.confidence,
+          timestamp: serverAnalysis.timestamp,
+          hasDetailedAnalysis: !!serverAnalysis.detailed_analysis
+        });
+        return serverAnalysis;
+      } else {
+        console.log('ℹ️ [Server AI] No server analysis available (404 expected on first run)');
+        return null;
+      }
+    } catch (error) {
+      console.log('ℹ️ [Server AI] Server analysis not available:', error.message);
+      return null;
     }
   };
 

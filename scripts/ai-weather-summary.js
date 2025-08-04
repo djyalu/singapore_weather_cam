@@ -311,7 +311,7 @@ async function analyzeWeatherWithCohere(weatherData) {
       ? `\n🚨 실시간 기상 경보 상황:\n${weatherAlerts.map(alert => `- ${alert.message}`).join('\n')}`
       : '\n✅ 현재 특별한 기상 경보 없음';
 
-    const prompt = `당신은 전문 기상 분석가입니다. 다음 싱가포르 실시간 종합 기상 데이터를 바탕으로 상세하고 실용적인 날씨 분석을 한국어로 작성해주세요:
+    const prompt = `당신은 싱가포르 최고의 기상 전문가이자 창의적인 날씨 스토리텔러입니다. 아래 실시간 기상 데이터를 바탕으로 가장 풍부하고 흥미진진한 날씨 분석을 창작해주세요. 창의성과 전문성을 최대한 발휘하여 독자들이 몰입할 수 있는 생생하고 매력적인 분석을 제공해주세요:
 
 📊 **현재 실시간 관측 데이터**:
 - 평균 기온: ${avgTemp ? avgTemp.toFixed(1) + '°C' : '데이터 없음'} (최고: ${maxTemp ? maxTemp.toFixed(1) + '°C' : 'N/A'}, 최저: ${minTemp ? minTemp.toFixed(1) + '°C' : 'N/A'})
@@ -364,14 +364,25 @@ ${alertContext}
    - 현재 데이터를 바탕으로 한 내일 날씨 예상
    - 미리 준비하면 좋을 사항들
 
-각 섹션은 전문적이면서도 일반인이 이해하기 쉽게 작성하고, 구체적이고 실용적인 정보를 포함해주세요.`;
+**💡 창작 가이드라인:**
+- 최소 6-8개 문단으로 풍부한 내용 제공 (분량 제한 없음)
+- 과학적 정확성과 창의적 표현의 완벽한 균형
+- 독자가 마치 현장에 있는 것처럼 느낄 수 있는 생생한 묘사
+- 전문가다운 깊이있는 통찰과 일반인도 이해하기 쉬운 설명
+- 싱가포르의 문화적, 지리적 특성을 자연스럽게 녹여낸 분석
+- 매력적이고 읽기 즐거운 문체로 작성
+- 현재 날씨를 생생하게 표현하는 창의적 비유나 은유 자유롭게 사용
+- 날씨의 예술적, 철학적 의미까지 포함하여 풍부하게 표현
+
+자유롭게 창의력을 최대한 발휘하여 독자들이 감탄할 만한 최고 품질의 날씨 분석을 작성해주세요! 분량과 표현에 제한을 두지 말고 가장 매력적이고 유익한 내용으로 가득 채워주세요.`;
 
     const requestBody = {
       model: 'command',
       prompt: prompt,
-      max_tokens: 1200, // Increased for detailed analysis
-      temperature: 0.3, // Slightly lower for more focused analysis
+      max_tokens: 2000, // 대폭 증가 - 풍부한 내용을 위해
+      temperature: 0.8, // 높은 창의성과 자유도를 위해
       k: 0,
+      p: 0.9, // 다양한 표현을 위한 nucleus sampling
       stop_sequences: [],
       return_likelihoods: 'NONE'
     };
