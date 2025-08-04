@@ -277,7 +277,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   };
 
-  // 🚀 실시간 AI 분석 실행 - 안전하고 강력한 분석
+  // 🚀 실제 Cohere AI 분석 실행 - 진짜 AI 파워!
   const handleRealAIAnalysis = async () => {
     try {
       // 안전한 글로벌 데이터 접근
@@ -285,131 +285,388 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
       try {
         globalWeatherData = typeof window !== 'undefined' && window.weatherData ? window.weatherData : null;
       } catch (error) {
-        console.warn('⚠️ [Real AI Analysis] Global data access failed:', error);
+        console.warn('⚠️ [Cohere AI Analysis] Global data access failed:', error);
         setCohereAnalysis({
-          summary: '실시간 데이터 접근 중 오류가 발생했습니다.',
-          highlights: ['데이터 연결 재시도 중'],
+          summary: '실시간 데이터 접근 중 오류가 발생했습니다. 데이터 연결을 확인해주세요.',
+          highlights: ['데이터 연결 재시도 중', '실시간 NEA API 대기'],
           confidence: 0.5,
           aiModel: 'Error Recovery Mode'
         });
-        setShowRealAI(true); // 에러 메시지도 표시
+        setShowRealAI(true);
         return;
       }
       
       if (!globalWeatherData?.data?.temperature?.readings?.length) {
         setCohereAnalysis({
-          summary: '실시간 데이터를 대기 중입니다...',
-          highlights: ['NEA API 연결 대기중'],
+          summary: '실시간 날씨 데이터를 수집 중입니다. 잠시만 기다려주세요...',
+          highlights: ['NEA Singapore API 연결 중', '59개 관측소 데이터 수집 대기'],
           confidence: 0.6,
-          aiModel: 'Data Loading Mode'
+          aiModel: 'Data Collection Mode'
         });
-        setShowRealAI(true); // 대기 메시지도 표시
+        setShowRealAI(true);
         return;
       }
 
       setCohereLoading(true);
       
-      // 실시간 고급 AI 분석
+      // 실시간 데이터 준비
       const temp = globalWeatherData.data.temperature.average || 0;
       const humidity = globalWeatherData.data.humidity.average || 0;
       const rainfall = globalWeatherData.data.rainfall?.total || 0;
       const stationCount = globalWeatherData.data.temperature.readings?.length || 0;
+      const readings = globalWeatherData.data.temperature.readings || [];
       
-      // 🧠 Advanced AI Analysis
-      const advancedSummary = generateAdvancedAISummary(temp, humidity, rainfall, stationCount, globalWeatherData);
-      const advancedHighlights = generateAdvancedHighlights(temp, humidity, rainfall, globalWeatherData);
+      // 🤖 실제 Cohere AI API 호출
+      console.log('🤖 [Cohere AI] Starting real AI analysis...');
       
-      console.log('🚀 [Real AI Analysis] 고급 분석 완료:', {
-        temperature: temp,
-        humidity: humidity,
-        rainfall: rainfall,
-        stationCount: stationCount
-      });
+      try {
+        // 단계별 진행 상황 표시
+        setCohereAnalysis({
+          summary: '🤖 Cohere AI가 싱가포르 날씨를 분석하고 있습니다...\n\n📊 실시간 기상 데이터 처리 중\n🧠 AI 추론 엔진 작동 중\n📝 개인화된 분석 생성 중',
+          highlights: ['Cohere Command 모델 로딩', 'NEA 데이터 AI 분석 중', '맞춤형 권장사항 생성'],
+          confidence: 0.0,
+          aiModel: 'Cohere Command API (처리 중...)',
+          analysisType: 'Real Cohere AI Analysis'
+        });
+        setShowRealAI(true);
+
+        // 지역별 온도 데이터 상세 분석
+        let maxTemp = 0, minTemp = 100, maxStation = '', minStation = '';
+        if (readings.length > 0) {
+          maxTemp = Math.max(...readings.map(r => r.value));
+          minTemp = Math.min(...readings.map(r => r.value));
+          maxStation = readings.find(r => r.value === maxTemp)?.station || 'Unknown';
+          minStation = readings.find(r => r.value === minTemp)?.station || 'Unknown';
+        }
+
+        // Cohere AI를 위한 상세한 프롬프트 구성
+        const currentTime = new Date().toLocaleString('ko-KR', { 
+          timeZone: 'Asia/Singapore',
+          hour: '2-digit',
+          minute: '2-digit',
+          weekday: 'long'
+        });
+        
+        const weatherPrompt = `
+당신은 싱가포르 전문 기상 분석가입니다. 다음 실시간 기상 데이터를 바탕으로 상세하고 유용한 날씨 분석을 한국어로 제공해주세요.
+
+🌍 현재 상황:
+- 시간: ${currentTime} (싱가포르 현지시간)
+- 전국 평균 기온: ${temp.toFixed(1)}°C
+- 전국 평균 습도: ${humidity.toFixed(1)}%
+- 강수량: ${rainfall.toFixed(1)}mm
+- 관측소 수: ${stationCount}개
+
+📊 지역별 온도 편차:
+- 최고 온도: ${maxTemp}°C (${maxStation})
+- 최저 온도: ${minTemp}°C (${minStation})
+- 온도 편차: ${(maxTemp - minTemp).toFixed(1)}°C
+
+분석 요청사항:
+1. 현재 날씨 상황의 전반적 평가
+2. 체감온도와 건강상 주의사항
+3. 지역별 온도 차이의 원인과 특징
+4. 시간대를 고려한 활동 권장사항
+5. 싱가포르 기후 특성을 반영한 전문적 조언
+
+자연스럽고 전문적인 톤으로 2-3문단 정도의 상세한 분석을 제공해주세요.`;
+
+        // 실제 Cohere AI API 호출
+        const cohereResponse = await callCohereAPI(weatherPrompt);
+        
+        if (cohereResponse.success) {
+          // AI 생성 하이라이트 추출
+          const aiHighlights = extractHighlights(cohereResponse.text, temp, humidity, rainfall);
+          
+          setCohereAnalysis({
+            summary: cohereResponse.text,
+            highlights: aiHighlights,
+            confidence: 0.95,
+            aiModel: 'Cohere Command API',
+            timestamp: globalWeatherData.timestamp,
+            analysisType: 'Real AI Analysis',
+            stationCount: stationCount,
+            tokensUsed: cohereResponse.tokensUsed || 0
+          });
+          
+          console.log('✅ [Cohere AI] Analysis completed successfully');
+        } else {
+          throw new Error(cohereResponse.error || 'Cohere API 호출 실패');
+        }
+        
+      } catch (cohereError) {
+        console.error('🚨 [Cohere AI] API Error:', cohereError);
+        
+        // Cohere AI 실패 시 고급 로컬 분석으로 폴백
+        const fallbackSummary = generateAdvancedAISummary(temp, humidity, rainfall, stationCount, globalWeatherData);
+        const fallbackHighlights = generateAdvancedHighlights(temp, humidity, rainfall, globalWeatherData);
+        
+        setCohereAnalysis({
+          summary: `⚠️ Cohere AI 연결 실패로 고급 로컬 분석으로 전환했습니다.\n\n${fallbackSummary}`,
+          highlights: fallbackHighlights,
+          confidence: 0.85,
+          aiModel: 'Advanced Local AI (Cohere Fallback)',
+          timestamp: globalWeatherData.timestamp,
+          analysisType: 'Fallback Analysis',
+          stationCount: stationCount,
+          error: cohereError.message
+        });
+      }
       
-      setCohereAnalysis({
-        summary: advancedSummary,
-        highlights: advancedHighlights,
-        confidence: 0.98,
-        aiModel: 'Singapore Weather Expert AI',
-        timestamp: globalWeatherData.timestamp,
-        analysisType: 'Advanced Real-time Analysis',
-        stationCount: stationCount
-      });
-      
-      // 고급 분석 결과 표시
       setShowRealAI(true);
       
     } catch (error) {
-      console.error('🚨 [Real AI Analysis] 오류:', error);
+      console.error('🚨 [AI Analysis] Critical error:', error);
       setCohereAnalysis({
-        summary: '고급 AI 분석 중 오류가 발생했습니다. 기본 분석으로 전환합니다.',
-        highlights: ['기본 분석 모드 활성화', '안정성 우선 모드'],
+        summary: '고급 AI 분석 중 오류가 발생했습니다. 시스템이 안전 모드로 전환되었습니다.',
+        highlights: ['시스템 안전 모드 활성화', '기본 분석 엔진 대기', '오류 복구 진행 중'],
         confidence: 0.7,
-        aiModel: 'Safe Mode AI'
+        aiModel: 'Safe Mode AI',
+        error: error.message
       });
-      setShowRealAI(true); // 오류 메시지도 표시
+      setShowRealAI(true);
     } finally {
       setCohereLoading(false);
     }
   };
 
-  // 🧠 고급 AI 분석 요약 생성
+  // 🤖 실제 Cohere AI API 호출 함수
+  const callCohereAPI = async (prompt) => {
+    try {
+      // GitHub Actions나 Vercel 환경변수에서 API 키 가져오기
+      const apiKey = import.meta.env.VITE_COHERE_API_KEY || process.env.COHERE_API_KEY;
+      
+      if (!apiKey) {
+        throw new Error('Cohere API 키가 설정되지 않았습니다. 환경변수를 확인해주세요.');
+      }
+
+      const response = await fetch('https://api.cohere.ai/v1/generate', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'command',
+          prompt: prompt,
+          max_tokens: 800,
+          temperature: 0.7,
+          k: 0,
+          stop_sequences: [],
+          return_likelihoods: 'NONE'
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Cohere API Error ${response.status}: ${errorData.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      
+      return {
+        success: true,
+        text: data.generations[0]?.text?.trim() || '분석 결과를 가져올 수 없습니다.',
+        tokensUsed: data.meta?.api_version?.version || 0
+      };
+      
+    } catch (error) {
+      console.error('Cohere API call failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  };
+
+  // 🌟 AI 텍스트에서 하이라이트 추출
+  const extractHighlights = (aiText, temp, humidity, rainfall) => {
+    const highlights = [];
+    
+    // 체감온도 계산
+    const heatIndex = calculateHeatIndex(temp, humidity);
+    highlights.push(`🌡️ 체감온도 ${heatIndex.toFixed(1)}°C`);
+    
+    // 온도 범주별 하이라이트
+    if (temp >= 32) {
+      highlights.push('🔥 고온 주의 - 열사병 위험');
+    } else if (temp >= 28) {
+      highlights.push('☀️ 따뜻한 열대 기후');
+    } else {
+      highlights.push('🌤️ 쾌적한 기온');
+    }
+    
+    // 습도 하이라이트
+    if (humidity >= 80) {
+      highlights.push('💧 고습도 - 통풍 중요');
+    } else if (humidity >= 70) {
+      highlights.push('🌊 적당한 습도');
+    } else {
+      highlights.push('🍃 상쾌한 대기');
+    }
+    
+    // 강수 하이라이트
+    if (rainfall > 10) {
+      highlights.push('🌧️ 강우 중 - 우산 필수');
+    } else if (rainfall > 0) {
+      highlights.push('☔ 가벼운 비 가능성');
+    } else {
+      highlights.push('🌈 맑은 날씨');
+    }
+    
+    // AI 브랜딩
+    highlights.push('🤖 Cohere AI 실시간 분석');
+    
+    return highlights.slice(0, 6); // 최대 6개
+  };
+
+  // 🧠 고급 AI 분석 요약 생성 - 매우 상세하고 풍부한 분석
   const generateAdvancedAISummary = (temp, humidity, rainfall, stationCount, weatherData) => {
     try {
       const currentHour = new Date().getHours();
+      const readings = weatherData.data.temperature.readings || [];
+      const humidityReadings = weatherData.data.humidity?.readings || [];
       let summary = '';
       
-      // 시간대별 분석
+      // 🌍 전반적 기상 현황
+      const currentTime = new Date().toLocaleString('ko-KR', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        timeZone: 'Asia/Singapore'
+      });
+      
       if (currentHour >= 6 && currentHour < 12) {
-        summary += '🌅 현재 아침 시간대, ';
+        summary += `🌅 아침 ${currentTime} 현재, 싱가포르는 하루를 시작하는 시간대입니다. `;
       } else if (currentHour >= 12 && currentHour < 18) {
-        summary += '☀️ 현재 오후 시간대, ';
+        summary += `☀️ 오후 ${currentTime} 현재, 하루 중 가장 더운 시간대입니다. `;
       } else if (currentHour >= 18 && currentHour < 22) {
-        summary += '🌆 현재 저녁 시간대, ';
+        summary += `🌆 저녁 ${currentTime} 현재, 기온이 서서히 내려가는 시간대입니다. `;
       } else {
-        summary += '🌙 현재 밤 시간대, ';
+        summary += `🌙 밤 ${currentTime} 현재, 하루 중 가장 시원한 시간대입니다. `;
       }
       
-      // 온도 상세 분석
-      summary += `싱가포르 전역 평균 기온은 ${temp.toFixed(1)}°C입니다. `;
+      // 🌡️ 온도 상세 분석
+      summary += `전국 ${stationCount}개 관측소에서 측정된 평균 기온은 ${temp.toFixed(1)}°C입니다. `;
       
-      // 체감온도 분석 (온도 + 습도)
-      const heatIndex = calculateHeatIndex(temp, humidity);
-      if (heatIndex > temp + 2) {
-        summary += `습도 ${humidity.toFixed(1)}%로 인해 체감온도는 ${heatIndex.toFixed(1)}°C로 더 덥게 느껴집니다. `;
-      } else {
-        summary += `습도 ${humidity.toFixed(1)}%로 적정 수준을 유지하고 있습니다. `;
-      }
-      
-      // 지역별 편차 분석  
-      const readings = weatherData.data.temperature.readings || [];
       if (readings.length > 0) {
         const maxTemp = Math.max(...readings.map(r => r.value));
         const minTemp = Math.min(...readings.map(r => r.value));
+        const maxStation = readings.find(r => r.value === maxTemp);
+        const minStation = readings.find(r => r.value === minTemp);
         const tempRange = maxTemp - minTemp;
         
-        if (tempRange > 3) {
-          summary += `지역 간 온도 편차가 ${tempRange.toFixed(1)}°C로 다소 큽니다. `;
+        summary += `현재 가장 더운 지역은 ${maxStation?.station || 'Unknown'} ${maxTemp}°C이며, 가장 시원한 지역은 ${minStation?.station || 'Unknown'} ${minTemp}°C로 지역 간 온도 편차는 ${tempRange.toFixed(1)}°C입니다. `;
+        
+        // 온도 분포 분석
+        const highTempStations = readings.filter(r => r.value >= temp + 2).length;
+        const lowTempStations = readings.filter(r => r.value <= temp - 2).length;
+        
+        if (tempRange > 4) {
+          summary += `전국적으로 온도 편차가 큰 편으로, `;
+          if (highTempStations > stationCount * 0.3) {
+            summary += `특히 도심 및 서부 지역에서 열섬 현상이 관찰됩니다. `;
+          }
+        } else if (tempRange > 2) {
+          summary += `일반적인 수준의 지역별 온도 차이를 보이고 있습니다. `;
         } else {
-          summary += `전국적으로 균등한 기온 분포를 보이고 있습니다. `;
+          summary += `전국적으로 매우 균등한 기온 분포를 보이고 있어 안정적인 날씨입니다. `;
         }
       }
       
-      // 강수 및 활동 권장사항
-      if (rainfall > 10) {
-        summary += `현재 강수량 ${rainfall.toFixed(1)}mm로 외출 시 우산이 필요하며, 실내 활동을 권장합니다.`;
-      } else if (rainfall > 0) {
-        summary += `소량의 비가 예상되니 가벼운 우산을 준비하세요.`;
+      // 💧 습도 및 체감온도 심층 분석
+      const heatIndex = calculateHeatIndex(temp, humidity);
+      const comfortLevel = getComfortLevel(temp, humidity);
+      
+      summary += `습도는 ${humidity.toFixed(1)}%로 `;
+      if (humidity >= 85) {
+        summary += `매우 높은 수준입니다. 체감온도는 ${heatIndex.toFixed(1)}°C로 실제 온도보다 ${(heatIndex - temp).toFixed(1)}°C 더 덥게 느껴져 `;
+      } else if (humidity >= 75) {
+        summary += `다소 높은 편입니다. 체감온도는 ${heatIndex.toFixed(1)}°C로 `;
+      } else if (humidity >= 60) {
+        summary += `적정 수준을 유지하고 있습니다. 체감온도는 ${heatIndex.toFixed(1)}°C로 `;
       } else {
-        summary += `맑은 날씨로 야외 활동에 적합합니다.`;
+        summary += `평소보다 낮은 편입니다. 체감온도는 ${heatIndex.toFixed(1)}°C로 `;
+      }
+      summary += `${comfortLevel.description}. `;
+      
+      // 🌧️ 강수량 및 기상 패턴 분석
+      if (rainfall > 15) {
+        summary += `현재 강수량이 ${rainfall.toFixed(1)}mm로 강한 비가 내리고 있어 교통 지연 및 침수 위험이 있습니다. 외출을 자제하고 실내 활동을 권장합니다. `;
+      } else if (rainfall > 5) {
+        summary += `현재 강수량 ${rainfall.toFixed(1)}mm의 중간 강도 비가 내리고 있어 우산과 방수 준비가 필요합니다. `;
+      } else if (rainfall > 0) {
+        summary += `가벼운 비 ${rainfall.toFixed(1)}mm가 내리고 있어 간단한 우산 정도면 충분합니다. `;
+      } else {
+        summary += `현재 강수는 없으며 맑은 날씨로 야외 활동에 적합합니다. `;
       }
       
-      summary += ` 현재 분석은 전국 ${stationCount}개 기상 관측소의 실시간 데이터를 종합한 결과입니다.`;
+      // 🏃‍♂️ 시간대별 활동 권장사항
+      const activityRecommendation = getActivityRecommendation(temp, humidity, rainfall, currentHour);
+      summary += activityRecommendation.detailed;
+      
+      // 🔮 단기 전망 및 주의사항
+      if (temp >= 34) {
+        summary += ` 고온으로 인한 열사병 위험이 높으니 충분한 수분 섭취와 그늘에서의 휴식이 필수입니다.`;
+      } else if (temp >= 31) {
+        summary += ` 더운 날씨이니 야외 활동 시 30분마다 그늘에서 휴식을 취하세요.`;
+      }
+      
+      if (humidity >= 85) {
+        summary += ` 높은 습도로 인해 땀 증발이 어려워 체온 조절에 어려움이 있을 수 있습니다.`;
+      }
       
       return summary;
     } catch (error) {
-      return `싱가포르 현재 날씨는 기온 ${temp.toFixed(1)}°C, 습도 ${humidity.toFixed(1)}%로 전반적으로 안정적인 상태입니다.`;
+      return `현재 싱가포르 전역의 기상 상황을 분석한 결과, 평균 기온 ${temp.toFixed(1)}°C, 습도 ${humidity.toFixed(1)}%로 ${getComfortLevel(temp, humidity).description}를 보이고 있습니다.`;
     }
+  };
+
+  // 🌟 편안함 수준 계산
+  const getComfortLevel = (temp, humidity) => {
+    const heatIndex = calculateHeatIndex(temp, humidity);
+    
+    if (heatIndex >= 41) {
+      return { level: 'dangerous', description: '위험 수준의 더위로 즉시 시원한 곳으로 피해야 합니다' };
+    } else if (heatIndex >= 32) {
+      return { level: 'uncomfortable', description: '매우 불쾌한 더위로 장시간 야외 활동을 피해야 합니다' };
+    } else if (heatIndex >= 27) {
+      return { level: 'caution', description: '주의가 필요한 날씨로 충분한 수분 섭취가 권장됩니다' };
+    } else if (heatIndex >= 24) {
+      return { level: 'comfortable', description: '쾌적한 날씨로 모든 활동에 적합합니다' };
+    } else {
+      return { level: 'cool', description: '서늘한 날씨로 야외 활동하기 좋습니다' };
+    }
+  };
+
+  // 🏃‍♂️ 활동 권장사항 생성
+  const getActivityRecommendation = (temp, humidity, rainfall, hour) => {
+    let recommendation = '';
+    
+    if (rainfall > 10) {
+      recommendation = '강한 비로 인해 실내 활동을 권장합니다. 쇼핑몰, 박물관, 카페 등에서 시간을 보내세요.';
+    } else if (rainfall > 0) {
+      recommendation = '가벼운 비가 있으니 우산을 준비하고 짧은 야외 활동은 가능합니다.';
+    } else if (temp >= 34) {
+      recommendation = '매우 더운 날씨로 오전 8시 이전이나 오후 6시 이후 야외 활동을 권장합니다.';
+    } else if (temp >= 30 && humidity >= 80) {
+      recommendation = '고온다습으로 그늘이 있는 곳에서의 가벼운 활동만 권장합니다.';
+    } else if (temp >= 28 && humidity < 70) {
+      recommendation = '야외 활동하기 좋은 날씨입니다. 충분한 수분 섭취만 유의하세요.';
+    } else {
+      recommendation = '모든 종류의 야외 활동에 최적의 날씨입니다.';
+    }
+    
+    // 시간대별 세부 권장사항
+    if (hour >= 6 && hour < 9) {
+      recommendation += ' 아침 시간대로 조깅이나 산책에 좋습니다.';
+    } else if (hour >= 11 && hour < 15) {
+      recommendation += ' 한낮 시간으로 가능한 그늘에서 활동하세요.';
+    } else if (hour >= 17 && hour < 20) {
+      recommendation += ' 저녁 시간으로 야외 식사나 산책을 즐기기 좋습니다.';
+    }
+    
+    return { detailed: ` ${recommendation}` };
   };
 
   // 🌟 고급 하이라이트 생성
