@@ -1,22 +1,35 @@
 {
-  "timestamp": "2025-07-29T14:06:34.798Z",
-  "source": "Singapore Weather Cam - AI Summary",
-  "ai_model": "Simulation",
-  "analysis_method": "Rule-based simulation",
-  "weather_data_timestamp": "2025-07-29T14:06:16.537Z",
-  "stations_analyzed": 4,
-  "summary": "싱가포르는 현재 비교적 쾌적한 날씨를 보이고 있습니다. 야외 활동하기 좋은 조건입니다.",
+  "timestamp": "2025-08-04T14:33:53.307Z",
+  "source": "Singapore Weather Cam - Fast AI Analysis",
+  "ai_model": "Cohere Command API (Fast)",
+  "analysis_method": "Optimized for speed while maintaining quality",
+  "weather_data_timestamp": "2025-08-02T06:44:12.941Z",
+  "stations_analyzed": 5,
+  "summary": "You are an expert in weather conditions in Singapore.  Please provide an expert and accurate analysis of the current weather conditions based on the real-time data provided below: \n\nCurrent Weather Conditions: \n\n- Average temperature: 32.",
   "highlights": [
-    "쾌적한 기온",
-    "적절한 습도",
-    "야외활동 적합"
+    "🌡️ 현재 기온 32.9°C",
+    "📊 5개 관측소 데이터",
+    "🏙️ 싱가포르 실시간 분석",
+    "⚡ 빠른 AI 처리 완료"
   ],
-  "recommendation": "산책이나 야외 활동을 즐기기 좋은 날씨입니다.",
-  "confidence": 0.75,
-  "api_calls_today": 0,
-  "api_calls_remaining": 20,
-  "api_calls_limit": 20,
-  "api_limit_reached": false,
-  "raw_analysis": null,
-  "force_analysis_used": false
+  "confidence": 0.94,
+  "processing_time": "16433ms",
+  "mode": "fast_analysis",
+  "optimization": {
+    "max_tokens": 800,
+    "temperature": 0.6,
+    "fast_mode": false
+  },
+  "weather_context": {
+    "current_temperature": {
+      "average": "32.9"
+    },
+    "humidity_levels": {
+      "average": 51
+    },
+    "rainfall_status": {
+      "total": "0.0"
+    }
+  },
+  "raw_analysis": "You are an expert in weather conditions in Singapore. Please provide an expert and accurate analysis of the current weather conditions based on the real-time data provided below: \n\nCurrent Weather Conditions: \n\n- Average temperature: 32.9°C \n- Average humidity: 50.6% \n- Amount of rainfall: 0.0mm \n\nThese measurements were taken from five different locations across the country and will form the basis for a more accurate prediction of future weather patterns in Singapore. Meanwhile, here is an expert analysis based on these metrics:\n\nCurrent Weather Situation: \n\nDue to the hot and humid climate, Singaporeans are currently experiencing temperatures of 32.9°C, which many might find unfavorable for outdoor activities. However, the breeze makes it bearable, with the humidity at 50.6%, which is relatively manageable compared to peak humidity levels. \n\nKey Points: \n\n1. Temperature & Sensory Experience: \n\nThe primary factor influencing the comfort level and outdoor activities is the temperature, which is relatively high. This, coupled with the humidity, influences the perceived temperature or how hot it feels. This feels uncomfortably warm, making sweat more and making strenuous activities difficult. Consider opting for water-based activities or taking refuge in air-conditioned spaces. \n\n2. Humidity & Moisture Impact: \n\nThe humidity level of 50.6% is conducive to the typical level of moisture absorption in the air, which can make the environment feel stickier and appear hazy. This combination of heat and humidity can intensify the effects of the sun and make it more daunting for outdoor activities, especially for prolonged periods. Remember to stay hydrated to mitigate the effects of moisture in the atmosphere. \n\n3. Rainfall & Outlook: \n\nCurrently, there is no rainfall, and it seems like a great day to enjoy outdoor activities without the worry of getting wet. However, the low rainfall can also mean that the current dry spell can affect water activities. \n\n4. Outdoor Activities: \n\nThe weather is not ideal for intensive outdoor workouts due to the high temperature and humidity, so it's crucial to stay hydrated and find shade whenever possible. Alternatively, nocturnal activities could provide some relief from the heat. \n\nThese are the key metrics analyzed, and based on these metrics, people in Singapore can better understand the current weather and make informed decisions regarding their outdoor activities."
 }
