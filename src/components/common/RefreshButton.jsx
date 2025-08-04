@@ -32,18 +32,42 @@ const RefreshButton = React.memo(({
     }
   }, [isRefreshing, refreshCount]);
 
-  // 실시간 새로고침 핸들러 (기존 강제 새로고침 로직 사용)
+  // 실시간 새로고침 핸들러 - 모바일 최적화 및 강화된 피드백
   const handleRefresh = useCallback(async () => {
-    if (!onRefresh || isRefreshing || disabled || !isOnline) {return;}
+    if (!onRefresh || isRefreshing || disabled || !isOnline) {
+      console.warn('🚫 새로고침 취소:', { isRefreshing, disabled, isOnline });
+      return;
+    }
 
     try {
+      console.log('🔄 [RefreshButton] 실시간 NEA API 새로고침 시작');
       setRefreshCount(prev => prev + 1);
-      announceToScreenReader('실시간 데이터 새로고침 시작', 'polite');
+      announceToScreenReader('실시간 NEA 데이터 새로고침 시작', 'polite');
+      
+      // 햅틱 피드백 (모바일)
+      if (navigator.vibrate) {
+        navigator.vibrate(50); // 50ms 진동
+      }
+      
+      const startTime = Date.now();
       await onRefresh();
-      announceToScreenReader('실시간 데이터 새로고침 완료', 'polite');
+      const duration = Date.now() - startTime;
+      
+      console.log(`✅ [RefreshButton] 실시간 새로고침 완료 (${duration}ms)`);
+      announceToScreenReader('실시간 NEA 데이터 새로고침 완료', 'polite');
+      
+      // 성공 햅틱 피드백 (모바일)
+      if (navigator.vibrate) {
+        navigator.vibrate([30, 100, 30]); // 성공 패턴
+      }
     } catch (error) {
-      announceToScreenReader('새로고침 실패', 'assertive');
-      console.error('Refresh failed:', error);
+      console.error('❌ [RefreshButton] 새로고침 실패:', error);
+      announceToScreenReader('새로고침 실패 - 네트워크를 확인해주세요', 'assertive');
+      
+      // 실패 햅틱 피드백 (모바일)
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100, 50, 100]); // 실패 패턴
+      }
     }
   }, [onRefresh, isRefreshing, disabled, isOnline]);
 

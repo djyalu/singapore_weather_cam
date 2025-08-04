@@ -12,11 +12,18 @@ const useSimpleDataLoader = (refreshInterval) => {
   const [error, setError] = useState(null);
   const [lastFetch, setLastFetch] = useState(new Date());
   const [validationResults, setValidationResults] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadData = async (isBackgroundRefresh = false, forceRealtime = false) => {
+  const loadData = async (isBackgroundRefresh = false, forceRealtime = false, isManualRefresh = false) => {
     try {
+      // 수동 새로고침 상태 표시
+      if (isManualRefresh) {
+        setIsRefreshing(true);
+        console.log('🔄 [수동 새로고침] 사용자 새로고침 시작');
+      }
+      
       // 백그라운드 새로고침이 아닌 경우에만 로딩 상태 표시
-      if (!isBackgroundRefresh) {
+      if (!isBackgroundRefresh && !isManualRefresh) {
         setLoading(true);
       }
       setError(null);
@@ -88,11 +95,22 @@ const useSimpleDataLoader = (refreshInterval) => {
       }
 
       setLastFetch(new Date());
+      
+      if (isManualRefresh) {
+        console.log('✅ [수동 새로고침] 사용자 새로고침 완료');
+      }
     } catch (err) {
       setError(err.message);
       console.error('Data loading error:', err);
+      
+      if (isManualRefresh) {
+        console.error('❌ [수동 새로고침] 사용자 새로고침 실패:', err.message);
+      }
     } finally {
       setLoading(false);
+      if (isManualRefresh) {
+        setIsRefreshing(false);
+      }
     }
   };
 
@@ -137,10 +155,10 @@ const useSimpleDataLoader = (refreshInterval) => {
     error,
     lastFetch,
     validationResults,
-    refresh: () => loadData(false, false), // 수동 새로고침 (캐시된 데이터)
-    forceRefresh: () => loadData(false, true), // 강제 새로고침 (실시간 API)
+    refresh: () => loadData(false, true, true), // 수동 새로고침 (실시간 NEA API + 새로고침 상태 표시)
+    forceRefresh: () => loadData(false, true, true), // 강제 새로고침 (동일하게 처리)
     isInitialLoading: loading && !weatherData,
-    isRefreshing: false, // 백그라운드 새로고침은 숨김
+    isRefreshing: isRefreshing, // 실제 새로고침 상태 반영
   };
 };
 
@@ -235,6 +253,7 @@ export const AppDataProvider = React.memo(({ children, refreshInterval = 5 * 60 
     refresh,
     forceRefresh,
     validationResults,
+    isRefreshing,
   ]);
 
   return (

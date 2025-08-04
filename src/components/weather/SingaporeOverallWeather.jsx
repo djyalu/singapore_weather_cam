@@ -430,22 +430,41 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   };
 
-  // 🤖 실제 Cohere AI API 호출 함수
+  // 🤖 실제 Cohere AI API 호출 함수 - 강화된 디버깅
   const callCohereAPI = async (prompt) => {
     try {
       // GitHub Actions나 Vercel 환경변수에서 API 키 가져오기
       const apiKey = import.meta.env.VITE_COHERE_API_KEY || process.env.COHERE_API_KEY;
       
+      console.log('🔑 [Cohere API] API 키 체크:', {
+        hasViteKey: !!import.meta.env.VITE_COHERE_API_KEY,
+        hasProcessKey: !!process.env.COHERE_API_KEY,
+        finalKey: apiKey ? `${apiKey.substring(0, 8)}...` : 'NOT_FOUND',
+        keyLength: apiKey?.length || 0
+      });
+      
       if (!apiKey) {
-        throw new Error('Cohere API 키가 설정되지 않았습니다. 환경변수를 확인해주세요.');
+        throw new Error('Cohere API 키가 설정되지 않았습니다. VITE_COHERE_API_KEY 환경변수를 확인해주세요.');
       }
+      
+      if (apiKey.length < 10) {
+        throw new Error(`Cohere API 키가 너무 짧습니다. 현재 길이: ${apiKey.length}`);
+      }
+
+      console.log('📡 [Cohere API] API 호출 시작:', {
+        url: 'https://api.cohere.ai/v1/generate',
+        model: 'command',
+        maxTokens: 800,
+        promptLength: prompt?.length || 0
+      });
 
       const response = await fetch('https://api.cohere.ai/v1/generate', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'User-Agent': 'Singapore-Weather-Cam/1.0'
         },
         body: JSON.stringify({
           model: 'command',
@@ -458,24 +477,56 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         })
       });
 
+      console.log('📡 [Cohere API] HTTP 응답:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries([...response.headers.entries()])
+      });
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Cohere API Error ${response.status}: ${errorData.message || 'Unknown error'}`);
+        console.error('❌ [Cohere API] HTTP 오류:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData: errorData
+        });
+        throw new Error(`Cohere API Error ${response.status}: ${errorData.message || response.statusText || 'Unknown error'}`);
       }
 
       const data = await response.json();
       
+      console.log('✅ [Cohere API] 응답 성공:', {
+        hasGenerations: !!data.generations,
+        generationsCount: data.generations?.length || 0,
+        firstGeneration: data.generations?.[0]?.text?.substring(0, 100) + '...',
+        metadata: data.meta
+      });
+      
+      const generatedText = data.generations?.[0]?.text?.trim();
+      
+      if (!generatedText) {
+        throw new Error('Cohere API에서 빈 응답을 반환했습니다.');
+      }
+      
       return {
         success: true,
-        text: data.generations[0]?.text?.trim() || '분석 결과를 가져올 수 없습니다.',
-        tokensUsed: data.meta?.api_version?.version || 0
+        text: generatedText,
+        tokensUsed: data.meta?.tokens?.input_tokens || 0,
+        model: 'command',
+        timestamp: new Date().toISOString()
       };
       
     } catch (error) {
-      console.error('Cohere API call failed:', error);
+      console.error('❌ [Cohere API] 호출 실패:', {
+        error: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        errorType: error.name || 'UnknownError'
       };
     }
   };
