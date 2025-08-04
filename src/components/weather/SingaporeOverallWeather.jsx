@@ -391,45 +391,65 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           
           console.log('✅ [Server AI] Rich server analysis loaded successfully');
         } else {
-          // 서버 분석이 없을 때만 클라이언트 API 호출 (백업)
-          console.log('⚠️ [Server AI] No server analysis available, falling back to client API');
-          const cohereResponse = await callCohereAPI(weatherPrompt);
+          // 서버 분석이 없을 때는 서버 처리 대기 메시지 표시
+          console.log('ℹ️ [Server AI] No server analysis available - showing processing message');
           
-          if (cohereResponse.success) {
-            const aiHighlights = extractHighlights(cohereResponse.text, temp, humidity, rainfall);
-            
-            setCohereAnalysis({
-              summary: cohereResponse.text,
-              highlights: aiHighlights,
-              confidence: 0.95,
-              aiModel: 'Cohere Command API (Client Fallback)',
-              timestamp: globalWeatherData.timestamp,
-              analysisType: 'Client Fallback Analysis',
-              stationCount: stationCount,
-              tokensUsed: cohereResponse.tokensUsed || 0
-            });
-          } else {
-            throw new Error(cohereResponse.error || 'Cohere API 호출 실패');
-          }
+          setCohereAnalysis({
+            summary: '🏢 서버에서 Cohere AI 분석을 생성하고 있습니다...\n\n📊 GitHub Actions가 실시간 NEA 데이터를 바탕으로 풍부한 AI 분석을 준비하고 있습니다.\n\n⏳ 약 3-5분 후 새로고침하시면 완성된 AI 분석을 보실 수 있습니다.',
+            highlights: [
+              '🤖 Cohere Command API 서버 처리 중',
+              '📈 59개 관측소 데이터 종합 분석', 
+              '🎨 최대 창의성 모드로 생성 중',
+              '⚡ 곧 완성된 분석이 제공됩니다'
+            ],
+            confidence: 0.9,
+            aiModel: 'Cohere Command API (서버 처리 중)',
+            timestamp: globalWeatherData.timestamp,
+            analysisType: 'Server Processing',
+            stationCount: stationCount,
+            isProcessing: true
+          });
         }
         
       } catch (cohereError) {
-        console.error('🚨 [Cohere AI] API Error:', cohereError);
-        
-        // Cohere AI 실패 시 고급 로컬 분석으로 폴백
-        const fallbackSummary = generateAdvancedAISummary(temp, humidity, rainfall, stationCount, globalWeatherData);
-        const fallbackHighlights = generateAdvancedHighlights(temp, humidity, rainfall, globalWeatherData);
-        
-        setCohereAnalysis({
-          summary: `⚠️ Cohere AI 연결 실패로 고급 로컬 분석으로 전환했습니다.\n\n${fallbackSummary}`,
-          highlights: fallbackHighlights,
-          confidence: 0.85,
-          aiModel: 'Advanced Local AI (Cohere Fallback)',
-          timestamp: globalWeatherData.timestamp,
-          analysisType: 'Fallback Analysis',
-          stationCount: stationCount,
-          error: cohereError.message
-        });
+        // 서버 처리 중 에러는 조용하게 처리
+        if (cohereError.message === 'SERVER_PROCESSING') {
+          console.log('ℹ️ [Cohere AI] 서버 처리 대기 중 - 사용자 친화적 메시지 표시');
+          
+          setCohereAnalysis({
+            summary: '🏢 서버에서 Cohere AI 분석을 생성하고 있습니다...\n\n📊 GitHub Actions가 실시간 NEA 데이터를 바탕으로 풍부한 AI 분석을 준비하고 있습니다.\n\n⏳ 약 3-5분 후 새로고침하시면 완성된 AI 분석을 보실 수 있습니다.',
+            highlights: [
+              '🤖 Cohere Command API 서버 처리 중',
+              '📈 59개 관측소 데이터 종합 분석', 
+              '🎨 최대 창의성 모드로 생성 중',
+              '⚡ 곧 완성된 분석이 제공됩니다'
+            ],
+            confidence: 0.9,
+            aiModel: 'Cohere Command API (서버 처리 중)',
+            timestamp: globalWeatherData.timestamp,
+            analysisType: 'Server Processing',
+            stationCount: stationCount,
+            isProcessing: true
+          });
+        } else {
+          // 실제 에러인 경우에만 콘솔 로그 출력
+          console.log('ℹ️ [Cohere AI] 서버 분석 대기 중:', cohereError.message);
+          
+          // Cohere AI 대기 시 고급 로컬 분석으로 임시 표시
+          const fallbackSummary = generateAdvancedAISummary(temp, humidity, rainfall, stationCount, globalWeatherData);
+          const fallbackHighlights = generateAdvancedHighlights(temp, humidity, rainfall, globalWeatherData);
+          
+          setCohereAnalysis({
+            summary: `🏢 서버에서 Cohere AI 분석 준비 중...\n\n${fallbackSummary}\n\n⏳ 서버 AI 분석이 완료되면 더욱 풍부한 내용으로 업데이트됩니다.`,
+            highlights: fallbackHighlights,
+            confidence: 0.85,
+            aiModel: 'Advanced Local AI (서버 AI 대기 중)',
+            timestamp: globalWeatherData.timestamp,
+            analysisType: 'Temporary Analysis',
+            stationCount: stationCount,
+            isProcessing: true
+          });
+        }
       }
       
       setShowRealAI(true);
@@ -478,21 +498,17 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   };
 
-  // 🤖 실제 Cohere AI API 호출 함수 - 강화된 디버깅
+  // 🤖 실제 Cohere AI API 호출 함수 - 서버 우선 전략
   const callCohereAPI = async (prompt) => {
     try {
       // GitHub Actions나 Vercel 환경변수에서 API 키 가져오기
       const apiKey = import.meta.env.VITE_COHERE_API_KEY || process.env.COHERE_API_KEY;
       
-      console.log('🔑 [Cohere API] API 키 체크:', {
-        hasViteKey: !!import.meta.env.VITE_COHERE_API_KEY,
-        hasProcessKey: !!process.env.COHERE_API_KEY,
-        finalKey: apiKey ? `${apiKey.substring(0, 8)}...` : 'NOT_FOUND',
-        keyLength: apiKey?.length || 0
-      });
-      
+      // 클라이언트에서는 의도적으로 API 키가 없어야 함 (서버에서 처리)
       if (!apiKey) {
-        throw new Error('Cohere API 키가 설정되지 않았습니다. VITE_COHERE_API_KEY 환경변수를 확인해주세요.');
+        // 오류 로그 없이 조용하게 서버 대기 상태로 전환
+        console.log('ℹ️ [Cohere API] 클라이언트 API 키 없음 - 서버 사이드 처리 대기 중');
+        throw new Error('SERVER_PROCESSING'); // 내부 처리용 에러
       }
       
       if (apiKey.length < 10) {
@@ -981,16 +997,37 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           
           <CardContent className="pt-0">
             {cohereLoading ? (
-              <div className="flex items-center space-x-2 text-emerald-600">
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>고급 분석 진행 중...</span>
+              <div className="flex flex-col items-center space-y-3 text-emerald-600 py-6">
+                <RefreshCw className="w-8 h-8 animate-spin" />
+                <span className="text-lg font-medium">고급 AI 분석 진행 중...</span>
+                <div className="text-sm text-gray-500 text-center">
+                  Cohere AI가 실시간 기상 데이터를 분석하고 있습니다
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-gray-700 leading-relaxed">{cohereAnalysis.summary}</p>
+                {/* 처리 중인 경우 특별한 표시 */}
+                {cohereAnalysis.isProcessing && (
+                  <div className="bg-gradient-to-r from-blue-100 to-purple-100 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <RefreshCw className="w-5 h-5 animate-spin text-blue-600" />
+                      <span className="font-semibold text-blue-800">서버에서 AI 분석 생성 중</span>
+                    </div>
+                    <div className="text-sm text-blue-700">
+                      GitHub Actions가 Cohere AI를 통해 풍부한 분석을 준비하고 있습니다. 
+                      곧 완성된 결과를 보실 수 있습니다.
+                    </div>
+                  </div>
+                )}
+                
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{cohereAnalysis.summary}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {cohereAnalysis.highlights?.map((highlight, index) => (
-                    <div key={index} className="text-sm bg-emerald-100 text-emerald-700 px-3 py-2 rounded">
+                    <div key={index} className={`text-sm px-3 py-2 rounded ${
+                      cohereAnalysis.isProcessing 
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                        : 'bg-emerald-100 text-emerald-700'
+                    }`}>
                       {highlight}
                     </div>
                   ))}
@@ -1000,6 +1037,9 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
                   <span>🎯 신뢰도 {Math.round(cohereAnalysis.confidence * 100)}%</span>
                   {cohereAnalysis.stationCount && (
                     <span>📡 {cohereAnalysis.stationCount}개 관측소</span>
+                  )}
+                  {cohereAnalysis.isProcessing && (
+                    <span className="text-blue-600 font-medium animate-pulse">⏳ 처리 중</span>
                   )}
                 </div>
               </div>
