@@ -328,9 +328,16 @@ export const validateDataConsistency = (weatherData) => {
     };
 
     // 전체 평균과 지역별 온도 차이 검사 (2도 이상 차이나면 경고)
-    const tempDiff = Math.abs(regionalTemp - overall.temperature);
-    if (tempDiff > 2) {
-      results.issues.push(`${region.displayName} 온도(${regionalTemp.toFixed(1)}°C)가 전체 평균(${overall.temperature.toFixed(1)}°C)과 ${tempDiff.toFixed(1)}°C 차이`);
+    // null 체크 추가로 오류 방지
+    if (regionalTemp !== null && overall.temperature !== null) {
+      const tempDiff = Math.abs(regionalTemp - overall.temperature);
+      if (tempDiff > 2) {
+        results.issues.push(`${region.displayName} 온도(${regionalTemp.toFixed(1)}°C)가 전체 평균(${overall.temperature.toFixed(1)}°C)과 ${tempDiff.toFixed(1)}°C 차이`);
+        results.isConsistent = false;
+      }
+    } else {
+      // 온도 데이터가 없는 경우 경고 추가
+      results.issues.push(`${region.displayName} 온도 데이터 없음 (regional: ${regionalTemp}, overall: ${overall.temperature})`);
       results.isConsistent = false;
     }
   });
