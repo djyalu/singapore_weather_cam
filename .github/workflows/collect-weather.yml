@@ -20,6 +20,7 @@ on:
       - '.github/workflows/collect-weather.yml'
       - 'scripts/collect-weather.js'
       - 'scripts/ai-weather-summary.js'
+      - 'scripts/fast-ai-summary.js'
 
 env:
   NODE_ENV: production

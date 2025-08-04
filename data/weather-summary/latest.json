@@ -1,56 +1,35 @@
 {
-  "timestamp": "2025-08-04T13:29:50.943Z",
-  "source": "Singapore Weather Cam - Enhanced AI Summary",
-  "ai_model": "Cohere Command API (Enhanced)",
-  "analysis_method": "Comprehensive AI-generated analysis",
+  "timestamp": "2025-08-04T14:28:02.868Z",
+  "source": "Singapore Weather Cam - Fast AI Analysis",
+  "ai_model": "Fast Intelligent Analysis",
+  "analysis_method": "Optimized for speed while maintaining quality",
   "weather_data_timestamp": "2025-08-02T06:44:12.941Z",
-  "stations_analyzed": 59,
-  "summary": "싱가포르는 현재 전형적인 열대기후 특성을 보이고 있습니다.",
+  "stations_analyzed": 5,
+  "summary": "현재 싱가포르는 전형적인 열대 기후를 보이고 있습니다. 상대적으로 건조한 상태입니다. 맑은 날씨로 야외 활동에 좋습니다.",
   "highlights": [
-    "현재 평균 기온 32.9°C",
-    "습도 51% (체감온도 상승)",
-    "열대기후 특성에 따른 높은 습도",
-    "건조한 날씨",
-    "야외활동 시 수분 보충 필요"
+    "☀️ 따뜻한 열대 기후 - 가벼운 복장 권장",
+    "🍃 상쾌한 대기 환경",
+    "🌈 맑은 날씨 - 야외 활동 최적",
+    "📊 전국 5개 관측소 실시간 데이터"
   ],
-  "recommendation": "현재 날씨 조건에 맞는 적절한 활동을 선택하여 즐겨보세요.",
-  "confidence": 0.92,
-  "detailed_analysis": {
-    "temperature_analysis": "",
-    "humidity_analysis": "",
-    "rainfall_analysis": "",
-    "pattern_analysis": "",
-    "health_safety": "",
-    "tomorrow_outlook": ""
+  "confidence": 0.9,
+  "processing_time": "<1s",
+  "mode": "fast_analysis",
+  "optimization": {
+    "max_tokens": 800,
+    "temperature": 0.6,
+    "fast_mode": false
   },
   "weather_context": {
     "current_temperature": {
-      "average": "32.9",
-      "max": "34.8",
-      "min": "31.6"
+      "average": "32.9"
     },
     "humidity_levels": {
-      "average": 51,
-      "max": 60.6
+      "average": 51
     },
     "rainfall_status": {
-      "total": "0.0",
-      "active_stations": 0,
-      "total_stations": 59
-    },
-    "forecast_summary": "Thundery Showers"
+      "total": "0.0"
+    }
   },
-  "api_calls_today": 7,
-  "api_calls_remaining": 93,
-  "api_calls_limit": 100,
-  "api_limit_reached": false,
-  "raw_analysis": " Here is a creative and attractive analysis of the weather based on real-time data: \n\n## 1. Current Weather Condition Analysis\n- Mean/maximum/minimum temperature, regional temperature variance, seasonal characteristics, and comparison with typical Singapore weather.\n- Explain the influence of humidity on perceived temperature and provide a detailed explanation of the health impact of the heat index. \n\n## 2. Analysis of humidity and thermal sensation\n- Influence of humidity on perceived temperature\n- Health impact of the heat index from a humidity perspective\n\n## 3. Rainfall pattern and prediction\n- Current rainfall distribution and future anticipated patterns\n- Regional rainfall variation and anticipated movement direction \n\n## 4. Comprehensive weather pattern analysis\n- Analysis of consistency with NEA forecast data\n- Assessment of the typicality/characteristics of the current weather condition \n\n## 5. Recommended activities according to time of day\n- Optimized suggestions for morning/noon/afternoon/evening each\n- Specific recommendations for specific activities/workouts/relaxes \n\n## 6. Health and safety advisory\n- Health risks associated with current weather conditions\n- Specific warnings for vulnerable groups (the elderly, children, outdoor workers) \n\n## 7. Weather highlights today\n- Three most important characteristics of today's weather\n- Detailed explanation and impact of each point \n\n## 8. Tomorrow's forecast and preparation \n- Forecast based on current data\n- Things that would be good to prepare today \n\n**Creative outline:**\n- Provide abundant content in a minimum of 6-8 paragraphs (unlimited amount)\n- Maintain an accurate and creative balance between scientific accuracy and creativity \n- Describe the weather as if you were here, making it relatable \n- Include deep, expert insight and be easy for civilians to understand \n- Naturally incorporate Singapore's cultural and geographical traits in the analysis\n- Use captivating and philosophical language to express the weather's artistic and philosophical meaning \n\nPlease let me know if you want me to elaborate on any of the above points or make any adjustments to better tailor the weather analysis to your preferences. I look forward to assisting you in delivering an outstanding weather analysis that captivates your readers! ",
-  "force_analysis_used": false,
-  "analysis_version": "2.0",
-  "enhancement_features": [
-    "detailed_sectional_analysis",
-    "weather_alerts_integration",
-    "comprehensive_data_context",
-    "enhanced_parsing_system"
-  ]
+  "raw_analysis": null
 }

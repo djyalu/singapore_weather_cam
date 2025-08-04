@@ -5,6 +5,7 @@
  * 
  * Optimized for speed - generates AI weather analysis in under 10 seconds
  * Uses reduced token count and optimized prompts for faster processing
+ * Updated to trigger workflow execution
  */
 
 import fs from 'fs/promises';
