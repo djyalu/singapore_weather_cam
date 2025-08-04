@@ -85,19 +85,21 @@ class HealthService {
   }
 
   /**
-   * Check API health status
+   * Check API health status (CORS-compatible version)
+   * Singapore data.gov.sg APIs block CORS, so we check our collected data instead
    */
   async checkAPIHealth() {
+    // Check our collected data instead of direct API calls (CORS limitation)
     const endpoints = [
       {
-        name: 'NEA Weather API',
-        url: 'https://api.data.gov.sg/v1/environment/air-temperature',
-        timeout: 10000,
+        name: 'Weather Data',
+        url: `${import.meta.env.BASE_URL || '/'}data/weather/latest.json`,
+        timeout: 5000,
       },
       {
-        name: 'LTA Traffic API',
-        url: 'https://api.data.gov.sg/v1/transport/traffic-images',
-        timeout: 15000,
+        name: 'AI Analysis',
+        url: `${import.meta.env.BASE_URL || '/'}data/weather-summary/latest.json`,
+        timeout: 5000,
       },
     ];
 
@@ -107,8 +109,8 @@ class HealthService {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), endpoint.timeout);
 
-        const response = await fetch(endpoint.url, {
-          method: 'HEAD', // Use HEAD to minimize data transfer
+        const response = await fetch(endpoint.url + `?t=${Date.now()}`, {
+          method: 'HEAD',
           signal: controller.signal,
         });
 
@@ -130,6 +132,13 @@ class HealthService {
         });
       }
     }
+
+    // Note about Singapore APIs CORS limitation
+    this.recordAPIMetric('Singapore APIs', {
+      status: 'cors_limited',
+      note: 'Direct browser access blocked by CORS - using server proxy',
+      timestamp: new Date().toISOString(),
+    });
 
     this.updateSystemStatus();
   }
