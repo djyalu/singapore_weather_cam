@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-04T12:42:29.444Z",
+  "timestamp": "2025-08-04T13:24:42.287Z",
   "source": "Singapore Weather Cam - Enhanced AI Summary",
   "ai_model": "Cohere Command API (Enhanced)",
   "analysis_method": "Comprehensive AI-generated analysis",
   "weather_data_timestamp": "2025-08-02T06:44:12.941Z",
   "stations_analyzed": 59,
-  "summary": "- 평균/최고/최저 기온의 의미와 지역별 편차 분석 - 계절적 특성 및 일반적인 싱가포르 기후와의 비교 - 데이터 수집 시간: 2025-08-02T06:44:12.941Z 🏛️ **지역별 상세 분석 데이터** 📊 **전체 관측소 현황** 59개 관측소 (coverage: 100%) 📊 **전체 관측소 현황** 59개 관측소 (temperature: 5개, humidity: 5개, rainfall: 59개, wind speed: 0개, wind direction: 0개) 🌤️ **NEA 공식 예보 정보** - 일반 예보: Th",
+  "summary": "싱가포르는 현재 전형적인 열대기후 특성을 보이고 있습니다.",
   "highlights": [
     "현재 평균 기온 32.9°C",
     "습도 51% (체감온도 상승)",
@@ -16,8 +16,8 @@
   "recommendation": "현재 날씨 조건에 맞는 적절한 활동을 선택하여 즐겨보세요.",
   "confidence": 0.92,
   "detailed_analysis": {
-    "temperature_analysis": "- 평균/최고/최저 기온의 의미와 지역별 편차 분석 - 계절적 특성 및 일반적인 싱가포르 기후와의 비교",
-    "humidity_analysis": "- 데이터 수집 시간: 2025-08-02T06:44:12.941Z 🏛️ **지역별 상세 분석 데이터** 📊 **전체 관측소 현황** 59개 관측소 (coverage: 100%) 📊 **전체 관측소 현황** 59개 관측소 (temperature: 5개, humidity: 5개, rainfall: 59개, wind speed: 0개, wind direction: 0개) 🌤️ **NEA 공식 예보 정보** - 일반 예보: Thundery Showers - 예상 기온 범위: 26°C - 34°C - 바람: SSE 10-20km/h 🚨 실시간 기상 경보 상황 - Boon Lay 지역 소나기 가능성 - Changi 지역 소나기 가능성 - Jalan Bahar 지역 소나기 가능성 📝 **요청사항** 다음 8개 섹션으로 상세 분석해주세요:",
+    "temperature_analysis": "",
+    "humidity_analysis": "",
     "rainfall_analysis": "",
     "pattern_analysis": "",
     "health_safety": "",
@@ -40,11 +40,11 @@
     },
     "forecast_summary": "Thundery Showers"
   },
-  "api_calls_today": 5,
-  "api_calls_remaining": 95,
+  "api_calls_today": 6,
+  "api_calls_remaining": 94,
   "api_calls_limit": 100,
   "api_limit_reached": false,
-  "raw_analysis": " 당신은 전문 기상 분석가입니다. 다음 싱가포르 실시간 종합 기상 데이터를 바탕으로 상세하고 실용적인 날씨 분석을 한국어로 작성해주세요:\n\n📊 **현재 실시간 관측 데이터**\n- 평균 기온: 32.9°C (최고: 34.8°C, 최저: 31.6°C)\n- 평균 습도: 51% (최고: 61%)\n- 총 강수량: 0.0mm (강수 지역: 0/59개소)\n- 분석 관측소: 온도 5개, 습도 5개, 강수량 59개 (전체 59개 관측소)\n- 데이터 수집 시간: 2025-08-02T06:44:12.941Z\n\n🏛️ **지역별 상세 분석 데이터**\n📊 **전체 관측소 현황** 59개 관측소 (coverage: 100%)\n- Unknown: 온도 32.9°C (31.6°C~34.8°C) | 습도 51% | 강수 0.0mm | 풍속 N/A | 59개 관측소\n\n📊 **전체 관측소 현황**\n59개 관측소 (temperature: 5개, humidity: 5개, rainfall: 59개, wind speed: 0개, wind direction: 0개)\n\n🌤️ **NEA 공식 예보 정보**\n- 일반 예보: Thundery Showers\n- 예상 기온 범위: 26°C - 34°C\n- 예상 습도 범위: 60% - 95%\n- 바람: SSE 10-20km/h\n\n🚨 실시간 기상 경보 상황\n- Boon Lay 지역 소나기 가능성\n- Changi 지역 소나기 가능성\n- Jalan Bahar 지역 소나기 가능성\n\n📝 **요청사항**\n다음 8개 섹션으로 상세 분석해주세요:\n\n1. **🌡️ 현재 기온 상황 분석** (2-3문장)\n   - 평균/최고/최저 기온의 의미와 지역별 편차 분석\n   - 계절적 특성 및 일반적인 싱가포르 기후와의 비교\n\n2. **💧 습도 및 체감온도 분세락** (2-3문장)  \n   - 습도가 체감온도에 미치는 영향 상세 설명\n   - 열지수(Heat Index) 관점에서의 건강 영향 분석\n\n3. **🌧️ 강수 패턴 및 예측** (2-3문장)\n   - 현재 강수 분포와 향",
+  "raw_analysis": " Here is a possible weather analysis script based on the given requirements and creative guideline: \n\n## Introduction to Singapore's Weather\nIntroduce Singapore's meteorological conditions and the context of the analysis. Provide an overview of the island's geographical features, climate, and any unique or challenging weather phenomena it experiences. \n\n## Current Temperature Analysis\nAnalyze the current temperature conditions in Singapore. Mention the average, highest, and lowest temperatures, and discuss any variations across different regions of the island. Link this to seasonal characteristics and comparisons with the typical Singapore climate. \n\n## Humidity and Perceived Temperature Analysis\nElaborate on humidity levels and how they affect perceived temperature. Explain the concept of heat index or humiture and any health implications associated with the current humidity and temperature combination. \n\n## Rainfall Patterns and Prediction\nAnalyze current rainfall distribution and anticipated patterns. Provide information on any rainfall variations across regions and predict upcoming directions. Refer to NEA official forecasts for alignment with predicted weather trends. \n\n## Comprehensive Weather Patterns Interpretation\nCompare the current weather conditions with NEA's official forecast. Discuss the coherence or deviations and evaluate the characteristics and uniqueness of the present weather scenario. \n\n## Recommended Activities Throughout the Day\nOffer optimized activity suggestions for the morning, afternoon, evening, and nighttime. Tailor them to specific activities, workouts, and workloads, etc. \n\n## Health and Safety Considerations\nIdentify any health and safety points concerning the current weather conditions. Target vulnerable groups, and working outdoors, and mention any specific precautions or limitations. \n\n## Highlight the Weather Highlights of the Day\nSelect three key attractions that best capture the artistic, philosophical, or artistic essence of today's weather. Elaborate on each point and its particular influence. \n\n## Tomorrow's Forecast and Preparations \nPredict tomorrow's weather based on current data. Offer preparations, such as collecting umbrellas or checking for any event cancellations. ",
   "force_analysis_used": false,
   "analysis_version": "2.0",
   "enhancement_features": [
