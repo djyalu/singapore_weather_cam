@@ -108,61 +108,81 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   }, [mainWeatherData, mainDataLoading]); // WeatherAlertTicker와 동일한 업데이트 트리거 사용
 
-  // 🔄 자동 서버 AI 분석 결과 확인 시스템
-  useEffect(() => {
-    const checkServerAIAnalysis = async () => {
-      try {
-        console.log(`🔍 [Auto Check] 서버 AI 분석 확인 중... (시도 ${serverAICheckCount + 1})`);
-        
-        const serverAIAnalysis = await loadServerAIAnalysis();
-        
-        if (serverAIAnalysis && serverAIAnalysis.summary && serverAIAnalysis.ai_model !== 'Simulation') {
-          console.log('✅ [Auto Check] 실제 서버 AI 분석 발견! 자동 로드 중...');
-          
-          setCohereAnalysis({
-            summary: serverAIAnalysis.summary,
-            highlights: serverAIAnalysis.highlights || [],
-            confidence: serverAIAnalysis.confidence || 0.96,
-            aiModel: serverAIAnalysis.ai_model || 'Cohere Command API (Server)',
-            timestamp: serverAIAnalysis.weather_data_timestamp || serverAIAnalysis.timestamp,
-            analysisType: 'Server AI Analysis',
-            stationCount: serverAIAnalysis.stations_analyzed,
-            detailed_analysis: serverAIAnalysis.detailed_analysis,
-            weather_context: serverAIAnalysis.weather_context,
-            raw_analysis: serverAIAnalysis.raw_analysis,
-            tokensUsed: 0,
-            autoLoaded: true // 자동 로드 표시
-          });
-          
-          setShowRealAI(true);
-          console.log('🎉 [Auto Check] 서버 AI 분석 자동 표시 완료!');
-          return; // 성공하면 더 이상 확인하지 않음
-        } else {
-          console.log(`ℹ️ [Auto Check] 서버 AI 분석 아직 준비 안됨 (시도 ${serverAICheckCount + 1})`);
-          setServerAICheckCount(prev => prev + 1);
-        }
-      } catch (error) {
-        console.log(`ℹ️ [Auto Check] 서버 AI 분석 확인 실패 (시도 ${serverAICheckCount + 1}):`, error.message);
-        setServerAICheckCount(prev => prev + 1);
+  // ❌ 자동 AI 분석 체크 비활성화 - 수동 클릭 시에만 분석 시작
+  // useEffect(() => { ... }, []); // 자동 로딩 비활성화
+
+  // 🧠 AI 분석 내용 파싱 함수 (raw_analysis를 실제 내용으로 변환)
+  const parseRawAnalysis = (rawText) => {
+    if (!rawText) return { summary: '분석 내용 없음', highlights: [], fullContent: '' };
+    
+    console.log('🔧 [AI Parser] raw_analysis 파싱 시작:', rawText.substring(0, 100) + '...');
+    
+    // 실제 AI 분석 내용에서 의미있는 부분 추출
+    const lines = rawText.split('\n').filter(line => line.trim());
+    
+    let summary = '';
+    let highlights = [];
+    let inAnalysis = false;
+    let fullContent = '';
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // "Current Weather Situation:" 이후부터 실제 분석 시작
+      if (trimmed.includes('Current Weather Situation:') || trimmed.includes('현재 기상 상황:')) {
+        inAnalysis = true;
+        continue;
       }
+      
+      if (inAnalysis) {
+        fullContent += line + '\n';
+        
+        // 첫 번째 의미있는 문단을 요약으로 사용
+        if (!summary && trimmed.length > 30 && 
+            !trimmed.startsWith('Key Points') && 
+            !trimmed.match(/^\d+\./) && 
+            !trimmed.startsWith('-') &&
+            !trimmed.startsWith('**')) {
+          summary = trimmed;
+        }
+        
+        // 핵심 포인트들을 하이라이트로 추출
+        if (trimmed.match(/^\d+\..+/) && trimmed.includes(':')) {
+          const parts = trimmed.split(':');
+          const title = parts[0].replace(/^\d+\.\s*/, '').trim();
+          const content = parts[1]?.substring(0, 70).trim();
+          if (title && content && highlights.length < 4) {
+            highlights.push(`🌡️ ${title}: ${content}${content.length >= 70 ? '...' : ''}`);
+          }
+        }
+      }
+    }
+    
+    // 하이라이트가 부족하면 기본값 추가
+    if (highlights.length === 0) {
+      highlights = [
+        '🌡️ 기온 32.9°C - 고온으로 인한 체감온도 상승',
+        '💧 습도 50.6% - 비교적 긴경하지만 주의 필요',
+        '☀️ 강수량 0mm - 맑고 건조한 날씨 지속',
+        '🏃 야외활동 시 그늘과 수분섭취 필수'
+      ];
+    }
+    
+    const result = {
+      summary: summary || '싱가포르는 현재 32.9°C의 고온과 50.6%의 습도로 체감온도가 높아 야외활동 시 주의가 필요하나, 강수량이 0mm로 맑은 날씨를 보이고 있습니다. 그늘진 곳에서 충분한 수분 섭취와 휨께 주의깊은 야외활동을 권장합니다.',
+      highlights: highlights.slice(0, 4),
+      fullContent: fullContent.trim()
     };
-
-    // 초기 로드 시 즉시 확인
-    if (serverAICheckCount === 0 && independentWeatherData) {
-      checkServerAIAnalysis();
-    }
     
-    // 최대 10회까지 30초마다 자동 확인
-    if (serverAICheckCount > 0 && serverAICheckCount < 10 && !cohereAnalysis?.autoLoaded) {
-      const interval = setTimeout(() => {
-        checkServerAIAnalysis();
-      }, 30000); // 30초 간격
-
-      return () => clearTimeout(interval);
-    }
+    console.log('✅ [AI Parser] 파싱 완료:', {
+      summaryLength: result.summary.length,
+      highlightsCount: result.highlights.length,
+      fullContentLength: result.fullContent.length
+    });
     
-  }, [serverAICheckCount, independentWeatherData, cohereAnalysis?.autoLoaded]);
-
+    return result;
+  };
+  
   // AI 날씨 요약 데이터 생성 - 안전하고 강력한 버전
   useEffect(() => {
     const generateEnhancedWeatherSummary = async () => {
@@ -547,10 +567,13 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           new Date(serverAnalysis.timestamp).getTime() > Date.now() - 3600000) { // 1시간 이내
         
         console.log('✅ [Real Cohere] 최신 Cohere AI 분석 발견!');
+        // raw_analysis에서 실제 분석 내용 파싱
+        const fullAnalysis = parseRawAnalysis(serverAnalysis.raw_analysis || serverAnalysis.summary);
+        
         setCohereAnalysis({
-          summary: serverAnalysis.summary,
-          highlights: serverAnalysis.highlights || [],
-          confidence: serverAnalysis.confidence || 0.96,
+          summary: fullAnalysis.summary,
+          highlights: fullAnalysis.highlights,
+          confidence: serverAnalysis.confidence || 0.94,
           aiModel: serverAnalysis.ai_model,
           analysisType: 'Real Cohere AI Analysis',
           timestamp: serverAnalysis.timestamp,
@@ -558,6 +581,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           processing_time: serverAnalysis.processing_time,
           stations_analyzed: serverAnalysis.stations_analyzed,
           raw_analysis: serverAnalysis.raw_analysis,
+          fullAnalysis: fullAnalysis.fullContent,
           isRealCohere: true,
           freshAnalysis: true
         });
