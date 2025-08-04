@@ -57,27 +57,27 @@ async function fastCohereAnalysis(weatherData) {
       ? rainfallReadings.reduce((sum, r) => sum + r.value, 0) 
       : 0;
 
-    // Optimized prompt for speed
-    const prompt = `날씨 전문가로서 싱가포르 현재 날씨를 간결하게 분석해주세요:
+    // 최적화된 빠른 분석 프롬프트 (Cohere API 전용)
+    const prompt = `당신은 싱가포르 최고의 기상 전문가입니다. 아래 실시간 데이터를 바탕으로 전문적이고 정확한 날씨 분석을 해주세요:
 
-📊 실시간 데이터:
-- 평균 기온: ${avgTemp.toFixed(1)}°C
-- 평균 습도: ${avgHumidity.toFixed(1)}%  
+🌡️ 실시간 기상 데이터 (NEA Singapore):
+- 현재 평균 기온: ${avgTemp.toFixed(1)}°C
+- 현재 평균 습도: ${avgHumidity.toFixed(1)}%
 - 강수량: ${totalRainfall.toFixed(1)}mm
-- 관측소: ${tempReadings.length}개
+- 분석 대상: 전국 ${tempReadings.length}개 관측소
 
-다음 형식으로 간결하게 작성해주세요:
+전문 기상 분석가로서 다음 형식으로 정확하고 유용한 분석을 제공해주세요:
 
-**현재 날씨 분석:**
-[2-3문장으로 현재 날씨 상황과 특징 설명]
+**현재 기상 상황:**
+[현재 날씨의 전반적인 상황과 특징을 2-3문장으로 전문적으로 분석]
 
-**주요 포인트:**
-- [기온 관련 핵심 정보]
-- [습도/체감온도 정보] 
-- [강수 상황]
-- [활동 권장사항]
+**핵심 포인트:**
+- 🌡️ [기온 분석 및 체감온도]
+- 💧 [습도 영향 및 쾌적도] 
+- ☔ [강수 상황 및 전망]
+- 🏃 [야외활동 권장사항]
 
-전문적이지만 이해하기 쉽게 작성해주세요.`;
+싱가포르의 열대 기후 특성을 고려하여 실용적이고 전문적인 분석을 해주세요.`;
 
     console.log(`📤 Sending fast request to Cohere API...`);
     
@@ -93,11 +93,12 @@ async function fastCohereAnalysis(weatherData) {
         model: 'command',
         prompt: prompt,
         max_tokens: MAX_TOKENS,
-        temperature: TEMPERATURE,
+        temperature: 0.7, // 더 안정적인 결과를 위해 조정
         k: 0,
-        p: 0.8,
-        stop_sequences: [],
-        return_likelihoods: 'NONE'
+        p: 0.9, // 더 다양한 표현을 위해 증가
+        stop_sequences: ['**끝**', '\n\n---', '참고:'],
+        return_likelihoods: 'NONE',
+        truncate: 'END' // 긴 프롬프트 처리
       })
     });
 

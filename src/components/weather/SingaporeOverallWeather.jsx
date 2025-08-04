@@ -493,10 +493,190 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   };
 
+  // 🚀 확실한 Cohere AI 분석 실행 - 실제 서버 AI 파워!
+  const handleRealCohereAnalysis = async () => {
+    try {
+      setCohereLoading(true);
+      console.log('🚀 [Real Cohere] 확실한 Cohere AI 분석 시작...');
+      
+      // 즉시 처리 상태 표시
+      setCohereAnalysis({
+        summary: '🚀 Cohere AI가 전문적인 날씨 분석을 시작합니다...\n\n⚡ 서버에서 실제 AI 분석을 생성하고 있습니다.\n\n📊 NEA 실시간 데이터를 바탕으로 고품질 분석을 제공합니다.',
+        highlights: [
+          '🤖 실제 Cohere Command API 실행',
+          '⚡ 최적화된 빠른 처리',
+          '🎯 전문 기상 분석가 수준',
+          '📈 실시간 NEA 데이터 활용'
+        ],
+        confidence: 0.95,
+        aiModel: 'Cohere Command API (처리 중)',
+        analysisType: 'Professional AI Analysis',
+        isProcessing: true,
+        isRealCohere: true
+      });
+      setShowRealAI(true);
+
+      // 1. GitHub Actions 즉시 실행 트리거
+      const triggerResponse = await fetch(`https://api.github.com/repos/djyalu/singapore_weather_cam/dispatches`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          event_type: 'fast-ai-request',
+          client_payload: {
+            priority: 'urgent',
+            cohere_mode: 'professional',
+            timestamp: new Date().toISOString(),
+            source: 'real_cohere_request'
+          }
+        })
+      });
+
+      if (triggerResponse.ok) {
+        console.log('✅ [Real Cohere] GitHub Actions 워크플로우 트리거 성공');
+        
+        // 2. 주기적 결과 확인 (10초 간격으로 6번 = 1분)
+        let checkCount = 0;
+        const maxChecks = 6;
+        
+        const checkInterval = setInterval(async () => {
+          checkCount++;
+          console.log(`🔄 [Real Cohere] 결과 확인 ${checkCount}/${maxChecks}...`);
+          
+          try {
+            const serverAIAnalysis = await loadServerAIAnalysis();
+            
+            // 새로운 Cohere 분석이 생성되었는지 확인
+            if (serverAIAnalysis && 
+                serverAIAnalysis.summary && 
+                serverAIAnalysis.ai_model !== 'Simulation' &&
+                serverAIAnalysis.ai_model.includes('Cohere') &&
+                new Date(serverAIAnalysis.timestamp).getTime() > Date.now() - 300000) { // 5분 이내
+              
+              console.log('✅ [Real Cohere] 새로운 Cohere AI 분석 확인!');
+              clearInterval(checkInterval);
+              
+              setCohereAnalysis({
+                summary: serverAIAnalysis.summary,
+                highlights: serverAIAnalysis.highlights || [],
+                confidence: serverAIAnalysis.confidence || 0.96,
+                aiModel: serverAIAnalysis.ai_model,
+                analysisType: 'Real Cohere AI Analysis',
+                timestamp: serverAIAnalysis.timestamp,
+                weather_context: serverAIAnalysis.weather_context,
+                processing_time: serverAIAnalysis.processing_time,
+                stations_analyzed: serverAIAnalysis.stations_analyzed,
+                isRealCohere: true,
+                freshAnalysis: true
+              });
+              setCohereLoading(false);
+              return;
+            }
+            
+            // 마지막 확인에서도 결과가 없으면 기존 분석 사용
+            if (checkCount >= maxChecks) {
+              console.log('⚠️ [Real Cohere] 새 분석 대기 시간 초과, 기존 분석 사용');
+              clearInterval(checkInterval);
+              
+              if (serverAIAnalysis && serverAIAnalysis.summary) {
+                setCohereAnalysis({
+                  summary: serverAIAnalysis.summary,
+                  highlights: serverAIAnalysis.highlights || [],
+                  confidence: serverAIAnalysis.confidence || 0.90,
+                  aiModel: serverAIAnalysis.ai_model + ' (기존 분석)',
+                  analysisType: 'Existing Server Analysis',
+                  timestamp: serverAIAnalysis.timestamp,
+                  weather_context: serverAIAnalysis.weather_context,
+                  isRealCohere: serverAIAnalysis.ai_model.includes('Cohere'),
+                  existingAnalysis: true
+                });
+              } else {
+                // 완전 실패 시 로컬 고급 분석
+                const fallbackAnalysis = generateQuickLocalAnalysis();
+                setCohereAnalysis({
+                  ...fallbackAnalysis,
+                  aiModel: 'Advanced Local Analysis (Cohere 대체)',
+                  analysisType: 'Cohere Fallback',
+                  note: 'Cohere API 일시 불가로 로컬 고급 분석 제공'
+                });
+              }
+              setCohereLoading(false);
+            }
+            
+          } catch (error) {
+            console.warn(`⚠️ [Real Cohere] 확인 ${checkCount} 실패:`, error);
+            if (checkCount >= maxChecks) {
+              clearInterval(checkInterval);
+              setCohereLoading(false);
+            }
+          }
+        }, 10000); // 10초 간격
+        
+        // 안전장치: 최대 2분 후 강제 종료
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          if (cohereLoading) {
+            console.log('⏰ [Real Cohere] 최대 대기 시간 초과');
+            setCohereLoading(false);
+          }
+        }, 120000);
+        
+      } else {
+        throw new Error(`GitHub Actions 트리거 실패: ${triggerResponse.status}`);
+      }
+      
+    } catch (error) {
+      console.error('❌ [Real Cohere] 확실한 분석 실패:', error);
+      
+      // 에러 시 즉시 고품질 로컬 분석 제공
+      const errorFallback = generateQuickLocalAnalysis();
+      setCohereAnalysis({
+        ...errorFallback,
+        aiModel: 'Professional Local Analysis (에러 복구)',
+        analysisType: 'Error Recovery Mode',
+        error: error.message,
+        note: 'Cohere API 연결 오류로 로컬 전문 분석 제공'
+      });
+      setShowRealAI(true);
+      setCohereLoading(false);
+    }
+  };
+
+  // 🔄 서버 AI 분석 결과 로드 (캐시 무효화 포함)
+  const loadServerAIAnalysis = async () => {
+    try {
+      const basePath = import.meta.env.BASE_URL || '/';
+      const timestamp = new Date().getTime();
+      const response = await fetch(`${basePath}data/weather-summary/latest.json?t=${timestamp}&cache=false`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 [Server AI] 분석 데이터 로드:', {
+          model: data.ai_model,
+          timestamp: data.timestamp,
+          has_summary: !!data.summary,
+          confidence: data.confidence
+        });
+        return data;
+      }
+      return null;
+    } catch (error) {
+      console.warn('⚠️ [Server AI] 로드 실패:', error);
+      return null;
+    }
+  };
+
   // 🚀 실제 Cohere AI 분석 실행 - 진짜 AI 파워!
   const handleRealAIAnalysis = async () => {
     try {
-      // 안전한 글로벌 데이터 접근
       let globalWeatherData = null;
       try {
         globalWeatherData = typeof window !== 'undefined' && window.weatherData ? window.weatherData : null;
@@ -686,34 +866,6 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   };
 
-  // 🏢 서버에서 생성된 AI 분석 결과 로드
-  const loadServerAIAnalysis = async () => {
-    try {
-      console.log('🏢 [Server AI] Loading server-generated AI analysis...');
-      
-      const basePath = import.meta.env.BASE_URL || '/';
-      const timestamp = new Date().getTime();
-      const response = await fetch(`${basePath}data/weather-summary/latest.json?t=${timestamp}`);
-      
-      if (response.ok) {
-        const serverAnalysis = await response.json();
-        console.log('✅ [Server AI] Server analysis loaded:', {
-          source: serverAnalysis.source,
-          aiModel: serverAnalysis.ai_model,
-          confidence: serverAnalysis.analysis?.confidence,
-          timestamp: serverAnalysis.timestamp,
-          hasDetailedAnalysis: !!serverAnalysis.detailed_analysis
-        });
-        return serverAnalysis;
-      } else {
-        console.log('ℹ️ [Server AI] No server analysis available (404 expected on first run)');
-        return null;
-      }
-    } catch (error) {
-      console.log('ℹ️ [Server AI] Server analysis not available:', error.message);
-      return null;
-    }
-  };
 
   // 🤖 실제 Cohere AI API 호출 함수 - 서버 우선 전략
   const callCohereAPI = async (prompt) => {
@@ -1155,7 +1307,20 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
               <Brain className="w-5 h-5 text-purple-500" />
               <span>AI 날씨 분석</span>
             </CardTitle>
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={handleRealCohereAnalysis}
+                disabled={cohereLoading}
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
+              >
+                {cohereLoading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Brain className="w-4 h-4" />
+                )}
+                Cohere AI 분석
+              </Button>
               <Button
                 onClick={handleFastAIAnalysis}
                 disabled={cohereLoading}
@@ -1167,7 +1332,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
                 ) : (
                   <Zap className="w-4 h-4" />
                 )}
-                빠른 AI 분석
+                빠른 분석
               </Button>
               <Button
                 onClick={handleRealAIAnalysis}

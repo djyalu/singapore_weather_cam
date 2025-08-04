@@ -19,7 +19,7 @@ env:
 jobs:
   fast-ai-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 2  # 더 빠른 타임아웃
     permissions:
       contents: write
     concurrency:
@@ -80,8 +80,8 @@ jobs:
           mkdir -p data/weather-summary
           mkdir -p public/data/weather-summary
           
-          # Run optimized AI analysis with shorter timeout
-          timeout 90s node scripts/fast-ai-summary.js || {
+          # Run optimized AI analysis with aggressive timeout
+          timeout 60s node scripts/fast-ai-summary.js || {
             echo "⚠️ Fast AI analysis failed, creating optimized fallback"
             
             # Create intelligent fallback based on weather data
