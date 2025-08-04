@@ -21,11 +21,13 @@ const useSimpleDataLoader = (refreshInterval) => {
       }
       setError(null);
 
-      console.log('🔄 Loading weather data: Using NEA Real-Time Service...');
+      const dataSource = forceRealtime ? '🔴 강제 실시간 API' : '📊 실시간 API';
+      console.log(`🔄 Loading weather data: ${dataSource} 호출 중...`);
 
       try {
-        // Use NEA Real-Time Service as primary data source
+        // NEA 실시간 서비스를 항상 우선 사용 (가장 최신 데이터)
         const weatherJson = await neaRealTimeService.getRealTimeWeatherData();
+        console.log(`✅ NEA API 호출 성공: ${dataSource}`);
 
         if (weatherJson) {
           // Store global reference for other components
@@ -48,15 +50,14 @@ const useSimpleDataLoader = (refreshInterval) => {
           const transformedWeatherData = transformWeatherData(weatherJson);
           setWeatherData(transformedWeatherData);
 
-          console.log('🌤️ [DataLoader] NEA Real-Time data loaded and validated:', {
+          console.log(`🌤️ [DataLoader] ${dataSource} 데이터 로드 완료:`, {
             source: weatherJson.source,
             temperature: weatherJson.data?.temperature?.average,
             avgTemp: weatherJson.data?.temperature?.average?.toFixed(2),
             locations: transformedWeatherData.locations?.length,
-            timestamp: transformedWeatherData.timestamp,
-            stations: weatherJson.stations_used?.length,
-            validationScore: validation.score,
-            validationStatus: validation.overall,
+            timestamp: weatherJson.timestamp,
+            loadType: forceRealtime ? 'FORCE_REALTIME' : 'NORMAL_REALTIME',
+            readings: weatherJson.data?.temperature?.readings?.length,
           });
 
           // Store success in local storage for persistence
@@ -96,14 +97,38 @@ const useSimpleDataLoader = (refreshInterval) => {
   };
 
   useEffect(() => {
-    loadData(); // 초기 로딩
+    // 브라우저 새로고침/페이지 로드 시 강제로 실시간 API 호출
+    console.log('🚀 [페이지 로드] 브라우저 새로고림 감지 - 실시간 NEA API 호출');
+    loadData(false, true); // 강제 실시간 API 호출
 
     // 백그라운드 자동 새로고침 (스피너 없이)
     const interval = setInterval(() => {
-      loadData(true); // 백그라운드 새로고침 플래그
+      console.log('⏰ [백그라운드 새로고침] 5분 간격 자동 업데이트');
+      loadData(true, true); // 백그라운드에서도 실시간 API 호출
     }, refreshInterval);
 
-    return () => clearInterval(interval);
+    // 페이지 포커스 시 실시간 API 호출 (탭 전환 후 돌아왔을 때)
+    const handleFocus = () => {
+      console.log('👁️ [페이지 포커스] 탭 활성화 감지 - 실시간 데이터 새로고침');
+      loadData(true, true); // 백그라운드 형태로 실시간 API 호출
+    };
+
+    // 페이지 가시성 변경 감지 (탭 전환)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('👁️ [페이지 가시성] 페이지 다시 보이기 - 실시간 데이터 새로고침');
+        loadData(true, true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [refreshInterval]);
 
   return {
