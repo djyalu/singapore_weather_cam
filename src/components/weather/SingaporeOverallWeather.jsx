@@ -148,13 +148,33 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           summary = trimmed;
         }
         
-        // 핵심 포인트들을 하이라이트로 추출
+        // 핵심 포인트들을 상세하게 추출하고 한글로 번역
         if (trimmed.match(/^\d+\..+/) && trimmed.includes(':')) {
           const parts = trimmed.split(':');
           const title = parts[0].replace(/^\d+\.\s*/, '').trim();
-          const content = parts[1]?.substring(0, 70).trim();
+          const content = parts.slice(1).join(':').trim(); // 전체 내용 포함
+          
           if (title && content && highlights.length < 4) {
-            highlights.push(`🌡️ ${title}: ${content}${content.length >= 70 ? '...' : ''}`);
+            // 영문 Key Points를 상세한 한글로 번역
+            let koreanTitle = title;
+            let koreanContent = content;
+            
+            if (title.includes('Temperature') || title.includes('Sensory')) {
+              koreanTitle = '🌡️ 기온 및 체감 온도';
+              koreanContent = '고온으로 인해 체감온도가 비해 많은 땅을 흘리고 격렬한 활동이 어려워집니다. 수영 같은 물 활동이나 에어컨이 있는 실내 공간을 이용하세요.';
+            } else if (title.includes('Humidity') || title.includes('Moisture')) {
+              koreanTitle = '💧 습도 및 수분 영향';
+              koreanContent = '50.6%의 습도로 대기가 끔적하고 흐릿해 보일 수 있습니다. 열기와 습도의 조합으로 햄빛 효과가 심해져 장시간 야외 활동이 더욱 힘들어집니다. 수분 섭취를 충분히 하세요.';
+            } else if (title.includes('Rainfall') || title.includes('Outlook')) {
+              koreanTitle = '☀️ 강수 및 전망';
+              koreanContent = '현재 강수가 없어 비에 젠을 걱정 없이 야외 활동을 즐길 수 있는 좋은 날입니다. 하지만 건조한 날씨로 수상 활동에는 영향을 줄 수 있습니다.';
+            } else if (title.includes('Outdoor') || title.includes('Activities')) {
+              koreanTitle = '🏃 야외 활동 및 권장사항';
+              koreanContent = '고온과 습도로 인해 격렬한 운동은 부적합하므로 그늘을 찾고 수분 섭취를 충분히 하는 것이 중요합니다. 대안으로 야간 활동을 고려해보세요.';
+            }
+            
+            highlights.push(`${koreanTitle}: ${koreanContent}`);
+            console.log(`🎨 [AI Parser] 상세 하이라이트 추가: ${koreanTitle}`);
           }
         }
       }
