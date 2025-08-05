@@ -7,7 +7,6 @@ import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency
 import neaRealTimeService from '../../services/neaRealTimeService';
 import { useWeatherData } from '../../contexts/AppDataContextSimple';
 import { useOnDemandAIAnalysis } from '../../hooks/useOnDemandAIAnalysis';
-import EnhancedRegionalAIAnalysis from '../analysis/EnhancedRegionalAIAnalysis';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -1472,13 +1471,6 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           )}
         </CardContent>
       </Card>
-
-      {/* 향상된 지역별 AI 분석 */}
-      <EnhancedRegionalAIAnalysis 
-        weatherData={dataForUI}
-        refreshTrigger={refreshTrigger}
-        className="mt-6"
-      />
 
       {/* 레거시 시스템 완전 비활성화 - 온디맨드 시스템으로 완전 전환 */}
     </div>

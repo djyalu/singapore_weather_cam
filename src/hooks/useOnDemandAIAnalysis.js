@@ -150,58 +150,73 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
       // 지역별 상세 분석 (8개 주요 지역)
       const regionalAnalysis = generateRegionalAnalysis(temperature.readings, humidity.avg);
       
-      // 전문적인 분석 작성
-      let analysis = `**${singaporeTime} 싱가포르 기상 전문 분석**\n\n`;
+      // 전문적인 분석 작성 - 읽기 쉬운 포맷
+      let analysis = `**🌤️ ${singaporeTime} 싱가포르 기상 전문 분석**\n\n`;
       
       // 1. 현재 기상 상황 요약
-      analysis += `전국 ${stationCount}개 관측소에서 측정된 현재 평균 기온은 **${temperature.avg.toFixed(1)}°C**로, `;
+      analysis += `**📊 현재 기상 상황**\n`;
+      analysis += `전국 ${stationCount}개 관측소에서 측정된 현재 평균 기온은 **${temperature.avg.toFixed(1)}°C**입니다.\n\n`;
       
       if (temperature.avg >= 32) {
-        analysis += '싱가포르 열대 기후의 전형적인 고온 상태입니다. ';
+        analysis += '🔥 싱가포르 열대 기후의 전형적인 고온 상태로, 야외 활동 시 각별한 주의가 필요합니다.\n\n';
       } else if (temperature.avg >= 28) {
-        analysis += '일반적인 열대 기후 특성을 보이고 있습니다. ';
+        analysis += '☀️ 일반적인 열대 기후 특성을 보이며, 평상시와 같은 날씨입니다.\n\n';
       } else {
-        analysis += '평년 대비 시원한 날씨를 보이고 있습니다. ';
+        analysis += '🌤️ 평년 대비 시원한 날씨로, 야외 활동하기 좋은 날씨입니다.\n\n';
       }
       
       // 2. 체감온도 및 불쾌지수 분석
-      analysis += `\n\n**체감온도 분석**: 습도 ${humidity.avg.toFixed(1)}%를 고려한 체감온도는 **${heatIndex.toFixed(1)}°C**로 `;
+      analysis += `**🌡️ 체감온도 분석**\n`;
+      analysis += `습도 ${humidity.avg.toFixed(1)}%를 고려한 체감온도는 **${heatIndex.toFixed(1)}°C**로, `;
       
       if (heatIndex - temperature.avg > 3) {
-        analysis += `실제 온도보다 ${(heatIndex - temperature.avg).toFixed(1)}°C 더 뜨겁게 느껴집니다. 고온다습 환경으로 인한 열 스트레스 주의가 필요합니다.`;
+        analysis += `실제 온도보다 ${(heatIndex - temperature.avg).toFixed(1)}°C 더 뜨겁게 느껴집니다.\n🚨 고온다습 환경으로 인한 열 스트레스 주의가 필요합니다.\n\n`;
       } else if (heatIndex - temperature.avg > 1) {
-        analysis += '실제 온도보다 약간 더 뜨겁게 느껴집니다. 일반적인 열대 기후 특성입니다.';
+        analysis += '실제 온도보다 약간 더 뜨겁게 느껴집니다.\n☀️ 일반적인 열대 기후 특성입니다.\n\n';
       } else {
-        analysis += '실제 온도와 비슷하게 느껴짐니다. 비교적 쾌적한 상태입니다.';
+        analysis += '실제 온도와 비슷하게 느껴집니다.\n🌤️ 비교적 쾌적한 상태입니다.\n\n';
       }
       
       // 3. 지역별 온도 편차 분석
+      analysis += `**🗺️ 지역별 온도 현황**\n`;
       if (tempVariance > 3) {
-        analysis += `\n\n**지역별 온도 편차**: 최고 ${temperature.max}°C(${hotSpotStation?.station || '도심지역'})에서 최저 ${temperature.min}°C(${coolSpotStation?.station || '외곽지역'})까지 **${tempVariance.toFixed(1)}°C의 큰 편차**를 보이고 있습니다. 이는 도심 열섬 현상과 해안 바람의 영향으로 추정됩니다.`;
+        analysis += `• **최고온**: ${temperature.max.toFixed(1)}°C (${hotSpotStation?.station || '도심지역'})\n`;
+        analysis += `• **최저온**: ${temperature.min.toFixed(1)}°C (${coolSpotStation?.station || '외곽지역'})\n`;
+        analysis += `• **편차**: ${tempVariance.toFixed(1)}°C의 큰 편차\n\n`;
+        analysis += `🏙️ 도심 열섬 현상과 해안 바람의 영향으로 지역 간 온도 차이가 큽니다.\n\n`;
       } else {
-        analysis += `\n\n**지역별 온도 분포**: 전국적으로 비교적 균등한 온도 분포(${tempVariance.toFixed(1)}°C 편차)를 보이며, 안정적인 대기 상태를 나타냅니다.`;
+        analysis += `• **온도 편차**: ${tempVariance.toFixed(1)}°C (균등한 분포)\n`;
+        analysis += `• **최고온**: ${temperature.max.toFixed(1)}°C\n`;
+        analysis += `• **최저온**: ${temperature.min.toFixed(1)}°C\n\n`;
+        analysis += `🎯 전국적으로 안정적인 온도 분포를 보이고 있습니다.\n\n`;
       }
       
       // 4. 시간대별 권장사항
-      analysis += '\n\n**시간대별 권장사항**: ';
+      analysis += `**⏰ 시간대별 권장사항**\n`;
       if (currentHour >= 6 && currentHour < 10) {
-        analysis += '아침 시간대로 비교적 시원합니다. 조깅, 산책 등 가벼운 야외 활동에 적합한 시간입니다.';
+        analysis += '🌅 **아침 시간대** (6-10시)\n비교적 시원하여 조깅, 산책 등 가벼운 야외 활동에 적합합니다.\n\n';
       } else if (currentHour >= 10 && currentHour < 16) {
-        analysis += '한낮 시간대로 기온이 최고치에 달합니다. 장시간 야외 활동 시 그늘 활용과 30분마다 휴식을 권장합니다.';
+        analysis += '☀️ **한낮 시간대** (10-16시)\n기온이 최고치에 달합니다. 그늘 활용과 30분마다 휴식을 권장합니다.\n\n';
       } else if (currentHour >= 16 && currentHour < 20) {
-        analysis += '저녁 시간대로 기온이 서서히 내려갑니다. 야외 식사나 여가 활동에 좋은 시간입니다.';
+        analysis += '🌆 **저녁 시간대** (16-20시)\n기온이 서서히 내려가며 야외 식사나 여가 활동에 좋습니다.\n\n';
       } else {
-        analysis += '야간 시간대로 하루 중 가장 시원한 시간입니다. 날씨가 허락한다면 모든 종류의 야외 활동이 가능합니다.';
+        analysis += '🌙 **야간 시간대** (20-6시)\n하루 중 가장 시원하여 모든 종류의 야외 활동이 가능합니다.\n\n';
       }
       
       // 5. 건강 및 안전 지침
-      analysis += '\n\n**건강 지침**: ';
+      analysis += `**🏥 건강 지침**\n`;
       if (heatIndex >= 40) {
-        analysis += '열사병 위험이 매우 높습니다. 실내 활동을 강력히 권장하며, 불가피한 외출 시 15-20분마다 그늘에서 휴식을 취하세요.';
+        analysis += '🚨 **열사병 위험**: 실내 활동을 강력히 권장합니다.\n';
+        analysis += '• 불가피한 외출 시 15-20분마다 그늘에서 휴식\n';
+        analysis += '• 충분한 수분 섭취 (시간당 300ml 이상)\n\n';
       } else if (heatIndex >= 32) {
-        analysis += '열 스트레스 주의가 필요합니다. 시간당 200-250ml의 수분 섭취와 가벼운 면 소재의 바람이 잘 통하는 옷을 착용하세요.';
+        analysis += '⚠️ **열 스트레스 주의**: 적절한 대비가 필요합니다.\n';
+        analysis += '• 시간당 200-250ml의 수분 섭취\n';
+        analysis += '• 가벼운 면 소재의 바람이 잘 통하는 옷 착용\n\n';
       } else {
-        analysis += '일반적인 열대 기후 주의사항을 지켜주세요. 적당한 수분 섭취와 자외선 차단은 기본입니다.';
+        analysis += '✅ **안전한 수준**: 일반적인 주의사항을 지켜주세요.\n';
+        analysis += '• 적당한 수분 섭취\n';
+        analysis += '• 자외선 차단 (SPF 30 이상)\n\n';
       }
       
       // 6. 지역별 상세 분석 통합
@@ -341,7 +356,7 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
     });
 
     // 지역별 분석 생성
-    let regionalSummary = '\n\n**🗺️ 지역별 상세 기상 분석**\n';
+    let regionalSummary = '**🗺️ 지역별 상세 기상 분석**\n\n';
     const validRegions = Object.entries(regions).filter(([name, data]) => data.temp !== null);
     
     if (validRegions.length > 0) {
@@ -353,7 +368,7 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
         curr[1].temp < min[1].temp ? curr : min
       );
 
-      regionalSummary += `\n**📍 지역별 온도 분포**:\n`;
+      regionalSummary += `**📍 지역별 온도 현황**\n`;
       
       // 온도 순으로 정렬해서 표시
       const sortedRegions = validRegions.sort((a, b) => b[1].temp - a[1].temp);
@@ -365,32 +380,38 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
         
         if (heatIndex >= 35) {
           status = '🔥 매우 더움';
-          recommendation = '실내활동 권장, 충분한 수분섭취';
+          recommendation = '실내활동 권장';
         } else if (heatIndex >= 32) {
           status = '🌡️ 더움';
-          recommendation = '그늘 활용, 정기적 휴식';
+          recommendation = '그늘 활용 필수';
         } else if (heatIndex >= 28) {
           status = '☀️ 따뜻함';
-          recommendation = '야외활동 적합, 자외선 주의';
+          recommendation = '야외활동 적합';
         } else {
           status = '🌤️ 시원함';
           recommendation = '모든 활동 적합';
         }
         
-        regionalSummary += `• **${data.icon} ${regionName}** (${data.area}): ${data.temp.toFixed(1)}°C ${status}\n`;
-        regionalSummary += `  체감온도 ${heatIndex.toFixed(1)}°C | ${recommendation}\n`;
+        regionalSummary += `${data.icon} **${regionName}**: ${data.temp.toFixed(1)}°C ${status}\n`;
+        regionalSummary += `   체감온도 ${heatIndex.toFixed(1)}°C • ${recommendation}\n\n`;
       });
 
       // 지역 간 편차 분석
       const tempDiff = hottestRegion[1].temp - coolestRegion[1].temp;
-      regionalSummary += `\n**🌍 지역 간 온도 편차**: ${tempDiff.toFixed(1)}°C\n`;
-      regionalSummary += `• **최고온** ${hottestRegion[1].icon} ${hottestRegion[0]}: ${hottestRegion[1].temp.toFixed(1)}°C\n`;
-      regionalSummary += `• **최저온** ${coolestRegion[1].icon} ${coolestRegion[0]}: ${coolestRegion[1].temp.toFixed(1)}°C\n`;
+      regionalSummary += `**🌍 지역 간 온도 편차**\n`;
+      regionalSummary += `• **편차**: ${tempDiff.toFixed(1)}°C\n`;
+      regionalSummary += `• **최고온**: ${hottestRegion[1].icon} ${hottestRegion[0]} ${hottestRegion[1].temp.toFixed(1)}°C\n`;
+      regionalSummary += `• **최저온**: ${coolestRegion[1].icon} ${coolestRegion[0]} ${coolestRegion[1].temp.toFixed(1)}°C\n\n`;
       
       if (tempDiff > 3) {
-        regionalSummary += `\n**📊 편차 분석**: ${tempDiff.toFixed(1)}°C의 큰 편차는 도심 열섬현상과 지리적 특성의 영향으로 보입니다. ${hottestRegion[0]} 지역은 특히 주의가 필요하며, ${coolestRegion[0]} 지역은 상대적으로 쾌적합니다.\n`;
+        regionalSummary += `**📊 편차 분석**\n`;
+        regionalSummary += `${tempDiff.toFixed(1)}°C의 큰 편차는 도심 열섬현상과 지리적 특성의 영향입니다.\n`;
+        regionalSummary += `• ${hottestRegion[0]} 지역: 특히 주의 필요\n`;
+        regionalSummary += `• ${coolestRegion[0]} 지역: 상대적으로 쾌적\n\n`;
       } else {
-        regionalSummary += `\n**📊 편차 분석**: ${tempDiff.toFixed(1)}°C의 작은 편차로 전국적으로 균등한 온도 분포를 보이며, 안정적인 기상 상태입니다.\n`;
+        regionalSummary += `**📊 편차 분석**\n`;
+        regionalSummary += `${tempDiff.toFixed(1)}°C의 작은 편차로 전국적으로 균등한 온도 분포를 보입니다.\n`;
+        regionalSummary += `안정적인 기상 상태입니다.\n\n`;
       }
 
       return {
@@ -403,7 +424,7 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
     }
 
     return {
-      summary: '\n\n**🗺️ 지역별 분석**: 현재 지역별 상세 데이터가 충분하지 않습니다.\n',
+      summary: '**🗺️ 지역별 분석**\n현재 지역별 상세 데이터를 수집 중입니다.\n\n',
       hottestRegion: null,
       coolestRegion: null,
       tempDiff: 0,
