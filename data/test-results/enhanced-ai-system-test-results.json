@@ -1,0 +1,191 @@
+{
+  "timestamp": "2025-08-05T13:49:36.333Z",
+  "test_version": "1.0",
+  "target_confidence": 0.97,
+  "performance_targets": {
+    "response_time_ms": 30000,
+    "confidence_threshold": 0.97,
+    "regional_coverage": 8,
+    "success_rate": 0.95
+  },
+  "tests": [
+    {
+      "test_name": "weather_data_validity",
+      "status": "passed",
+      "metrics": {
+        "has_timestamp": true,
+        "has_temperature_data": true,
+        "has_humidity_data": true,
+        "has_rainfall_data": true,
+        "stations_count": 59,
+        "data_freshness_minutes": 4745,
+        "quality_score": 0.8833333333333333,
+        "test_duration_ms": 14.880968000000003
+      }
+    },
+    {
+      "test_name": "basic_system_performance",
+      "status": "passed",
+      "metrics": {
+        "total_response_time_ms": 8020.839048999999,
+        "regions_analyzed": 8,
+        "successful_analyses": 8,
+        "overall_confidence": 0.99,
+        "analysis_version": "2.0",
+        "performance_targets_met": {
+          "response_time_ok": true,
+          "confidence_ok": true,
+          "coverage_ok": true
+        },
+        "all_targets_met": true,
+        "test_duration_ms": 8020.8802350000005
+      }
+    },
+    {
+      "test_name": "regional_analysis_quality",
+      "status": "passed",
+      "metrics": {
+        "regional_results": {
+          "hwa-chong": {
+            "overall_score": 0.9,
+            "has_summary": true,
+            "has_detailed_analysis": true,
+            "has_recommendations": true,
+            "confidence_score": 0.9750000000000001
+          },
+          "newton": {
+            "overall_score": 0.9,
+            "has_summary": true,
+            "has_detailed_analysis": true,
+            "has_recommendations": true,
+            "confidence_score": 0.99
+          },
+          "changi": {
+            "overall_score": 0.9,
+            "has_summary": true,
+            "has_detailed_analysis": true,
+            "has_recommendations": true,
+            "confidence_score": 0.99
+          },
+          "jurong": {
+            "overall_score": 0.9,
+            "has_summary": true,
+            "has_detailed_analysis": true,
+            "has_recommendations": true,
+            "confidence_score": 0.99
+          },
+          "woodlands": {
+            "overall_score": 0.9,
+            "has_summary": true,
+            "has_detailed_analysis": true,
+            "has_recommendations": true,
+            "confidence_score": 0.99
+          },
+          "marina-bay": {
+            "overall_score": 0.9,
+            "has_summary": true,
+            "has_detailed_analysis": true,
+            "has_recommendations": true,
+            "confidence_score": 0.99
+          },
+          "sentosa": {
+            "overall_score": 0.9,
+            "has_summary": true,
+            "has_detailed_analysis": true,
+            "has_recommendations": true,
+            "confidence_score": 0.99
+          },
+          "tampines": {
+            "overall_score": 0.9,
+            "has_summary": true,
+            "has_detailed_analysis": true,
+            "has_recommendations": true,
+            "confidence_score": 0.99
+          }
+        },
+        "average_quality_score": 0.9000000000000001,
+        "analyzed_regions": 8,
+        "quality_threshold_met": true,
+        "test_duration_ms": 10.781713000000309
+      }
+    },
+    {
+      "test_name": "confidence_calculation",
+      "status": "passed",
+      "metrics": {
+        "calculated_confidence": 0.99,
+        "reported_confidence": 0.99,
+        "confidence_difference": 0,
+        "meets_target": true,
+        "confidence_accuracy": true,
+        "target_achieved": true,
+        "test_duration_ms": 5.22016800000074
+      }
+    },
+    {
+      "test_name": "stress_test",
+      "status": "passed",
+      "metrics": {
+        "stress_runs": 3,
+        "successful_runs": 3,
+        "success_rate": 1,
+        "average_response_time_ms": 8017.957556666668,
+        "average_confidence": 0.9899999999999999,
+        "stress_results": [
+          {
+            "run": 1,
+            "success": true,
+            "response_time_ms": 8018.564505,
+            "confidence": 0.99,
+            "regions_analyzed": 8
+          },
+          {
+            "run": 2,
+            "success": true,
+            "response_time_ms": 8017.708831,
+            "confidence": 0.99,
+            "regions_analyzed": 8
+          },
+          {
+            "run": 3,
+            "success": true,
+            "response_time_ms": 8017.599334000002,
+            "confidence": 0.99,
+            "regions_analyzed": 8
+          }
+        ],
+        "meets_success_rate_target": true,
+        "test_duration_ms": 30060.446547
+      }
+    }
+  ],
+  "overall_results": {
+    "test_summary": {
+      "total_tests": 5,
+      "passed_tests": 5,
+      "failed_tests": 0,
+      "overall_success_rate": 1
+    },
+    "performance_summary": {
+      "average_response_time_ms": 8020.839048999999,
+      "average_confidence": 0.99,
+      "total_success_count": 1,
+      "total_failure_count": 0
+    },
+    "target_achievements": {
+      "response_time_target": true,
+      "confidence_target": true,
+      "success_rate_target": true,
+      "regional_coverage_target": true
+    },
+    "all_targets_achieved": true,
+    "final_grade": {
+      "grade": "A+",
+      "score": 99.6,
+      "description": "Excellent - 97%+ 신뢰도 목표 완전 달성, 엔터프라이즈급 품질"
+    },
+    "recommendations": [
+      "모든 목표 달성! 현재 성능 유지 및 모니터링 지속"
+    ]
+  }
+}
