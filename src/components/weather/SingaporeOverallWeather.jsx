@@ -119,8 +119,18 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
     }
   }, [mainWeatherData, mainDataLoading]); // WeatherAlertTicker와 동일한 업데이트 트리거 사용
 
-  // ❌ 자동 AI 분석 체크 비활성화 - 수동 클릭 시에만 분석 시작
+  // ❌ 자동 AI 분석 체크 비활성화 - 온디맨드 시스템으로 완전 전환
   // useEffect(() => { ... }, []); // 자동 로딩 비활성화
+  
+  // 레거시 상태 완전 초기화 (weatherData 변경 시마다)
+  useEffect(() => {
+    if (independentWeatherData) {
+      console.log('💯 [온디맨드 AI] 레거시 상태 초기화 (weatherData 변경)');
+      setShowRealAI(false);
+      setCohereAnalysis(null);
+      setCohereLoading(false);
+    }
+  }, [independentWeatherData]);
 
   // 🧠 AI 분석 내용 파싱 함수 (raw_analysis를 실제 내용으로 변환)
   const parseRawAnalysis = (rawText) => {
@@ -1462,29 +1472,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         </CardContent>
       </Card>
 
-      {/* Legacy AI 분석 결과 카드 (backward compatibility) */}
-      {showRealAI && cohereAnalysis && !onDemandAnalysis && (
-        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center space-x-2 text-lg font-bold text-amber-800">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              <span>레거시 AI 분석 (자동 전환 중)</span>
-            </CardTitle>
-          </CardHeader>
-          
-          <CardContent className="pt-0">
-            <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-4">
-              <div className="flex items-center space-x-2">
-                <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
-                <span className="text-blue-800 font-medium">온디맨드 AI 시스템으로 전환 중...</span>
-              </div>
-              <div className="text-sm text-blue-600 mt-2">
-                위의 "고급 AI 분석" 버튼을 다시 클릭하면 새로운 온디맨드 AI 분석을 사용할 수 있습니다.
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* 레거시 시스템 완전 비활성화 - 온디맨드 시스템으로 완전 전환 */}
     </div>
   );
 };
