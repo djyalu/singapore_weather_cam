@@ -1,0 +1,86 @@
+name: Real-time Data Sync
+
+# Ultra-fast data collection for real-time updates
+# Optimized for minimal latency and maximum freshness
+
+on:
+  schedule:
+    # Every 5 minutes - true real-time experience
+    - cron: '*/5 * * * *'
+  
+  workflow_dispatch:
+    inputs:
+      priority:
+        description: 'Priority level'
+        type: choice
+        options:
+          - 'normal'
+          - 'high'
+          - 'urgent'
+        default: 'normal'
+
+env:
+  NODE_ENV: production
+  REQUEST_TIMEOUT: 5000
+  MAX_RETRIES: 1
+
+jobs:
+  realtime-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies (minimal)
+        run: |
+          echo "⚡ Installing minimal dependencies for speed..."
+          npm ci --production --silent
+          echo "✅ Dependencies ready"
+
+      - name: Real-time weather collection
+        run: |
+          echo "🌡️ Collecting real-time weather data..."
+          echo "Priority: ${{ inputs.priority || 'normal' }}"
+          node scripts/collect-weather.js
+          echo "✅ Weather data updated"
+
+      - name: Commit real-time updates
+        run: |
+          git config --local user.email "realtime@github.com"
+          git config --local user.name "Real-time Sync"
+          
+          if git diff --quiet; then
+            echo "📊 No changes detected - data is already current"
+          else
+            git add data/weather/
+            git commit -m "feat: Real-time weather data update
+
+            ⚡ Ultra-fast 5-minute sync
+            🌡️ Latest NEA Singapore data
+            
+            🤖 Generated with [Claude Code](https://claude.ai/code)
+            
+            Co-Authored-By: Claude <noreply@anthropic.com>"
+            git push
+            echo "✅ Real-time data committed successfully"
+          fi

@@ -6,8 +6,8 @@ name: AI Weather Summary Generation
 
 on:
   schedule:
-    # Run every 3 hours at 0, 3, 6, 9, 12, 15, 18, 21 UTC
-    - cron: '0 */3 * * *'
+    # Run every 15 minutes for real-time AI analysis updates
+    - cron: '*/15 * * * *'
   
   workflow_dispatch:
     inputs:

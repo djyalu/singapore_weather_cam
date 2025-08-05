@@ -1384,7 +1384,7 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
                 ) : (
                   <Brain className="w-4 h-4" />
                 )}
-                AI 분석
+                고급 AI 분석
               </Button>
             </div>
           </div>

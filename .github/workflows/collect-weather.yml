@@ -2,8 +2,8 @@ name: Collect Weather Data
 
 on:
   schedule:
-    # Every 3 hours (8 runs/day = 240 runs/month) - 50% GitHub Actions budget
-    - cron: '0 */3 * * *'
+    # Every 15 minutes for real-time updates (96 runs/day = 2880 runs/month)
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       force_run:

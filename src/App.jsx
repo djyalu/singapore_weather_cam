@@ -11,6 +11,8 @@ import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
 import './utils/notifications'; // 알림 시스템 초기화
 import MobileUpdateGuide from './components/common/MobileUpdateGuide'; // 모바일 업데이트 가이드
+import { useRealTimeWeatherStream } from './hooks/useRealTimeWeatherStream'; // 실시간 스트림
+import RealTimeIndicator from './components/common/RealTimeIndicator'; // 실시간 표시기
 
 // Only AdminPanels remains lazy loaded
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
@@ -27,7 +29,21 @@ const App = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0); // 지도 히트맵 새로고침 트리거
 
   // Data hooks from context
-  const { weatherData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather, forceRefresh: forceRefetchWeather } = useWeatherData();
+  const { weatherData: contextData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather, forceRefresh: forceRefetchWeather } = useWeatherData();
+
+  // Real-time streaming hook - 1분 간격 실시간 업데이트
+  const {
+    weatherData: streamData,
+    lastUpdateTime,
+    updateCount,
+    isStreaming,
+    forceUpdate,
+    streamHealth,
+    nextUpdateIn
+  } = useRealTimeWeatherStream(contextData);
+
+  // Use streaming data if available, fallback to context data
+  const weatherData = streamData || contextData;
 
   // Manual refresh - 이제 실시간 데이터를 우선 사용
   const handleManualRefresh = () => {
@@ -94,6 +110,20 @@ const App = () => {
 
     return (
       <div className="space-y-4 sm:space-y-6">
+        {/* 실시간 스트림 상태 표시기 */}
+        <RealTimeIndicator
+          isStreaming={isStreaming}
+          lastUpdateTime={lastUpdateTime}
+          nextUpdateIn={nextUpdateIn}
+          updateCount={updateCount}
+          streamHealth={streamHealth}
+          onForceUpdate={async () => {
+            await forceUpdate();
+            setLastUpdate(new Date());
+            setRefreshTrigger(prev => prev + 1);
+          }}
+        />
+
         {/* 모바일 업데이트 가이드 - 8월 2일 문제 해결 */}
         <MobileUpdateGuide 
           weatherData={weatherData} 
