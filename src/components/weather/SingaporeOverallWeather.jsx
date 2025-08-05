@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
 import neaRealTimeService from '../../services/neaRealTimeService';
 import { useWeatherData } from '../../contexts/AppDataContextSimple';
+import { useOnDemandAIAnalysis } from '../../hooks/useOnDemandAIAnalysis';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -19,6 +20,16 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
   const [showRealAI, setShowRealAI] = useState(false);
   const [independentWeatherData, setIndependentWeatherData] = useState(null);
   const [serverAICheckCount, setServerAICheckCount] = useState(0);
+
+  // On-Demand AI Analysis Hook
+  const {
+    aiAnalysis: onDemandAnalysis,
+    generateAnalysis,
+    isGenerating: isGeneratingOnDemand,
+    analysisError: onDemandError,
+    hasAnalysis,
+    canGenerate
+  } = useOnDemandAIAnalysis(independentWeatherData);
 
   // WeatherAlertTicker와 동일한 데이터 감지 시스템 사용
   const { weatherData: mainWeatherData, isLoading: mainDataLoading } = useWeatherData();
@@ -1374,12 +1385,20 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
             </CardTitle>
             <div className="flex justify-center">
               <Button
-                onClick={handleOptimizedAIAnalysis}
-                disabled={cohereLoading}
+                onClick={async () => {
+                  console.log('🤖 [On-Demand AI] User clicked "고급 AI 분석" button');
+                  const success = await generateAnalysis();
+                  if (success) {
+                    console.log('✅ [On-Demand AI] Analysis generated successfully');
+                  } else {
+                    console.warn('⚠️ [On-Demand AI] Analysis generation failed');
+                  }
+                }}
+                disabled={isGeneratingOnDemand || !canGenerate}
                 size="sm"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-6"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-6 disabled:opacity-50"
               >
-                {cohereLoading ? (
+                {isGeneratingOnDemand ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
                   <Brain className="w-4 h-4" />
@@ -1391,96 +1410,78 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
         </CardHeader>
         
         <CardContent className="pt-0">
-          {aiLoading ? (
-            <div className="flex items-center space-x-2 text-purple-600">
+          {/* On-Demand AI Analysis Results */}
+          {isGeneratingOnDemand ? (
+            <div className="flex items-center space-x-2 text-purple-600 py-4">
               <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>AI 분석 중...</span>
+              <span>AI 분석 생성 중...</span>
             </div>
-          ) : aiSummary ? (
+          ) : onDemandAnalysis ? (
             <div className="space-y-3">
-              <p className="text-gray-700 leading-relaxed">{aiSummary.summary}</p>
+              <p className="text-gray-700 leading-relaxed">{onDemandAnalysis.summary}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {aiSummary.highlights?.map((highlight, index) => (
+                {onDemandAnalysis.highlights?.map((highlight, index) => (
                   <div key={index} className="text-sm bg-purple-100 text-purple-700 px-3 py-2 rounded">
                     {highlight}
                   </div>
                 ))}
               </div>
               <div className="text-xs text-gray-500 flex items-center space-x-4">
-                <span>🤖 {aiSummary.aiModel}</span>
-                <span>🎯 신뢰도 {Math.round(aiSummary.confidence * 100)}%</span>
+                <span>🤖 {onDemandAnalysis.aiModel}</span>
+                <span>🎯 신뢰도 {Math.round((onDemandAnalysis.confidence || 0) * 100)}%</span>
+                {onDemandAnalysis.weatherContext?.stationCount && (
+                  <span>📊 {onDemandAnalysis.weatherContext.stationCount}개 관측소</span>
+                )}
               </div>
+              {onDemandAnalysis.isLocalAnalysis && (
+                <div className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded inline-block">
+                  ⚡ 실시간 로컬 AI 분석
+                </div>
+              )}
+              {onDemandAnalysis.isServerAnalysis && (
+                <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded inline-block">
+                  🏢 서버 AI 분석 ({onDemandAnalysis.age}시간 전)
+                </div>
+              )}
+            </div>
+          ) : onDemandError ? (
+            <div className="text-red-600 bg-red-50 p-3 rounded text-center">
+              <div className="font-medium">AI 분석 오류</div>
+              <div className="text-sm mt-1">{onDemandError}</div>
             </div>
           ) : (
             <div className="text-gray-500 text-center py-4">
-              날씨 데이터 로딩 후 AI 분석이 시작됩니다...
+              <div className="space-y-2">
+                <div>🤖 버튼을 클릭하면 고급 AI 분석을 생성합니다</div>
+                <div className="text-xs">
+                  {canGenerate ? '✅ 분석 준비 완료' : '⏳ 날씨 데이터 로딩 중...'}
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* 고급 AI 분석 결과 카드 */}
-      {showRealAI && cohereAnalysis && (
-        <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+      {/* Legacy AI 분석 결과 카드 (backward compatibility) */}
+      {showRealAI && cohereAnalysis && !onDemandAnalysis && (
+        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center space-x-2 text-lg font-bold text-emerald-800">
-              <Sparkles className="w-5 h-5 text-emerald-500" />
-              <span>고급 AI 분석 결과</span>
+            <CardTitle className="flex items-center space-x-2 text-lg font-bold text-amber-800">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <span>레거시 AI 분석 (자동 전환 중)</span>
             </CardTitle>
           </CardHeader>
           
           <CardContent className="pt-0">
-            {cohereLoading ? (
-              <div className="flex flex-col items-center space-y-3 text-emerald-600 py-6">
-                <RefreshCw className="w-6 h-6 animate-spin" />
-                <span className="text-base font-medium">AI 분석 중...</span>
+            <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-4">
+              <div className="flex items-center space-x-2">
+                <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+                <span className="text-blue-800 font-medium">온디맨드 AI 시스템으로 전환 중...</span>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {/* 간결한 처리 중 표시 */}
-                {cohereAnalysis.isProcessing && (
-                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-4">
-                    <div className="flex items-center space-x-2">
-                      <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
-                      <span className="text-blue-800 font-medium">AI 분석 진행 중</span>
-                      {serverAICheckCount > 0 && (
-                        <span className="text-sm text-blue-600">({serverAICheckCount}/6)</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{cohereAnalysis.summary}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {cohereAnalysis.highlights?.map((highlight, index) => (
-                    <div key={index} className={`text-sm px-3 py-2 rounded ${
-                      cohereAnalysis.isProcessing 
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                        : 'bg-emerald-100 text-emerald-700'
-                    }`}>
-                      {highlight}
-                    </div>
-                  ))}
-                </div>
-                <div className="text-xs text-gray-500 flex items-center space-x-3">
-                  <span>{cohereAnalysis.aiModel}</span>
-                  <span>신뢰도 {Math.round(cohereAnalysis.confidence * 100)}%</span>
-                  {cohereAnalysis.stationCount && (
-                    <span>{cohereAnalysis.stationCount}개 관측소</span>
-                  )}
-                </div>
-                
-                {/* 간결한 완료 알림 */}
-                {cohereAnalysis.autoLoaded && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-2 mt-3">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-green-800">AI 분석 완료</span>
-                    </div>
-                  </div>
-                )}
+              <div className="text-sm text-blue-600 mt-2">
+                위의 "고급 AI 분석" 버튼을 다시 클릭하면 새로운 온디맨드 AI 분석을 사용할 수 있습니다.
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       )}
