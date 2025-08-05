@@ -11,7 +11,6 @@ import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
 import './utils/notifications'; // 알림 시스템 초기화
 import { useOnDemandWeatherData } from './hooks/useOnDemandWeatherData'; // On-Demand 업데이트
-import OnDemandRefreshButton from './components/common/OnDemandRefreshButton'; // 수동 새로고침 버튼
 
 // Only AdminPanels remains lazy loaded
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
@@ -44,18 +43,24 @@ const App = () => {
   // Use on-demand data if available, fallback to context data
   const weatherData = onDemandData || contextData;
 
-  // Manual refresh - 이제 실시간 데이터를 우선 사용
-  const handleManualRefresh = () => {
-    forceRefetchWeather(); // 실시간 NEA API 직접 호출로 변경
-    setLastUpdate(new Date());
-    setRefreshTrigger(prev => prev + 1); // 지도 히트맵 새로고침 트리거
+  // Manual refresh - On-demand 데이터 새로고침 사용
+  const handleManualRefresh = async () => {
+    const success = await refreshData(); // On-demand hook 사용
+    if (success) {
+      setLastUpdate(new Date());
+      setRefreshTrigger(prev => prev + 1); // 지도 히트맵 새로고침 트리거
+    }
+    return success;
   };
 
-  // Force refresh - 실시간 NEA API 호출 (동일하게 유지)
-  const handleForceRefresh = () => {
-    forceRefetchWeather();
-    setLastUpdate(new Date());
-    setRefreshTrigger(prev => prev + 1); // 지도 히트맵 새로고침 트리거
+  // Force refresh - 동일한 로직 사용
+  const handleForceRefresh = async () => {
+    const success = await refreshData();
+    if (success) {
+      setLastUpdate(new Date());
+      setRefreshTrigger(prev => prev + 1);
+    }
+    return success;
   };
 
   // 더 스마트한 로딩 상태 관리
@@ -109,23 +114,6 @@ const App = () => {
 
     return (
       <div className="space-y-4 sm:space-y-6">
-        {/* On-Demand 새로고침 버튼 - 사용자 요청 시에만 업데이트 */}
-        <OnDemandRefreshButton
-          onRefresh={async () => {
-            const success = await refreshData();
-            if (success) {
-              setLastUpdate(new Date());
-              setRefreshTrigger(prev => prev + 1);
-            }
-            return success;
-          }}
-          isUpdating={isUpdating}
-          updateError={updateError}
-          lastUpdateTime={lastUpdateTime}
-          dataFreshness={dataFreshness}
-          updateCount={manualUpdateCount}
-        />
-
         {/* 싱가포르 전체 평균 날씨 정보 - 개선된 컴팩트한 디자인 */}
         <SingaporeOverallWeather
           weatherData={weatherData}
