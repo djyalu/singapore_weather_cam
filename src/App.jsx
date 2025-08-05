@@ -10,6 +10,7 @@ import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
 import './utils/notifications'; // 알림 시스템 초기화
+import MobileUpdateGuide from './components/common/MobileUpdateGuide'; // 모바일 업데이트 가이드
 
 // Only AdminPanels remains lazy loaded
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
@@ -93,6 +94,15 @@ const App = () => {
 
     return (
       <div className="space-y-4 sm:space-y-6">
+        {/* 모바일 업데이트 가이드 - 8월 2일 문제 해결 */}
+        <MobileUpdateGuide 
+          weatherData={weatherData} 
+          onRefreshSuccess={() => {
+            setLastUpdate(new Date());
+            setRefreshTrigger(prev => prev + 1);
+          }}
+        />
+
         {/* 싱가포르 전체 평균 날씨 정보 - 개선된 컴팩트한 디자인 */}
         <SingaporeOverallWeather
           weatherData={weatherData}

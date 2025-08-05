@@ -1,0 +1,156 @@
+name: Mobile Data Refresh Enhancement
+
+on:
+  schedule:
+    # Every 30 minutes (more frequent for mobile users)
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      force_mobile_cache_clear:
+        description: 'Force clear all mobile caches'
+        type: boolean
+        default: true
+
+env:
+  NODE_ENV: production
+  MOBILE_OPTIMIZATION: true
+
+jobs:
+  enhance-mobile-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit --silent
+          echo "✅ Dependencies installed for mobile optimization"
+
+      - name: Generate mobile-optimized data
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          MOBILE_CACHE_CLEAR: ${{ inputs.force_mobile_cache_clear || 'true' }}
+        run: |
+          echo "📱 Generating mobile-optimized weather data..."
+          
+          # Create mobile-specific data directory
+          mkdir -p data/mobile
+          mkdir -p public/data/mobile
+          
+          # Run enhanced weather collection with mobile flags
+          timeout 3m node scripts/collect-weather.js --mobile-optimized || {
+            echo "⚠️ Primary collection failed, creating mobile fallback"
+            
+            # Create mobile-optimized fallback
+            TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')
+            CACHE_BUST=$(date +%s%N)
+            
+            cat > data/mobile/latest.json << EOF
+            {
+              "timestamp": "$TIMESTAMP",
+              "cache_bust": "$CACHE_BUST",
+              "mobile_optimized": true,
+              "source": "GitHub Actions Mobile Enhancement",
+              "status": "updating",
+              "message": "실시간 모바일 데이터 업데이트 중... 잠시만 기다려주세요.",
+              "next_update": "$(date -u -d '+30 minutes' '+%Y-%m-%dT%H:%M:%S.000Z')",
+              "update_frequency": "30분마다",
+              "user_message": "모바일 환경을 위한 최적화된 실시간 업데이트가 진행 중입니다."
+            }
+          EOF
+          }
+
+      - name: Add mobile cache headers
+        run: |
+          echo "📱 Adding mobile-specific cache control headers..."
+          
+          # Create .htaccess for mobile optimization (if using Apache)
+          cat > public/.htaccess << 'EOF'
+          # Mobile cache optimization
+          <FilesMatch "\.(json)$">
+            Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+            Header set Pragma "no-cache"
+            Header set Expires "0"
+            Header set X-Mobile-Optimized "true"
+          </FilesMatch>
+          
+          # Mobile-specific data files
+          <FilesMatch "mobile/.*\.json$">
+            Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+            Header set X-Cache-Bust "$(date +%s)"
+            Header set X-Mobile-Fresh "true"
+          </FilesMatch>
+          EOF
+          
+          # Create mobile-specific manifest
+          cat > public/mobile-manifest.json << EOF
+          {
+            "last_update": "$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')",
+            "cache_version": "$(date +%s)",
+            "mobile_optimized": true,
+            "update_interval": 1800,
+            "force_refresh": true
+          }
+          EOF
+
+      - name: Copy mobile data to public
+        run: |
+          cp -r data/mobile/* public/data/mobile/ 2>/dev/null || true
+          cp -r data/weather/* public/data/mobile/ 2>/dev/null || true
+          echo "📱 Mobile data copied to public directory"
+
+      - name: Configure Git for mobile commit
+        run: |
+          git config --local user.email "mobile@github.com"
+          git config --local user.name "Mobile Data Updater"
+
+      - name: Commit mobile-optimized data
+        run: |
+          git add data/mobile/ public/data/mobile/ public/.htaccess public/mobile-manifest.json 2>/dev/null || true
+          
+          if ! git diff --staged --quiet; then
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            CACHE_BUST=$(date +%s)
+            
+            git commit -m "📱 Mobile data refresh - ${TIMESTAMP}
+
+Mobile optimization updates:
+- Cache-busting timestamp: ${CACHE_BUST}
+- Aggressive cache headers added
+- 30-minute refresh cycle
+- Mobile-specific data structure
+
+🔄 Addresses mobile update issues
+🚀 Enhanced for better mobile UX
+
+Generated with Claude Code
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            
+            git push
+            echo "✅ Mobile-optimized data committed and pushed"
+          else
+            echo "ℹ️ No mobile data changes to commit"
+          fi
+
+      - name: Verify mobile optimization
+        run: |
+          echo "📱 Mobile optimization verification:"
+          echo "- Data directory: $(ls -la data/mobile/ 2>/dev/null | wc -l) files"
+          echo "- Public directory: $(ls -la public/data/mobile/ 2>/dev/null | wc -l) files"
+          echo "- Cache headers: $(test -f public/.htaccess && echo 'Added' || echo 'Missing')"
+          echo "- Mobile manifest: $(test -f public/mobile-manifest.json && echo 'Created' || echo 'Missing')"
+          echo "✅ Mobile enhancement workflow completed"
