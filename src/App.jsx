@@ -10,9 +10,8 @@ import CameraModal from './components/webcam/CameraModal';
 import { useWeatherData } from './contexts/AppDataContextSimple';
 import { getLocalizedString } from './config/localization';
 import './utils/notifications'; // 알림 시스템 초기화
-import MobileUpdateGuide from './components/common/MobileUpdateGuide'; // 모바일 업데이트 가이드
-import { useRealTimeWeatherStream } from './hooks/useRealTimeWeatherStream'; // 실시간 스트림
-import RealTimeIndicator from './components/common/RealTimeIndicator'; // 실시간 표시기
+import { useOnDemandWeatherData } from './hooks/useOnDemandWeatherData'; // On-Demand 업데이트
+import OnDemandRefreshButton from './components/common/OnDemandRefreshButton'; // 수동 새로고침 버튼
 
 // Only AdminPanels remains lazy loaded
 const AdminPanels = lazy(() => import('./components/admin/AdminPanels'));
@@ -28,22 +27,22 @@ const App = () => {
   const [selectedRegions, setSelectedRegions] = useState(['hwa-chong', 'newton', 'changi']); // 선택된 지역들
   const [refreshTrigger, setRefreshTrigger] = useState(0); // 지도 히트맵 새로고침 트리거
 
-  // Data hooks from context
-  const { weatherData: contextData, isLoading: weatherLoading, error: weatherError, refresh: refetchWeather, forceRefresh: forceRefetchWeather } = useWeatherData();
+  // Data hooks from context (for initial load)
+  const { weatherData: contextData, isLoading: weatherLoading, error: weatherError } = useWeatherData();
 
-  // Real-time streaming hook - 1분 간격 실시간 업데이트
+  // On-Demand data hook - 사용자 요청 시에만 업데이트
   const {
-    weatherData: streamData,
+    weatherData: onDemandData,
     lastUpdateTime,
-    updateCount,
-    isStreaming,
-    forceUpdate,
-    streamHealth,
-    nextUpdateIn
-  } = useRealTimeWeatherStream(contextData);
+    manualUpdateCount,
+    refreshData,
+    isUpdating,
+    updateError,
+    dataFreshness
+  } = useOnDemandWeatherData(contextData);
 
-  // Use streaming data if available, fallback to context data
-  const weatherData = streamData || contextData;
+  // Use on-demand data if available, fallback to context data
+  const weatherData = onDemandData || contextData;
 
   // Manual refresh - 이제 실시간 데이터를 우선 사용
   const handleManualRefresh = () => {
@@ -110,27 +109,21 @@ const App = () => {
 
     return (
       <div className="space-y-4 sm:space-y-6">
-        {/* 실시간 스트림 상태 표시기 */}
-        <RealTimeIndicator
-          isStreaming={isStreaming}
+        {/* On-Demand 새로고침 버튼 - 사용자 요청 시에만 업데이트 */}
+        <OnDemandRefreshButton
+          onRefresh={async () => {
+            const success = await refreshData();
+            if (success) {
+              setLastUpdate(new Date());
+              setRefreshTrigger(prev => prev + 1);
+            }
+            return success;
+          }}
+          isUpdating={isUpdating}
+          updateError={updateError}
           lastUpdateTime={lastUpdateTime}
-          nextUpdateIn={nextUpdateIn}
-          updateCount={updateCount}
-          streamHealth={streamHealth}
-          onForceUpdate={async () => {
-            await forceUpdate();
-            setLastUpdate(new Date());
-            setRefreshTrigger(prev => prev + 1);
-          }}
-        />
-
-        {/* 모바일 업데이트 가이드 - 8월 2일 문제 해결 */}
-        <MobileUpdateGuide 
-          weatherData={weatherData} 
-          onRefreshSuccess={() => {
-            setLastUpdate(new Date());
-            setRefreshTrigger(prev => prev + 1);
-          }}
+          dataFreshness={dataFreshness}
+          updateCount={manualUpdateCount}
         />
 
         {/* 싱가포르 전체 평균 날씨 정보 - 개선된 컴팩트한 디자인 */}

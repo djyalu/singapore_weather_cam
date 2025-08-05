@@ -5,9 +5,9 @@ name: AI Weather Summary Generation
 # Cohere API key verified working - final test
 
 on:
-  schedule:
-    # Run every 15 minutes for real-time AI analysis updates
-    - cron: '*/15 * * * *'
+  # schedule: # DISABLED - On-demand only system
+    # # Run every 15 minutes for real-time AI analysis updates  
+    # - cron: '*/15 * * * *'
   
   workflow_dispatch:
     inputs:

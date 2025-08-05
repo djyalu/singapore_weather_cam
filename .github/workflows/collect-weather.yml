@@ -1,9 +1,9 @@
 name: Collect Weather Data
 
 on:
-  schedule:
-    # Every 15 minutes for real-time updates (96 runs/day = 2880 runs/month)
-    - cron: '*/15 * * * *'
+  # schedule: # DISABLED - On-demand only system
+    # # Every 6 hours for baseline data collection (4 runs/day = 120 runs/month)
+    # - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       force_run:
@@ -194,7 +194,7 @@ jobs:
 Bukit Timah area weather update:
 - Temperature: ${TEMP_INFO}
 - Source: NEA Singapore API${AI_SUMMARY_INFO}
-- Schedule: Every 6 hours with AI summaries
+- Schedule: Every 6 hours baseline + on-demand user requests
 
 Generated with Claude Code
 Co-Authored-By: Claude <noreply@anthropic.com>"
