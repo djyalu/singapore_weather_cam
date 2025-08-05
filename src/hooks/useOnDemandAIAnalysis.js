@@ -125,7 +125,7 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
   }, []);
 
   /**
-   * 전문적인 기상 분석 생성 함수 - 과학적이고 상세한 분석
+   * 전문적인 기상 분석 생성 함수 - 과학적이고 상세한 분석 + 지역별 분석 통합
    */
   const generateProfessionalWeatherAnalysis = useCallback((weatherInput) => {
     try {
@@ -146,6 +146,9 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
       const tempVariance = temperature.max - temperature.min;
       const hotSpotStation = temperature.readings.find(r => r.value === temperature.max);
       const coolSpotStation = temperature.readings.find(r => r.value === temperature.min);
+      
+      // 지역별 상세 분석 (8개 주요 지역)
+      const regionalAnalysis = generateRegionalAnalysis(temperature.readings, humidity.avg);
       
       // 전문적인 분석 작성
       let analysis = `**${singaporeTime} 싱가포르 기상 전문 분석**\n\n`;
@@ -201,6 +204,9 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
         analysis += '일반적인 열대 기후 주의사항을 지켜주세요. 적당한 수분 섭취와 자외선 차단은 기본입니다.';
       }
       
+      // 6. 지역별 상세 분석 통합
+      analysis += regionalAnalysis.summary;
+      
       // 하이라이트 생성
       const highlights = [];
       
@@ -242,8 +248,16 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
         highlights.push('🌈 강수없음 - 야외활동 최적');
       }
       
+      // 지역별 분석 하이라이트
+      if (regionalAnalysis.regionCount > 0) {
+        highlights.push(`🗺️ ${regionalAnalysis.regionCount}개 지역별 상세 분석`);
+        if (regionalAnalysis.hottestRegion && regionalAnalysis.coolestRegion) {
+          highlights.push(`🔥 최고온: ${regionalAnalysis.hottestRegion} | 🌤️ 최저온: ${regionalAnalysis.coolestRegion}`);
+        }
+      }
+      
       // 전문성 하이라이트
-      highlights.push(`📊 ${stationCount}개 관측소 전문 분석`);
+      highlights.push(`📊 ${stationCount}개 관측소 + 지역별 종합 분석`);
       
       return {
         summary: analysis,
@@ -298,6 +312,104 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
   const calculateDiscomfortIndex = useCallback((temp, humidity) => {
     return 0.81 * temp + 0.01 * humidity * (0.99 * temp - 14.3) + 46.3;
   }, []);
+
+  /**
+   * 지역별 상세 분석 생성 (8개 주요 지역)
+   */
+  const generateRegionalAnalysis = useCallback((temperatureReadings, avgHumidity) => {
+    const regions = {
+      'Hwa Chong': { temp: null, station: 'S116', area: 'Bukit Timah Road', icon: '🏫' },
+      'Newton': { temp: null, station: 'S107', area: 'Central Singapore', icon: '🏙️' },
+      'Changi': { temp: null, station: 'S24', area: 'East Singapore', icon: '✈️' },
+      'Jurong': { temp: null, station: 'S50', area: 'West Singapore', icon: '🏭' },
+      'Marina Bay': { temp: null, station: 'S108', area: 'Central Business District', icon: '🏢' },
+      'Woodlands': { temp: null, station: 'S121', area: 'North Singapore', icon: '🌳' },
+      'Tuas': { temp: null, station: 'S23', area: 'Southwest Singapore', icon: '🚢' },
+      'Sentosa': { temp: null, station: 'S33', area: 'Southern Island', icon: '🏖️' }
+    };
+
+    // 온도 데이터를 지역에 매핑
+    temperatureReadings.forEach(reading => {
+      Object.keys(regions).forEach(regionName => {
+        const region = regions[regionName];
+        if (reading.station === region.station || 
+            reading.station_id === region.station ||
+            reading.name?.includes(region.station)) {
+          region.temp = reading.value;
+        }
+      });
+    });
+
+    // 지역별 분석 생성
+    let regionalSummary = '\n\n**🗺️ 지역별 상세 기상 분석**\n';
+    const validRegions = Object.entries(regions).filter(([name, data]) => data.temp !== null);
+    
+    if (validRegions.length > 0) {
+      // 가장 더운 지역과 시원한 지역 찾기
+      const hottestRegion = validRegions.reduce((max, curr) => 
+        curr[1].temp > max[1].temp ? curr : max
+      );
+      const coolestRegion = validRegions.reduce((min, curr) => 
+        curr[1].temp < min[1].temp ? curr : min
+      );
+
+      regionalSummary += `\n**📍 지역별 온도 분포**:\n`;
+      
+      // 온도 순으로 정렬해서 표시
+      const sortedRegions = validRegions.sort((a, b) => b[1].temp - a[1].temp);
+      
+      sortedRegions.forEach(([regionName, data], index) => {
+        const heatIndex = calculateAdvancedHeatIndex(data.temp, avgHumidity);
+        let status = '';
+        let recommendation = '';
+        
+        if (heatIndex >= 35) {
+          status = '🔥 매우 더움';
+          recommendation = '실내활동 권장, 충분한 수분섭취';
+        } else if (heatIndex >= 32) {
+          status = '🌡️ 더움';
+          recommendation = '그늘 활용, 정기적 휴식';
+        } else if (heatIndex >= 28) {
+          status = '☀️ 따뜻함';
+          recommendation = '야외활동 적합, 자외선 주의';
+        } else {
+          status = '🌤️ 시원함';
+          recommendation = '모든 활동 적합';
+        }
+        
+        regionalSummary += `• **${data.icon} ${regionName}** (${data.area}): ${data.temp.toFixed(1)}°C ${status}\n`;
+        regionalSummary += `  체감온도 ${heatIndex.toFixed(1)}°C | ${recommendation}\n`;
+      });
+
+      // 지역 간 편차 분석
+      const tempDiff = hottestRegion[1].temp - coolestRegion[1].temp;
+      regionalSummary += `\n**🌍 지역 간 온도 편차**: ${tempDiff.toFixed(1)}°C\n`;
+      regionalSummary += `• **최고온** ${hottestRegion[1].icon} ${hottestRegion[0]}: ${hottestRegion[1].temp.toFixed(1)}°C\n`;
+      regionalSummary += `• **최저온** ${coolestRegion[1].icon} ${coolestRegion[0]}: ${coolestRegion[1].temp.toFixed(1)}°C\n`;
+      
+      if (tempDiff > 3) {
+        regionalSummary += `\n**📊 편차 분석**: ${tempDiff.toFixed(1)}°C의 큰 편차는 도심 열섬현상과 지리적 특성의 영향으로 보입니다. ${hottestRegion[0]} 지역은 특히 주의가 필요하며, ${coolestRegion[0]} 지역은 상대적으로 쾌적합니다.\n`;
+      } else {
+        regionalSummary += `\n**📊 편차 분석**: ${tempDiff.toFixed(1)}°C의 작은 편차로 전국적으로 균등한 온도 분포를 보이며, 안정적인 기상 상태입니다.\n`;
+      }
+
+      return {
+        summary: regionalSummary,
+        hottestRegion: hottestRegion[0],
+        coolestRegion: coolestRegion[0],
+        tempDiff: tempDiff,
+        regionCount: validRegions.length
+      };
+    }
+
+    return {
+      summary: '\n\n**🗺️ 지역별 분석**: 현재 지역별 상세 데이터가 충분하지 않습니다.\n',
+      hottestRegion: null,
+      coolestRegion: null,
+      tempDiff: 0,
+      regionCount: 0
+    };
+  }, [calculateAdvancedHeatIndex]);
 
   /**
    * Try to load existing server-side AI analysis
