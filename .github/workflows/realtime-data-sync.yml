@@ -4,9 +4,9 @@ name: Real-time Data Sync
 # Optimized for minimal latency and maximum freshness
 
 on:
-  schedule:
-    # Every 5 minutes - true real-time experience
-    - cron: '*/5 * * * *'
+  # schedule: # DISABLED - On-demand only system
+    # # Every 5 minutes - true real-time experience
+    # - cron: '*/5 * * * *'
   
   workflow_dispatch:
     inputs:
