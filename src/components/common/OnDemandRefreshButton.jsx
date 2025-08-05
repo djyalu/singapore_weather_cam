@@ -83,129 +83,66 @@ const OnDemandRefreshButton = ({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-      <div className="flex items-center justify-between gap-4">
+    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
         
-        {/* Status Info */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            {isOnline ? (
-              <Wifi className="w-4 h-4 text-green-600" />
-            ) : (
-              <WifiOff className="w-4 h-4 text-red-600" />
-            )}
-            
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700">
-                {formatLastUpdate()}
-              </span>
-            </div>
-          </div>
-
-          {/* Data Freshness */}
+        {/* Compact Status Info */}
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          {isOnline ? (
+            <Wifi className="w-4 h-4 text-green-600" />
+          ) : (
+            <WifiOff className="w-4 h-4 text-red-600" />
+          )}
+          
+          <span>{formatLastUpdate()}</span>
+          
           {dataFreshness && (
-            <div className="flex items-center gap-1">
-              <span className={`text-sm font-medium ${getDataStatusColor()}`}>
-                {getDataStatusText()}
-              </span>
-              {dataFreshness.minutesOld > 0 && (
-                <span className="text-xs text-gray-500">
-                  ({dataFreshness.minutesOld}분 전 데이터)
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Update Count */}
-          {updateCount > 0 && (
-            <span className="text-xs text-gray-500 hidden sm:inline">
-              업데이트 #{updateCount}
+            <span className={`font-medium ${getDataStatusColor()}`}>
+              ({getDataStatusText()})
             </span>
           )}
         </div>
 
-        {/* Refresh Button */}
-        <div className="flex items-center gap-2">
-          {/* Success Indicator */}
-          {showSuccess && (
-            <div className="flex items-center gap-1 text-green-600 text-sm animate-fade-in">
-              <CheckCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">업데이트 완료</span>
-            </div>
-          )}
-
-          {/* Error Indicator */}
-          {updateError && (
-            <div className="flex items-center gap-1 text-red-600 text-sm">
-              <AlertCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">오류 발생</span>
-            </div>
-          )}
-
-          {/* Main Refresh Button */}
-          <button
-            onClick={handleRefresh}
-            disabled={!isOnline || isUpdating}
-            className={`
-              px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2
-              ${!isOnline || isUpdating 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
-              }
-              ${showSuccess ? 'bg-green-600 hover:bg-green-700' : ''}
-            `}
-            title={!isOnline ? '네트워크 연결 필요' : isUpdating ? '업데이트 중...' : '최신 날씨 정보 가져오기'}
-          >
-            <RefreshCw className={`w-4 h-4 ${isUpdating ? 'animate-spin' : ''}`} />
-            <span>
-              {isUpdating ? '업데이트 중...' : '최신 정보'}
-            </span>
-          </button>
-        </div>
+        {/* Compact Refresh Button */}
+        <button
+          onClick={handleRefresh}
+          disabled={!isOnline || isUpdating}
+          className={`
+            px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-1.5
+            ${!isOnline || isUpdating 
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+              : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
+            }
+            ${showSuccess ? 'bg-green-600 hover:bg-green-700' : ''}
+          `}
+          title={!isOnline ? '네트워크 연결 필요' : isUpdating ? '업데이트 중...' : '최신 날씨 정보 가져오기'}
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
+          <span>
+            {isUpdating ? '업데이트 중' : '새로고침'}
+          </span>
+        </button>
       </div>
 
-      {/* Error Message */}
+      {/* Compact Error Message */}
       {updateError && (
-        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">업데이트 실패</div>
-              <div className="text-red-600">{updateError}</div>
-              <div className="text-red-500 mt-1">
-                네트워크 연결을 확인하고 다시 시도해주세요.
-              </div>
-            </div>
+        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+          <div className="flex items-center gap-1">
+            <AlertCircle className="w-3 h-3" />
+            <span>업데이트 실패: 네트워크를 확인하고 다시 시도하세요</span>
           </div>
         </div>
       )}
 
-      {/* Stale Data Warning */}
+      {/* Very Stale Data Warning Only */}
       {dataFreshness?.isVeryStale && (
-        <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">데이터가 오래되었습니다</div>
-              <div>
-                {dataFreshness.minutesOld}분 전 데이터를 표시하고 있습니다. 
-                최신 정보를 보려면 새로고침 버튼을 클릭하세요.
-              </div>
-            </div>
+        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+          <div className="flex items-center gap-1">
+            <AlertCircle className="w-3 h-3" />
+            <span>데이터가 {dataFreshness.minutesOld}분 전 것입니다. 새로고침을 권장합니다.</span>
           </div>
         </div>
       )}
-
-      {/* Usage Instructions */}
-      <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-        <div className="font-medium mb-1">📱 사용법:</div>
-        <ul className="text-blue-700 space-y-1">
-          <li>• <strong>새로고침 버튼</strong>을 클릭하면 최신 날씨 정보를 가져옵니다</li>
-          <li>• <strong>브라우저 새로고침</strong>을 하면 페이지 로드 시 자동으로 최신 정보를 확인합니다</li>
-          <li>• 자동 업데이트는 없으며, 필요할 때만 수동으로 새로고침하세요</li>
-        </ul>
-      </div>
     </div>
   );
 };
