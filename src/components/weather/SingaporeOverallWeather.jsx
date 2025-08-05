@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap } from 'lucide-react';
+import { Thermometer, Droplets, Cloud, Clock, RefreshCw, Sparkles, Brain, Zap, MapPin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency } from '../../utils/weatherDataUnifier';
 import neaRealTimeService from '../../services/neaRealTimeService';
 import { useWeatherData } from '../../contexts/AppDataContextSimple';
 import { useOnDemandAIAnalysis } from '../../hooks/useOnDemandAIAnalysis';
+import EnhancedRegionalAIAnalysis from '../analysis/EnhancedRegionalAIAnalysis';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -1471,6 +1472,13 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           )}
         </CardContent>
       </Card>
+
+      {/* 향상된 지역별 AI 분석 */}
+      <EnhancedRegionalAIAnalysis 
+        weatherData={dataForUI}
+        refreshTrigger={refreshTrigger}
+        className="mt-6"
+      />
 
       {/* 레거시 시스템 완전 비활성화 - 온디맨드 시스템으로 완전 전환 */}
     </div>

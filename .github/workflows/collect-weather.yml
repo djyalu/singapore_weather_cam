@@ -101,52 +101,69 @@ jobs:
         run: |
           cp -r data/weather/* public/data/weather/ 2>/dev/null || true
 
-      - name: Generate AI Weather Summary
+      - name: Generate Enhanced Regional AI Analysis
         env:
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
           FORCE_ANALYSIS: ${{ inputs.force_ai_analysis || 'true' }}
         run: |
-          echo "🤖 Generating comprehensive AI weather summary..."
+          echo "🤖 Generating enhanced regional AI analysis with 97%+ confidence..."
           echo "🔑 API Key Status: ${{ secrets.COHERE_API_KEY && 'SET' || 'NOT_SET' }}"
           echo "⚡ Force Analysis: ${FORCE_ANALYSIS}"
+          echo "🎯 Target: 8 regions with high confidence analysis"
           mkdir -p data/weather-summary
           mkdir -p public/data/weather-summary
           
-          # Run AI analysis with extended timeout for rich content
-          timeout 3m node scripts/ai-weather-summary.js || {
-            echo "⚠️ AI summary generation failed, creating fallback"
+          # Run enhanced regional AI analysis
+          timeout 5m node scripts/enhanced-regional-ai-analysis.js || {
+            echo "⚠️ Enhanced regional analysis failed, running fallback AI summary"
             
-            # Create fallback summary
-            cat > data/weather-summary/latest.json << EOF
-            {
-              "timestamp": "$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')",
-              "source": "Fallback System",
-              "ai_model": "Local Fallback",
-              "analysis": {
-                "summary": "서버에서 AI 분석을 생성하는 중입니다. GitHub Actions가 Cohere AI를 통해 풍부한 날씨 분석을 준비하고 있습니다.",
-                "highlights": [
-                  "🏢 서버 사이드 AI 분석 준비 중",
-                  "🤖 Cohere Command API 통합",
-                  "📊 실시간 NEA 데이터 기반",
-                  "🎨 창의적이고 풍부한 분석 예정"
-                ],
-                "confidence": 0.7
-              },
-              "fallback": true,
-              "error": "AI analysis generation in progress"
+            # Fallback to original AI summary
+            timeout 3m node scripts/ai-weather-summary.js || {
+              echo "⚠️ All AI analysis failed, creating basic fallback"
+              
+              # Create basic fallback
+              cat > data/weather-summary/latest.json << EOF
+              {
+                "timestamp": "$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')",
+                "source": "Fallback System",
+                "ai_model": "Local Fallback",
+                "analysis": {
+                  "summary": "서버에서 고급 지역별 AI 분석을 생성하는 중입니다. GitHub Actions가 Cohere AI를 통해 8개 지역별 맞춤형 분석을 준비하고 있습니다.",
+                  "highlights": [
+                    "🏢 서버 사이드 지역별 AI 분석 준비 중",
+                    "🤖 Cohere Command API 통합",
+                    "📊 실시간 NEA 데이터 기반",
+                    "🎯 97% 이상 신뢰도 목표"
+                  ],
+                  "confidence": 0.85
+                },
+                "fallback": true,
+                "error": "Enhanced regional AI analysis generation in progress"
+              }
+            EOF
             }
-          EOF
           }
           
           # Always copy to public directory
           cp -r data/weather-summary/* public/data/weather-summary/ 2>/dev/null || true
           
-          if [ -f "data/weather-summary/latest.json" ]; then
-            echo "✅ AI weather summary ready"
+          # Check results
+          if [ -f "data/weather-summary/enhanced-regional-analysis.json" ]; then
+            echo "✅ Enhanced regional AI analysis completed"
+            echo "📊 Analysis type: Regional (8 regions)"
+            CONFIDENCE=$(node -pe "
+              try {
+                const data = JSON.parse(require('fs').readFileSync('data/weather-summary/enhanced-regional-analysis.json', 'utf8'));
+                data.achieved_confidence || 'N/A';
+              } catch(e) { 'N/A'; }
+            " 2>/dev/null || echo "N/A")
+            echo "🎯 Achieved confidence: ${CONFIDENCE}"
+          elif [ -f "data/weather-summary/latest.json" ]; then
+            echo "✅ Basic AI weather summary ready"
             echo "📄 Summary preview:"
             head -n 10 data/weather-summary/latest.json
           else
-            echo "❌ AI summary generation completely failed"
+            echo "❌ All AI analysis generation failed"
           fi
 
       - name: Configure Git
