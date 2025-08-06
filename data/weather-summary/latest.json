@@ -1,56 +1,35 @@
 {
-  "timestamp": "2025-08-05T13:22:06.886Z",
-  "source": "Singapore Weather Cam - Enhanced AI Summary",
-  "ai_model": "Cohere Command API (Enhanced)",
-  "analysis_method": "Comprehensive AI-generated analysis",
+  "timestamp": "2025-08-06T13:50:06.251Z",
+  "source": "Singapore Weather Cam - Fast AI Analysis",
+  "ai_model": "Fast Intelligent Analysis",
+  "analysis_method": "Optimized for speed while maintaining quality",
   "weather_data_timestamp": "2025-08-02T06:44:12.941Z",
-  "stations_analyzed": 59,
-  "summary": "싱가포르는 현재 전형적인 열대기후 특성을 보이고 있습니다.",
+  "stations_analyzed": 5,
+  "summary": "현재 싱가포르는 전형적인 열대 기후를 보이고 있습니다. 상대적으로 건조한 상태입니다. 맑은 날씨로 야외 활동에 좋습니다.",
   "highlights": [
-    "현재 평균 기온 32.9°C",
-    "습도 51% (체감온도 상승)",
-    "열대기후 특성에 따른 높은 습도",
-    "건조한 날씨",
-    "야외활동 시 수분 보충 필요"
+    "☀️ 따뜻한 열대 기후 - 가벼운 복장 권장",
+    "🍃 상쾌한 대기 환경",
+    "🌈 맑은 날씨 - 야외 활동 최적",
+    "📊 전국 5개 관측소 실시간 데이터"
   ],
-  "recommendation": "현재 날씨 조건에 맞는 적절한 활동을 선택하여 즐겨보세요.",
-  "confidence": 0.92,
-  "detailed_analysis": {
-    "temperature_analysis": "",
-    "humidity_analysis": "",
-    "rainfall_analysis": "",
-    "pattern_analysis": "",
-    "health_safety": "",
-    "tomorrow_outlook": ""
+  "confidence": 0.9,
+  "processing_time": "<1s",
+  "mode": "fast_analysis",
+  "optimization": {
+    "max_tokens": 800,
+    "temperature": 0.6,
+    "fast_mode": false
   },
   "weather_context": {
     "current_temperature": {
-      "average": "32.9",
-      "max": "34.8",
-      "min": "31.6"
+      "average": "32.9"
     },
     "humidity_levels": {
-      "average": 51,
-      "max": 60.6
+      "average": 51
     },
     "rainfall_status": {
-      "total": "0.0",
-      "active_stations": 0,
-      "total_stations": 59
-    },
-    "forecast_summary": "Thundery Showers"
+      "total": "0.0"
+    }
   },
-  "api_calls_today": 7,
-  "api_calls_remaining": 93,
-  "api_calls_limit": 100,
-  "api_limit_reached": false,
-  "raw_analysis": " Here is a detailed analysis based on the given real-time weather data and location-specific analysis for Singapore, creatively crafted to capture the interest of your audience:\n\n1. **Current Temperature Situation Analysis**\n- Explain the meaning of average, maximum, and minimum temperature and analyze regional variations.\n- Compare seasonal characteristics and the general Singapore climate.\n\n2. **Humidity and Perceived Temperature Analysis**\n- Explain how humidity influences perceived temperature and provide a detailed explanation of the impact.\n- Conduct a health impact analysis based on the Heat Index perspective.\n\n3. **Rainfall Patterns and Prediction**\n- Describe the distribution of rainfall and anticipated patterns in the future.\n- Forecast regional variations and directions of movement.\n\n4. **Integrated Weather Pattern Interpretation**\n- Analyze the correspondence between NEA forecast and real-time data.\n- Evaluate the typicality and uniqueness of the current weather situation.\n\n5. **Activity Recommendations Throughout the Day**\n- Provide optimal activity suggestions for the morning, afternoon, evening, and nighttime.\n- Suggest specific activities for working, lounging, and exercising.\n\n6. **Health and Safety Guidelines**\n- Identify health risks associated with the current weather condition.\n- Provide specific recommendations for vulnerable groups (the elderly, children, outdoor workers).\n\n7. **Weather Highlight** \n- Identify the three most crucial characteristics of today's weather.\n- Provide a detailed explanation of each point and its influence.\n\n8. **Tomorrow's Outlook and Preparation** \n- Based on the current data, anticipate tomorrow's weather.\n- Suggest things that would be beneficial to prepare in advance.\n\n**Creative Guidelines:**\n- Provide abundant content within a minimum of 6-8 paragraphs (no word limit).\n- Balance scientific accuracy and creative expression perfectly.\n- Describe the weather as if you were present in person, evoking a sense of immersion.\n- Write professionally and provide thorough analysis, accessible to both experts and mainstream readers.\n- Naturally incorporate cultural and geographical characteristics of Singapore.\n- Make your work attractive and worthwhile, including philosophical and artistic significance beyond the weather. \n\nFeel free to unleash your creativity to provide your readers with the ultimate weather analysis of the highest quality, captivating their attention and leaving them captivated! If you have any further questions or requests, please let me know! G ",
-  "force_analysis_used": false,
-  "analysis_version": "2.0",
-  "enhancement_features": [
-    "detailed_sectional_analysis",
-    "weather_alerts_integration",
-    "comprehensive_data_context",
-    "enhanced_parsing_system"
-  ]
+  "raw_analysis": null
 }
