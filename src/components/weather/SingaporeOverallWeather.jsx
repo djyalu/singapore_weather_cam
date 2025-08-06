@@ -7,7 +7,6 @@ import { getOverallWeatherData as getUnifiedWeatherData, validateDataConsistency
 import neaRealTimeService from '../../services/neaRealTimeService';
 import { useWeatherData } from '../../contexts/AppDataContextSimple';
 import { useOnDemandAIAnalysis } from '../../hooks/useOnDemandAIAnalysis';
-import EnhancedRegionalAIAnalysis from '../analysis/EnhancedRegionalAIAnalysis';
 
 /**
  * 싱가포르 전체 평균 날씨 정보를 표시하는 컴포넌트 (AI 요약 포함)
@@ -1428,8 +1427,59 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
               <span>AI 분석 생성 중...</span>
             </div>
           ) : onDemandAnalysis ? (
-            <div className="space-y-3">
-              <p className="text-gray-700 leading-relaxed">{onDemandAnalysis.summary}</p>
+            <div className="space-y-4">
+              {/* Structured AI Analysis Display */}
+              <div className="space-y-4">
+                {onDemandAnalysis.summary.split('\n\n').filter(section => section.trim()).map((section, index) => {
+                  const lines = section.split('\n').filter(line => line.trim());
+                  if (lines.length === 0) return null;
+                  
+                  const title = lines[0];
+                  const content = lines.slice(1).join('\n');
+                  
+                  // Check if this is a section header
+                  if (title.startsWith('**') && title.endsWith('**')) {
+                    const sectionTitle = title.replace(/\*\*/g, '');
+                    return (
+                      <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-100">
+                        <h4 className="font-semibold text-blue-800 mb-2 text-sm">{sectionTitle}</h4>
+                        <div className="text-gray-700 text-sm space-y-1">
+                          {content.split('\n').map((line, lineIndex) => {
+                            if (!line.trim()) return null;
+                            
+                            // Handle bullet points
+                            if (line.startsWith('•')) {
+                              return (
+                                <div key={lineIndex} className="flex items-start space-x-2 ml-2">
+                                  <span className="text-blue-600 mt-1">•</span>
+                                  <span>{line.substring(1).trim()}</span>
+                                </div>
+                              );
+                            }
+                            
+                            // Handle bold text
+                            const boldText = line.replace(/\*\*(.*?)\*\*/g, '<strong class="font-medium text-gray-900">$1</strong>');
+                            
+                            return (
+                              <div key={lineIndex} className="leading-relaxed" dangerouslySetInnerHTML={{__html: boldText}} />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div key={index} className="text-gray-700 text-sm leading-relaxed">
+                      {section.split('\n').map((line, lineIndex) => (
+                        <div key={lineIndex}>{line}</div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Highlights */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {onDemandAnalysis.highlights?.map((highlight, index) => (
                   <div key={index} className="text-sm bg-purple-100 text-purple-700 px-3 py-2 rounded">
@@ -1472,12 +1522,6 @@ const SingaporeOverallWeather = ({ weatherData, refreshTrigger = 0, className = 
           )}
         </CardContent>
       </Card>
-
-      {/* Enhanced Regional AI Analysis - 8개 지역별 고급 분석 */}
-      <EnhancedRegionalAIAnalysis 
-        weatherData={independentWeatherData || weatherData}
-        className="mt-4"
-      />
 
       {/* 레거시 시스템 완전 비활성화 - 온디맨드 시스템으로 완전 전환 */}
     </div>

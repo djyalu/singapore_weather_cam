@@ -297,28 +297,32 @@ export const useOnDemandAIAnalysis = (weatherData = null) => {
   }, []);
   
   /**
-   * 고급 체감온도 계산 (Steadman's Heat Index)
+   * 섭씨 기반 체감온도 계산 (Heat Index for Celsius)
    */
   const calculateAdvancedHeatIndex = useCallback((temp, humidity) => {
+    // 27°C 이하에서는 체감온도가 실제 온도와 큰 차이 없음
     if (temp < 27) return temp;
     
     const T = temp;
     const RH = humidity;
     
-    // Steadman's Heat Index 공식 사용
-    let HI = -42.379 + 2.04901523 * T + 10.14333127 * RH 
-           - 0.22475541 * T * RH - 6.83783e-3 * T * T 
-           - 5.481717e-2 * RH * RH + 1.22874e-3 * T * T * RH 
-           + 8.5282e-4 * T * RH * RH - 1.99e-6 * T * T * RH * RH;
+    // 섭씨 온도를 위한 간소화된 체감온도 공식 (Celsius Heat Index)
+    // 기본적으로 습도가 높을수록 체감온도 상승
+    let heatIndex = T + (0.5 * (T + 61.0 + ((T - 68.0) * 1.2) + (RH * 0.094)));
     
-    // 싱가포르 기후에 맞게 조정
-    if (RH < 13 && T >= 80 && T <= 112) {
-      HI -= ((13 - RH) / 4) * Math.sqrt((17 - Math.abs(T - 95)) / 17);
-    } else if (RH > 85 && T >= 80 && T <= 87) {
-      HI += ((RH - 85) / 10) * ((87 - T) / 5);
+    // 고온 고습 환경에서 추가 보정
+    if (T >= 30 && RH >= 70) {
+      // 열대 기후 보정: 고온 고습 시 체감온도 추가 상승
+      const adjustment = ((RH - 70) * 0.1) + ((T - 30) * 0.15);
+      heatIndex += adjustment;
+    } else if (T >= 32 && RH >= 50) {
+      // 중간 습도에서도 고온 시 체감온도 상승
+      const adjustment = ((T - 32) * 0.2) + ((RH - 50) * 0.05);
+      heatIndex += adjustment;
     }
     
-    return Math.max(HI, temp);
+    // 실제 온도보다 낮아지지 않도록 보정
+    return Math.max(heatIndex, temp);
   }, []);
   
   /**
