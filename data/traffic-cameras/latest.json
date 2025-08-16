@@ -1,8 +1,21 @@
 {
-  "timestamp": "2025-08-16T17:36:06.797Z",
+  "timestamp": "2025-08-16T17:43:20.013Z",
   "source": "Singapore data.gov.sg API",
-  "totalCameras": 89,
+  "totalCameras": 90,
   "cameras": [
+    {
+      "id": "3798",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/08/c20314de-de1b-4e90-9c80-1b81e243aa5c.jpg",
+      "location": {
+        "latitude": 1.29158484,
+        "longitude": 103.8615987,
+        "name": "Camera 3798",
+        "description": "Traffic Camera 3798"
+      },
+      "timestamp": "2025-08-17T01:36:12+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
     {
       "id": "4713",
       "image": "https://images.data.gov.sg/api/traffic-images/2025/08/860a4760-e5f7-42ba-8421-2d5d492f52d4.jpg",
@@ -1163,5 +1176,5 @@
   ],
   "apiStatus": "success",
   "fetchMethod": "GitHub Actions",
-  "cacheExpiry": "2025-08-16T17:41:06.797Z"
+  "cacheExpiry": "2025-08-16T17:48:20.013Z"
 }

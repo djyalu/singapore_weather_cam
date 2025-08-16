@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-16T17:36:06.797Z",
+  "timestamp": "2025-08-16T17:43:20.013Z",
   "regions": {
     "hwa-chong": [
       {
@@ -200,6 +200,20 @@
       }
     ],
     "newton": [
+      {
+        "id": "3798",
+        "image": "https://images.data.gov.sg/api/traffic-images/2025/08/c20314de-de1b-4e90-9c80-1b81e243aa5c.jpg",
+        "location": {
+          "latitude": 1.29158484,
+          "longitude": 103.8615987,
+          "name": "Camera 3798",
+          "description": "Traffic Camera 3798"
+        },
+        "timestamp": "2025-08-17T01:36:12+08:00",
+        "quality": "Real-time HD",
+        "isRealTime": true,
+        "distanceFromRegion": "3.29"
+      },
       {
         "id": "5799",
         "image": "https://images.data.gov.sg/api/traffic-images/2025/08/3e7a2b8b-19e3-4278-b149-811d16928c5d.jpg",
@@ -1265,8 +1279,8 @@
     ]
   },
   "metadata": {
-    "totalCameras": 89,
+    "totalCameras": 90,
     "regionsWithCameras": 8,
-    "averageCamerasPerRegion": 11.125
+    "averageCamerasPerRegion": 11.25
   }
 }
