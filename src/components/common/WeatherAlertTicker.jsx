@@ -271,6 +271,42 @@ const WeatherAlertTicker = React.memo(({ className = '', refreshInterval = 30000
     }
   }, [mainWeatherData, mainDataLoading]); // mainWeatherData 변경은 원본 데이터 변경을 의미
 
+  // 모바일 전용 강제 새로고침 이벤트 리스너
+  useEffect(() => {
+    const handleMobileRefresh = (event) => {
+      console.log('📱 [WeatherAlertTicker] Mobile refresh event received:', event.type);
+      loadAlerts();
+    };
+
+    const handleDataUpdated = (event) => {
+      console.log('📊 [WeatherAlertTicker] Data updated event received:', event.type);
+      if (event.detail) {
+        window.weatherData = event.detail;
+      }
+      loadAlerts();
+    };
+
+    const handleForceRefresh = () => {
+      console.log('🔄 [WeatherAlertTicker] Force refresh event received');
+      setTimeout(loadAlerts, 100); // 약간의 지연으로 데이터 로딩 보장
+    };
+
+    // 모바일 이벤트 리스너 등록
+    window.addEventListener('mobileDataRefreshed', handleDataUpdated);
+    window.addEventListener('mobileTickerRefresh', handleMobileRefresh);
+    window.addEventListener('weatherDataUpdated', handleDataUpdated);
+    window.addEventListener('dataRefreshed', handleDataUpdated);
+    window.addEventListener('forceComponentRefresh', handleForceRefresh);
+
+    return () => {
+      window.removeEventListener('mobileDataRefreshed', handleDataUpdated);
+      window.removeEventListener('mobileTickerRefresh', handleMobileRefresh);
+      window.removeEventListener('weatherDataUpdated', handleDataUpdated);
+      window.removeEventListener('dataRefreshed', handleDataUpdated);
+      window.removeEventListener('forceComponentRefresh', handleForceRefresh);
+    };
+  }, []);
+
   // 컴포넌트 마운트 시 초기 로드 (원본 NEA 데이터 확인)
   useEffect(() => {
     const originalData = getOriginalNeaData();
