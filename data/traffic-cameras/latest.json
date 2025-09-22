@@ -1,8 +1,34 @@
 {
-  "timestamp": "2025-09-22T17:41:50.485Z",
+  "timestamp": "2025-09-22T17:51:34.618Z",
   "source": "Singapore data.gov.sg API",
   "totalCameras": 90,
   "cameras": [
+    {
+      "id": "1001",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/09/3eab5f0d-65bf-4016-9484-a12d12cf1fcd.jpg",
+      "location": {
+        "latitude": 1.29531332,
+        "longitude": 103.871146,
+        "name": "Camera 1001",
+        "description": "Traffic Camera 1001"
+      },
+      "timestamp": "2025-09-23T01:46:07+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1002",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/09/76973de0-2918-47ff-bee8-ce8550f16766.jpg",
+      "location": {
+        "latitude": 1.319541067,
+        "longitude": 103.8785627,
+        "name": "Camera 1002",
+        "description": "Traffic Camera 1002"
+      },
+      "timestamp": "2025-09-23T01:46:07+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
     {
       "id": "1003",
       "image": "https://images.data.gov.sg/api/traffic-images/2025/09/1f3874a8-1ddc-4cee-80ff-ed20c166cf8a.jpg",
@@ -52,32 +78,6 @@
         "description": "Traffic Camera 1504"
       },
       "timestamp": "2025-09-23T01:41:27+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1001",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/09/0bb944b1-6f85-468f-a56c-5516b0543739.jpg",
-      "location": {
-        "latitude": 1.29531332,
-        "longitude": 103.871146,
-        "name": "Camera 1001",
-        "description": "Traffic Camera 1001"
-      },
-      "timestamp": "2025-09-23T01:36:27+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1002",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/09/06950530-3d21-4550-ae76-9c1c7153f955.jpg",
-      "location": {
-        "latitude": 1.319541067,
-        "longitude": 103.8785627,
-        "name": "Camera 1002",
-        "description": "Traffic Camera 1002"
-      },
-      "timestamp": "2025-09-23T01:36:27+08:00",
       "quality": "Real-time HD",
       "isRealTime": true
     },
@@ -1176,5 +1176,5 @@
   ],
   "apiStatus": "success",
   "fetchMethod": "GitHub Actions",
-  "cacheExpiry": "2025-09-22T17:46:50.485Z"
+  "cacheExpiry": "2025-09-22T17:56:34.618Z"
 }
