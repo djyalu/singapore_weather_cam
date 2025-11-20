@@ -1,18 +1,1162 @@
 {
-  "timestamp": "2025-11-20T22:38:10.647Z",
+  "timestamp": "2025-11-20T22:44:51.945Z",
   "source": "Singapore data.gov.sg API",
   "totalCameras": 90,
   "cameras": [
     {
       "id": "1001",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/be4d0945-2042-4f0a-91c3-ddbfe3e860a6.jpg",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/fd67be4e-ae25-4fd8-a7a4-2f0c76768de5.jpg",
       "location": {
         "latitude": 1.29531332,
         "longitude": 103.871146,
         "name": "Camera 1001",
         "description": "Traffic Camera 1001"
       },
-      "timestamp": "2025-11-21T06:36:33+08:00",
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1003",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/e50684c1-72f1-4dc9-a09f-24545cb5ed10.jpg",
+      "location": {
+        "latitude": 1.323957439,
+        "longitude": 103.8728576,
+        "name": "Camera 1003",
+        "description": "Traffic Camera 1003"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1004",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3701ec83-a0a9-44e1-ac99-f94922a81763.jpg",
+      "location": {
+        "latitude": 1.319535712,
+        "longitude": 103.8750668,
+        "name": "Camera 1004",
+        "description": "Traffic Camera 1004"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1005",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/34cd82c8-3e0a-4214-b466-400f50af82dc.jpg",
+      "location": {
+        "latitude": 1.363519886,
+        "longitude": 103.905394,
+        "name": "Camera 1005",
+        "description": "Traffic Camera 1005"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1006",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/cd017642-d6c8-4fd5-84cb-155a63b8ca9b.jpg",
+      "location": {
+        "latitude": 1.357098686,
+        "longitude": 103.902042,
+        "name": "Camera 1006",
+        "description": "Traffic Camera 1006"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1111",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/6bbed6e4-7b60-46d5-8770-16a61bf4aff8.jpg",
+      "location": {
+        "latitude": 1.365434,
+        "longitude": 103.953997,
+        "name": "Camera 1111",
+        "description": "Traffic Camera 1111"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1112",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/61ffdfb0-033c-484d-b3f9-3649363d6564.jpg",
+      "location": {
+        "latitude": 1.3605,
+        "longitude": 103.961412,
+        "name": "Camera 1112",
+        "description": "Traffic Camera 1112"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1113",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/5b719c81-bdfb-4fbe-86c1-a4f5000dc172.jpg",
+      "location": {
+        "latitude": 1.317036,
+        "longitude": 103.988598,
+        "name": "Camera 1113",
+        "description": "Traffic Camera 1113"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1501",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/7f86c6b0-5a04-41e2-aaa6-b6adb1f0f51e.jpg",
+      "location": {
+        "latitude": 1.27414394350065,
+        "longitude": 103.851316802547,
+        "name": "Camera 1501",
+        "description": "Traffic Camera 1501"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1502",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/60dd8c8b-a0c6-49b6-9077-1414533056b1.jpg",
+      "location": {
+        "latitude": 1.27135090682664,
+        "longitude": 103.861828440597,
+        "name": "Camera 1502",
+        "description": "Traffic Camera 1502"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1503",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3820566b-3d6c-4309-a4e3-5d1020a103da.jpg",
+      "location": {
+        "latitude": 1.27066408655104,
+        "longitude": 103.856977943394,
+        "name": "Camera 1503",
+        "description": "Traffic Camera 1503"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1504",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/0e600473-2671-4d80-bf89-6558069d28f7.jpg",
+      "location": {
+        "latitude": 1.29409891409364,
+        "longitude": 103.876056196568,
+        "name": "Camera 1504",
+        "description": "Traffic Camera 1504"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1505",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/89d2b037-13a2-492e-8e3e-505c4d95a398.jpg",
+      "location": {
+        "latitude": 1.2752977149006,
+        "longitude": 103.866390381759,
+        "name": "Camera 1505",
+        "description": "Traffic Camera 1505"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1701",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d161601e-20eb-48fc-98ad-db60afb6eb23.jpg",
+      "location": {
+        "latitude": 1.323604823,
+        "longitude": 103.8587802,
+        "name": "Camera 1701",
+        "description": "Traffic Camera 1701"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1702",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/567745a2-a340-4f84-a819-a4eac6118ee0.jpg",
+      "location": {
+        "latitude": 1.34355015,
+        "longitude": 103.8601984,
+        "name": "Camera 1702",
+        "description": "Traffic Camera 1702"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1703",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/babe1a6c-faf8-49e8-8642-63bc8f38ceb3.jpg",
+      "location": {
+        "latitude": 1.32814722194857,
+        "longitude": 103.862203282048,
+        "name": "Camera 1703",
+        "description": "Traffic Camera 1703"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1704",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/1417787d-f35e-43c2-9572-a81de6205744.jpg",
+      "location": {
+        "latitude": 1.28569398886979,
+        "longitude": 103.837524510188,
+        "name": "Camera 1704",
+        "description": "Traffic Camera 1704"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1705",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/5ce252c4-815e-41d8-8dd7-66b1f36f582b.jpg",
+      "location": {
+        "latitude": 1.375925022,
+        "longitude": 103.8587986,
+        "name": "Camera 1705",
+        "description": "Traffic Camera 1705"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1706",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a989ff0c-ace8-42f1-bdf9-efff329b7ea4.jpg",
+      "location": {
+        "latitude": 1.38861,
+        "longitude": 103.85806,
+        "name": "Camera 1706",
+        "description": "Traffic Camera 1706"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1707",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/8ab75e8a-193e-4d08-bab6-6176c0c9ac7d.jpg",
+      "location": {
+        "latitude": 1.28036584335876,
+        "longitude": 103.830451146503,
+        "name": "Camera 1707",
+        "description": "Traffic Camera 1707"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1709",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/b532919b-b943-4152-a008-11de8d9b3c0f.jpg",
+      "location": {
+        "latitude": 1.31384231654635,
+        "longitude": 103.845603032574,
+        "name": "Camera 1709",
+        "description": "Traffic Camera 1709"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "1711",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/eed4a1ef-f464-499f-ab4b-b00e83a26110.jpg",
+      "location": {
+        "latitude": 1.35296,
+        "longitude": 103.85719,
+        "name": "Camera 1711",
+        "description": "Traffic Camera 1711"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "2701",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d5733be6-d980-4faf-9dec-a4baba3fedf9.jpg",
+      "location": {
+        "latitude": 1.447023728,
+        "longitude": 103.7716543,
+        "name": "Camera 2701",
+        "description": "Traffic Camera 2701"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "2702",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/5db9dc0a-076b-4ec6-8760-f3f97310abfa.jpg",
+      "location": {
+        "latitude": 1.445554109,
+        "longitude": 103.7683397,
+        "name": "Camera 2702",
+        "description": "Traffic Camera 2702"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "2703",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/03cd8874-4097-4adb-b2a6-7bced3c53f6a.jpg",
+      "location": {
+        "latitude": 1.35047790791386,
+        "longitude": 103.791033581325,
+        "name": "Camera 2703",
+        "description": "Traffic Camera 2703"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "2704",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/f6f965a7-86a7-42ad-b7da-8e1441c759a0.jpg",
+      "location": {
+        "latitude": 1.429588536,
+        "longitude": 103.769311,
+        "name": "Camera 2704",
+        "description": "Traffic Camera 2704"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "2705",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/dcbf24f9-60a2-4453-9467-3a85db8bf1b5.jpg",
+      "location": {
+        "latitude": 1.36728572,
+        "longitude": 103.7794698,
+        "name": "Camera 2705",
+        "description": "Traffic Camera 2705"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "2706",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/643ca3c2-7e4e-4667-8bdc-b1fec0d87cc6.jpg",
+      "location": {
+        "latitude": 1.414142,
+        "longitude": 103.771168,
+        "name": "Camera 2706",
+        "description": "Traffic Camera 2706"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "2707",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a7dd068c-11ab-47b4-8f48-36ebc6e5d559.jpg",
+      "location": {
+        "latitude": 1.3983,
+        "longitude": 103.774247,
+        "name": "Camera 2707",
+        "description": "Traffic Camera 2707"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "2708",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/7f944ef4-d221-408b-a0f3-0a5d10deda5c.jpg",
+      "location": {
+        "latitude": 1.3865,
+        "longitude": 103.7747,
+        "name": "Camera 2708",
+        "description": "Traffic Camera 2708"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "3702",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/83a65577-ec8c-4dd3-b24c-a54ce4bb880c.jpg",
+      "location": {
+        "latitude": 1.33831,
+        "longitude": 103.98032,
+        "name": "Camera 3702",
+        "description": "Traffic Camera 3702"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "3704",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/352a91ec-f57e-4422-beb7-14ead431e597.jpg",
+      "location": {
+        "latitude": 1.2958550156561,
+        "longitude": 103.880314665981,
+        "name": "Camera 3704",
+        "description": "Traffic Camera 3704"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "3705",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/40975d00-80b2-4b33-8774-e3a5e42395a2.jpg",
+      "location": {
+        "latitude": 1.32743,
+        "longitude": 103.97383,
+        "name": "Camera 3705",
+        "description": "Traffic Camera 3705"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "3793",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/142c520f-c60d-4c2b-a6e4-a9fc11ef538e.jpg",
+      "location": {
+        "latitude": 1.309330837,
+        "longitude": 103.9350504,
+        "name": "Camera 3793",
+        "description": "Traffic Camera 3793"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "3795",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/12cff822-241f-4f0f-9b33-dbfbd5c786b4.jpg",
+      "location": {
+        "latitude": 1.30145145166066,
+        "longitude": 103.910596320237,
+        "name": "Camera 3795",
+        "description": "Traffic Camera 3795"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "3796",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/724520f0-99e1-4c24-9100-0f59334c200f.jpg",
+      "location": {
+        "latitude": 1.297512569,
+        "longitude": 103.8983019,
+        "name": "Camera 3796",
+        "description": "Traffic Camera 3796"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "3797",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/41f3f2d4-1c42-4ffd-8dca-2c88ad2ea3c8.jpg",
+      "location": {
+        "latitude": 1.29565733262976,
+        "longitude": 103.885283049309,
+        "name": "Camera 3797",
+        "description": "Traffic Camera 3797"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "3798",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/529aef48-113e-4c86-95f4-c5012c675252.jpg",
+      "location": {
+        "latitude": 1.29158484,
+        "longitude": 103.8615987,
+        "name": "Camera 3798",
+        "description": "Traffic Camera 3798"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4701",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/f9091fb1-2e4d-4e44-8e66-953327b18492.jpg",
+      "location": {
+        "latitude": 1.2871,
+        "longitude": 103.79633,
+        "name": "Camera 4701",
+        "description": "Traffic Camera 4701"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4702",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/0b8f0269-8a18-477b-ab54-cd2e9fc0e60f.jpg",
+      "location": {
+        "latitude": 1.27237,
+        "longitude": 103.8324,
+        "name": "Camera 4702",
+        "description": "Traffic Camera 4702"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4703",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/240848ea-117d-42b2-a5d2-46f68bbd02d0.jpg",
+      "location": {
+        "latitude": 1.348697862,
+        "longitude": 103.6350413,
+        "name": "Camera 4703",
+        "description": "Traffic Camera 4703"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4704",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/e2f3e512-3ceb-4ef6-83dc-d501968aebe0.jpg",
+      "location": {
+        "latitude": 1.27877,
+        "longitude": 103.82375,
+        "name": "Camera 4704",
+        "description": "Traffic Camera 4704"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4705",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/ad9a5ca6-5427-4a62-9f73-e22fc75b2662.jpg",
+      "location": {
+        "latitude": 1.32618,
+        "longitude": 103.73028,
+        "name": "Camera 4705",
+        "description": "Traffic Camera 4705"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4706",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/866e7fb7-1abd-4205-8295-a8bfbb7db4f9.jpg",
+      "location": {
+        "latitude": 1.29792,
+        "longitude": 103.78205,
+        "name": "Camera 4706",
+        "description": "Traffic Camera 4706"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4707",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/ec0c3e8f-721d-4407-8379-4757de762b2e.jpg",
+      "location": {
+        "latitude": 1.33344648135658,
+        "longitude": 103.652700847056,
+        "name": "Camera 4707",
+        "description": "Traffic Camera 4707"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4708",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/b53fc7fa-3442-49ac-a329-e2fc4c3b9d97.jpg",
+      "location": {
+        "latitude": 1.29939,
+        "longitude": 103.7799,
+        "name": "Camera 4708",
+        "description": "Traffic Camera 4708"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4709",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/cea42267-017d-426c-879d-9624fb27ab7e.jpg",
+      "location": {
+        "latitude": 1.312019,
+        "longitude": 103.763002,
+        "name": "Camera 4709",
+        "description": "Traffic Camera 4709"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4710",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/f8e39a80-43e0-4760-a25e-3111bd8a84bd.jpg",
+      "location": {
+        "latitude": 1.32153,
+        "longitude": 103.75273,
+        "name": "Camera 4710",
+        "description": "Traffic Camera 4710"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4712",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a780daf0-c102-488b-8a88-61eee519960a.jpg",
+      "location": {
+        "latitude": 1.341244001,
+        "longitude": 103.6439134,
+        "name": "Camera 4712",
+        "description": "Traffic Camera 4712"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4713",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/c39982eb-4712-4e17-9839-39b309afb24c.jpg",
+      "location": {
+        "latitude": 1.347645829,
+        "longitude": 103.6366955,
+        "name": "Camera 4713",
+        "description": "Traffic Camera 4713"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4714",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/983438e4-0b97-4fbe-9240-08498c838521.jpg",
+      "location": {
+        "latitude": 1.31023,
+        "longitude": 103.76438,
+        "name": "Camera 4714",
+        "description": "Traffic Camera 4714"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4716",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/033cb34d-e4c0-4dbc-8edd-8cee923614c9.jpg",
+      "location": {
+        "latitude": 1.32227,
+        "longitude": 103.67453,
+        "name": "Camera 4716",
+        "description": "Traffic Camera 4716"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4798",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/ec2baf62-0f11-4ed6-9c69-4fd72d14f167.jpg",
+      "location": {
+        "latitude": 1.25999999687243,
+        "longitude": 103.823611110166,
+        "name": "Camera 4798",
+        "description": "Traffic Camera 4798"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "4799",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/6be99994-c87c-46d8-9944-2b2aad2260df.jpg",
+      "location": {
+        "latitude": 1.26027777363278,
+        "longitude": 103.823888890049,
+        "name": "Camera 4799",
+        "description": "Traffic Camera 4799"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "5794",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/48af12fa-1a7e-4c4e-b7ac-2f5c551976be.jpg",
+      "location": {
+        "latitude": 1.3309693,
+        "longitude": 103.9168616,
+        "name": "Camera 5794",
+        "description": "Traffic Camera 5794"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "5795",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/e539f865-0b20-4ca1-b4ba-2eca9b627088.jpg",
+      "location": {
+        "latitude": 1.326024822,
+        "longitude": 103.905625,
+        "name": "Camera 5795",
+        "description": "Traffic Camera 5795"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "5797",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/71f36e21-aeeb-4c3a-b77f-f6d219550e86.jpg",
+      "location": {
+        "latitude": 1.322875288,
+        "longitude": 103.8910793,
+        "name": "Camera 5797",
+        "description": "Traffic Camera 5797"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "5798",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/96e02647-a741-4073-8579-d6158d043df8.jpg",
+      "location": {
+        "latitude": 1.32036078126842,
+        "longitude": 103.877174116489,
+        "name": "Camera 5798",
+        "description": "Traffic Camera 5798"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "5799",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d70ff0d1-1050-4665-a23c-5e8a49cc2580.jpg",
+      "location": {
+        "latitude": 1.328171608,
+        "longitude": 103.8685191,
+        "name": "Camera 5799",
+        "description": "Traffic Camera 5799"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6701",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/cdea8ecd-7e17-4576-8444-eae7aa1a6eb9.jpg",
+      "location": {
+        "latitude": 1.329334,
+        "longitude": 103.858222,
+        "name": "Camera 6701",
+        "description": "Traffic Camera 6701"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6703",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/18a1f546-76b2-43e0-82b7-b944ba18d2ee.jpg",
+      "location": {
+        "latitude": 1.328899,
+        "longitude": 103.84121,
+        "name": "Camera 6703",
+        "description": "Traffic Camera 6703"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6704",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/0e5039a0-57fa-4f11-b490-520c3948905a.jpg",
+      "location": {
+        "latitude": 1.32657403632366,
+        "longitude": 103.826857295633,
+        "name": "Camera 6704",
+        "description": "Traffic Camera 6704"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6705",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3e10022c-4f8c-40cc-95db-8780318c3233.jpg",
+      "location": {
+        "latitude": 1.332124,
+        "longitude": 103.81768,
+        "name": "Camera 6705",
+        "description": "Traffic Camera 6705"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6706",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/0e827f41-cfa2-4c05-b8e4-8c668780193d.jpg",
+      "location": {
+        "latitude": 1.349428893,
+        "longitude": 103.7952799,
+        "name": "Camera 6706",
+        "description": "Traffic Camera 6706"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6708",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/6ce9807e-a313-42f6-948e-35777366ccce.jpg",
+      "location": {
+        "latitude": 1.345996,
+        "longitude": 103.69016,
+        "name": "Camera 6708",
+        "description": "Traffic Camera 6708"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6710",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/2c7514a6-f069-4ce9-8d7c-eebf1504681c.jpg",
+      "location": {
+        "latitude": 1.344205,
+        "longitude": 103.78577,
+        "name": "Camera 6710",
+        "description": "Traffic Camera 6710"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6711",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/bd66df62-49a5-48d1-b742-b63db0afcfd9.jpg",
+      "location": {
+        "latitude": 1.33771,
+        "longitude": 103.977827,
+        "name": "Camera 6711",
+        "description": "Traffic Camera 6711"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6712",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3dd4d71c-3c7a-4002-bdea-494212c20c40.jpg",
+      "location": {
+        "latitude": 1.332691,
+        "longitude": 103.770278,
+        "name": "Camera 6712",
+        "description": "Traffic Camera 6712"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6713",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a00fffd8-235f-4e33-8270-a4bd44037b3f.jpg",
+      "location": {
+        "latitude": 1.340298,
+        "longitude": 103.945652,
+        "name": "Camera 6713",
+        "description": "Traffic Camera 6713"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6714",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/7f2453e9-06fc-43fb-bbf6-9fc7c2793cf6.jpg",
+      "location": {
+        "latitude": 1.361742,
+        "longitude": 103.703341,
+        "name": "Camera 6714",
+        "description": "Traffic Camera 6714"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6715",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/17018621-3d4c-4a42-82cf-36496ac2b829.jpg",
+      "location": {
+        "latitude": 1.356299,
+        "longitude": 103.716071,
+        "name": "Camera 6715",
+        "description": "Traffic Camera 6715"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "6716",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/fab968d4-e27d-4e89-a01c-e858bad1a8b6.jpg",
+      "location": {
+        "latitude": 1.322893,
+        "longitude": 103.6635051,
+        "name": "Camera 6716",
+        "description": "Traffic Camera 6716"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "7791",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/529d8871-357a-4591-ad27-4b3e01b72aeb.jpg",
+      "location": {
+        "latitude": 1.354245,
+        "longitude": 103.963782,
+        "name": "Camera 7791",
+        "description": "Traffic Camera 7791"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "7793",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/222b56ac-e6a3-4eed-a6cf-f907fe598da0.jpg",
+      "location": {
+        "latitude": 1.37704704,
+        "longitude": 103.92946983,
+        "name": "Camera 7793",
+        "description": "Traffic Camera 7793"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "7794",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/968ee373-e5e7-4834-ab06-a02a1db9f558.jpg",
+      "location": {
+        "latitude": 1.37988658,
+        "longitude": 103.92009174,
+        "name": "Camera 7794",
+        "description": "Traffic Camera 7794"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "7795",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/4de5d07a-2860-4c92-b856-b62183e8209a.jpg",
+      "location": {
+        "latitude": 1.38432741,
+        "longitude": 103.91585701,
+        "name": "Camera 7795",
+        "description": "Traffic Camera 7795"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "7796",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/dcaef9e1-8fc2-468b-8ce6-2d9a00a2ad88.jpg",
+      "location": {
+        "latitude": 1.39559294,
+        "longitude": 103.90515712,
+        "name": "Camera 7796",
+        "description": "Traffic Camera 7796"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "7797",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/61ce214a-a197-4a1b-91c1-80606b679690.jpg",
+      "location": {
+        "latitude": 1.40002575,
+        "longitude": 103.85702534,
+        "name": "Camera 7797",
+        "description": "Traffic Camera 7797"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "7798",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3ccf6f3b-1323-45f1-8d0c-81622d354b4f.jpg",
+      "location": {
+        "latitude": 1.39748842,
+        "longitude": 103.85400467,
+        "name": "Camera 7798",
+        "description": "Traffic Camera 7798"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "8701",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/582621dc-b34b-4e4f-8e78-d32864226e7c.jpg",
+      "location": {
+        "latitude": 1.38647,
+        "longitude": 103.74143,
+        "name": "Camera 8701",
+        "description": "Traffic Camera 8701"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "8702",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/7b3165e0-d1b6-42d0-81be-5b531c24d81f.jpg",
+      "location": {
+        "latitude": 1.39059,
+        "longitude": 103.7717,
+        "name": "Camera 8702",
+        "description": "Traffic Camera 8702"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "8704",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/b49cedf4-2bab-4169-8258-80f3e886bf56.jpg",
+      "location": {
+        "latitude": 1.3899,
+        "longitude": 103.74843,
+        "name": "Camera 8704",
+        "description": "Traffic Camera 8704"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "8706",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/de59a7c3-1590-44d6-b388-886f570cb619.jpg",
+      "location": {
+        "latitude": 1.3664,
+        "longitude": 103.70899,
+        "name": "Camera 8706",
+        "description": "Traffic Camera 8706"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "9701",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/dd2c06cf-9bf3-42e5-b55f-81b33d5706d7.jpg",
+      "location": {
+        "latitude": 1.39466333,
+        "longitude": 103.83474601,
+        "name": "Camera 9701",
+        "description": "Traffic Camera 9701"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "9702",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3ee3e746-d52d-4b1a-a84f-1f3c278e4d64.jpg",
+      "location": {
+        "latitude": 1.39474081,
+        "longitude": 103.81797086,
+        "name": "Camera 9702",
+        "description": "Traffic Camera 9702"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "9703",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d1789626-8c47-4be3-bb31-e3230a14567a.jpg",
+      "location": {
+        "latitude": 1.422857,
+        "longitude": 103.773005,
+        "name": "Camera 9703",
+        "description": "Traffic Camera 9703"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "9704",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/2110f229-6480-4c1c-b386-2dbee7a56437.jpg",
+      "location": {
+        "latitude": 1.42214311,
+        "longitude": 103.79542062,
+        "name": "Camera 9704",
+        "description": "Traffic Camera 9704"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "9705",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/b54935a7-6da3-4eef-8957-6e2af2e8fc04.jpg",
+      "location": {
+        "latitude": 1.42627712,
+        "longitude": 103.78716637,
+        "name": "Camera 9705",
+        "description": "Traffic Camera 9705"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
+      "quality": "Real-time HD",
+      "isRealTime": true
+    },
+    {
+      "id": "9706",
+      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/c38b28b6-030d-4a2a-82f9-b2aec1d1fc96.jpg",
+      "location": {
+        "latitude": 1.41270056,
+        "longitude": 103.80642712,
+        "name": "Camera 9706",
+        "description": "Traffic Camera 9706"
+      },
+      "timestamp": "2025-11-21T06:41:33+08:00",
       "quality": "Real-time HD",
       "isRealTime": true
     },
@@ -28,1153 +1172,9 @@
       "timestamp": "2025-11-21T06:36:33+08:00",
       "quality": "Real-time HD",
       "isRealTime": true
-    },
-    {
-      "id": "1003",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/2cc53e87-6cf9-461b-8bd4-30e1554c1d23.jpg",
-      "location": {
-        "latitude": 1.323957439,
-        "longitude": 103.8728576,
-        "name": "Camera 1003",
-        "description": "Traffic Camera 1003"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1004",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/fede746b-6642-4737-92c3-06ccb0d80321.jpg",
-      "location": {
-        "latitude": 1.319535712,
-        "longitude": 103.8750668,
-        "name": "Camera 1004",
-        "description": "Traffic Camera 1004"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1005",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d06c96d8-bf01-4e7b-83ad-74c29889ddcf.jpg",
-      "location": {
-        "latitude": 1.363519886,
-        "longitude": 103.905394,
-        "name": "Camera 1005",
-        "description": "Traffic Camera 1005"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1006",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/9e9497fa-90b0-4e5e-a30e-e11acc06b176.jpg",
-      "location": {
-        "latitude": 1.357098686,
-        "longitude": 103.902042,
-        "name": "Camera 1006",
-        "description": "Traffic Camera 1006"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1111",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/c58916c3-7f4e-41e6-b770-8865008b71b9.jpg",
-      "location": {
-        "latitude": 1.365434,
-        "longitude": 103.953997,
-        "name": "Camera 1111",
-        "description": "Traffic Camera 1111"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1112",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/811a955a-0db7-4568-a4ef-ed4ea66e2b06.jpg",
-      "location": {
-        "latitude": 1.3605,
-        "longitude": 103.961412,
-        "name": "Camera 1112",
-        "description": "Traffic Camera 1112"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1113",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/59ce7374-a4a7-45d4-b4f6-a0d65a59ee1b.jpg",
-      "location": {
-        "latitude": 1.317036,
-        "longitude": 103.988598,
-        "name": "Camera 1113",
-        "description": "Traffic Camera 1113"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1501",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d65cd6b2-ba06-4433-81f4-defe9033b97c.jpg",
-      "location": {
-        "latitude": 1.27414394350065,
-        "longitude": 103.851316802547,
-        "name": "Camera 1501",
-        "description": "Traffic Camera 1501"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1502",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/2cbfe47a-6083-4cd6-ac46-45f76e20970a.jpg",
-      "location": {
-        "latitude": 1.27135090682664,
-        "longitude": 103.861828440597,
-        "name": "Camera 1502",
-        "description": "Traffic Camera 1502"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1503",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/4bb1bfe8-7e81-4242-99d4-d3cb2acada58.jpg",
-      "location": {
-        "latitude": 1.27066408655104,
-        "longitude": 103.856977943394,
-        "name": "Camera 1503",
-        "description": "Traffic Camera 1503"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1504",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/81e620a7-3085-44a1-9ff2-64468a482970.jpg",
-      "location": {
-        "latitude": 1.29409891409364,
-        "longitude": 103.876056196568,
-        "name": "Camera 1504",
-        "description": "Traffic Camera 1504"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1505",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/1c4c66a2-c4ed-456b-a276-34a680112d57.jpg",
-      "location": {
-        "latitude": 1.2752977149006,
-        "longitude": 103.866390381759,
-        "name": "Camera 1505",
-        "description": "Traffic Camera 1505"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1701",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/59361dcf-4b38-41cf-b347-980464aa79f2.jpg",
-      "location": {
-        "latitude": 1.323604823,
-        "longitude": 103.8587802,
-        "name": "Camera 1701",
-        "description": "Traffic Camera 1701"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1702",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/8ee49dd2-9de3-4164-aa13-ca404f86db52.jpg",
-      "location": {
-        "latitude": 1.34355015,
-        "longitude": 103.8601984,
-        "name": "Camera 1702",
-        "description": "Traffic Camera 1702"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1703",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/bf50ffb6-1cb7-414e-81c9-ff3e374a8294.jpg",
-      "location": {
-        "latitude": 1.32814722194857,
-        "longitude": 103.862203282048,
-        "name": "Camera 1703",
-        "description": "Traffic Camera 1703"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1704",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/e7b47c14-7e8b-4806-bdb6-533dc93dacb9.jpg",
-      "location": {
-        "latitude": 1.28569398886979,
-        "longitude": 103.837524510188,
-        "name": "Camera 1704",
-        "description": "Traffic Camera 1704"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1705",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/bfa3390d-a39f-43da-86bb-4a6bdbc28062.jpg",
-      "location": {
-        "latitude": 1.375925022,
-        "longitude": 103.8587986,
-        "name": "Camera 1705",
-        "description": "Traffic Camera 1705"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1706",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/543bbc6c-98b8-4e55-b364-c40523d8e26a.jpg",
-      "location": {
-        "latitude": 1.38861,
-        "longitude": 103.85806,
-        "name": "Camera 1706",
-        "description": "Traffic Camera 1706"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1707",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/cac50a1a-dbc8-49da-8bb2-c76690a3ffac.jpg",
-      "location": {
-        "latitude": 1.28036584335876,
-        "longitude": 103.830451146503,
-        "name": "Camera 1707",
-        "description": "Traffic Camera 1707"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1709",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/6de4165b-3e11-4b73-b820-d49de56af6a4.jpg",
-      "location": {
-        "latitude": 1.31384231654635,
-        "longitude": 103.845603032574,
-        "name": "Camera 1709",
-        "description": "Traffic Camera 1709"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "1711",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/2b932c1d-138c-42a2-a4c2-b8472cf704f9.jpg",
-      "location": {
-        "latitude": 1.35296,
-        "longitude": 103.85719,
-        "name": "Camera 1711",
-        "description": "Traffic Camera 1711"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "2701",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/722c5f6a-5e4c-41da-aee1-2ac00b0fe702.jpg",
-      "location": {
-        "latitude": 1.447023728,
-        "longitude": 103.7716543,
-        "name": "Camera 2701",
-        "description": "Traffic Camera 2701"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "2702",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/f270834c-651b-4c10-9fce-76b53bdf0a74.jpg",
-      "location": {
-        "latitude": 1.445554109,
-        "longitude": 103.7683397,
-        "name": "Camera 2702",
-        "description": "Traffic Camera 2702"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "2703",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/f594c7b2-2e26-46dc-b984-962751731470.jpg",
-      "location": {
-        "latitude": 1.35047790791386,
-        "longitude": 103.791033581325,
-        "name": "Camera 2703",
-        "description": "Traffic Camera 2703"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "2704",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/e8f6e9d7-1a70-4859-beaf-a41c74ebcaee.jpg",
-      "location": {
-        "latitude": 1.429588536,
-        "longitude": 103.769311,
-        "name": "Camera 2704",
-        "description": "Traffic Camera 2704"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "2705",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/65bd9e9e-bf81-4457-a5ce-97b1dd506771.jpg",
-      "location": {
-        "latitude": 1.36728572,
-        "longitude": 103.7794698,
-        "name": "Camera 2705",
-        "description": "Traffic Camera 2705"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "2706",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/dd333c5e-5ebc-4c13-901c-a96327eda56d.jpg",
-      "location": {
-        "latitude": 1.414142,
-        "longitude": 103.771168,
-        "name": "Camera 2706",
-        "description": "Traffic Camera 2706"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "2707",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/9dbec2ce-96ca-43b3-a354-86d5e2b1ac9b.jpg",
-      "location": {
-        "latitude": 1.3983,
-        "longitude": 103.774247,
-        "name": "Camera 2707",
-        "description": "Traffic Camera 2707"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "2708",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/eb48a442-879f-4572-87ba-1790fe80b218.jpg",
-      "location": {
-        "latitude": 1.3865,
-        "longitude": 103.7747,
-        "name": "Camera 2708",
-        "description": "Traffic Camera 2708"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "3702",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/27fa3b48-2768-43d6-8bb7-a0b88bdf42a4.jpg",
-      "location": {
-        "latitude": 1.33831,
-        "longitude": 103.98032,
-        "name": "Camera 3702",
-        "description": "Traffic Camera 3702"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "3704",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3172fc03-63cb-4c6d-83be-83cb7c4bf588.jpg",
-      "location": {
-        "latitude": 1.2958550156561,
-        "longitude": 103.880314665981,
-        "name": "Camera 3704",
-        "description": "Traffic Camera 3704"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "3705",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/64ca8cb6-6c1b-4bb4-96ff-17554bec97c5.jpg",
-      "location": {
-        "latitude": 1.32743,
-        "longitude": 103.97383,
-        "name": "Camera 3705",
-        "description": "Traffic Camera 3705"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "3793",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d802db2c-2cbc-4c14-a1de-839f44cd7b52.jpg",
-      "location": {
-        "latitude": 1.309330837,
-        "longitude": 103.9350504,
-        "name": "Camera 3793",
-        "description": "Traffic Camera 3793"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "3795",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/8bc52215-8b3a-4099-9d81-486cf169829f.jpg",
-      "location": {
-        "latitude": 1.30145145166066,
-        "longitude": 103.910596320237,
-        "name": "Camera 3795",
-        "description": "Traffic Camera 3795"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "3796",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/078245af-2200-4ae4-8e0c-95713197357c.jpg",
-      "location": {
-        "latitude": 1.297512569,
-        "longitude": 103.8983019,
-        "name": "Camera 3796",
-        "description": "Traffic Camera 3796"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "3797",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/88499b40-c989-4152-aafb-2a526cb980d6.jpg",
-      "location": {
-        "latitude": 1.29565733262976,
-        "longitude": 103.885283049309,
-        "name": "Camera 3797",
-        "description": "Traffic Camera 3797"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "3798",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/72661101-8474-457c-870b-c59225c1b461.jpg",
-      "location": {
-        "latitude": 1.29158484,
-        "longitude": 103.8615987,
-        "name": "Camera 3798",
-        "description": "Traffic Camera 3798"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4701",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/547feab9-bead-48db-9c01-417189f6c763.jpg",
-      "location": {
-        "latitude": 1.2871,
-        "longitude": 103.79633,
-        "name": "Camera 4701",
-        "description": "Traffic Camera 4701"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4702",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/6c61236e-7fd3-40bc-a4b3-8f814decbe0f.jpg",
-      "location": {
-        "latitude": 1.27237,
-        "longitude": 103.8324,
-        "name": "Camera 4702",
-        "description": "Traffic Camera 4702"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4703",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/8c52834d-f289-4b7e-bcaf-9f6c03b737d0.jpg",
-      "location": {
-        "latitude": 1.348697862,
-        "longitude": 103.6350413,
-        "name": "Camera 4703",
-        "description": "Traffic Camera 4703"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4704",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/dca9d111-feca-44a9-bc6f-5cfa11489e4f.jpg",
-      "location": {
-        "latitude": 1.27877,
-        "longitude": 103.82375,
-        "name": "Camera 4704",
-        "description": "Traffic Camera 4704"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4705",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/e123247d-dd33-470b-b788-c08dc99fc8cb.jpg",
-      "location": {
-        "latitude": 1.32618,
-        "longitude": 103.73028,
-        "name": "Camera 4705",
-        "description": "Traffic Camera 4705"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4706",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a6b4c1cc-e726-4fd8-8334-065b737ffb36.jpg",
-      "location": {
-        "latitude": 1.29792,
-        "longitude": 103.78205,
-        "name": "Camera 4706",
-        "description": "Traffic Camera 4706"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4707",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/7decde70-3dc9-462a-8d97-fc2c1c286f6c.jpg",
-      "location": {
-        "latitude": 1.33344648135658,
-        "longitude": 103.652700847056,
-        "name": "Camera 4707",
-        "description": "Traffic Camera 4707"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4708",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/87a5e959-84e3-4abc-b856-5c15f64799c0.jpg",
-      "location": {
-        "latitude": 1.29939,
-        "longitude": 103.7799,
-        "name": "Camera 4708",
-        "description": "Traffic Camera 4708"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4709",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/0e260197-10cc-4aa4-8ffa-256e0ca01add.jpg",
-      "location": {
-        "latitude": 1.312019,
-        "longitude": 103.763002,
-        "name": "Camera 4709",
-        "description": "Traffic Camera 4709"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4710",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/fe5ff5a3-739f-42f0-8afd-e52a1d0a3852.jpg",
-      "location": {
-        "latitude": 1.32153,
-        "longitude": 103.75273,
-        "name": "Camera 4710",
-        "description": "Traffic Camera 4710"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4712",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/4f3b43a5-5258-402e-8aa4-cb56b49cb7ba.jpg",
-      "location": {
-        "latitude": 1.341244001,
-        "longitude": 103.6439134,
-        "name": "Camera 4712",
-        "description": "Traffic Camera 4712"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4713",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/8834ffad-5ffc-4b10-87d3-5df15f253b5f.jpg",
-      "location": {
-        "latitude": 1.347645829,
-        "longitude": 103.6366955,
-        "name": "Camera 4713",
-        "description": "Traffic Camera 4713"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4714",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/ba1be8f2-8505-47e6-8442-ba7e6f1293e4.jpg",
-      "location": {
-        "latitude": 1.31023,
-        "longitude": 103.76438,
-        "name": "Camera 4714",
-        "description": "Traffic Camera 4714"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4716",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/e8af6ce4-e554-495b-9305-f741c14ab018.jpg",
-      "location": {
-        "latitude": 1.32227,
-        "longitude": 103.67453,
-        "name": "Camera 4716",
-        "description": "Traffic Camera 4716"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4798",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/0700bd81-cdfa-48e7-a1ef-341e08a8406c.jpg",
-      "location": {
-        "latitude": 1.25999999687243,
-        "longitude": 103.823611110166,
-        "name": "Camera 4798",
-        "description": "Traffic Camera 4798"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "4799",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/544a87c3-5d43-455c-b83f-7e1b60990847.jpg",
-      "location": {
-        "latitude": 1.26027777363278,
-        "longitude": 103.823888890049,
-        "name": "Camera 4799",
-        "description": "Traffic Camera 4799"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "5794",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/641138a4-2e0e-43cd-96be-9c0fa5c0d8f1.jpg",
-      "location": {
-        "latitude": 1.3309693,
-        "longitude": 103.9168616,
-        "name": "Camera 5794",
-        "description": "Traffic Camera 5794"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "5795",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a19abfd5-2af7-4a1c-b781-9f89f32c9ace.jpg",
-      "location": {
-        "latitude": 1.326024822,
-        "longitude": 103.905625,
-        "name": "Camera 5795",
-        "description": "Traffic Camera 5795"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "5797",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a39e3c10-4e88-43e1-a902-9bd59ec7e9e1.jpg",
-      "location": {
-        "latitude": 1.322875288,
-        "longitude": 103.8910793,
-        "name": "Camera 5797",
-        "description": "Traffic Camera 5797"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "5798",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/39545171-3423-4aa3-8879-1e98cbb695df.jpg",
-      "location": {
-        "latitude": 1.32036078126842,
-        "longitude": 103.877174116489,
-        "name": "Camera 5798",
-        "description": "Traffic Camera 5798"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "5799",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/18abab76-d5c3-4bae-a2b9-e56f6bafec77.jpg",
-      "location": {
-        "latitude": 1.328171608,
-        "longitude": 103.8685191,
-        "name": "Camera 5799",
-        "description": "Traffic Camera 5799"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6701",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a3ace1b3-3391-4e76-ac81-119a894ee9b7.jpg",
-      "location": {
-        "latitude": 1.329334,
-        "longitude": 103.858222,
-        "name": "Camera 6701",
-        "description": "Traffic Camera 6701"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6703",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/6f21e96b-8bf5-46fd-aab6-06065decafe3.jpg",
-      "location": {
-        "latitude": 1.328899,
-        "longitude": 103.84121,
-        "name": "Camera 6703",
-        "description": "Traffic Camera 6703"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6704",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/4333a50f-ebf7-4096-abf6-b73ea9ce7619.jpg",
-      "location": {
-        "latitude": 1.32657403632366,
-        "longitude": 103.826857295633,
-        "name": "Camera 6704",
-        "description": "Traffic Camera 6704"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6705",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d0de9336-9d42-4fc0-8ae4-083d9cc2b5ed.jpg",
-      "location": {
-        "latitude": 1.332124,
-        "longitude": 103.81768,
-        "name": "Camera 6705",
-        "description": "Traffic Camera 6705"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6706",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/56e49d0e-d48a-4971-9318-738516345326.jpg",
-      "location": {
-        "latitude": 1.349428893,
-        "longitude": 103.7952799,
-        "name": "Camera 6706",
-        "description": "Traffic Camera 6706"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6708",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/01f9b269-1fae-46dd-859b-f2833136ebef.jpg",
-      "location": {
-        "latitude": 1.345996,
-        "longitude": 103.69016,
-        "name": "Camera 6708",
-        "description": "Traffic Camera 6708"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6710",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/9a69248b-d151-4ea4-9f95-5a7a64508349.jpg",
-      "location": {
-        "latitude": 1.344205,
-        "longitude": 103.78577,
-        "name": "Camera 6710",
-        "description": "Traffic Camera 6710"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6711",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/765c18aa-88e2-42c8-ad99-e84569a3f590.jpg",
-      "location": {
-        "latitude": 1.33771,
-        "longitude": 103.977827,
-        "name": "Camera 6711",
-        "description": "Traffic Camera 6711"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6712",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/36ed35a4-68cf-4d4e-9ef7-53ea0743760c.jpg",
-      "location": {
-        "latitude": 1.332691,
-        "longitude": 103.770278,
-        "name": "Camera 6712",
-        "description": "Traffic Camera 6712"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6713",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/ea2f66be-a3bb-47f3-ab62-f86f30bb3f93.jpg",
-      "location": {
-        "latitude": 1.340298,
-        "longitude": 103.945652,
-        "name": "Camera 6713",
-        "description": "Traffic Camera 6713"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6714",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/e3f95e48-7fed-4b4b-a0e6-9fc4b887d15b.jpg",
-      "location": {
-        "latitude": 1.361742,
-        "longitude": 103.703341,
-        "name": "Camera 6714",
-        "description": "Traffic Camera 6714"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6715",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/09cabbd0-b683-492e-9bf6-b9a939d08991.jpg",
-      "location": {
-        "latitude": 1.356299,
-        "longitude": 103.716071,
-        "name": "Camera 6715",
-        "description": "Traffic Camera 6715"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "6716",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/5bc08120-5ac3-48d3-aaab-15e888e3434a.jpg",
-      "location": {
-        "latitude": 1.322893,
-        "longitude": 103.6635051,
-        "name": "Camera 6716",
-        "description": "Traffic Camera 6716"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "7791",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/97090f6b-6059-4266-a597-19cf6628ccfc.jpg",
-      "location": {
-        "latitude": 1.354245,
-        "longitude": 103.963782,
-        "name": "Camera 7791",
-        "description": "Traffic Camera 7791"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "7793",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/a1d8dc1d-cda7-4829-bfcf-418529fb5a3f.jpg",
-      "location": {
-        "latitude": 1.37704704,
-        "longitude": 103.92946983,
-        "name": "Camera 7793",
-        "description": "Traffic Camera 7793"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "7794",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/8456e906-7723-4482-8edf-8395e5fd49f7.jpg",
-      "location": {
-        "latitude": 1.37988658,
-        "longitude": 103.92009174,
-        "name": "Camera 7794",
-        "description": "Traffic Camera 7794"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "7795",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/b8131fca-dbde-479c-a3af-44fcbfeb3fbe.jpg",
-      "location": {
-        "latitude": 1.38432741,
-        "longitude": 103.91585701,
-        "name": "Camera 7795",
-        "description": "Traffic Camera 7795"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "7796",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/203e8349-92ca-48f6-a4aa-4a70cd67ea12.jpg",
-      "location": {
-        "latitude": 1.39559294,
-        "longitude": 103.90515712,
-        "name": "Camera 7796",
-        "description": "Traffic Camera 7796"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "7797",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/22dc9223-652b-470b-926f-af0f6f74bb35.jpg",
-      "location": {
-        "latitude": 1.40002575,
-        "longitude": 103.85702534,
-        "name": "Camera 7797",
-        "description": "Traffic Camera 7797"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "7798",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d29bdec4-32e2-4ecf-aaf4-afc6e1ac91f2.jpg",
-      "location": {
-        "latitude": 1.39748842,
-        "longitude": 103.85400467,
-        "name": "Camera 7798",
-        "description": "Traffic Camera 7798"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "8701",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/c72955a5-d40b-4542-9ec0-0ea52f2dc2a5.jpg",
-      "location": {
-        "latitude": 1.38647,
-        "longitude": 103.74143,
-        "name": "Camera 8701",
-        "description": "Traffic Camera 8701"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "8702",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3e1bd856-ec28-4460-82e3-c9e4253f85e1.jpg",
-      "location": {
-        "latitude": 1.39059,
-        "longitude": 103.7717,
-        "name": "Camera 8702",
-        "description": "Traffic Camera 8702"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "8704",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/3cb9f30f-b57c-49de-b298-2fd194aaeeac.jpg",
-      "location": {
-        "latitude": 1.3899,
-        "longitude": 103.74843,
-        "name": "Camera 8704",
-        "description": "Traffic Camera 8704"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "8706",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/01ae71c0-8f92-4f2f-b8f4-af20b2e7db47.jpg",
-      "location": {
-        "latitude": 1.3664,
-        "longitude": 103.70899,
-        "name": "Camera 8706",
-        "description": "Traffic Camera 8706"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "9701",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/849355a6-184c-458a-a5ac-f1f5a7d15fdd.jpg",
-      "location": {
-        "latitude": 1.39466333,
-        "longitude": 103.83474601,
-        "name": "Camera 9701",
-        "description": "Traffic Camera 9701"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "9702",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/5496ce65-b87a-4f7c-b346-be3fa9f3c4b0.jpg",
-      "location": {
-        "latitude": 1.39474081,
-        "longitude": 103.81797086,
-        "name": "Camera 9702",
-        "description": "Traffic Camera 9702"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "9703",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/68d8639c-e420-4287-a6c8-ecb99d860e5e.jpg",
-      "location": {
-        "latitude": 1.422857,
-        "longitude": 103.773005,
-        "name": "Camera 9703",
-        "description": "Traffic Camera 9703"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "9704",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/d8f236c8-8dbd-4f82-8c26-0dec9f61cdc5.jpg",
-      "location": {
-        "latitude": 1.42214311,
-        "longitude": 103.79542062,
-        "name": "Camera 9704",
-        "description": "Traffic Camera 9704"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "9705",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/010a7773-1ed5-4e3d-9517-ef6920d730c6.jpg",
-      "location": {
-        "latitude": 1.42627712,
-        "longitude": 103.78716637,
-        "name": "Camera 9705",
-        "description": "Traffic Camera 9705"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
-    },
-    {
-      "id": "9706",
-      "image": "https://images.data.gov.sg/api/traffic-images/2025/11/0c576d21-5002-44a3-992e-f19e4ae10ff5.jpg",
-      "location": {
-        "latitude": 1.41270056,
-        "longitude": 103.80642712,
-        "name": "Camera 9706",
-        "description": "Traffic Camera 9706"
-      },
-      "timestamp": "2025-11-21T06:36:33+08:00",
-      "quality": "Real-time HD",
-      "isRealTime": true
     }
   ],
   "apiStatus": "success",
   "fetchMethod": "GitHub Actions",
-  "cacheExpiry": "2025-11-20T22:43:10.647Z"
+  "cacheExpiry": "2025-11-20T22:49:51.945Z"
 }
